@@ -1,0 +1,19 @@
+mixin form(action, method)
+  if err 
+    div 
+      div error 
+      ul
+        each error in err.errors 
+          li
+            div=error.path.join('.')
+            div=error.message
+
+  form(action=action, method="post")
+    input(type="hidden", name="_method", value=method)
+    
+    div
+      input(name="title", value=task.title)
+    div  
+      textarea(name="description")=task.description
+    div  
+      input(type="submit")

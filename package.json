@@ -1,0 +1,38 @@
+{
+  "name": "bistrio",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/server",
+    "dev": "DEBUG=bistrio:*,restrant2:* nodemon ./bin/dev.ts",
+    "build": "npx tsc && cpx 'views/**' dist/views && cpx 'public/**' dist/public",
+    "clean": "npx rimraf dist",
+    "console": "npx ts-node --project ./tsconfig.console.json -r ./server/support/console.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^3.9.2",
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "express": "~4.16.1",
+    "http-errors": "~1.6.3",
+    "method-override": "^3.0.0",
+    "morgan": "~1.9.1",
+    "pug": "^3.0.2",
+    "typescript": "^4.6.2"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.2",
+    "@types/debug": "^4.1.7",
+    "@types/express": "^4.17.13",
+    "@types/http-errors": "^1.8.2",
+    "@types/method-override": "^0.0.32",
+    "@types/morgan": "^1.9.3",
+    "@types/node": "^17.0.17",
+    "cpx": "^1.5.0",
+    "nodemon": "^2.0.15",
+    "prisma": "^3.9.2",
+    "rimraf": "^3.0.2",
+    "ts-morph": "^13.0.3",
+    "ts-node": "^10.5.0"
+  }
+}
