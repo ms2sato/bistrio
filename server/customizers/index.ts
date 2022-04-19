@@ -1,5 +1,4 @@
-import express from 'express'
-import { ActionDescriptor } from 'restrant2'
+import { CreateOptionsFunction } from 'restrant2'
 import createDebug from 'debug'
 
 const debug = createDebug('bistrio:customizer')
@@ -11,19 +10,14 @@ export type CustomMethodOption = {
   }
 }
 
-export function createResourceMethodOptions(
-  req: express.Request,
-  res: express.Response,
-  httpPath: string,
-  ad: ActionDescriptor
-): [CustomMethodOption] {
-  debug('createResourceMethodOptions: req.params %s', req.params)
+export const createOptions: CreateOptionsFunction = async (ctx, httpPath, ad) => {
+  debug('createOptions: req.params %s', ctx.params)
 
   const customMethodOption: CustomMethodOption = {}
 
-  if (req.params.adminId) {
+  if (ctx.params.adminId) {
     customMethodOption.admin = {
-      id: Number(req.params.adminId),
+      id: Number(ctx.params.adminId),
       accessedAt: new Date(),
     }
   }

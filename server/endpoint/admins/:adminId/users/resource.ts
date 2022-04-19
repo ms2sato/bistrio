@@ -12,8 +12,6 @@ export default defineResource((support, options) => {
     [2, { id: 2, name: 'test2' }],
   ])
 
-  let lastId = 2
-
   return {
     index: (option: CustomMethodOption) => {
       console.log(users)

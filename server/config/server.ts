@@ -1,6 +1,7 @@
-import { ServerRouterOption } from 'restrant2'
-import { createResourceMethodOptions } from '../customizers'
+import { ServerRouterConfig } from 'restrant2'
+import { createOptions } from '../customizers'
 
-export function config(): Partial<ServerRouterOption> {
-  return { createResourceMethodOptions }
+// config for Routers in server
+export function config(): Partial<ServerRouterConfig> {
+  return { createOptions }
 }

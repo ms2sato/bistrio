@@ -1,15 +1,15 @@
-import { ResourceHolderCreateRouter, ServerRouter, ServerRouterOption } from 'restrant2'
+import { ResourceHolderCreateRouter, ServerRouter, ServerRouterConfig } from 'restrant2'
 import { config } from './config/server'
 
 class RouterFactory {
-  constructor(private option: Partial<ServerRouterOption>) {}
+  constructor(private option: Partial<ServerRouterConfig>) {}
 
   getServerRouter(dir: string): ServerRouter {
-    return new ServerRouter(dir, '/', this.option)
+    return new ServerRouter(dir, this.option)
   }
 
   getResourceHolderCreateRouter(resourcesHolder: any, fileRoot: string) {
-    return new ResourceHolderCreateRouter(resourcesHolder, fileRoot, '/', this.option)
+    return new ResourceHolderCreateRouter(resourcesHolder, fileRoot, this.option, '/')
   }
 }
 

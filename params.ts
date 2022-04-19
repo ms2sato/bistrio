@@ -1,11 +1,5 @@
 import { z } from 'restrant2'
 
-export const idSchema = z.object({
-  id: z.number(),
-})
-
-export type IdParams = z.infer<typeof idSchema>
-
 const taskCoreProps = {
   title: z.string().min(3).max(255),
   description: z.string().min(3).max(4096),
