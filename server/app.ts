@@ -54,7 +54,7 @@ app.use((req, res, next) => {
 const router: ServerRouter = setup().getServerRouter(__dirname)
 routes(router)
 app.use(router.router)
-router.build()
+router.build() // TODO: await
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
