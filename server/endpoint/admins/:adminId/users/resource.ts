@@ -6,7 +6,7 @@ export type User = {
   name: string
 }
 
-export default defineResource((support, options) => {
+export default defineResource((_support, _options) => {
   const users: Map<number, User> = new Map([
     [1, { id: 1, name: 'test1' }],
     [2, { id: 2, name: 'test2' }],
@@ -17,7 +17,7 @@ export default defineResource((support, options) => {
       console.log(users)
       console.log(option)
       console.log(option.admin?.accessedAt)
-      return Array.from(users, ([id, data]) => data)
+      return Array.from(users, ([_id, data]) => data)
     },
   }
 })

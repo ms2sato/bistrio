@@ -8,6 +8,7 @@ class RouterFactory {
     return new ServerRouter(dir, this.option)
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getResourceHolderCreateRouter(resourcesHolder: any, fileRoot: string) {
     return new ResourceHolderCreateRouter(resourcesHolder, fileRoot, this.option, '/')
   }

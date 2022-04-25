@@ -3,44 +3,44 @@ import type resource from './resource'
 
 type Adapter = AdapterOf<typeof resource> & { build: Handler }
 
-export default defineAdapter((support, options): Adapter => {
+export default defineAdapter((_support, _options): Adapter => {
   return {
     index: {
-      success: async (ctx, output) => ctx.render('tasks/index', { tasks: output }),
+      success: (ctx, output) => ctx.render('tasks/index', { tasks: output }),
     },
 
     build: (ctx) => ctx.render('tasks/build', { task: {} }),
 
     edit: {
-      success: async (ctx, output) => ctx.render('tasks/edit', { task: output }),
+      success: (ctx, output) => ctx.render('tasks/edit', { task: output }),
     },
 
     create: {
-      success: async (ctx, output) => {
+      success: (ctx, _output) => {
         ctx.redirect('/tasks')
       },
-      invalid: async (ctx, err) => {
-        ctx.render('tasks/build', { task: ctx.body, err })
+      invalid: (ctx, err, source) => {
+        ctx.render('tasks/build', { task: source, err })
       },
     },
 
     update: {
-      success: async (ctx, output) => {
+      success: (ctx, _output) => {
         ctx.redirect('/tasks')
       },
-      invalid: async (ctx, err) => {
-        ctx.render('tasks/edit', { task: ctx.body, err })
+      invalid: (ctx, err, source) => {
+        ctx.render('tasks/edit', { task: source, err })
       },
     },
 
     destroy: {
-      success: async (ctx, output) => {
+      success: (ctx, _output) => {
         ctx.redirect('/tasks')
       },
     },
 
     done: {
-      success: async (ctx, output) => {
+      success: (ctx, _output) => {
         ctx.redirect('/tasks')
       },
     },

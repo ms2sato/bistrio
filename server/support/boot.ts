@@ -50,12 +50,17 @@ export function boot(app: express.Application) {
    * Event listener for HTTP server "error" event.
    */
 
-  function onError(error: any) {
+  type ServerError = {
+    syscall: string
+    code: string
+  }
+
+  function onError(error: ServerError) {
     if (error.syscall !== 'listen') {
       throw error
     }
 
-    const bind = typeof port === 'string' ? 'Pipe ' + port : 'Port ' + port
+    const bind = typeof port === 'string' ? 'Pipe ' + port : `Port ${port.toString()}`
 
     // handle specific listen errors with friendly messages
     switch (error.code) {
@@ -81,7 +86,7 @@ export function boot(app: express.Application) {
     if (typeof addr === 'string') {
       debug('pipe ' + addr)
     } else {
-      debug('access http://localhost:%s', addr!.port)
+      debug('access http://localhost:%s', addr?.port)
     }
   }
 }

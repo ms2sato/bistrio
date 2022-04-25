@@ -10,7 +10,7 @@ export type CustomMethodOption = {
   }
 }
 
-export const createActionOptions: CreateActionOptionsFunction = async (ctx, httpPath, ad) => {
+export const createActionOptions: CreateActionOptionsFunction = (ctx, _httpPath, _ad) => {
   debug('createOptions: req.params %s', ctx.params)
 
   const customMethodOption: CustomMethodOption = {}

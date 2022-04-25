@@ -6,4 +6,6 @@ import { setup } from '../router-factory'
 
 const router = setup().getResourceHolderCreateRouter(global, path.join(__dirname, '..'))
 routes(router)
-router.build() // TODO: await
+router.build().catch((err: Error) => {
+  console.error(`console error: ${err.message}`)
+})
