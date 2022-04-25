@@ -1,7 +1,7 @@
 import { ServerRouterConfig } from 'restrant2'
-import { createOptions } from '../customizers'
+import { createActionOptions } from '../customizers'
 
 // config for Routers in server
 export function config(): Partial<ServerRouterConfig> {
-  return { createOptions }
+  return { createActionOptions }
 }

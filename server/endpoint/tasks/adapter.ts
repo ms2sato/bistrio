@@ -1,6 +1,9 @@
-import { defineAdapter } from 'restrant2'
+import { defineAdapter, AdapterOf, Handler } from 'restrant2'
+import type resource from './resource'
 
-export default defineAdapter((support, options) => {
+type Adapter = AdapterOf<typeof resource> & { build: Handler }
+
+export default defineAdapter((support, options): Adapter => {
   return {
     index: {
       success: async (ctx, output) => ctx.render('tasks/index', { tasks: output }),
