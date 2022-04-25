@@ -1,3 +1,10 @@
-import {setup} from '../server/app'
+import { setup } from '../server/app'
 import { boot } from '../server/support/boot'
-boot(await setup())
+
+setup()
+  .then((app) => {
+    boot(app)
+  })
+  .catch((err) => {
+    console.error(err)
+  })

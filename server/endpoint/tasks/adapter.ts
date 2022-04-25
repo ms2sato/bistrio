@@ -1,12 +1,16 @@
 import { defineAdapter, AdapterOf, Handler } from 'restrant2'
 import type resource from './resource'
+import { render } from '../../components/test'
 
 type Adapter = AdapterOf<typeof resource> & { build: Handler }
 
 export default defineAdapter((_support, _options): Adapter => {
   return {
     index: {
-      success: (ctx, output) => ctx.render('tasks/index', { tasks: output }),
+      success: (ctx, _output) => {
+        //ctx.render('tasks/index', { tasks: output }),
+        render(ctx)
+      },
     },
 
     build: (ctx) => ctx.render('tasks/build', { task: {} }),
