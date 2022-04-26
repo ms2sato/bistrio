@@ -1,3 +1,9 @@
 const { setup } = require('../dist/server/app')
 const { boot } = require('../dist/server/support/boot')
-boot(await setup())
+setup()
+  .then((app) => {
+    boot(app)
+  })
+  .catch((err) => {
+    console.error(err)
+  })

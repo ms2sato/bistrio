@@ -1,12 +1,6 @@
 import { TaskCreateParams, TaskUpdateParams } from '../../../params'
 import { defineResource, IdNumberParams } from 'restrant2'
-
-export type Task = {
-  id: number
-  title: string
-  description: string
-  done: boolean
-}
+import { Task } from '../../entities/Task'
 
 export default defineResource((_support, _options) => {
   const tasks: Map<number, Task> = new Map([
