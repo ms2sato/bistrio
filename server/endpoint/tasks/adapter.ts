@@ -1,23 +1,20 @@
-import { defineAdapter, AdapterOf, Handler } from 'restrant2'
+import { defineAdapter, AdapterOf } from 'restrant2'
 import type resource from './resource'
-import { render } from '../../lib/render-jsx'
-import { All } from '../../components/test'
 
-type Adapter = AdapterOf<typeof resource> & { build: Handler }
+type Adapter = AdapterOf<typeof resource>
 
 export default defineAdapter((_support, _options): Adapter => {
   return {
     index: {
-      success: (ctx, output) => {
-        //ctx.render('tasks/index', { tasks: output }),
-        render(ctx, All({ tasks: output }))
-      },
+      success: (ctx, output) => ({ tasks: output }),
     },
 
-    build: (ctx) => ctx.render('tasks/build', { task: {} }),
+    build: {
+      success: (ctx, output) => ({ task: output }),
+    },
 
     edit: {
-      success: (ctx, output) => ctx.render('tasks/edit', { task: output }),
+      success: (ctx, output) => ({ task: output }),
     },
 
     create: {

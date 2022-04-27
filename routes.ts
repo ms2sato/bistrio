@@ -1,5 +1,5 @@
 import { taskCreateSchema, taskUpdateSchema } from './params'
-import { Router, Actions, idNumberSchema} from 'restrant2'
+import { Router, Actions, idNumberSchema } from 'restrant2'
 
 export function routes(router: Router) {
   router.resources('/tasks', {

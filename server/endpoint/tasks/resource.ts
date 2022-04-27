@@ -24,6 +24,10 @@ export default defineResource((_support, _options) => {
       return Array.from(tasks, ([_id, data]) => data)
     },
 
+    build: (): TaskCreateParams => {
+      return { title: '', description: '' }
+    },
+
     create: (params: TaskCreateParams) => {
       console.log(params)
       const task: Task = {
