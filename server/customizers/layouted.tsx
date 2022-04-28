@@ -1,5 +1,5 @@
 import { NodeArrangeFunc } from '../lib/jsx-engine'
-import { Layout } from '../../pages/_layout'
+import { Layout } from '../../views/_layout'
 
 export const arrange: NodeArrangeFunc = (Page, options) => {
   return (

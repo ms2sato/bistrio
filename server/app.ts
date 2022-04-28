@@ -21,12 +21,8 @@ export async function setup() {
   const app = express()
 
   app.engine('tsx', engine(arrange))
-  app.set('views', path.join(__dirname, '../pages'))
+  app.set('views', path.join(__dirname, '../views'))
   app.set('view engine', 'tsx')
-
-  // view engine setup
-  // app.set('views', path.join(__dirname, '../views'))
-  // app.set('view engine', 'pug')
 
   app.use(logger('dev'))
   app.use(express.json())

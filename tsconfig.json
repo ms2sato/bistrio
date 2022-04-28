@@ -14,6 +14,6 @@
     "jsx": "react-jsx"
   },
   "include": [
-    "server", "pages", "params", "routes"
-, "tsconfig.console.json"  ] 
+    "server","params", "routes"
+, "tsconfig.console.json", "views"  ] 
 }
