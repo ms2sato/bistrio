@@ -82,11 +82,6 @@ export async function setup() {
 
   // error handler
   app.use(function (err, req, res, _next) {
-    // set locals, only providing error in development
-
-    res.locals.message = err.message
-    res.locals.error = req.app.get('env') === 'development' ? err : {}
-
     // render the error page
     if ('status' in err) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -94,7 +89,12 @@ export async function setup() {
     } else {
       res.status(500)
     }
-    res.render('error')
+
+    if (req.app.get('env') === 'development') {
+      console.error(err)
+    }
+
+    res.render('error', { err })
   } as express.ErrorRequestHandler)
 
   return app

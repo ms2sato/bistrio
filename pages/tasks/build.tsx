@@ -1,12 +1,13 @@
 import 'react'
+import { ValidationError } from 'restrant2'
 import { TaskCreateParams } from '../../params'
 import { Form } from './_form'
 
-export function Build({ task }: { task: TaskCreateParams }) {
+export function Build(props: { task: TaskCreateParams; err?: ValidationError }) {
   return (
     <>
       <h2>Create New Task</h2>
-      <Form action="/tasks/" method="post" task={task}></Form>
+      <Form action="/tasks/" method="post" {...props}></Form>
     </>
   )
 }
