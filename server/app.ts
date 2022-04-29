@@ -12,8 +12,8 @@ import methodOverride from 'method-override'
 import { ServerRouter } from 'restrant2'
 import { routes } from '../routes'
 import * as RouterFactory from './router-factory'
-import { engine } from './lib/jsx-engine'
-import { arrange } from './customizers/layouted'
+import { engine } from './lib/react-ssr-engine'
+import { arrange } from './customizers/react-ssr'
 
 const debug = createDebug('bistrio:params')
 
@@ -69,7 +69,7 @@ export async function setup() {
   const router: ServerRouter = RouterFactory.setup().getServerRouter(__dirname)
   routes(router)
   app.use(router.router)
-  await router.build() // TODO: await
+  await router.build()
 
   // catch 404 and forward to error handler
   app.use(function (req, res, next) {

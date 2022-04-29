@@ -12,4 +12,4 @@ export function Build(props: { task: TaskCreateParams; err?: ValidationError }) 
   )
 }
 
-export { Build as Page }
+export default Build

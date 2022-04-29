@@ -12,4 +12,4 @@ export function Edit(props: { task: TaskUpdateParams; err?: ValidationError }) {
   )
 }
 
-export { Edit as Page }
+export default Edit

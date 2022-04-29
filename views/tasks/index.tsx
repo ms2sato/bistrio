@@ -35,4 +35,4 @@ export function Index({ tasks }: Prop) {
   )
 }
 
-export { Index as Page }
+export default Index
