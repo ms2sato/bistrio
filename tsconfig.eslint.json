@@ -2,7 +2,7 @@
   "extends": "./tsconfig.json",
   "include": [
     "server/**/*.ts",
-    "pages/**/*.ts",
+    "views/**/*.tsx",
     ".eslintrc.js"
   ],
   "exclude": [
