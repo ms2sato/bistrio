@@ -1,6 +1,6 @@
 import path from 'path'
-import { ActionContextImpl } from 'restrant2'
-import { NodeArrangeFunc, renderReactView, PageExport } from './react-ssr-engine'
+import { ActionContextImpl, ActionContextCreator } from 'restrant2'
+import { NodeArrangeFunc, renderReactView, importPage } from './react-ssr-engine'
 
 export const createRenderFunc = (arrange: NodeArrangeFunc, viewRoot: string, failText = '') => {
   function newRender(
@@ -16,9 +16,8 @@ export const createRenderFunc = (arrange: NodeArrangeFunc, viewRoot: string, fai
     options: object | undefined | { (err: Error, html: string): void },
     callback?: (err: Error, html: string) => void
   ): void {
-    import(path.join(viewRoot, view))
-      .then((ret) => {
-        const Page = (ret as PageExport).default
+    importPage(path.join(viewRoot, view))
+      .then((Page) => {
         renderReactView(this.res, arrange(Page, options), failText)
       })
       .catch((err) => {
@@ -28,4 +27,18 @@ export const createRenderFunc = (arrange: NodeArrangeFunc, viewRoot: string, fai
   }
 
   return newRender
+}
+
+type ActionContextFactory = (viewRoot: string, arrange: NodeArrangeFunc, failText: string) => ActionContextCreator
+
+export const actionContextFactory: ActionContextFactory = (
+  viewRoot: string,
+  arrange: NodeArrangeFunc,
+  failText = ''
+) => {
+  return (req, res, descriptor, httpPath) => {
+    const ctx = new ActionContextImpl(req, res, descriptor, httpPath)
+    ctx.render = createRenderFunc(arrange, viewRoot, failText)
+    return ctx
+  }
 }

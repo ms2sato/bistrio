@@ -6,9 +6,7 @@ type Adapter = AdapterOf<typeof resource>
 export default defineAdapter((_support, _options): Adapter => {
   return {
     index: {
-      success: (ctx, output) => {
-        ctx.render('tasks/index', { tasks: output })
-      },
+      success: (ctx, output) => ({ tasks: output }),
     },
 
     build: {

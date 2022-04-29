@@ -6,15 +6,19 @@ type EngineFunc = (path: string, options: object, callback: EngineFuncCallback) 
 type Node = JSX.Element
 export type NodeArrangeFunc = (node: any, options: any) => Node
 
-export type PageExport = {
+type PageExport = {
   default: JSX.Element
+}
+
+export const importPage = async (filePath: string) => {
+  const ret = (await import(filePath)) as PageExport
+  return ret.default
 }
 
 export const engine: (arrange: NodeArrangeFunc) => EngineFunc = (arrange: NodeArrangeFunc) => {
   return (filePath, options, callback) => {
-    import(filePath)
-      .then((ret) => {
-        const Page = (ret as PageExport).default
+    importPage(filePath)
+      .then((Page) => {
         const node = arrange(Page, options)
         callback(null, renderToString(node)) // Low performance but easy to use without res
       })
