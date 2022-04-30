@@ -1,5 +1,6 @@
 import { Suspense } from 'react'
 import { ActionContext } from 'restrant2'
+import fetch from 'node-fetch'
 import { Task } from '../../server/entities/Task'
 
 type Prop = {
@@ -44,16 +45,25 @@ export function Index({ tasks, ctx }: Prop) {
   )
 }
 
-let counter = 0
-let sleepTime = 0
+function request(ctx: ActionContext, url: string) {
+  console.log('### call request')
+  let readerMap: ReaderMap | undefined = requestMap.get(ctx)
+  if (!readerMap) {
+    readerMap = new Map()
+    requestMap.set(ctx, readerMap)
+  }
 
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms))
-}
-
-async function fetchSomething(ms: number) {
-  await sleep(ms)
-  return { result: `random: ${Math.random()}` }
+  let reader: Reader | undefined = readerMap.get(url)
+  if (!reader) {
+    console.log('undefined reader, start fetch')
+    reader = wrap(
+      fetch(url).then((ret) => {
+        return ret.json()
+      })
+    )
+    readerMap.set(url, reader)
+  }
+  return reader
 }
 
 // @see https://blog.logrocket.com/react-suspense-data-fetching/#data-fetching-approaches
@@ -75,8 +85,10 @@ function wrap<T>(promise: Promise<T>): { read: () => T } {
     read: () => {
       switch (status) {
         case 'pending':
+          console.log('read: pending')
           throw suspender
         case 'error':
+          console.log('read: err', err)
           throw err
         default:
           return result
@@ -85,39 +97,29 @@ function wrap<T>(promise: Promise<T>): { read: () => T } {
   }
 }
 
-const requestMap = new Map<ActionContext, { read: () => any }>()
+type Reader = { read: () => any }
+type URL = string
+type ReaderMap = Map<URL, Reader>
+type ActionContextReaderMap = Map<ActionContext, ReaderMap>
+
+const requestMap: ActionContextReaderMap = new Map()
 
 const MySuspend = ({ ctx }: { ctx: ActionContext }) => {
-  counter++
+  const reader = request(ctx, 'http://localhost:3000/tasks/1/edit.json')
+  const res = reader.read() as Record<string, any>
+  console.log(res)
 
-  let reader = requestMap.get(ctx)
-  if (!reader) {
-    reader = wrap(fetchSomething(sleepTime))
-    requestMap.set(ctx, reader)
-  }
-
-  sleepTime = 1000 * ((counter % 3) + 1)
-  const ret = reader.read() as { result: string }
-  requestMap.delete(ctx)
-  console.log(requestMap)
-
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  const task = res.data.task as Task
+  console.log(task)
   return (
     <div>
-      Hello, world! {counter}, waited: {sleepTime}ms: {ret.result}
+      <h3>request on server</h3>
+      <div>
+        {task.title}, {task.description}
+      </div>
     </div>
   )
 }
-
-// const MySuspend = () => {
-//   if (counter++ % 2 == 0) {
-//     sleepTime = 1000 * ((counter % 3) + 1)
-//     throw fetchSomething(sleepTime)
-//   }
-//   return (
-//     <p>
-//       Hello, world! {counter}, waited: {sleepTime}ms
-//     </p>
-//   )
-// }
 
 export default Index
