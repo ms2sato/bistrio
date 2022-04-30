@@ -1,13 +1,18 @@
 import { renderToString, renderToPipeableStream } from 'react-dom/server'
 import express from 'express'
 
-type EngineFuncCallback = (e: any, rendered?: string | undefined) => void
+// TODO: fix
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type EngineFuncCallback = (err: any, rendered?: string | undefined) => void
 type EngineFunc = (path: string, options: object, callback: EngineFuncCallback) => void
 type Node = JSX.Element
+
+// TODO: fix
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type NodeArrangeFunc = (node: any, options: any) => Node
 
 type PageExport = {
-  default: JSX.Element
+  default: Node
 }
 
 export const importPage = async (filePath: string) => {
@@ -19,6 +24,9 @@ export const engine: (arrange: NodeArrangeFunc) => EngineFunc = (arrange: NodeAr
   return (filePath, options, callback) => {
     importPage(filePath)
       .then((Page) => {
+        console.warn(
+          'Response#render for tsx(set view engine) is low performance, use renderReactViewStream( ex. ctx.ren )'
+        )
         const node = arrange(Page, options)
         callback(null, renderToString(node)) // Low performance but easy to use without res
       })
@@ -29,7 +37,7 @@ export const engine: (arrange: NodeArrangeFunc) => EngineFunc = (arrange: NodeAr
 }
 
 // @see https://reactjs.org/docs/react-dom-server.html#rendertopipeablestream
-export function renderReactView(res: express.Response, node: React.ReactNode, failText = '') {
+export function renderReactViewStream(res: express.Response, node: React.ReactNode, failText = '') {
   let didError = false
   const stream = renderToPipeableStream(node, {
     onShellReady() {

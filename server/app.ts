@@ -12,17 +12,14 @@ import methodOverride from 'method-override'
 import { ServerRouter } from 'restrant2'
 import { routes } from '../routes'
 import * as RouterFactory from './router-factory'
-import { engine } from './lib/react-ssr-engine'
-import { arrange } from './customizers/react-ssr'
+import { useTsxView } from './customizers/react-ssr'
 
 const debug = createDebug('bistrio:params')
 
 export async function setup() {
   const app = express()
 
-  app.engine('tsx', engine(arrange))
-  app.set('views', path.join(__dirname, '../views'))
-  app.set('view engine', 'tsx')
+  useTsxView(app, path.join(__dirname, '../views'))
 
   app.use(logger('dev'))
   app.use(express.json())
