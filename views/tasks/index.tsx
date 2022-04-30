@@ -1,16 +1,18 @@
 import { Suspense } from 'react'
+import { ActionContext } from 'restrant2'
 import { Task } from '../../server/entities/Task'
 
 type Prop = {
   tasks: Task[]
+  ctx: ActionContext
 }
 
-export function Index({ tasks }: Prop) {
+export function Index({ tasks, ctx }: Prop) {
   return (
     <>
       <h1>Task list</h1>
       <Suspense fallback={<p>Loading...</p>}>
-        <MySuspend></MySuspend>
+        <MySuspend ctx={ctx}></MySuspend>
       </Suspense>
       <a href="/tasks/build">create new task</a>
       <table>
@@ -44,7 +46,6 @@ export function Index({ tasks }: Prop) {
 
 let counter = 0
 let sleepTime = 0
-let data: { result: string } | undefined
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -52,23 +53,58 @@ function sleep(ms: number) {
 
 async function fetchSomething(ms: number) {
   await sleep(ms)
-  data = { result: `random: ${Math.random()}` }
-  return data
+  return { result: `random: ${Math.random()}` }
 }
 
-const MySuspend = () => {
+// @see https://blog.logrocket.com/react-suspense-data-fetching/#data-fetching-approaches
+function wrap<T>(promise: Promise<T>): { read: () => T } {
+  let status = 'pending'
+  let result: T
+  let err: Error
+  const suspender = promise.then(
+    (ret) => {
+      status = 'success'
+      result = ret
+    },
+    (e: Error) => {
+      status = 'error'
+      err = e
+    }
+  )
+  return {
+    read: () => {
+      switch (status) {
+        case 'pending':
+          throw suspender
+        case 'error':
+          throw err
+        default:
+          return result
+      }
+    },
+  }
+}
+
+const requestMap = new Map<ActionContext, { read: () => any }>()
+
+const MySuspend = ({ ctx }: { ctx: ActionContext }) => {
   counter++
-  if (data === undefined) {
-    sleepTime = 1000 * ((counter % 3) + 1)
-    throw fetchSomething(sleepTime)
+
+  let reader = requestMap.get(ctx)
+  if (!reader) {
+    reader = wrap(fetchSomething(sleepTime))
+    requestMap.set(ctx, reader)
   }
 
-  const result = data.result
-  data = undefined
+  sleepTime = 1000 * ((counter % 3) + 1)
+  const ret = reader.read() as { result: string }
+  requestMap.delete(ctx)
+  console.log(requestMap)
+
   return (
-    <p>
-      Hello, world! {counter}, waited: {sleepTime}ms: {result}
-    </p>
+    <div>
+      Hello, world! {counter}, waited: {sleepTime}ms: {ret.result}
+    </div>
   )
 }
 
