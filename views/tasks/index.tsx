@@ -43,7 +43,7 @@ const TaskTable = () => {
             <td>{task.description}</td>
             <td>
               <a href={`/tasks/${task.id}/edit`}>edit</a>&nbsp;|&nbsp;
-              <a href={`/tasks/${task.id}?_method=destory`}>delete</a>
+              <a href={`/tasks/${task.id}?_method=delete`}>delete</a>
             </td>
           </tr>
         ))}
