@@ -1,14 +1,8 @@
 import { useContext, Suspense } from 'react'
-import { ActionContext } from 'restrant2'
 import { Task } from '../../server/entities/Task'
 import { RenderSupportContext } from '../../server/customizers/react-ssr'
 
-type Prop = {
-  tasks: Task[]
-  ctx: ActionContext
-}
-
-export function Index(_prop: Prop) {
+export function Index() {
   return (
     <>
       <h1>Task list</h1>

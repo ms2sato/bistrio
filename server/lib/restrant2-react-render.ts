@@ -98,8 +98,6 @@ class RenderSupportImpl implements RenderSupport {
       this.readerMap.set(key, reader)
     }
 
-    const ret: T = (reader as Reader<T>)()
-    this.readerMap.delete(key)
-    return ret
+    return (reader as Reader<T>)()
   }
 }
