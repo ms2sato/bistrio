@@ -1,8 +1,11 @@
 import path from 'path'
 import { ActionContextImpl, ActionContextCreator, createDefaultActionContext } from 'restrant2'
 import { NodeArrangeFunc, renderReactViewStream, importPage } from './react-ssr-engine'
+import createDebug from 'debug'
 
 export * from '../lib/react-ssr-engine'
+
+const debug = createDebug('bistrio:react')
 
 export const createRenderFunc = (arrange: NodeArrangeFunc, viewRoot: string, failText = '') => {
   function newRender(
@@ -24,7 +27,11 @@ export const createRenderFunc = (arrange: NodeArrangeFunc, viewRoot: string, fai
       })
       .catch((err) => {
         console.error(err)
-        callback && callback(err as Error, '')
+        if (callback) {
+          callback(err as Error, '')
+        } else {
+          throw err
+        }
       })
   }
 
@@ -82,11 +89,15 @@ class RenderSupportImpl implements RenderSupport {
   fetchJson<T>(url: string, key: string = url): T {
     let reader: Reader<unknown> | undefined = this.readerMap.get(key)
     if (!reader) {
-      console.log('undefined reader, start fetch')
+      debug('RenderSupportImpl#fetchJson render undefined, start fetch')
       reader = suspendable(
-        fetch(url).then((ret) => {
-          return ret.json()
-        })
+        fetch(url)
+          .then((ret) => {
+            return ret.json()
+          })
+          .finally(() => {
+            this.readerMap.delete(key)
+          })
       )
       this.readerMap.set(key, reader)
     }

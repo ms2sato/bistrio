@@ -12,9 +12,6 @@ export function Index(_prop: Prop) {
   return (
     <>
       <h1>Task list</h1>
-      <Suspense fallback={<p>Loading...</p>}>
-        <MySuspend></MySuspend>
-      </Suspense>
       <a href="/tasks/build">create new task</a>
       <Suspense fallback={<p>Loading...</p>}>
         <TaskTable></TaskTable>
@@ -24,29 +21,12 @@ export function Index(_prop: Prop) {
 }
 
 // TODO: define params and JsonResponder
-type TaskRes = { status: string; data: { task: Task } }
 type TasksRes = { status: string; data: { tasks: Task[] } }
-
-const MySuspend = () => {
-  const ctx = useContext(RenderSupportContext)
-
-  const res = ctx.fetchJson<TaskRes>('http://localhost:3000/tasks/1/edit.json')
-  console.log(res)
-
-  const task = res.data.task
-  console.log(task)
-  return (
-    <div>
-      {task.title}, {task.description}
-    </div>
-  )
-}
 
 const TaskTable = () => {
   const ctx = useContext(RenderSupportContext)
 
   const res = ctx.fetchJson<TasksRes>('http://localhost:3000/tasks.json')
-  console.log(res)
 
   const tasks = res.data.tasks
   return (

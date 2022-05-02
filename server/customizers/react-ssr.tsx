@@ -30,16 +30,16 @@ const Wrapper = ({ children }: { children: ReactNode }) => {
   )
 }
 
-let ctxCreator: ActionContextCreator
+let createActionCtx: ActionContextCreator
 
 export const useTsxView = (app: Application, viewRoot: string) => {
   app.engine('tsx', engine(arrange))
   app.set('views', viewRoot)
   app.set('view engine', 'tsx')
 
-  ctxCreator = buildActionContextCreator(viewRoot, arrange, '')
+  createActionCtx = buildActionContextCreator(viewRoot, arrange, '')
 }
 
 export const createActionContext: ActionContextCreator = (props) => {
-  return ctxCreator(props)
+  return createActionCtx(props)
 }
