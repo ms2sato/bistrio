@@ -91,16 +91,15 @@ class RenderSupportImpl implements RenderSupport {
     if (!reader) {
       debug('RenderSupportImpl#fetchJson render undefined, start fetch')
       reader = suspendable(
-        fetch(url)
-          .then((ret) => {
-            return ret.json()
-          })
-          .finally(() => {
-            this.readerMap.delete(key)
-          })
+        fetch(url).then((ret) => {
+          return ret.json()
+        })
       )
       this.readerMap.set(key, reader)
     }
-    return (reader as Reader<T>)()
+
+    const ret: T = (reader as Reader<T>)()
+    this.readerMap.delete(key)
+    return ret
   }
 }
