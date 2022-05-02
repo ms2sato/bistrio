@@ -27,6 +27,7 @@
     "pug": "^3.0.2",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
+    "restrant2": "file:../restrant2/restrant2-0.0.2.tgz",
     "typescript": "^4.6.2"
   },
   "devDependencies": {
