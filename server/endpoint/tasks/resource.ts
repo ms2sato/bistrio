@@ -20,11 +20,7 @@ prisma.$on('query', ({ query, params }) => {
 
 export default defineResource((_support, _options) => {
   const get = async (id: number) => {
-    const task = await prisma.task.findUnique({ where: { id } })
-    if (!task) {
-      throw new Error(`Task not found: ${id}`)
-    }
-    return task
+    return await prisma.task.findUnique({ where: { id }, rejectOnNotFound: true })
   }
 
   return {
