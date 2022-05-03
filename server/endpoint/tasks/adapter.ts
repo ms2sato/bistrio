@@ -5,10 +5,6 @@ type Adapter = AdapterOf<typeof resource>
 
 export default defineAdapter((_support, _options): Adapter => {
   return {
-    index: {
-      success: (ctx, output) => ({ tasks: output, ctx }),
-    },
-
     build: {
       success: (ctx, output) => ({ task: output }),
     },

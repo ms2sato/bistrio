@@ -17,4 +17,10 @@ export function routes(router: Router) {
     name: 'admin_user',
     actions: Actions.standard({ only: ['index'] }),
   })
+
+  const apiRouter = router.sub('/api')
+  apiRouter.resources('/tasks', {
+    name: 'api_task',
+    actions: Actions.api({ only: ['index'] }),
+  })
 }

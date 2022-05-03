@@ -14,10 +14,6 @@ const accessor = createPrismaEasyDataAccessor<
 
 export default defineResource((_support, _options) => {
   return {
-    index: async () => {
-      return accessor.list()
-    },
-
     build: (): TaskCreateParams => {
       return { title: '', description: '' }
     },

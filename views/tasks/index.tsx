@@ -15,14 +15,14 @@ export function Index() {
 }
 
 // TODO: define params and JsonResponder
-type TasksRes = { status: string; data: { tasks: Task[] } }
+type TasksRes = { status: string; data: Task[] }
 
 const TaskTable = () => {
   const ctx = useContext(RenderSupportContext)
 
-  const res = ctx.fetchJson<TasksRes>('http://localhost:3000/tasks.json')
+  const res = ctx.fetchJson<TasksRes>('http://localhost:3000/api/tasks')
 
-  const tasks = res.data.tasks
+  const tasks = res.data
   return (
     <table>
       <thead>
