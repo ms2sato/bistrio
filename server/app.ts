@@ -75,6 +75,8 @@ export async function setup() {
 
   // error handler
   app.use(function (err, req, res, _next) {
+    // TODO: handling RecordNotFound of prisma
+
     // render the error page
     if ('status' in err) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access

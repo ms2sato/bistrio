@@ -1,41 +1,46 @@
-import { TaskCreateParams, TaskUpdateParams } from '../../../params'
 import { defineResource, IdNumberParams } from 'restrant2'
-import { Task } from '../../entities/Task'
+import { PrismaClient } from '@prisma/client'
+import { TaskCreateParams, TaskUpdateParams } from '../../../params'
+import createDebug from 'debug'
+
+const log = createDebug('bistrio:sql')
+
+const prisma = new PrismaClient({
+  log: [
+    {
+      emit: 'event',
+      level: 'query',
+    },
+  ],
+})
+
+prisma.$on('query', ({ query, params }) => {
+  log('%s %s', query, params)
+})
 
 export default defineResource((_support, _options) => {
-  const tasks: Map<number, Task> = new Map([
-    [1, { id: 1, title: 'test1', description: 'test', done: false }],
-    [2, { id: 2, title: 'test2', description: 'test', done: false }],
-  ])
-
-  let lastId = tasks.size
-
-  const get = (id: number): Task => {
-    const task = tasks.get(id)
-    if (task === undefined) {
+  const get = async (id: number) => {
+    const task = await prisma.task.findUnique({ where: { id } })
+    if (!task) {
       throw new Error(`Task not found: ${id}`)
     }
     return task
   }
 
   return {
-    index: () => {
-      console.log(tasks)
-      return Array.from(tasks, ([_id, data]) => data)
+    index: async () => {
+      return await prisma.task.findMany()
     },
 
     build: (): TaskCreateParams => {
       return { title: '', description: '' }
     },
 
-    create: (params: TaskCreateParams) => {
+    create: async (params: TaskCreateParams) => {
       console.log(params)
-      const task: Task = {
-        ...params,
-        id: ++lastId,
-        done: false,
-      }
-      tasks.set(task.id, task)
+      const task = await prisma.task.create({
+        data: { ...params, done: false },
+      })
       return task
     },
 
@@ -44,26 +49,24 @@ export default defineResource((_support, _options) => {
       return get(params.id)
     },
 
-    update: (params: TaskUpdateParams) => {
+    update: async (params: TaskUpdateParams) => {
       console.log(params)
       const { id, ...data } = params
-      const task = { ...get(id), ...data }
-      tasks.set(id, task)
+      const task = await prisma.task.update({
+        where: { id },
+        data,
+      })
       return task
     },
 
-    destroy: (params: IdNumberParams) => {
-      console.log(params)
-      const task = get(params.id)
-      tasks.delete(params.id)
-      return task
+    destroy: async ({ id }: IdNumberParams) => {
+      await prisma.task.delete({
+        where: { id },
+      })
     },
 
-    done: (params: IdNumberParams) => {
-      console.log(params)
-      const task = get(params.id)
-      task.done = true
-      return task
+    done: async ({ id }: IdNumberParams) => {
+      await prisma.task.update({ where: { id }, data: { done: true } })
     },
   }
 })
