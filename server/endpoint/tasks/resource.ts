@@ -1,31 +1,21 @@
 import { defineResource, IdNumberParams } from 'restrant2'
-import { PrismaClient } from '@prisma/client'
+import { Prisma, Task } from '@prisma/client'
 import { TaskCreateParams, TaskUpdateParams } from '../../../params'
-import createDebug from 'debug'
+import { createPrismaEasyDataAccessor, getPrismaCilent } from '../../lib/prisma-util'
 
-const log = createDebug('bistrio:sql')
+const prisma = getPrismaCilent()
 
-const prisma = new PrismaClient({
-  log: [
-    {
-      emit: 'event',
-      level: 'query',
-    },
-  ],
-})
-
-prisma.$on('query', ({ query, params }) => {
-  log('%s %s', query, params)
-})
+const accessor = createPrismaEasyDataAccessor<
+  Task,
+  IdNumberParams,
+  Prisma.TaskCreateInput,
+  IdNumberParams & Prisma.TaskUpdateInput
+>(prisma.task, 'id')
 
 export default defineResource((_support, _options) => {
-  const get = async (id: number) => {
-    return await prisma.task.findUnique({ where: { id }, rejectOnNotFound: true })
-  }
-
   return {
     index: async () => {
-      return await prisma.task.findMany()
+      return accessor.list()
     },
 
     build: (): TaskCreateParams => {
@@ -33,32 +23,19 @@ export default defineResource((_support, _options) => {
     },
 
     create: async (params: TaskCreateParams) => {
-      console.log(params)
-      const task = await prisma.task.create({
-        data: { ...params, done: false },
-      })
-      return task
+      return accessor.create({ ...params, done: false })
     },
 
     edit: (params: IdNumberParams) => {
-      console.log(params)
-      return get(params.id)
+      return accessor.get(params)
     },
 
     update: async (params: TaskUpdateParams) => {
-      console.log(params)
-      const { id, ...data } = params
-      const task = await prisma.task.update({
-        where: { id },
-        data,
-      })
-      return task
+      return accessor.update(params)
     },
 
-    destroy: async ({ id }: IdNumberParams) => {
-      await prisma.task.delete({
-        where: { id },
-      })
+    destroy: async (params: IdNumberParams) => {
+      return accessor.destroy(params)
     },
 
     done: async ({ id }: IdNumberParams) => {
