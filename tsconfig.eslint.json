@@ -3,6 +3,7 @@
   "include": [
     "server/**/*.ts",
     "views/**/*.tsx",
+    "prisma/**/*.ts",
     ".eslintrc.js"
   ],
   "exclude": [

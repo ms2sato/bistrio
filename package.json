@@ -14,7 +14,9 @@
     "eslint": "npx eslint ./server",
     "eslint:fix": "npx eslint ./server --fix",
     "format": "npx prettier --write 'server/**/*.{js,ts,tsx,json}'",
-    "check-types": "npx tsc --noEmit"
+    "check-types": "npx tsc --noEmit",
+    "db:seed": "npx ts-node prisma/seed.ts",
+    "db:truncate": "npx ts-node prisma/truncate.ts"
   },
   "dependencies": {
     "@prisma/client": "^3.9.2",
