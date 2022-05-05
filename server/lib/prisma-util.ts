@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 import createDebug from 'debug'
 import { PrimaryKeyParams } from 'restrant2'
 import { PrismaClient } from '@prisma/client'
@@ -30,20 +27,29 @@ export const getPrismaCilent = (): PrismaClient => {
   return _prisma
 }
 
+type PrismaAnyClient<T> = {
+  findMany: (args?: unknown) => Promise<T[]>,
+  findUnique: (args: any) => Promise<T>,
+  create: (args: any) => Promise<T>,
+  update: (args: any) => Promise<T>,
+  delete: (args: any) => Promise<boolean>
+}
+
 export const createPrismaEasyDataAccessor = <
   T,
   IP extends PrimaryKeyParams<IT, IN>,
   CP,
-  UP extends IP,
+  UP,
   IN extends string = 'id',
-  IT = number
+  IT = number,
 >(
-  client: any,
+  cli: any,
   keyName: IN
 ) => {
+  const client = cli as PrismaAnyClient<T> // FIXME: unsafe
   return {
-    list: async (arg?: any): Promise<T[]> => {
-      return await client.findMany(arg)
+    list: async (args?: any): Promise<T[]> => {
+      return await client.findMany(args)
     },
 
     get: async (params: IP): Promise<T> => {
@@ -56,7 +62,7 @@ export const createPrismaEasyDataAccessor = <
       })
     },
 
-    update: async (params: UP) => {
+    update: async (params: UP & IP) => {
       const data = { ...params }
       const key = data[keyName]
       delete data[keyName]

@@ -4,12 +4,10 @@ import { createPrismaEasyDataAccessor, getPrismaCilent } from '../../../lib/pris
 
 const prisma = getPrismaCilent()
 
-const accessor = createPrismaEasyDataAccessor<
-  Task,
-  IdNumberParams,
-  Prisma.TaskCreateInput,
-  IdNumberParams & Prisma.TaskUpdateInput
->(prisma.task, 'id')
+const accessor = createPrismaEasyDataAccessor<Task, IdNumberParams, Prisma.TaskCreateInput, Prisma.TaskUpdateInput>(
+  prisma.task,
+  'id'
+)
 
 export default defineResource((_support, _options) => {
   return {

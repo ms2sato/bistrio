@@ -1,5 +1,5 @@
 import { useContext, Suspense } from 'react'
-import { Task } from '../../server/entities/Task'
+import { Task } from '@prisma/client'
 import { RenderSupportContext } from '../../server/customizers/react-ssr'
 
 export function Index() {
