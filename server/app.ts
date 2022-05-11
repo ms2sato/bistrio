@@ -12,7 +12,8 @@ import methodOverride from 'method-override'
 import { ServerRouter } from 'restrant2'
 import { routes } from '../routes'
 import * as RouterFactory from './router-factory'
-import { useTsxView } from './customizers/react-ssr'
+import { useTsxView } from './customizers/render-support'
+import { localeMiddleware } from './lib/locale-express'
 
 const debug = createDebug('bistrio:params')
 
@@ -51,6 +52,8 @@ export async function setup() {
     })
   )
   app.use(methodOverride(methodName, { methods: ['GET', 'POST'] })) // for GET Parameter
+
+  app.use(await localeMiddleware({ localeConfig: { dir: path.join(__dirname, '../locales') } }))
 
   app.use((req, res, next) => {
     debug(`${req.method} ${req.path}`)

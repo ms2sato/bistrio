@@ -4,6 +4,7 @@
     "server/**/*.ts",
     "views/**/*.tsx",
     "prisma/**/*.ts",
+    "locales/**/*.ts",
     ".eslintrc.js"
   ],
   "exclude": [

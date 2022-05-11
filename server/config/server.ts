@@ -1,6 +1,6 @@
 import { ServerRouterConfig } from 'restrant2'
 import { createActionOptions } from '../customizers'
-import { createActionContext} from '../customizers/react-ssr'
+import { createActionContext} from '../customizers/render-support'
 
 // config for Routers in server
 export function config(): Partial<ServerRouterConfig> {

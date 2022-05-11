@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/server",
-    "dev": "DEBUG=bistrio:*,restrant2:* nodemon -e ts,tsx ./bin/dev.ts",
+    "dev": "DEBUG=bistrio:*,restrant2:* nodemon -e ts,tsx --files ./bin/dev.ts",
     "build": "npx tsc && cpx 'views/**' dist/views && cpx 'public/**' dist/public",
     "clean": "npx rimraf dist",
     "console": "npx ts-node --project ./tsconfig.console.json -r ./server/support/console.ts",
@@ -36,6 +36,7 @@
     "@types/cookie-parser": "^1.4.2",
     "@types/debug": "^4.1.7",
     "@types/express": "^4.17.13",
+    "@types/glob": "^7.2.0",
     "@types/http-errors": "^1.8.2",
     "@types/method-override": "^0.0.32",
     "@types/morgan": "^1.9.3",
