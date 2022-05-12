@@ -14,7 +14,7 @@ export const localeMiddleware = async ({ localeConfig, defaultLanguage = 'en' }:
   return (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
       const lang = req.acceptsLanguages(localeSelector.getLanguages()) || defaultLanguage
-      req.locale = localeSelector.select(lang)
+      req.localizer = localeSelector.select(lang)
 
       next()
     } catch (err) {

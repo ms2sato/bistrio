@@ -3,10 +3,12 @@ import { Task } from '@prisma/client'
 import { RenderSupportContext } from '../../server/customizers/render-support'
 
 export function Index() {
+  const rctx = useContext(RenderSupportContext)
+  const l = rctx.getLocalizer()
   return (
     <>
-      <h1>Task list</h1>
-      <a href="/tasks/build">create new task</a>
+      <h1>{l.t`Task list`}</h1>
+      <a href="/tasks/build">{l.t`Create new task`}</a>
       <Suspense fallback={<p>Loading...</p>}>
         <TaskTable></TaskTable>
       </Suspense>
@@ -18,9 +20,9 @@ export function Index() {
 type TasksRes = { status: string; data: Task[] }
 
 const TaskTable = () => {
-  const ctx = useContext(RenderSupportContext)
-
-  const res = ctx.fetchJson<TasksRes>('http://localhost:3000/api/tasks')
+  const rctx = useContext(RenderSupportContext)
+  const l = rctx.getLocalizer()
+  const res = rctx.fetchJson<TasksRes>('http://localhost:3000/api/tasks')
 
   const tasks = res.data
   return (
@@ -28,7 +30,7 @@ const TaskTable = () => {
       <thead>
         <tr>
           <th>ID</th>
-          <th>Done</th>
+          <th>{l.o('models.tasks.done')}</th>
           <th>Title</th>
           <th>Description</th>
           <th>Actions</th>
@@ -38,7 +40,13 @@ const TaskTable = () => {
         {tasks.map((task) => (
           <tr key={task.id}>
             <td>{task.id}</td>
-            <td>{task.done ? 'closed' : <a href={`/tasks/${task.id}/done?_method=post`}>done</a>}</td>
+            <td>
+              {task.done ? (
+                l.o('models.tasks.getStatus', task.done)
+              ) : (
+                <a href={`/tasks/${task.id}/done?_method=post`}>{l.o('models.tasks.getStatus', task.done)}</a>
+              )}
+            </td>
             <td>{task.title}</td>
             <td>{task.description}</td>
             <td>

@@ -1,9 +1,9 @@
-import { LocaleTagFunc } from '../lib/locale'
+import { Localizer } from '../lib/locale'
 
 declare global {
   namespace Express {
     interface Request {
-      locale: LocaleTagFunc
+      localizer: Localizer
     }
   }
 }

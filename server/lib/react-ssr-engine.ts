@@ -1,5 +1,6 @@
 import { renderToString, renderToPipeableStream } from 'react-dom/server'
 import express from 'express'
+import { ActionContext, NullActionContext } from 'restrant2'
 
 // TODO: fix
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -9,7 +10,7 @@ type Node = JSX.Element
 
 // TODO: fix
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type NodeArrangeFunc = (node: any, options: any) => Node
+export type NodeArrangeFunc = (node: any, options: any, ctx: ActionContext) => Node
 
 type PageExport = {
   default: Node
@@ -25,9 +26,9 @@ export const engine: (arrange: NodeArrangeFunc) => EngineFunc = (arrange: NodeAr
     importPage(filePath)
       .then((Page) => {
         console.warn(
-          'Response#render for tsx(set view engine) is low performance, use renderReactViewStream( ex. ctx.ren )'
+          'Response#render for tsx(set view engine) is low performance, use renderReactViewStream( ex. ctx.render )'
         )
-        const node = arrange(Page, options)
+        const node = arrange(Page, options, new NullActionContext())
         callback(null, renderToString(node)) // Low performance but easy to use without res
       })
       .catch((err) => {

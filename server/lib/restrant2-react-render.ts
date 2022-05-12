@@ -1,7 +1,14 @@
 import path from 'path'
-import { ActionContextImpl, ActionContextCreator, createDefaultActionContext } from 'restrant2'
+import {
+  ActionContextImpl,
+  ActionContextCreator,
+  createDefaultActionContext,
+  ActionContext,
+  NullActionContext,
+} from 'restrant2'
 import { NodeArrangeFunc, renderReactViewStream, importPage } from './react-ssr-engine'
 import createDebug from 'debug'
+import { Localizer } from './locale'
 
 export * from '../lib/react-ssr-engine'
 
@@ -23,7 +30,7 @@ export const createRenderFunc = (arrange: NodeArrangeFunc, viewRoot: string, fai
   ): void {
     importPage(path.join(viewRoot, view))
       .then((Page) => {
-        renderReactViewStream(this.res, arrange(Page, options), failText)
+        renderReactViewStream(this.res, arrange(Page, options, this), failText)
       })
       .catch((err) => {
         console.error(err)
@@ -78,13 +85,18 @@ export function suspendable<T>(promise: Promise<T>): Reader<T> {
 }
 
 export type RenderSupport = {
+  getLocalizer: () => Localizer
   fetchJson: <T>(url: string, key?: string) => T
 }
 
-export const createRenderSupport = () => new RenderSupportImpl()
+export const createRenderSupport = (ctx: ActionContext = new NullActionContext()) => new RenderSupportImpl(ctx)
 
 class RenderSupportImpl implements RenderSupport {
-  constructor(private readerMap: ReaderMap = new Map()) {}
+  constructor(private ctx: ActionContext, private readerMap: ReaderMap = new Map()) {}
+
+  getLocalizer(): Localizer {
+    return this.ctx.req.localizer
+  }
 
   fetchJson<T>(url: string, key: string = url): T {
     let reader: Reader<unknown> | undefined = this.readerMap.get(key)

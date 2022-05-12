@@ -1,5 +1,5 @@
 import { Application } from 'express'
-import { ActionContextCreator } from 'restrant2'
+import { ActionContextCreator, ActionContext } from 'restrant2'
 import {
   buildActionContextCreator,
   NodeArrangeFunc,
@@ -12,20 +12,20 @@ import { createContext, ReactNode, useState } from 'react'
 
 export const RenderSupportContext = createContext<RenderSupport>(createRenderSupport())
 
-const arrange: NodeArrangeFunc = (Page, options) => {
+const arrange: NodeArrangeFunc = (Page, options, ctx) => {
   return (
-    <Wrapper>
+    <Wrapper ctx={ctx}>
       <Page {...options}></Page>
     </Wrapper>
   )
 }
 
-const Wrapper = ({ children }: { children: ReactNode }) => {
-  const [ctx] = useState(createRenderSupport())
+const Wrapper = ({ children, ctx }: { ctx: ActionContext, children: ReactNode }) => {
+  const [renderSupportContext] = useState(createRenderSupport(ctx))
 
   return (
     <Layout>
-      <RenderSupportContext.Provider value={ctx}>{children}</RenderSupportContext.Provider>
+      <RenderSupportContext.Provider value={renderSupportContext}>{children}</RenderSupportContext.Provider>
     </Layout>
   )
 }
