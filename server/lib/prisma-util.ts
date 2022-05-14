@@ -29,10 +29,10 @@ export const getPrismaCilent = (): PrismaClient => {
 
 type PrismaAnyClient<T> = {
   findMany: (args?: unknown) => Promise<T[]>,
-  findUnique: (args: any) => Promise<T>,
-  create: (args: any) => Promise<T>,
-  update: (args: any) => Promise<T>,
-  delete: (args: any) => Promise<boolean>
+  findUnique: (args: unknown) => Promise<T>,
+  create: (args: unknown) => Promise<T>,
+  update: (args: unknown) => Promise<T>,
+  delete: (args: unknown) => Promise<boolean>
 }
 
 export const createPrismaEasyDataAccessor = <
@@ -43,12 +43,12 @@ export const createPrismaEasyDataAccessor = <
   IN extends string = 'id',
   IT = number,
 >(
-  cli: any,
+  unknownPrismaClient: unknown,
   keyName: IN
 ) => {
-  const client = cli as PrismaAnyClient<T> // FIXME: unsafe
+  const client = unknownPrismaClient as PrismaAnyClient<T> // FIXME: unsafe
   return {
-    list: async (args?: any): Promise<T[]> => {
+    list: async (args?: unknown): Promise<T[]> => {
       return await client.findMany(args)
     },
 

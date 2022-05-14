@@ -15,7 +15,7 @@ export const RenderSupportContext = createContext<RenderSupport>(createRenderSup
 const arrange: NodeArrangeFunc = (Page, options, ctx) => {
   return (
     <Wrapper ctx={ctx}>
-      <Page {...options}></Page>
+      <Page {...options as JSX.IntrinsicAttributes}></Page>
     </Wrapper>
   )
 }

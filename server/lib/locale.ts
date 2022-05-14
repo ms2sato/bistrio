@@ -8,13 +8,13 @@ export type LocaleConfig = {
   dir: string
 }
 
-export type LocaleTagFunc = (template: Template, ...values: any[]) => string
+export type LocaleTagFunc = (template: Template, ...values: unknown[]) => string
 export type LocaleSelector = {
   select: (lang: string) => Localizer
   getLanguages: () => string[]
 }
 
-type LocaleItemFunc = (...args: any[]) => string
+type LocaleItemFunc = (...args: unknown[]) => string
 type LocaleDictionaryItem = string | LocaleItemFunc | true
 type LocaleDictionary = {
   [key: string]: LocaleDictionaryItem
@@ -25,7 +25,7 @@ type ParentLocaleDictionary = {
 
 export type Localizer = {
   t: LocaleTagFunc
-  o: (key: string, ...values: any[]) => string
+  o: (key: string, ...values: unknown[]) => string
 }
 
 export type Template = { raw: readonly string[] | ArrayLike<string> }
@@ -33,7 +33,7 @@ export type Template = { raw: readonly string[] | ArrayLike<string> }
 export class LocalizerImpl implements Localizer {
   constructor(private dictionary: LocaleDictionary, private lang: string) {}
 
-  t(template: Template, ...values: any[]): string {
+  t(template: Template, ...values: unknown[]): string {
     const key = Array.prototype.join.call(template.raw, '@')
     const lfunc = this.dictionary[key]
     if (lfunc === undefined) {
@@ -41,7 +41,6 @@ export class LocalizerImpl implements Localizer {
     }
 
     if (lfunc === true) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       return String.raw(template, ...values)
     }
 
@@ -56,7 +55,7 @@ export class LocalizerImpl implements Localizer {
     throw new Error(`Unexpected type of ${key} for locale: ${this.lang}`)
   }
 
-  o(key: string, ...values: any[]): string {
+  o(key: string, ...values: unknown[]): string {
     const nodeNames = key.split('.')
     const lastNodeName = nodeNames.pop()
     if (lastNodeName === undefined) {

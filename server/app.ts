@@ -1,6 +1,3 @@
-// TODO: fix
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import createError from 'http-errors'
 import express from 'express'
 import path from 'path'
@@ -77,21 +74,21 @@ export async function setup() {
   })
 
   // error handler
-  app.use(function (err, req, res, _next) {
-    // TODO: handling RecordNotFound of prisma
-
-    // render the error page
-    if ('status' in err) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      res.status(Number(err.status))
-    } else {
-      res.status(500)
+  app.use(function (err: unknown, req, res, _next) {
+    // @see https://stackoverflow.com/questions/51624117/how-to-check-for-the-property-type-of-an-unknown-value
+    const isHttpError = (err: unknown): err is createError.HttpError<number> => {
+      const herr = err as createError.HttpError<number>
+      return 'stasus' in herr && typeof herr.status === 'number'
     }
 
     if (req.app.get('env') === 'development') {
       console.error(err)
     }
 
+    // TODO: handling RecordNotFound of prisma
+
+    // render the error page
+    res.status(isHttpError(err) ? err.status : 500)
     res.render('error', { err })
   } as express.ErrorRequestHandler)
 

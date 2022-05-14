@@ -2,15 +2,11 @@ import { renderToString, renderToPipeableStream } from 'react-dom/server'
 import express from 'express'
 import { ActionContext, NullActionContext } from 'restrant2'
 
-// TODO: fix
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type EngineFuncCallback = (err: any, rendered?: string | undefined) => void
+type EngineFuncCallback = (err: unknown, rendered?: string | undefined) => void
 type EngineFunc = (path: string, options: object, callback: EngineFuncCallback) => void
-type Node = JSX.Element
+type Node = React.FC<unknown>
 
-// TODO: fix
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type NodeArrangeFunc = (node: any, options: any, ctx: ActionContext) => Node
+export type NodeArrangeFunc = (node: React.FC<unknown>, options: unknown, ctx: ActionContext) => JSX.Element
 
 type PageExport = {
   default: Node
