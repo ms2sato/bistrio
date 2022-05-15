@@ -11,6 +11,11 @@ import { routes } from '../routes'
 import * as RouterFactory from './router-factory'
 import { useTsxView } from './customizers/render-support'
 import { localeMiddleware } from './lib/locale-express'
+import { useWebpackDev } from './lib/webpack'
+
+if (!process.env.NODE_ENV) {
+  process.env.NODE_ENV = 'development'
+}
 
 const debug = createDebug('bistrio:params')
 
@@ -18,6 +23,7 @@ export async function setup() {
   const app = express()
 
   useTsxView(app, path.join(__dirname, '../views'))
+  useWebpackDev(app)
 
   app.use(logger('dev'))
   app.use(express.json())

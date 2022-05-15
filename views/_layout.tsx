@@ -5,6 +5,7 @@ export function Layout({ children }: { children: ReactNode }) {
     <html>
       <head>
         <link type="text/css" rel="stylesheet" href="/stylesheets/style.css"></link>
+        <script src="/bundle.js" defer></script>
       </head>
       <body>{children}</body>
     </html>

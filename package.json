@@ -16,7 +16,9 @@
     "format": "npx prettier --write 'server/**/*.{js,ts,tsx,json}'",
     "check-types": "npx tsc --noEmit",
     "db:seed": "npx ts-node prisma/seed.ts",
-    "db:truncate": "npx ts-node prisma/truncate.ts"
+    "db:truncate": "npx ts-node prisma/truncate.ts",
+    "build:client": "webpack",
+    "dev:client": "webpack --watch"
   },
   "dependencies": {
     "@prisma/client": "^3.9.2",
@@ -51,7 +53,11 @@
     "prettier": "^2.6.2",
     "prisma": "^3.9.2",
     "rimraf": "^3.0.2",
+    "ts-loader": "^9.3.0",
     "ts-morph": "^13.0.3",
-    "ts-node": "^10.5.0"
+    "ts-node": "^10.5.0",
+    "webpack": "^5.72.1",
+    "webpack-cli": "^4.9.2",
+    "webpack-dev-middleware": "^5.3.1"
   }
 }
