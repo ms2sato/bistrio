@@ -1,9 +1,10 @@
+import * as React from 'react'
 import { ValidationError } from 'restrant2'
 import { TaskCreateParams, TaskUpdateParams } from '../../params'
 
 function ErrorPanel({ err }: { err: ValidationError }) {
   return (
-    <div>
+    <>
       <div>error</div>
       <ul>
         {err.errors.map((er, i) => (
@@ -12,7 +13,7 @@ function ErrorPanel({ err }: { err: ValidationError }) {
           </li>
         ))}
       </ul>
-    </div>
+    </>
   )
 }
 

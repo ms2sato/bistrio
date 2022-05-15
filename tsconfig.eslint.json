@@ -2,6 +2,7 @@
   "extends": "./tsconfig.json",
   "include": [
     "server/**/*.ts",
+    "client/**/*.ts",
     "views/**/*.tsx",
     "prisma/**/*.ts",
     "locales/**/*.ts",

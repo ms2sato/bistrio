@@ -4,7 +4,7 @@ import { Configuration } from 'webpack'
 const env = process.env.NODE_ENV == 'production' ? 'production' : 'development'
 
 const config: Configuration = {
-  entry: './client/index.ts',
+  entry: './client/index.tsx',
   mode: env,
   module: {
     rules: [
