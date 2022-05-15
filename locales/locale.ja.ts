@@ -1,5 +1,8 @@
 export default () => ({
   Hello: 'こんにちは',
+  Edit: '編集',
+  Delete: '削除',
+  'Loading...': '読み込み中...',
   'Task list': 'タスク一覧',
   'Create new task': 'タスクの新規作成',
   'There are @ errors': (count: number) => `${count}個のエラーがあります`,

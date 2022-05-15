@@ -9,7 +9,7 @@ export function Index() {
     <>
       <h1>{l.t`Task list`}</h1>
       <a href="/tasks/build">{l.t`Create new task`}</a>
-      <Suspense fallback={<p>Loading...</p>}>
+      <Suspense fallback={<p>{l.t`Loading...`}</p>}>
         <TaskTable></TaskTable>
       </Suspense>
     </>
@@ -50,8 +50,8 @@ const TaskTable = () => {
             <td>{task.title}</td>
             <td>{task.description}</td>
             <td>
-              <a href={`/tasks/${task.id}/edit`}>edit</a>&nbsp;|&nbsp;
-              <a href={`/tasks/${task.id}?_method=delete`}>delete</a>
+              <a href={`/tasks/${task.id}/edit`}>{l.t`Edit`}</a>&nbsp;|&nbsp;
+              <a href={`/tasks/${task.id}?_method=delete`}>{l.t`Delete`}</a>
             </td>
           </tr>
         ))}
