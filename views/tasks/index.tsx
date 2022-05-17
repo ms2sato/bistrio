@@ -1,16 +1,16 @@
-import React, { useContext, Suspense } from 'react'
+import * as React from 'react'
+import { Suspense } from 'react'
 import { Task } from '@prisma/client'
-import { RenderSupportContext } from '../../server/customizers/render-support'
+import { PageProps } from '../../lib/render-support'
 
-export function Index() {
-  const rctx = useContext(RenderSupportContext)
-  const l = rctx.getLocalizer()
+export function Index({ rs }: PageProps) {
+  const l = rs.getLocalizer()
   return (
     <>
       <h1>{l.t`Task list`}</h1>
       <a href="/tasks/build">{l.t`Create new task`}</a>
       <Suspense fallback={<p>{l.t`Loading...`}</p>}>
-        <TaskTable></TaskTable>
+        <TaskTable rs={rs}></TaskTable>
       </Suspense>
     </>
   )
@@ -19,10 +19,9 @@ export function Index() {
 // TODO: define params and JsonResponder
 type TasksRes = { status: string; data: Task[] }
 
-const TaskTable = () => {
-  const rctx = useContext(RenderSupportContext)
-  const l = rctx.getLocalizer()
-  const res = rctx.fetchJson<TasksRes>('http://localhost:3000/api/tasks')
+const TaskTable = ({ rs }: PageProps) => {
+  const l = rs.getLocalizer()
+  const res = rs.fetchJson<TasksRes>('http://localhost:3000/api/tasks')
 
   const tasks = res.data
   return (

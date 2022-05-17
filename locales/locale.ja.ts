@@ -1,4 +1,4 @@
-export const dictionary =  () => ({
+export const dictionary = {
   Hello: 'こんにちは',
   Edit: '編集',
   Delete: '削除',
@@ -14,4 +14,4 @@ export const dictionary =  () => ({
       getStatus: (done: boolean) => (done ? '完了' : '未完'),
     },
   },
-})
+}

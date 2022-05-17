@@ -4,28 +4,22 @@ import {
   buildActionContextCreator,
   NodeArrangeFunc,
   engine,
-  RenderSupport,
   createRenderSupport,
+  PageNode,
 } from '../lib/restrant2-react-render'
 import { Layout } from '../../views/_layout'
-import { createContext, ReactNode, useState } from 'react'
+import { ReactNode, useState } from 'react'
 
-export const RenderSupportContext = createContext<RenderSupport>(createRenderSupport())
-
-const arrange: NodeArrangeFunc = (Page, options, ctx) => {
-  return (
-    <Wrapper ctx={ctx}>
-      <Page {...options as JSX.IntrinsicAttributes}></Page>
-    </Wrapper>
-  )
+const arrange: NodeArrangeFunc = async (Page, options, ctx) => {
+  return <Wrapper ctx={ctx} Page={Page}></Wrapper>
 }
 
-const Wrapper = ({ children, ctx }: { ctx: ActionContext, children: ReactNode }) => {
-  const [renderSupportContext] = useState(createRenderSupport(ctx))
+const Wrapper = ({ Page, ctx }: { ctx: ActionContext; Page: PageNode; children?: ReactNode }) => {
+  const [renderSupport] = useState(createRenderSupport(ctx))
 
   return (
     <Layout>
-      <RenderSupportContext.Provider value={renderSupportContext}>{children}</RenderSupportContext.Provider>
+      <Page rs={renderSupport}></Page>
     </Layout>
   )
 }

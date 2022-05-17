@@ -1,4 +1,4 @@
-export const dictionary = () => ({
+export const dictionary = {
   Hello: true,
   Edit: true,
   Delete: true,
@@ -13,4 +13,4 @@ export const dictionary = () => ({
       getStatus: (done: boolean) => (done ? 'Done' : 'Undone'),
     },
   },
-})
+}

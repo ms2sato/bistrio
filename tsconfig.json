@@ -15,5 +15,5 @@
   },
   "include": [
     "server","params", "routes"
-, "tsconfig.console.json", "views", "locales", "server/types/index.d.ts"  ] 
+, "tsconfig.console.json", "views", "locales", "server/types/index.d.ts", "lib" ] 
 }

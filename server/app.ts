@@ -56,7 +56,7 @@ export async function setup() {
   )
   app.use(methodOverride(methodName, { methods: ['GET', 'POST'] })) // for GET Parameter
 
-  app.use(await localeMiddleware({ localeConfig: { dir: path.join(__dirname, '../locales') } }))
+  app.use(await localeMiddleware())
 
   app.use((req, res, next) => {
     debug(`${req.method} ${req.path}`)

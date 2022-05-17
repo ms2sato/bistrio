@@ -1,18 +1,5 @@
-import path from 'path'
-import * as glob from 'glob'
-import createDebug from 'debug'
-
-const log = createDebug('locale')
-
-export type LocaleConfig = {
-  dir: string
-}
-
-export type LocaleTagFunc = (template: Template, ...values: unknown[]) => string
-export type LocaleSelector = {
-  select: (lang: string) => Localizer
-  getLanguages: () => string[]
-}
+import { Localizer, Template, LocaleSelector } from './locale'
+import { localeMap } from '../locales'
 
 type LocaleItemFunc = (...args: unknown[]) => string
 type LocaleDictionaryItem = string | LocaleItemFunc | true
@@ -22,13 +9,6 @@ type LocaleDictionary = {
 type ParentLocaleDictionary = {
   [key: string]: ParentLocaleDictionary
 }
-
-export type Localizer = {
-  t: LocaleTagFunc
-  o: (key: string, ...values: unknown[]) => string
-}
-
-export type Template = { raw: readonly string[] | ArrayLike<string> }
 
 export class LocalizerImpl implements Localizer {
   constructor(private dictionary: LocaleDictionary, private lang: string) {}
@@ -73,6 +53,7 @@ export class LocalizerImpl implements Localizer {
       }
     }
 
+    // TODO remove as unknown
     const lfunc = (node as unknown as LocaleDictionary)[lastNodeName]
 
     if (lfunc === true) {
@@ -91,24 +72,12 @@ export class LocalizerImpl implements Localizer {
   }
 }
 
-export const initLocale = async ({ dir }: LocaleConfig): Promise<LocaleSelector> => {
-  const lang2Dictionary: Map<string, LocaleDictionary> = new Map<string, LocaleDictionary>()
-  const globExpression = `${dir}/locale.*.*`
-  log('search locale files: %s', globExpression)
-
-  const dictionaryPaths = glob.sync(globExpression, { ignore: [`${globExpression}.map`] })
-  await Promise.all(
-    dictionaryPaths.map(async (dictionaryPath) => {
-      const lang = path.basename(dictionaryPath).split('.')[1]
-      log('read dictionary: %s', lang)
-      const module = (await import(dictionaryPath)) as { dictionary: () => LocaleDictionary }
-      const dictionary = module.dictionary()
-      lang2Dictionary.set(lang, dictionary)
-    })
-  )
+export const initLocale = async (): Promise<LocaleSelector> => {
+  // TODO: remove as unknown
+  const lang2Dictionary: Record<string, LocaleDictionary> = localeMap as unknown as Record<string, LocaleDictionary>
 
   const select = (lang: string) => {
-    const dictionary = lang2Dictionary.get(lang)
+    const dictionary = lang2Dictionary[lang]
     if (dictionary == undefined) {
       throw new Error(`Unexpected locale: ${lang}`)
     }
@@ -116,7 +85,7 @@ export const initLocale = async ({ dir }: LocaleConfig): Promise<LocaleSelector>
     return new LocalizerImpl(dictionary, lang)
   }
 
-  const getLanguages = () => Array.from(lang2Dictionary.keys())
+  const getLanguages = () => Object.keys(lang2Dictionary)
 
   return {
     select,

@@ -1,19 +1,19 @@
 import express from 'express'
-import { initLocale, LocaleSelector, LocaleConfig } from './locale'
+import { LocaleSelector } from '../../lib/locale'
+import { initLocale } from '../../lib/localizer'
 
 let localeSelector: LocaleSelector
 
 type localeMiddlewareProps = {
-  localeConfig: LocaleConfig
-  defaultLanguage?: string
+  defaultLanguage: string
 }
 
-export const localeMiddleware = async ({ localeConfig, defaultLanguage = 'en' }: localeMiddlewareProps) => {
-  localeSelector = await initLocale(localeConfig)
+export const localeMiddleware = async (props: localeMiddlewareProps = { defaultLanguage: 'en' }) => {
+  localeSelector = await initLocale()
 
   return (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
-      const lang = req.acceptsLanguages(localeSelector.getLanguages()) || defaultLanguage
+      const lang = req.acceptsLanguages(localeSelector.getLanguages()) || props.defaultLanguage
       req.localizer = localeSelector.select(lang)
 
       next()

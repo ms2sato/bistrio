@@ -6,9 +6,10 @@ import {
   ActionContext,
   NullActionContext,
 } from 'restrant2'
+import { CreateRenderSupportFunc, Reader, RenderSupport, suspendable } from '../../lib/render-support'
 import { NodeArrangeFunc, renderReactViewStream, importPage } from './react-ssr-engine'
 import createDebug from 'debug'
-import { Localizer } from './locale'
+import { Localizer } from '../../lib/locale'
 
 export * from '../lib/react-ssr-engine'
 
@@ -30,7 +31,10 @@ export const createRenderFunc = (arrange: NodeArrangeFunc, viewRoot: string, fai
   ): void {
     importPage(path.join(viewRoot, view))
       .then((Page) => {
-        renderReactViewStream(this.res, arrange(Page, options, this), failText)
+        return arrange(Page, options, this)
+      })
+      .then((node) => {
+        renderReactViewStream(this.res, node, failText)
       })
       .catch((err) => {
         console.error(err)
@@ -63,35 +67,14 @@ export const buildActionContextCreator: BuildActionContextCreator = (
   }
 }
 
-// -----
-// for SSR and CSR
+export const createRenderSupport: CreateRenderSupportFunc = (option: unknown) => {
+  const ctx: ActionContext = (option as ActionContext) ?? new NullActionContext()
+  return new ServerRenderSupport(ctx)
+}
 
-export type Reader<T> = () => T
 type ReaderMap = Map<string, Reader<unknown>>
 
-// @see https://blog.logrocket.com/react-suspense-data-fetching/#data-fetching-approaches
-export function suspendable<T>(promise: Promise<T>): Reader<T> {
-  let result: T
-  let err: Error
-  const suspender = promise.then(
-    (ret) => (result = ret),
-    (e: Error) => (err = e)
-  )
-  return () => {
-    if (result) return result
-    if (err) throw err
-    throw suspender
-  }
-}
-
-export type RenderSupport = {
-  getLocalizer: () => Localizer
-  fetchJson: <T>(url: string, key?: string) => T
-}
-
-export const createRenderSupport = (ctx: ActionContext = new NullActionContext()) => new RenderSupportImpl(ctx)
-
-class RenderSupportImpl implements RenderSupport {
+class ServerRenderSupport implements RenderSupport {
   constructor(private ctx: ActionContext, private readerMap: ReaderMap = new Map()) {}
 
   getLocalizer(): Localizer {

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ValidationError } from 'restrant2'
+import { ValidationError } from 'restrant2/client'
 import { TaskCreateParams, TaskUpdateParams } from '../../params'
 
 function ErrorPanel({ err }: { err: ValidationError }) {

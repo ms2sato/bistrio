@@ -2,12 +2,16 @@ import { renderToString, renderToPipeableStream } from 'react-dom/server'
 import express from 'express'
 import { ActionContext, NullActionContext } from 'restrant2'
 import { safeImport } from './safe-import'
+import { PageProps } from '../../lib/render-support'
+import React from 'react'
 
 type EngineFuncCallback = (err: unknown, rendered?: string | undefined) => void
 type EngineFunc = (path: string, options: object, callback: EngineFuncCallback) => void
 type Node = React.FC<unknown>
 
-export type NodeArrangeFunc = (node: React.FC<unknown>, options: unknown, ctx: ActionContext) => JSX.Element
+export type PageNode = React.FC<PageProps>
+
+export type NodeArrangeFunc = (node: PageNode, options: unknown, ctx: ActionContext) => Promise<JSX.Element>
 
 type PageExport = {
   Page: Node
@@ -25,8 +29,9 @@ export const engine: (arrange: NodeArrangeFunc) => EngineFunc = (arrange: NodeAr
         console.warn(
           'Response#render for tsx(set view engine) is low performance, use renderReactViewStream( ex. ctx.render )'
         )
-        const node = arrange(Page, options, new NullActionContext())
-        callback(null, renderToString(node)) // Low performance but easy to use without res
+        arrange(Page, options, new NullActionContext()).then((node) => {
+          callback(null, renderToString(node)) // Low performance but easy to use without res
+        })
       })
       .catch((err) => {
         callback(err)
