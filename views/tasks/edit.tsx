@@ -1,5 +1,5 @@
-import 'react'
-import { ValidationError } from 'restrant2'
+import * as React from 'react'
+import { ValidationError } from 'restrant2/client'
 import { TaskUpdateParams } from '../../params'
 import { Form } from './_form'
 
@@ -12,4 +12,4 @@ export function Edit(props: { task: TaskUpdateParams; err?: ValidationError }) {
   )
 }
 
-export default Edit
+export { Edit as Page }

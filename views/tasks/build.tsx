@@ -16,4 +16,4 @@ export function Build(props: { task: TaskCreateParams; err?: any }) {
   )
 }
 
-export default Build
+export { Build as Page }

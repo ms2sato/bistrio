@@ -1,6 +1,7 @@
 import { renderToString, renderToPipeableStream } from 'react-dom/server'
 import express from 'express'
 import { ActionContext, NullActionContext } from 'restrant2'
+import { safeImport } from './safe-import'
 
 type EngineFuncCallback = (err: unknown, rendered?: string | undefined) => void
 type EngineFunc = (path: string, options: object, callback: EngineFuncCallback) => void
@@ -9,12 +10,12 @@ type Node = React.FC<unknown>
 export type NodeArrangeFunc = (node: React.FC<unknown>, options: unknown, ctx: ActionContext) => JSX.Element
 
 type PageExport = {
-  default: Node
+  Page: Node
 }
 
 export const importPage = async (filePath: string) => {
-  const ret = (await import(filePath)) as PageExport
-  return ret.default
+  const ret = (await safeImport(filePath)) as PageExport
+  return ret.Page
 }
 
 export const engine: (arrange: NodeArrangeFunc) => EngineFunc = (arrange: NodeArrangeFunc) => {

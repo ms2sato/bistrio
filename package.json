@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/server",
-    "dev": "DEBUG=bistrio:*,restrant2:* nodemon -e ts,tsx --files ./bin/dev.ts",
+    "dev": "DEBUG=bistrio:*,restrant2:* tsc-watch --onSuccess 'node ./bin/server'",
     "build": "npx tsc && cpx 'views/**' dist/views && cpx 'public/**' dist/public",
     "clean": "npx rimraf dist",
     "console": "npx ts-node --project ./tsconfig.console.json -r ./server/support/console.ts",
@@ -32,7 +32,8 @@
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "restrant2": "file:../restrant2/restrant2-0.0.2.tgz",
-    "typescript": "^4.6.2"
+    "ts-node": "^10.5.0",
+    "typescript": "^4.7.1-rc"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.2",
@@ -47,16 +48,15 @@
     "@typescript-eslint/eslint-plugin": "^5.12.1",
     "@typescript-eslint/parser": "^5.12.1",
     "cpx": "^1.5.0",
-    "eslint": "^8.10.0",
+    "eslint": "^8.12.0",
     "eslint-config-prettier": "8.4.0",
-    "nodemon": "^2.0.15",
     "prettier": "^2.6.2",
     "prisma": "^3.9.2",
     "react-router-dom": "^6.3.0",
     "rimraf": "^3.0.2",
     "ts-loader": "^9.3.0",
     "ts-morph": "^13.0.3",
-    "ts-node": "^10.5.0",
+    "tsc-watch": "^5.0.3",
     "webpack": "^5.72.1",
     "webpack-cli": "^4.9.2",
     "webpack-dev-middleware": "^5.3.1"

@@ -2,7 +2,7 @@
   "extends": "./tsconfig.json",
   "include": [
     "server/**/*.ts",
-    "client/**/*.ts",
+    "client/**/*.ts*",
     "views/**/*.tsx",
     "prisma/**/*.ts",
     "locales/**/*.ts",
@@ -12,6 +12,7 @@
     "node_modules",
     "dist",
     "bin",
-    "webpack.config.ts"
+    "webpack.config.ts",
+    "tsconfig.*"
   ]
 }

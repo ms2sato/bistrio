@@ -1,4 +1,4 @@
-import { useContext, Suspense } from 'react'
+import React, { useContext, Suspense } from 'react'
 import { Task } from '@prisma/client'
 import { RenderSupportContext } from '../../server/customizers/render-support'
 
@@ -60,4 +60,4 @@ const TaskTable = () => {
   )
 }
 
-export default Index
+export { Index as Page }

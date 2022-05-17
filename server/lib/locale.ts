@@ -101,8 +101,8 @@ export const initLocale = async ({ dir }: LocaleConfig): Promise<LocaleSelector>
     dictionaryPaths.map(async (dictionaryPath) => {
       const lang = path.basename(dictionaryPath).split('.')[1]
       log('read dictionary: %s', lang)
-      const module = (await import(dictionaryPath)) as { default: () => LocaleDictionary }
-      const dictionary = module.default()
+      const module = (await import(dictionaryPath)) as { dictionary: () => LocaleDictionary }
+      const dictionary = module.dictionary()
       lang2Dictionary.set(lang, dictionary)
     })
   )

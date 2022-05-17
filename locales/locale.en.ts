@@ -1,4 +1,4 @@
-export default () => ({
+export const dictionary = () => ({
   Hello: true,
   Edit: true,
   Delete: true,

@@ -1,4 +1,4 @@
-export default () => ({
+export const dictionary =  () => ({
   Hello: 'こんにちは',
   Edit: '編集',
   Delete: '削除',
