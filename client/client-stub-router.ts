@@ -1,5 +1,12 @@
-import { ActionDescriptor, ConstructDescriptor } from 'restrant2/client'
-import { Resource, RouteConfig, Router, ConstructConfig, HandlerBuildRunner } from 'restrant2/client'
+import {
+  ActionDescriptor,
+  ConstructDescriptor,
+  Resource,
+  RouteConfig,
+  Router,
+  ConstructConfig,
+  HandlerBuildRunner,
+} from 'restrant2/client'
 import { PageNode } from '../lib/render-support'
 
 // @see https://stackoverflow.com/questions/29855098/is-there-a-built-in-javascript-function-similar-to-os-path-join
@@ -83,7 +90,7 @@ export class ClientGenretateRouter implements Router {
           }
         } else {
           resource[actionName] = async function (...options) {
-            const apath = ad.path.replace(':id', options[0].id)
+            const apath = ad.path.indexOf(':id') == -1 ? ad.path : ad.path.replace(':id', options[0].id)
             return fetchJson(pathJoin(resourceUrl, apath), ad.method)
           }
         }

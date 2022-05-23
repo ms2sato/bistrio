@@ -2,7 +2,8 @@ import * as React from 'react'
 import { Suspense } from 'react'
 import { Link } from 'react-router-dom'
 import { Task } from '@prisma/client'
-import { PageProps } from '../../lib/render-support'
+import { getResource, PageProps } from '../../lib/render-support'
+import type ApiTask from '../../server/endpoint/api/tasks/resource'
 
 export function Index({ rs }: PageProps) {
   const l = rs.getLocalizer()
@@ -22,9 +23,9 @@ type TasksRes = { status: string; data: Task[] }
 
 const TaskTable = ({ rs }: PageProps) => {
   const l = rs.getLocalizer()
-  const res = rs.fetchJson<TasksRes>('http://localhost:3000/api/tasks')
 
-  const tasks = res.data
+  const resource = getResource<typeof ApiTask>(rs, 'api_task')
+  const tasks = resource.index()
   return (
     <table>
       <thead>
