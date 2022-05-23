@@ -14,5 +14,9 @@ export default defineResource((_support, _options) => {
     index: async () => {
       return accessor.list()
     },
+
+    show: async (params: IdNumberParams) => {
+      return accessor.get(params)
+    },
   }
 })

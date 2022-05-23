@@ -1,5 +1,5 @@
+import { Router, Actions, idNumberSchema } from 'restrant2/client'
 import { taskCreateSchema, taskUpdateSchema } from './params'
-import { Router, Actions, idNumberSchema } from 'restrant2'
 
 export function routes(router: Router) {
   router.resources('/tasks', {
@@ -21,6 +21,6 @@ export function routes(router: Router) {
   const apiRouter = router.sub('/api')
   apiRouter.resources('/tasks', {
     name: 'api_task',
-    actions: Actions.api({ only: ['index'] }),
+    actions: Actions.api({ only: ['index', 'show'] }),
   })
 }

@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Suspense } from 'react'
+import { Link } from 'react-router-dom'
 import { Task } from '@prisma/client'
 import { PageProps } from '../../lib/render-support'
 
@@ -8,7 +9,7 @@ export function Index({ rs }: PageProps) {
   return (
     <>
       <h1>{l.t`Task list`}</h1>
-      <a href="/tasks/build">{l.t`Create new task`}</a>
+      <Link to="/tasks/build">{l.t`Create new task`}</Link>
       <Suspense fallback={<p>{l.t`Loading...`}</p>}>
         <TaskTable rs={rs}></TaskTable>
       </Suspense>

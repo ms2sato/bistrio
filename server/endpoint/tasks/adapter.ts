@@ -3,16 +3,8 @@ import type resource from './resource'
 
 type Adapter = AdapterOf<typeof resource>
 
-export default defineAdapter((_support, _options): Adapter => {
+export default defineAdapter<Adapter>((_support, _options) => {
   return {
-    build: {
-      success: (ctx, output) => ({ task: output }),
-    },
-
-    edit: {
-      success: (ctx, output) => ({ task: output }),
-    },
-
     create: {
       success: (ctx, _output) => {
         ctx.redirect('/tasks')

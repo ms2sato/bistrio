@@ -1,4 +1,4 @@
-import { z } from 'restrant2'
+import { z } from 'restrant2/client'
 
 const taskCoreProps = {
   title: z.string().min(3).max(255),

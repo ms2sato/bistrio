@@ -1,4 +1,4 @@
-import { ResourceHolderCreateRouter, ServerRouter, ServerRouterConfig } from 'restrant2'
+import { ResourceHolderCreateRouter, ServerRouter, ServerRouterConfig, Resource } from 'restrant2'
 import { config } from './config/server'
 
 class RouterFactory {
@@ -9,7 +9,7 @@ class RouterFactory {
   }
 
   getResourceHolderCreateRouter(resourcesHolder: unknown, fileRoot: string) {
-    return new ResourceHolderCreateRouter(resourcesHolder, fileRoot, this.option, '/')
+    return new ResourceHolderCreateRouter(resourcesHolder as Record<string, Resource>, fileRoot, this.option, '/')
   }
 }
 

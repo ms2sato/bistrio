@@ -1,14 +1,10 @@
 import { Application } from 'express'
 import { ActionContextCreator, ActionContext } from 'restrant2'
-import {
-  buildActionContextCreator,
-  NodeArrangeFunc,
-  engine,
-  createRenderSupport,
-  PageNode,
-} from '../lib/restrant2-react-render'
+import { buildActionContextCreator, NodeArrangeFunc, createRenderSupport } from '../lib/restrant2-react-render'
 import { Layout } from '../../views/_layout'
 import { ReactNode, useState } from 'react'
+import { StaticRouter } from 'react-router-dom/server'
+import { PageNode } from '../../lib/render-support'
 
 const arrange: NodeArrangeFunc = async (Page, options, ctx) => {
   return <Wrapper ctx={ctx} Page={Page}></Wrapper>
@@ -19,7 +15,9 @@ const Wrapper = ({ Page, ctx }: { ctx: ActionContext; Page: PageNode; children?:
 
   return (
     <Layout>
-      <Page rs={renderSupport}></Page>
+      <StaticRouter location={ctx.req.url}>
+        <Page rs={renderSupport}></Page>
+      </StaticRouter>
     </Layout>
   )
 }
@@ -27,10 +25,6 @@ const Wrapper = ({ Page, ctx }: { ctx: ActionContext; Page: PageNode; children?:
 let createActionCtx: ActionContextCreator
 
 export const useTsxView = (app: Application, viewRoot: string) => {
-  app.engine('tsx', engine(arrange))
-  app.set('views', viewRoot)
-  app.set('view engine', 'tsx')
-
   createActionCtx = buildActionContextCreator(viewRoot, arrange, '')
 }
 

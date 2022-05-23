@@ -2,14 +2,12 @@ import { renderToString, renderToPipeableStream } from 'react-dom/server'
 import express from 'express'
 import { ActionContext, NullActionContext } from 'restrant2'
 import { safeImport } from './safe-import'
-import { PageProps } from '../../lib/render-support'
+import { PageNode } from '../../lib/render-support'
 import React from 'react'
 
 type EngineFuncCallback = (err: unknown, rendered?: string | undefined) => void
 type EngineFunc = (path: string, options: object, callback: EngineFuncCallback) => void
 type Node = React.FC<unknown>
-
-export type PageNode = React.FC<PageProps>
 
 export type NodeArrangeFunc = (node: PageNode, options: unknown, ctx: ActionContext) => Promise<JSX.Element>
 

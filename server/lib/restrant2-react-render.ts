@@ -6,7 +6,8 @@ import {
   ActionContext,
   NullActionContext,
 } from 'restrant2'
-import { CreateRenderSupportFunc, Reader, RenderSupport, suspendable } from '../../lib/render-support'
+import { Resource } from 'restrant2/client'
+import { RenderSupport, suspense } from '../../lib/render-support'
 import { NodeArrangeFunc, renderReactViewStream, importPage } from './react-ssr-engine'
 import createDebug from 'debug'
 import { Localizer } from '../../lib/locale'
@@ -67,32 +68,30 @@ export const buildActionContextCreator: BuildActionContextCreator = (
   }
 }
 
-export const createRenderSupport: CreateRenderSupportFunc = (option: unknown) => {
-  const ctx: ActionContext = (option as ActionContext) ?? new NullActionContext()
+export const createRenderSupport = (ctx: ActionContext = new NullActionContext()) => {
   return new ServerRenderSupport(ctx)
 }
 
-type ReaderMap = Map<string, Reader<unknown>>
-
 class ServerRenderSupport implements RenderSupport {
-  constructor(private ctx: ActionContext, private readerMap: ReaderMap = new Map()) {}
+  private suspense
+
+  constructor(private ctx: ActionContext) {
+    this.suspense = suspense()
+  }
 
   getLocalizer(): Localizer {
     return this.ctx.req.localizer
   }
 
   fetchJson<T>(url: string, key: string = url): T {
-    let reader: Reader<unknown> | undefined = this.readerMap.get(key)
-    if (!reader) {
-      debug('RenderSupportImpl#fetchJson render undefined, start fetch')
-      reader = suspendable(
-        fetch(url).then((ret) => {
-          return ret.json()
-        })
-      )
-      this.readerMap.set(key, reader)
-    }
+    return this.suspense.fetchJson(url, key)
+  }
 
-    return (reader as Reader<T>)()
+  suspend<T>(asyncProcess: () => Promise<T>, key: string): T {
+    return this.suspense.suspend(asyncProcess, key)
+  }
+
+  resourceOf<T extends Resource>(name: string): T {
+    return this.ctx.resourceOf<T>(name)
   }
 }
