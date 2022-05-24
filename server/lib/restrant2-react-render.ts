@@ -1,20 +1,61 @@
 import path from 'path'
+import express from 'express'
+import React from 'react'
+import { renderToPipeableStream } from 'react-dom/server'
 import {
   ActionContextImpl,
   ActionContextCreator,
   createDefaultActionContext,
   ActionContext,
   NullActionContext,
+  Resource,
 } from 'restrant2'
-import { Resource } from 'restrant2/client'
-import { RenderSupport, suspense } from '../../lib/render-support'
-import { NodeArrangeFunc, renderReactViewStream, importPage } from './react-ssr-engine'
-import createDebug from 'debug'
+import { safeImport } from './safe-import'
 import { Localizer } from '../../lib/locale'
+import { PageNode, RenderSupport, suspense } from '../../lib/render-support'
 
-export * from '../lib/react-ssr-engine'
+type Node = React.FC<unknown>
 
-const debug = createDebug('bistrio:react')
+export type NodeArrangeFunc = (
+  node: PageNode,
+  options: unknown,
+  ctx: ActionContext
+) => Promise<JSX.Element> | JSX.Element
+
+type PageExport = {
+  Page: Node
+}
+
+export const importPage = async (filePath: string) => {
+  const ret = (await safeImport(filePath)) as PageExport
+  return ret.Page
+}
+
+// @see https://reactjs.org/docs/react-dom-server.html#rendertopipeablestream
+export function renderReactViewStream(res: express.Response, node: React.ReactNode, failText = '') {
+  let didError = false
+  const stream = renderToPipeableStream(node, {
+    onShellReady() {
+      res.statusCode = didError ? 500 : 200
+      res.setHeader('Content-type', 'text/html; charset=UTF-8')
+      stream.pipe(res)
+    },
+    onShellError(err) {
+      console.error(err)
+
+      res.statusCode = 500
+      res.setHeader('Content-type', 'text/html; charset=UTF-8')
+      res.send(failText)
+    },
+    onAllReady() {
+      // nop
+    },
+    onError(err) {
+      didError = true
+      console.error(err)
+    },
+  })
+}
 
 export const createRenderFunc = (arrange: NodeArrangeFunc, viewRoot: string, failText = '') => {
   function newRender(
