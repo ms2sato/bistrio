@@ -6,7 +6,7 @@ import { ReactNode, useState } from 'react'
 import { StaticRouter } from 'react-router-dom/server'
 import { PageNode } from '../../lib/render-support'
 
-const arrange: NodeArrangeFunc = async (Page, options, ctx) => {
+const arrange: NodeArrangeFunc = (Page, options, ctx) => {
   return <Wrapper ctx={ctx} Page={Page}></Wrapper>
 }
 

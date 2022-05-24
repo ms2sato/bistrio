@@ -6,10 +6,14 @@ import { PageNode } from '../../lib/render-support'
 import React from 'react'
 
 type EngineFuncCallback = (err: unknown, rendered?: string | undefined) => void
-type EngineFunc = (path: string, options: object, callback: EngineFuncCallback) => void
+type EngineFunc = (path: string, options: object, callback: EngineFuncCallback) => void | Promise<void>
 type Node = React.FC<unknown>
 
-export type NodeArrangeFunc = (node: PageNode, options: unknown, ctx: ActionContext) => Promise<JSX.Element>
+export type NodeArrangeFunc = (
+  node: PageNode,
+  options: unknown,
+  ctx: ActionContext
+) => Promise<JSX.Element> | JSX.Element
 
 type PageExport = {
   Page: Node
@@ -21,19 +25,17 @@ export const importPage = async (filePath: string) => {
 }
 
 export const engine: (arrange: NodeArrangeFunc) => EngineFunc = (arrange: NodeArrangeFunc) => {
-  return (filePath, options, callback) => {
-    importPage(filePath)
-      .then((Page) => {
-        console.warn(
-          'Response#render for tsx(set view engine) is low performance, use renderReactViewStream( ex. ctx.render )'
-        )
-        arrange(Page, options, new NullActionContext()).then((node) => {
-          callback(null, renderToString(node)) // Low performance but easy to use without res
-        })
-      })
-      .catch((err) => {
-        callback(err)
-      })
+  return async (filePath, options, callback) => {
+    try {
+      const Page = await importPage(filePath)
+      console.warn(
+        'Response#render for tsx(set view engine) is low performance, use renderReactViewStream( ex. ctx.render )'
+      )
+      const node = await arrange(Page, options, new NullActionContext())
+      callback(null, renderToString(node)) // Low performance but easy to use without res
+    } catch (err) {
+      callback(err)
+    }
   }
 }
 
