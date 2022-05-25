@@ -1,10 +1,8 @@
 import {
-  ActionDescriptor,
   ConstructDescriptor,
   Resource,
   RouteConfig,
   Router,
-  ConstructConfig,
   HandlerBuildRunner,
 } from 'restrant2/client'
 import { PageNode } from '../lib/render-support'
@@ -24,33 +22,34 @@ function pathJoin(...parts: string[]) {
   return parts.join(separator)
 }
 
-// resource_name: URL
-// resource_name: Page
-// resource_name#action: ZodSchema
-//
-// resource_name: { path, Page, resource }
+export type ViewDescriptor = { [key: string]: PageNode }
 
 export type ResourceInfo = { httpPath: string; resource: Resource; pages: Map<string, PageNode> }
 type ResourceNameToInfo = Map<string, ResourceInfo>
 
 export type ClientGenretateRouterCore = {
   host: string
+  viewDescriptor: ViewDescriptor
   handlerBuildRunners: HandlerBuildRunner[]
   resourceNameToInfo: ResourceNameToInfo
+  pathToPage: Map<string, PageNode>
 }
 
 export class ClientGenretateRouter implements Router {
   constructor(
+    private viewDescriptor: ViewDescriptor,
     private httpPath = '/',
     private core: ClientGenretateRouterCore = {
       host: 'http://localhost:3000',
+      viewDescriptor,
       resourceNameToInfo: new Map<string, ResourceInfo>(),
       handlerBuildRunners: [],
+      pathToPage: new Map(),
     }
   ) {}
 
   sub(rpath: string, ...args: unknown[]): Router {
-    return new ClientGenretateRouter(pathJoin(this.httpPath, rpath), this.core)
+    return new ClientGenretateRouter(this.viewDescriptor, pathJoin(this.httpPath, rpath), this.core)
   }
 
   resources(rpath: string, config: RouteConfig): void {
@@ -68,11 +67,8 @@ export class ClientGenretateRouter implements Router {
 
     this.core.handlerBuildRunners.push(async () => {
       const httpPath = pathJoin(this.httpPath, rpath)
+      console.log({ httpPath, rpath, thisHttpPath: this.httpPath })
       const resourceUrl = pathJoin(this.core.host, httpPath)
-
-      const viewRoot = `/views`
-      // TODO: read Page
-      const pages = new Map<string, PageNode>()
 
       const resource: Resource = {}
       for (const ad of config.actions) {
@@ -90,15 +86,21 @@ export class ClientGenretateRouter implements Router {
           }
         } else {
           resource[actionName] = async function (...options) {
+            // TODO: fix
             const apath = ad.path.indexOf(':id') == -1 ? ad.path : ad.path.replace(':id', options[0].id)
             return fetchJson(pathJoin(resourceUrl, apath), ad.method)
           }
+        }
+
+        const pagePath = pathJoin(httpPath, ad.path)
+        const Page = this.core.viewDescriptor[pagePath]
+        if (ad.page && Page) {
+          this.core.pathToPage.set(pagePath, Page)
         }
       }
       const pathInfo: ResourceInfo = {
         httpPath,
         resource,
-        pages,
       }
       this.core.resourceNameToInfo.set(config.name, pathInfo)
     })

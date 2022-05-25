@@ -1,7 +1,6 @@
 import * as React from 'react'
 import { Suspense } from 'react'
 import { Link } from 'react-router-dom'
-import { Task } from '@prisma/client'
 import { getResource, PageProps } from '../../lib/render-support'
 import type ApiTask from '../../server/endpoint/api/tasks/resource'
 
@@ -17,9 +16,6 @@ export function Index({ rs }: PageProps) {
     </>
   )
 }
-
-// TODO: define params and JsonResponder
-type TasksRes = { status: string; data: Task[] }
 
 const TaskTable = ({ rs }: PageProps) => {
   const l = rs.getLocalizer()

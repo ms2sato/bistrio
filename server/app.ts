@@ -82,10 +82,10 @@ export async function setup() {
   // error handler
   app.use(function (err: unknown, req, res, _next) {
     // @see https://stackoverflow.com/questions/51624117/how-to-check-for-the-property-type-of-an-unknown-value
-    // const isHttpError = (err: unknown): err is createError.HttpError<number> => {
-    //   const herr = err as createError.HttpError<number>
-    //   return 'stasus' in herr && typeof herr.status === 'number'
-    // }
+    const isHttpError = (err: unknown): err is createError.HttpError<number> => {
+      const herr = err as createError.HttpError<number>
+      return 'stasus' in herr && typeof herr.status === 'number'
+    }
 
     if (req.app.get('env') === 'development') {
       console.error(err)
@@ -94,7 +94,7 @@ export async function setup() {
     // TODO: handling RecordNotFound of prisma
 
     // render the error page
-    // res.status(isHttpError(err) ? err.status : 500)
+    res.status(isHttpError(err) ? err.status : 500)
     // res.render('error', { err })
   } as express.ErrorRequestHandler)
 

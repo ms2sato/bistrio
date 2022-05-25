@@ -33,6 +33,7 @@ const devConfig: Configuration = {
     filename: 'bundle.js',
     publicPath: '/',
   },
+  stats: 'detailed',
 }
 
 const prodConfig: Configuration = {

@@ -6,10 +6,8 @@ import { Resource } from 'restrant2/client'
 import { LocaleSelector, Localizer } from '../lib/locale'
 import { initLocale } from '../lib/localizer'
 import { RenderSupport, suspense } from '../lib/render-support'
-import { Index } from '../views/tasks/index'
-import { Build } from '../views/tasks/build'
-import { Edit } from '../views/tasks/edit'
-import { ClientGenretateRouter, ClientGenretateRouterCore, ResourceInfo } from './client-stub-router'
+import { views } from '../views'
+import { ClientGenretateRouter, ClientGenretateRouterCore } from './client-stub-router'
 import { routes } from '../routes'
 
 class ClientRenderSupport implements RenderSupport {
@@ -37,6 +35,7 @@ class ClientRenderSupport implements RenderSupport {
 
 const root = async () => {
   const localeSelector = await initLocale()
+
   return <Root localeSelector={localeSelector}></Root>
 }
 
@@ -45,9 +44,10 @@ const Root = ({ localeSelector }: { localeSelector: LocaleSelector }) => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/tasks/" element={<Index rs={renderSupport} />}></Route>
-        <Route path="/tasks/build" element={<Build rs={renderSupport} />}></Route>
-        <Route path="/tasks/:id/edit" element={<Edit rs={renderSupport} />}></Route>
+        {Array.from(core.pathToPage).map(([path, Page]) => {
+          console.debug('<Route>', path, Page)
+          return <Route key={path} path={path} element={<Page rs={renderSupport} />}></Route>
+        })}
       </Routes>
     </BrowserRouter>
   )
@@ -56,7 +56,7 @@ const Root = ({ localeSelector }: { localeSelector: LocaleSelector }) => {
 let core: ClientGenretateRouterCore
 
 const hydrate = async () => {
-  const cgr = new ClientGenretateRouter()
+  const cgr = new ClientGenretateRouter(views)
   routes(cgr)
   await cgr.build()
   core = cgr.getCore()
@@ -65,4 +65,6 @@ const hydrate = async () => {
   hydrateRoot(container, await root())
 }
 
-hydrate()
+hydrate().catch((err) => {
+  console.error(err)
+})
