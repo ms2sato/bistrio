@@ -7,7 +7,7 @@ import { LocaleSelector, Localizer } from '../lib/locale'
 import { initLocale } from '../lib/localizer'
 import { RenderSupport, suspense } from '../lib/render-support'
 import { views } from '../views'
-import { ClientGenretateRouter, ClientGenretateRouterCore } from './client-stub-router'
+import { ClientGenretateRouter, ClientGenretateRouterCore } from '../lib/client-stub-router'
 import { routes } from '../routes'
 
 class ClientRenderSupport implements RenderSupport {

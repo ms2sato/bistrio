@@ -1,11 +1,5 @@
-import {
-  ConstructDescriptor,
-  Resource,
-  RouteConfig,
-  Router,
-  HandlerBuildRunner,
-} from 'restrant2/client'
-import { PageNode } from '../lib/render-support'
+import { ConstructDescriptor, Resource, RouteConfig, Router, HandlerBuildRunner } from 'restrant2/client'
+import { PageNode } from './render-support'
 
 // @see https://stackoverflow.com/questions/29855098/is-there-a-built-in-javascript-function-similar-to-os-path-join
 function pathJoin(...parts: string[]) {
@@ -24,7 +18,7 @@ function pathJoin(...parts: string[]) {
 
 export type ViewDescriptor = { [key: string]: PageNode }
 
-export type ResourceInfo = { httpPath: string; resource: Resource; pages: Map<string, PageNode> }
+export type ResourceInfo = { httpPath: string; resource: Resource }
 type ResourceNameToInfo = Map<string, ResourceInfo>
 
 export type ClientGenretateRouterCore = {
@@ -55,7 +49,7 @@ export class ClientGenretateRouter implements Router {
   resources(rpath: string, config: RouteConfig): void {
     const fetchJson = async (url: string, method: string, body?: any) => {
       const ret = await fetch(url, {
-        method: method,
+        method,
         headers: {
           'Content-Type': 'application/json',
         },
@@ -71,33 +65,46 @@ export class ClientGenretateRouter implements Router {
       const resourceUrl = pathJoin(this.core.host, httpPath)
 
       const resource: Resource = {}
-      for (const ad of config.actions) {
-        const actionName = ad.action
-        const cad: ConstructDescriptor | undefined = config.construct?.[actionName]
-        if (cad?.schema) {
-          const schema = cad.schema
-          resource[actionName] = async function (input, ...options) {
-            const parsedInput = schema.parse(input)
-            if (parsedInput === undefined) {
-              throw new Error('UnexpectedInput')
+      if (config.actions) {
+        for (const ad of config.actions) {
+          const actionName = ad.action
+          let method: string
+          if (typeof ad.method === 'string') {
+            method = ad.method
+          } else {
+            if (ad.method.length === 0) {
+              throw new Error(`method is blank array: ${httpPath}#${ad.action}`)
             }
-            // TODO: replace placeholder!
-            return fetchJson(pathJoin(resourceUrl, ad.path), ad.method, parsedInput)
+            method = ad.method[0]
           }
-        } else {
-          resource[actionName] = async function (...options) {
-            // TODO: fix
-            const apath = ad.path.indexOf(':id') == -1 ? ad.path : ad.path.replace(':id', options[0].id)
-            return fetchJson(pathJoin(resourceUrl, apath), ad.method)
-          }
-        }
 
-        const pagePath = pathJoin(httpPath, ad.path)
-        const Page = this.core.viewDescriptor[pagePath]
-        if (ad.page && Page) {
-          this.core.pathToPage.set(pagePath, Page)
+          const cad: ConstructDescriptor | undefined = config.construct?.[actionName]
+          if (cad?.schema) {
+            const schema = cad.schema
+            resource[actionName] = async function (input, ...options) {
+              const parsedInput = schema.parse(input)
+              if (parsedInput === undefined) {
+                throw new Error('UnexpectedInput')
+              }
+              // TODO: replace placeholder!
+              return fetchJson(pathJoin(resourceUrl, ad.path), method, parsedInput)
+            }
+          } else {
+            resource[actionName] = async function (...options) {
+              // TODO: fix
+              const apath = ad.path.indexOf(':id') == -1 ? ad.path : ad.path.replace(':id', options[0].id)
+              return fetchJson(pathJoin(resourceUrl, apath), method)
+            }
+          }
+
+          const pagePath = pathJoin(httpPath, ad.path)
+          const Page = this.core.viewDescriptor[pagePath]
+          if (ad.page && Page) {
+            this.core.pathToPage.set(pagePath, Page)
+          }
         }
       }
+
       const pathInfo: ResourceInfo = {
         httpPath,
         resource,
@@ -105,8 +112,6 @@ export class ClientGenretateRouter implements Router {
       this.core.resourceNameToInfo.set(config.name, pathInfo)
     })
   }
-
-  resourceOf<R extends Resource>(name: string): R {}
 
   async build() {
     const promises = this.core.handlerBuildRunners.map((runner) => runner())
