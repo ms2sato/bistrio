@@ -1,6 +1,5 @@
 import { Localizer } from './locale'
-import { Resource } from 'restrant2/client'
-import { ResourceFunc, ResourceMethod } from 'restrant2'
+import { NamedResources } from 'restrant2/client'
 
 export type Reader<T> = () => T
 
@@ -19,15 +18,15 @@ export function suspendable<T>(promise: Promise<T>): Reader<T> {
   }
 }
 
-export type RenderSupport = {
+export type RenderSupport<RS extends NamedResources> = {
   getLocalizer: () => Localizer
   fetchJson: <T>(url: string, key?: string) => T
-  resourceOf: <T extends Resource>(name: string) => T
+  resources: () => RS
   suspend: <T>(asyncProcess: () => Promise<T>, key: string) => T
 }
 
-export type PageProps = { rs: RenderSupport }
-export type PageNode = React.FC<PageProps>
+export type PageProps<RS extends NamedResources> = { rs: RenderSupport<RS> }
+export type PageNode<RS extends NamedResources> = React.FC<PageProps<RS>>
 
 type ReaderMap = Map<string, Reader<unknown>>
 
@@ -55,19 +54,8 @@ export const suspense = () => {
   }
 }
 
-export type ResourceOf<R extends ResourceFunc> = ReturnType<R>
+//export type ResourceOf<R extends ResourceFunc> = ReturnType<R>
 
-export const getResource = <RF extends ResourceFunc>(rs: RenderSupport, name: string): SuspendableResource<RF> => {
-  const res = rs.resourceOf<ResourceOf<RF>>(name)
-  const proxy: Record<string, ResourceMethod> = {}
-  for (const action in res) {
-    proxy[action] = function (...args: unknown[]) {
-      return rs.suspend(() => res[action].apply(res, args), `${name}#${action}`)
-    }
-  }
-  return proxy as unknown as SuspendableResource<RF>
-}
-
-type SuspendableResource<RF extends ResourceFunc> = {
-  [key in keyof ResourceOf<RF>]: (...args: Parameters<ResourceOf<RF>[key]>) => Awaited<ReturnType<ResourceOf<RF>[key]>>
-}
+// type SuspendableResource<RF extends ResourceFunc> = {
+//   [key in keyof ResourceOf<RF>]: (...args: Parameters<ResourceOf<RF>[key]>) => Awaited<ReturnType<ResourceOf<RF>[key]>>
+// }

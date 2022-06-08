@@ -2,15 +2,16 @@ import * as React from 'react'
 import { useState } from 'react'
 import { hydrateRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { Resource } from 'restrant2/client'
+import { Resource, NamedResources } from 'restrant2/client'
 import { LocaleSelector, Localizer } from '../lib/locale'
 import { initLocale } from '../lib/localizer'
 import { RenderSupport, suspense } from '../lib/render-support'
 import { views } from '../views'
 import { ClientGenretateRouter, ClientGenretateRouterCore } from '../lib/client-stub-router'
 import { routes } from '../routes'
+import { N2R } from '../_types'
 
-class ClientRenderSupport implements RenderSupport {
+class ClientRenderSupport<RS extends NamedResources> implements RenderSupport<RS> {
   private suspense
   constructor(private localeSelector?: LocaleSelector) {
     this.suspense = suspense()
@@ -28,6 +29,14 @@ class ClientRenderSupport implements RenderSupport {
     return core.resourceNameToInfo.get(name).resource
   }
 
+  resources(): RS {
+    const ret: { [key: string]: Resource } = {}
+    for (const [key, info] of core.resourceNameToInfo.entries()) {
+      ret[key] = info.resource
+    }
+    return ret as RS
+  }
+
   suspend<T>(asyncProcess: () => Promise<T>, key: string): T {
     return this.suspense.suspend(asyncProcess, key)
   }
@@ -40,7 +49,7 @@ const root = async () => {
 }
 
 const Root = ({ localeSelector }: { localeSelector: LocaleSelector }) => {
-  const [renderSupport] = useState(new ClientRenderSupport(localeSelector))
+  const [renderSupport] = useState(new ClientRenderSupport<N2R>(localeSelector))
   return (
     <BrowserRouter>
       <Routes>
@@ -53,10 +62,10 @@ const Root = ({ localeSelector }: { localeSelector: LocaleSelector }) => {
   )
 }
 
-let core: ClientGenretateRouterCore
+let core: ClientGenretateRouterCore<N2R>
 
 const hydrate = async () => {
-  const cgr = new ClientGenretateRouter(views)
+  const cgr = new ClientGenretateRouter<N2R>(views)
   routes(cgr)
   await cgr.build()
   core = cgr.getCore()

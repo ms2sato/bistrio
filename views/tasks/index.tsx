@@ -1,8 +1,7 @@
 import * as React from 'react'
 import { Suspense } from 'react'
 import { Link } from 'react-router-dom'
-import { getResource, PageProps } from '../../lib/render-support'
-import type ApiTask from '../../server/endpoint/api/tasks/resource'
+import { PageProps } from '../../_types'
 
 export function Index({ rs }: PageProps) {
   const l = rs.getLocalizer()
@@ -20,8 +19,7 @@ export function Index({ rs }: PageProps) {
 const TaskTable = ({ rs }: PageProps) => {
   const l = rs.getLocalizer()
 
-  const resource = getResource<typeof ApiTask>(rs, 'api_task')
-  const tasks = resource.index()
+  const tasks = rs.suspend(() => rs.resources().api_task.index(), 'api_task_index')
   return (
     <table>
       <thead>

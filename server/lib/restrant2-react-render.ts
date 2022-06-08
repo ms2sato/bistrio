@@ -8,7 +8,7 @@ import {
   createDefaultActionContext,
   ActionContext,
   NullActionContext,
-  Resource,
+  NamedResources,
 } from 'restrant2'
 import { safeImport } from './safe-import'
 import { Localizer } from '../../lib/locale'
@@ -16,8 +16,8 @@ import { PageNode, RenderSupport, suspense } from '../../lib/render-support'
 
 type Node = React.FC<unknown>
 
-export type NodeArrangeFunc = (
-  node: PageNode,
+export type NodeArrangeFunc<RC extends NamedResources> = (
+  node: PageNode<RC>,
   options: unknown,
   ctx: ActionContext
 ) => Promise<JSX.Element> | JSX.Element
@@ -57,7 +57,11 @@ export function renderReactViewStream(res: express.Response, node: React.ReactNo
   })
 }
 
-export const createRenderFunc = (arrange: NodeArrangeFunc, viewRoot: string, failText = '') => {
+export function createRenderFunc<RS extends NamedResources>(
+  arrange: NodeArrangeFunc<RS>,
+  viewRoot: string,
+  failText = ''
+) {
   function newRender(
     this: ActionContextImpl,
     view: string,
@@ -91,17 +95,17 @@ export const createRenderFunc = (arrange: NodeArrangeFunc, viewRoot: string, fai
   return newRender
 }
 
-export type BuildActionContextCreator = (
+export type BuildActionContextCreator<RS extends NamedResources> = (
   viewRoot: string,
-  arrange: NodeArrangeFunc,
+  arrange: NodeArrangeFunc<RS>,
   failText: string
 ) => ActionContextCreator
 
-export const buildActionContextCreator: BuildActionContextCreator = (
+export function buildActionContextCreator<RS extends NamedResources>(
   viewRoot: string,
-  arrange: NodeArrangeFunc,
+  arrange: NodeArrangeFunc<RS>,
   failText = ''
-) => {
+): ActionContextCreator {
   return (props) => {
     const ctx = createDefaultActionContext(props)
     ctx.render = createRenderFunc(arrange, viewRoot, failText)
@@ -109,11 +113,11 @@ export const buildActionContextCreator: BuildActionContextCreator = (
   }
 }
 
-export const createRenderSupport = (ctx: ActionContext = new NullActionContext()) => {
-  return new ServerRenderSupport(ctx)
+export function createRenderSupport<RS extends NamedResources>(ctx: ActionContext = new NullActionContext()) {
+  return new ServerRenderSupport<RS>(ctx)
 }
 
-class ServerRenderSupport implements RenderSupport {
+class ServerRenderSupport<RS extends NamedResources> implements RenderSupport<RS> {
   private suspense
 
   constructor(private ctx: ActionContext) {
@@ -132,7 +136,9 @@ class ServerRenderSupport implements RenderSupport {
     return this.suspense.suspend(asyncProcess, key)
   }
 
-  resourceOf<T extends Resource>(name: string): T {
-    return this.ctx.resourceOf<T>(name)
+  resources(): RS {
+    const ret = this.ctx.resources()
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return ret as RS
   }
 }

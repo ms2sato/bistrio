@@ -1,4 +1,11 @@
-import { ConstructDescriptor, Resource, RouteConfig, Router, HandlerBuildRunner } from 'restrant2/client'
+import {
+  ConstructDescriptor,
+  Resource,
+  RouteConfig,
+  Router,
+  HandlerBuildRunner,
+  NamedResources,
+} from 'restrant2/client'
 import { PageNode } from './render-support'
 
 // @see https://stackoverflow.com/questions/29855098/is-there-a-built-in-javascript-function-similar-to-os-path-join
@@ -16,24 +23,24 @@ function pathJoin(...parts: string[]) {
   return parts.join(separator)
 }
 
-export type ViewDescriptor = { [key: string]: PageNode }
+export type ViewDescriptor<RS extends NamedResources> = { [key: string]: PageNode<RS> }
 
 export type ResourceInfo = { httpPath: string; resource: Resource }
 type ResourceNameToInfo = Map<string, ResourceInfo>
 
-export type ClientGenretateRouterCore = {
+export type ClientGenretateRouterCore<RS extends NamedResources> = {
   host: string
-  viewDescriptor: ViewDescriptor
+  viewDescriptor: ViewDescriptor<RS>
   handlerBuildRunners: HandlerBuildRunner[]
   resourceNameToInfo: ResourceNameToInfo
-  pathToPage: Map<string, PageNode>
+  pathToPage: Map<string, PageNode<RS>>
 }
 
-export class ClientGenretateRouter implements Router {
+export class ClientGenretateRouter<RS extends NamedResources> implements Router {
   constructor(
-    private viewDescriptor: ViewDescriptor,
+    private viewDescriptor: ViewDescriptor<RS>,
     private httpPath = '/',
-    private core: ClientGenretateRouterCore = {
+    private core: ClientGenretateRouterCore<RS> = {
       host: 'http://localhost:3000',
       viewDescriptor,
       resourceNameToInfo: new Map<string, ResourceInfo>(),
@@ -43,7 +50,7 @@ export class ClientGenretateRouter implements Router {
   ) {}
 
   sub(rpath: string, ...args: unknown[]): Router {
-    return new ClientGenretateRouter(this.viewDescriptor, pathJoin(this.httpPath, rpath), this.core)
+    return new ClientGenretateRouter<RS>(this.viewDescriptor, pathJoin(this.httpPath, rpath), this.core)
   }
 
   resources(rpath: string, config: RouteConfig): void {

@@ -1,11 +1,9 @@
 import * as React from 'react'
 import { Form } from './_form'
-import { PageProps, getResource } from '../../lib/render-support'
-import type ApiTask from '../../server/endpoint/api/tasks/resource'
+import { type PageProps } from '../../_types'
 
 function MyForm({ rs }: PageProps) {
-  const resource = getResource<typeof ApiTask>(rs, 'api_task')
-  const task = resource.show({ id: 1 })
+  const task = rs.suspend(() => rs.resources().api_task.show({ id: 1 }), 'api_task_show')
 
   const props = { task }
   return <Form action={`/tasks/${props.task.id}`} method="patch" {...props}></Form>

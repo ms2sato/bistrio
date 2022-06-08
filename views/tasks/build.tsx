@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Link } from 'react-router-dom'
-import { PageProps } from '../../lib/render-support'
+import { PageProps } from '../../_types'
 import { Form } from './_form'
 
 export function Build({ rs }: PageProps) {
