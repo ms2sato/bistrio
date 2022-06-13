@@ -6,6 +6,7 @@
     "views/**/*.tsx",
     "prisma/**/*.ts",
     "locales/**/*.ts",
+    "lib/**/*.ts",
     ".eslintrc.js"
   ],
   "exclude": [
