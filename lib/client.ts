@@ -39,7 +39,7 @@ class ClientRenderSupport<RS extends NamedResources> implements RenderSupport<RS
   }
 }
 
-export type App<RS extends NamedResources> = {
+export type Engine<RS extends NamedResources> = {
   createRenderSupport: (localeSelector: LocaleSelector) => ClientRenderSupport<RS>
   pathToPage: () => Map<string, PageNode<RS>>
 }
@@ -47,7 +47,7 @@ export type App<RS extends NamedResources> = {
 export async function setup<RS extends NamedResources>(
   routes: (router: Router) => void,
   views: ViewDescriptor<RS>
-): Promise<App<RS>> {
+): Promise<Engine<RS>> {
   const cgr = new ClientGenretateRouter<RS>(views)
   routes(cgr)
   await cgr.build()

@@ -5,7 +5,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { hydrateRoot } from 'react-dom/client'
 import { LocaleSelector } from '../lib/locale'
 import { initLocale } from '../lib/localizer'
-import { setup, App } from '../lib/client'
+import { setup, Engine } from '../lib/client'
 
 import { views } from '../views'
 import { routes } from '../routes'
@@ -18,11 +18,11 @@ const root = async () => {
 }
 
 const Root = ({ localeSelector }: { localeSelector: LocaleSelector }) => {
-  const [renderSupport] = useState(instance.createRenderSupport(localeSelector))
+  const [renderSupport] = useState(engine.createRenderSupport(localeSelector))
   return (
     <BrowserRouter>
       <Routes>
-        {Array.from(instance.pathToPage()).map(([path, Page]) => {
+        {Array.from(engine.pathToPage()).map(([path, Page]) => {
           console.debug('<Route>', path, Page)
           return <Route key={path} path={path} element={<Page rs={renderSupport} />}></Route>
         })}
@@ -31,10 +31,10 @@ const Root = ({ localeSelector }: { localeSelector: LocaleSelector }) => {
   )
 }
 
-let instance: App<N2R>
+let engine: Engine<N2R>
 
 const boot = async () => {
-  instance = await setup<N2R>(routes, views)
+  engine = await setup<N2R>(routes, views)
   const container = document.getElementById('app')
   if (!container) {
     throw new Error('#app not found')
