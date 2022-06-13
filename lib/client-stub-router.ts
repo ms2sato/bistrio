@@ -54,7 +54,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
   }
 
   resources(rpath: string, config: RouteConfig): void {
-    const fetchJson = async (url: string, method: string, body?: any) => {
+    const fetchJson = async (url: string, method: string, body?: BodyInit | null) => {
       const ret = await fetch(url, {
         method,
         headers: {
@@ -66,7 +66,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
       return json.data
     }
 
-    this.core.handlerBuildRunners.push(async () => {
+    this.core.handlerBuildRunners.push(() => {
       const httpPath = pathJoin(this.httpPath, rpath)
       console.log({ httpPath, rpath, thisHttpPath: this.httpPath })
       const resourceUrl = pathJoin(this.core.host, httpPath)

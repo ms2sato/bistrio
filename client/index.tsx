@@ -11,21 +11,14 @@ import { views } from '../views'
 import { routes } from '../routes'
 import { N2R } from '../_types'
 
-const root = async () => {
-  const localeSelector = await initLocale()
-
-  return <Root localeSelector={localeSelector}></Root>
-}
-
 const Root = ({ localeSelector }: { localeSelector: LocaleSelector }) => {
   const [renderSupport] = useState(engine.createRenderSupport(localeSelector))
   return (
     <BrowserRouter>
       <Routes>
-        {Array.from(engine.pathToPage()).map(([path, Page]) => {
-          console.debug('<Route>', path, Page)
-          return <Route key={path} path={path} element={<Page rs={renderSupport} />}></Route>
-        })}
+        {Array.from(engine.pathToPage(), ([path, Page]) => (
+          <Route key={path} path={path} element={<Page rs={renderSupport} />}></Route>
+        ))}
       </Routes>
     </BrowserRouter>
   )
@@ -40,7 +33,8 @@ const boot = async () => {
     throw new Error('#app not found')
   }
 
-  hydrateRoot(container, await root())
+  const localeSelector = await initLocale()
+  hydrateRoot(container, <Root localeSelector={localeSelector}></Root>)
 }
 
 boot().catch((err) => {
