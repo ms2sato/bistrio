@@ -1,10 +1,11 @@
 import { Resource, NamedResources, Router } from 'restrant2/client'
 import { LocaleSelector, Localizer } from './locale'
-import { PageNode, RenderSupport, suspense } from './render-support'
+import { PageNode, ParamsDictionary, RenderSupport, suspense } from './render-support'
 import { ClientGenretateRouter, ClientGenretateRouterCore, ResourceInfo, ViewDescriptor } from './client-stub-router'
 
-class ClientRenderSupport<RS extends NamedResources> implements RenderSupport<RS> {
+export class ClientRenderSupport<RS extends NamedResources> implements RenderSupport<RS> {
   private suspense
+  params: ParamsDictionary = {} as const
 
   constructor(private core: ClientGenretateRouterCore<RS>, private localeSelector: LocaleSelector) {
     this.suspense = suspense()

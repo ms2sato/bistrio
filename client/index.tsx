@@ -1,15 +1,16 @@
 import * as React from 'react'
 import { useState } from 'react'
 
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useParams } from 'react-router-dom'
 import { hydrateRoot } from 'react-dom/client'
 import { LocaleSelector } from '../lib/locale'
 import { initLocale } from '../lib/localizer'
-import { setup, Engine } from '../lib/client'
+import { setup, Engine, ClientRenderSupport } from '../lib/client'
 
 import { views } from '../views'
 import { routes } from '../routes'
 import { N2R } from '../_types'
+import { PageNode } from '../lib/render-support'
 
 const Root = ({ localeSelector }: { localeSelector: LocaleSelector }) => {
   const [renderSupport] = useState(engine.createRenderSupport(localeSelector))
@@ -17,11 +18,17 @@ const Root = ({ localeSelector }: { localeSelector: LocaleSelector }) => {
     <BrowserRouter>
       <Routes>
         {Array.from(engine.pathToPage(), ([path, Page]) => (
-          <Route key={path} path={path} element={<Page rs={renderSupport} />}></Route>
+          <Route key={path} path={path} element={<PageAdapter Page={Page} rs={renderSupport} />}></Route>
         ))}
       </Routes>
     </BrowserRouter>
   )
+}
+
+const PageAdapter = ({ Page, rs }: { Page: PageNode<N2R>; rs: ClientRenderSupport<N2R> }) => {
+  const params = useParams()
+  rs.params = params
+  return <Page rs={rs} />
 }
 
 let engine: Engine<N2R>

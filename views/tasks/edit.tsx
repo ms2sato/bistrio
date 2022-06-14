@@ -3,10 +3,15 @@ import { Form } from './_form'
 import { type PageProps } from '../../_types'
 
 function MyForm({ rs }: PageProps) {
-  const task = rs.suspend(() => rs.resources().api_task.show({ id: 1 }), 'api_task_show')
+  const { id } = rs.params
+  if (!id) {
+    throw new Error('id not in params')
+  }
+
+  const task = rs.suspend(() => rs.resources().api_task.show({ id: Number(id) }), 'api_task_show')
 
   const props = { task }
-  return <Form action={`/tasks/${props.task.id}`} method="patch" {...props}></Form>
+  return <Form action={`/tasks/${id}`} method="patch" {...props}></Form>
 }
 
 export function Edit(props: PageProps) {

@@ -18,11 +18,14 @@ export function suspendable<T>(promise: Promise<T>): Reader<T> {
   }
 }
 
+export type ParamsDictionary = { [key: string]: string | undefined }
+
 export type RenderSupport<RS extends NamedResources> = {
   getLocalizer: () => Localizer
   fetchJson: <T>(url: string, key?: string) => T
   resources: () => RS
   suspend: <T>(asyncProcess: () => Promise<T>, key: string) => T
+  params: Readonly<ParamsDictionary>
 }
 
 export type PageProps<RS extends NamedResources> = { rs: RenderSupport<RS> }

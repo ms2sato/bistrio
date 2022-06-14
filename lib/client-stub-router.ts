@@ -50,6 +50,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
   ) {}
 
   sub(rpath: string, ...args: unknown[]): Router {
+    // TODO: args and middlewares
     return new ClientGenretateRouter<RS>(this.viewDescriptor, pathJoin(this.httpPath, rpath), this.core)
   }
 
@@ -66,7 +67,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
       return json.data
     }
 
-    this.core.handlerBuildRunners.push(() => {
+    this.core.handlerBuildRunners.push(async () => {
       const httpPath = pathJoin(this.httpPath, rpath)
       console.log({ httpPath, rpath, thisHttpPath: this.httpPath })
       const resourceUrl = pathJoin(this.core.host, httpPath)
@@ -85,6 +86,19 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
             method = ad.method[0]
           }
 
+          const createPath = (options: unknown[]) => {
+            const option = options[0] as Record<string, string | number>
+            const apath = ad.path.replace(/:[a-z][\w_]+/g, (ma) => {
+              const attr = ma.substring(1)
+              const param = option[attr]
+              if (param === undefined || param === null) {
+                throw new Error(`Unexpected param name: ${attr}`)
+              }
+              return String(param)
+            })
+            return pathJoin(resourceUrl, apath)
+          }
+
           const cad: ConstructDescriptor | undefined = config.construct?.[actionName]
           if (cad?.schema) {
             const schema = cad.schema
@@ -94,13 +108,11 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
                 throw new Error('UnexpectedInput')
               }
               // TODO: replace placeholder!
-              return fetchJson(pathJoin(resourceUrl, ad.path), method, parsedInput)
+              return fetchJson(createPath(options), method, parsedInput as BodyInit)
             }
           } else {
             resource[actionName] = async function (...options) {
-              // TODO: fix
-              const apath = ad.path.indexOf(':id') == -1 ? ad.path : ad.path.replace(':id', options[0].id)
-              return fetchJson(pathJoin(resourceUrl, apath), method)
+              return fetchJson(createPath(options), method)
             }
           }
 

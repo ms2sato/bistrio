@@ -4,11 +4,11 @@ import { type NameToPath } from './_routes'
 import { type Resources } from './_resources'
 
 export type ResourcesT = {
-  [key: string]: Resource
+  [path: string]: Resource
 }
 
 export type NameToPathT = {
-  [key: string]: string
+  [name: string]: string
 }
 
 type NameToResource<R extends ResourcesT, NP extends NameToPathT> = {

@@ -125,7 +125,11 @@ class ServerRenderSupport<RS extends NamedResources> implements RenderSupport<RS
   }
 
   getLocalizer(): Localizer {
-    return this.ctx.req.localizer
+    const localizer = this.ctx.req.localizer
+    if (!localizer) {
+      throw new Error('Unexpected call getLocalizer: Must use localeMiddleware')
+    }
+    return localizer
   }
 
   fetchJson<T>(url: string, key: string = url): T {
@@ -140,5 +144,9 @@ class ServerRenderSupport<RS extends NamedResources> implements RenderSupport<RS
     const ret = this.ctx.resources()
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return ret as RS
+  }
+
+  get params() {
+    return this.ctx.params
   }
 }

@@ -13,6 +13,7 @@ export const localeMiddleware = async (props: localeMiddlewareProps = { defaultL
 
   return (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
+      // TODO: any approch for detect language
       const lang = req.acceptsLanguages(localeSelector.getLanguages()) || props.defaultLanguage
       req.localizer = localeSelector.select(lang)
 
