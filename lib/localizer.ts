@@ -1,11 +1,14 @@
 import { Localizer, Template, LocaleSelector } from './locale'
-import { localeMap } from '../locales'
 
-type LocaleItemFunc = (...args: unknown[]) => string
-type LocaleDictionaryItem = string | LocaleItemFunc | true
-type LocaleDictionary = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type LocaleItemFunc = (...args: any[]) => string
+
+type LocaleDictionaryItem = string | LocaleItemFunc | boolean | LocaleDictionary
+
+export type LocaleDictionary = {
   [key: string]: LocaleDictionaryItem
 }
+
 type ParentLocaleDictionary = {
   [key: string]: ParentLocaleDictionary
 }
@@ -72,12 +75,9 @@ export class LocalizerImpl implements Localizer {
   }
 }
 
-export const initLocale = async (): Promise<LocaleSelector> => {
-  // TODO: remove as unknown
-  const lang2Dictionary: Record<string, LocaleDictionary> = localeMap as unknown as Record<string, LocaleDictionary>
-
+export const initLocale = <LM extends Record<string, LocaleDictionary>>(localeMap: LM): LocaleSelector => {
   const select = (lang: string) => {
-    const dictionary = lang2Dictionary[lang]
+    const dictionary = localeMap[lang]
     if (dictionary == undefined) {
       throw new Error(`Unexpected locale: ${lang}`)
     }
@@ -85,7 +85,7 @@ export const initLocale = async (): Promise<LocaleSelector> => {
     return new LocalizerImpl(dictionary, lang)
   }
 
-  const getLanguages = () => Object.keys(lang2Dictionary)
+  const getLanguages = () => Object.keys(localeMap)
 
   return {
     select,

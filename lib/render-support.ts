@@ -49,9 +49,9 @@ export const suspense = () => {
   return {
     suspend,
     fetchJson<T>(url: string, key: string = url): T {
-      return suspend(async () => {
+      return suspend<T>(async () => {
         const ret = await fetch(url)
-        return await ret.json()
+        return (await ret.json()) as T
       }, key)
     },
   }

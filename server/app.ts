@@ -12,6 +12,7 @@ import * as RouterFactory from './router-factory'
 import { useTsxView } from './customizers/render-support'
 import { localeMiddleware } from './lib/locale-express'
 import { useWebpackDev } from './lib/webpack'
+import { localeMap } from '../locales'
 
 if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = 'development'
@@ -56,7 +57,10 @@ export async function setup() {
   )
   app.use(methodOverride(methodName, { methods: ['GET', 'POST'] })) // for GET Parameter
 
-  app.use(await localeMiddleware())
+  app.use(localeMiddleware({
+    defaultLanguage: 'en',
+    localeMap: localeMap
+  }))
 
   app.use((req, res, next) => {
     debug(`${req.method} ${req.path}`)

@@ -7,6 +7,7 @@ import { LocaleSelector } from '../lib/locale'
 import { initLocale } from '../lib/localizer'
 import { setup, Engine, ClientRenderSupport } from '../lib/client'
 
+import { localeMap } from '../locales'
 import { views } from '../views'
 import { routes } from '../routes'
 import { N2R } from '../_types'
@@ -40,8 +41,13 @@ const boot = async () => {
     throw new Error('#app not found')
   }
 
-  const localeSelector = await initLocale()
-  hydrateRoot(container, <Root localeSelector={localeSelector}></Root>)
+  const localeSelector = initLocale(localeMap)
+  hydrateRoot(
+    container,
+    <React.StrictMode>
+      <Root localeSelector={localeSelector}></Root>
+    </React.StrictMode>
+  )
 }
 
 boot().catch((err) => {

@@ -49,7 +49,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
     }
   ) {}
 
-  sub(rpath: string, ...args: unknown[]): Router {
+  sub(rpath: string, ..._args: unknown[]): Router {
     // TODO: args and middlewares
     return new ClientGenretateRouter<RS>(this.viewDescriptor, pathJoin(this.httpPath, rpath), this.core)
   }
