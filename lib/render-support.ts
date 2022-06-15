@@ -26,6 +26,7 @@ export type RenderSupport<RS extends NamedResources> = {
   resources: () => RS
   suspend: <T>(asyncProcess: () => Promise<T>, key: string) => T
   params: Readonly<ParamsDictionary>
+  // TODO: query
 }
 
 export type PageProps<RS extends NamedResources> = { rs: RenderSupport<RS> }

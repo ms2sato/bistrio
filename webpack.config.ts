@@ -1,7 +1,9 @@
 import path from 'path'
 import { Configuration } from 'webpack'
 
-const env = process.env.NODE_ENV == 'production' ? 'production' : 'development'
+const prod = 'production'
+const dev = 'development'
+const env = process.env.NODE_ENV === prod ? prod : dev
 
 const config: Configuration = {
   entry: './client/index.tsx',
@@ -33,7 +35,7 @@ const devConfig: Configuration = {
     filename: 'bundle.js',
     publicPath: '/',
   },
-  stats: 'detailed',
+  stats: 'normal',
 }
 
 const prodConfig: Configuration = {
@@ -44,4 +46,4 @@ const prodConfig: Configuration = {
   },
 }
 
-export default env != 'development' ? devConfig : prodConfig
+export default env === dev ? devConfig : prodConfig
