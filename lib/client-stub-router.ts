@@ -41,7 +41,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
     private viewDescriptor: ViewDescriptor<RS>,
     private httpPath = '/',
     private core: ClientGenretateRouterCore<RS> = {
-      host: 'http://localhost:3000',
+      host: 'http://localhost:3000', // TODO: pluggable
       viewDescriptor,
       resourceNameToInfo: new Map<string, ResourceInfo>(),
       handlerBuildRunners: [],
@@ -56,6 +56,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
 
   resources(rpath: string, config: RouteConfig): void {
     const fetchJson = async (url: string, method: string, body?: BodyInit | null) => {
+      // TODO: pluggable
       const ret = await fetch(url, {
         method,
         headers: {
@@ -67,9 +68,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
       return json.data
     }
 
-    this.core.handlerBuildRunners.push(async () => {
-      const httpPath = pathJoin(this.httpPath, rpath)
-      console.log({ httpPath, rpath, thisHttpPath: this.httpPath })
+    const createResourceProxy = (httpPath: string) => {
       const resourceUrl = pathJoin(this.core.host, httpPath)
 
       const resource: Resource = {}
@@ -123,6 +122,14 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
           }
         }
       }
+      return resource
+    }
+
+    this.core.handlerBuildRunners.push(async () => {
+      const httpPath = pathJoin(this.httpPath, rpath)
+      console.log({ httpPath, rpath, thisHttpPath: this.httpPath })
+
+      const resource = createResourceProxy(httpPath)
 
       const pathInfo: ResourceInfo = {
         httpPath,
