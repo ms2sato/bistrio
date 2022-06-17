@@ -5,7 +5,14 @@ import {
   Router,
   HandlerBuildRunner,
   NamedResources,
+  choiceSchema,
+  ConstructConfig,
+  Actions,
+  blankSchema,
+  z,
+  ActionDescriptor,
 } from 'restrant2/client'
+import { filterWithoutKeys } from './object-util'
 import { PageNode } from './render-support'
 
 // @see https://stackoverflow.com/questions/29855098/is-there-a-built-in-javascript-function-similar-to-os-path-join
@@ -23,6 +30,20 @@ function pathJoin(...parts: string[]) {
   return parts.join(separator)
 }
 
+const createPath = (resourceUrl: string, pathFormat: string, option: Record<string, string | number>) => {
+  const keys: string[] = []
+  const apath = pathFormat.replace(/:[a-z][\w_]+/g, (ma) => {
+    const attr = ma.substring(1)
+    const param = option[attr]
+    if (param === undefined || param === null) {
+      throw new Error(`Unexpected param name: ${attr}`)
+    }
+    keys.push(attr)
+    return String(param)
+  })
+  return { httpPath: pathJoin(resourceUrl, apath), keys }
+}
+
 export type ViewDescriptor<RS extends NamedResources> = { [key: string]: PageNode<RS> }
 
 export type ResourceInfo = { httpPath: string; resource: Resource }
@@ -30,6 +51,7 @@ type ResourceNameToInfo = Map<string, ResourceInfo>
 
 export type ClientGenretateRouterCore<RS extends NamedResources> = {
   host: string
+  constructConfig: ConstructConfig
   viewDescriptor: ViewDescriptor<RS>
   handlerBuildRunners: HandlerBuildRunner[]
   resourceNameToInfo: ResourceNameToInfo
@@ -42,6 +64,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
     private httpPath = '/',
     private core: ClientGenretateRouterCore<RS> = {
       host: 'http://localhost:3000', // TODO: pluggable
+      constructConfig: Actions.defaultConstructConfig(),
       viewDescriptor,
       resourceNameToInfo: new Map<string, ResourceInfo>(),
       handlerBuildRunners: [],
@@ -54,7 +77,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
     return new ClientGenretateRouter<RS>(this.viewDescriptor, pathJoin(this.httpPath, rpath), this.core)
   }
 
-  resources(rpath: string, config: RouteConfig): void {
+  resources(rpath: string, routeConfig: RouteConfig): void {
     const fetchJson = async (url: string, method: string, body?: BodyInit | null) => {
       // TODO: pluggable
       const ret = await fetch(url, {
@@ -68,12 +91,40 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
       return json.data
     }
 
+    const createStubMethod = (ad: ActionDescriptor, resourceUrl: string, schema: z.AnyZodObject, method: string) => {
+      // TODO: Error handling and throw as Error
+
+      if (schema === blankSchema) {
+        return async function (...options: unknown[]) {
+          const option = options.length > 0 ? (options[0] as Record<string, string | number>) : {}
+          const { httpPath } = createPath(resourceUrl, ad.path, option)
+          return fetchJson(httpPath, method)
+        }
+      } else {
+        return async function (input: unknown, ..._options: unknown[]) {
+          const parsedInput = schema.parse(input)
+          if (parsedInput === undefined) {
+            throw new Error('UnexpectedInput')
+          }
+
+          const { httpPath, keys } = createPath(resourceUrl, ad.path, input as Record<string, string | number>)
+
+          // TODO: pluggable
+          const body = filterWithoutKeys(parsedInput, keys)
+          if (Object.keys(body).length > 0) {
+            return fetchJson(httpPath, method, body as unknown as BodyInit)
+          } else {
+            return fetchJson(httpPath, method)
+          }
+        }
+      }
+    }
+
     const createResourceProxy = (httpPath: string) => {
       const resourceUrl = pathJoin(this.core.host, httpPath)
-
       const resource: Resource = {}
-      if (config.actions) {
-        for (const ad of config.actions) {
+      if (routeConfig.actions) {
+        for (const ad of routeConfig.actions) {
           const actionName = ad.action
           let method: string
           if (typeof ad.method === 'string') {
@@ -82,38 +133,15 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
             if (ad.method.length === 0) {
               throw new Error(`method is blank array: ${httpPath}#${ad.action}`)
             }
+
+            // TODO: choice which method
             method = ad.method[0]
           }
 
-          const createPath = (options: unknown[]) => {
-            const option = options[0] as Record<string, string | number>
-            const apath = ad.path.replace(/:[a-z][\w_]+/g, (ma) => {
-              const attr = ma.substring(1)
-              const param = option[attr]
-              if (param === undefined || param === null) {
-                throw new Error(`Unexpected param name: ${attr}`)
-              }
-              return String(param)
-            })
-            return pathJoin(resourceUrl, apath)
-          }
+          const cad: ConstructDescriptor | undefined = routeConfig.construct?.[actionName]
+          const schema = choiceSchema(this.core.constructConfig, cad, actionName)
 
-          const cad: ConstructDescriptor | undefined = config.construct?.[actionName]
-          if (cad?.schema) {
-            const schema = cad.schema
-            resource[actionName] = async function (input, ...options) {
-              const parsedInput = schema.parse(input)
-              if (parsedInput === undefined) {
-                throw new Error('UnexpectedInput')
-              }
-              // TODO: replace placeholder!
-              return fetchJson(createPath(options), method, parsedInput as BodyInit)
-            }
-          } else {
-            resource[actionName] = async function (...options) {
-              return fetchJson(createPath(options), method)
-            }
-          }
+          resource[actionName] = createStubMethod(ad, resourceUrl, schema, method)
 
           const pagePath = pathJoin(httpPath, ad.path)
           const Page = this.core.viewDescriptor[pagePath]
@@ -125,17 +153,15 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
       return resource
     }
 
-    this.core.handlerBuildRunners.push(async () => {
+    this.core.handlerBuildRunners.push(() => {
       const httpPath = pathJoin(this.httpPath, rpath)
-      console.log({ httpPath, rpath, thisHttpPath: this.httpPath })
-
       const resource = createResourceProxy(httpPath)
 
       const pathInfo: ResourceInfo = {
         httpPath,
         resource,
       }
-      this.core.resourceNameToInfo.set(config.name, pathInfo)
+      this.core.resourceNameToInfo.set(routeConfig.name, pathInfo)
     })
   }
 
