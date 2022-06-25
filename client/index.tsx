@@ -8,7 +8,7 @@ import { initLocale } from '../lib/localizer'
 import { setup, Engine, ClientRenderSupport } from '../lib/client'
 
 import { localeMap } from '../locales'
-import { views } from '../views'
+import { views } from '../_views'
 import { routes } from '../routes'
 import { N2R } from '../_types'
 import { PageNode } from '../lib/render-support'

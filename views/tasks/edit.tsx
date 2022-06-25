@@ -1,17 +1,14 @@
 import * as React from 'react'
+import { SchemaUtil, idNumberSchema } from 'restrant2/client'
 import { Form } from './_form'
 import { type PageProps } from '../../_types'
 
 function MyForm({ rs }: PageProps) {
-  const { id } = rs.params
-  if (!id) {
-    throw new Error('id not in params')
-  }
-
-  const task = rs.suspend(() => rs.resources().api_task.show({ id: Number(id) }), 'api_task_show')
+  const params = SchemaUtil.deepCast(idNumberSchema, rs.params)
+  const task = rs.suspend(() => rs.resources().api_task.show(params), 'api_task_show')
 
   const props = { task }
-  return <Form action={`/tasks/${id}`} method="patch" {...props}></Form>
+  return <Form action={`/tasks/${params.id}`} method="patch" {...props}></Form>
 }
 
 export function Edit(props: PageProps) {
