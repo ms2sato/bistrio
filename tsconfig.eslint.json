@@ -7,12 +7,14 @@
     "prisma/**/*.ts",
     "locales/**/*.ts",
     "lib/**/*.ts",
+    "bin/**/*.ts",
+    "bin/**/*.js",
+    "support/**/*.ts",
     ".eslintrc.js"
   ],
   "exclude": [
     "node_modules",
     "dist",
-    "bin",
     "webpack.config.ts",
     "tsconfig.*"
   ]

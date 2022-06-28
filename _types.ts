@@ -1,7 +1,7 @@
 import { type Resource } from 'restrant2/client'
 import { PageProps as TPageProps } from './lib/render-support'
-import { type NameToPath } from './_routes'
-import { type Resources } from './_resources'
+import { type NameToPath } from './.bistrio/generated/_name_to_path'
+import { type Resources } from './.bistrio/generated/_resources'
 
 export type ResourcesT = {
   [path: string]: Resource

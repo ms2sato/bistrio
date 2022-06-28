@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/server",
+    "prepare": "npm run bistrio:gen",
     "dev": "DEBUG=bistrio:*,restrant2:* tsc-watch --onSuccess 'node ./bin/server'",
+    "prebuild": "npm run bistrio:gen",
     "build": "npx tsc && cpx 'views/**' dist/views && cpx 'public/**' dist/public",
     "clean": "npx rimraf dist",
     "console": "npx ts-node --project ./tsconfig.console.json -r ./server/support/console.ts",
@@ -18,7 +20,7 @@
     "db:seed": "npx ts-node prisma/seed.ts",
     "db:truncate": "npx ts-node prisma/truncate.ts",
     "build:client": "webpack",
-    "dev:client": "webpack --watch"
+    "bistrio:gen": "ts-node bin/generate.ts"
   },
   "dependencies": {
     "@prisma/client": "^3.9.2",
@@ -31,7 +33,7 @@
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "restrant2": "file:../restrant2/restrant2-0.0.2.tgz",
-    "ts-node": "^10.5.0"
+    "ts-node": "^10.8.1"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.2",

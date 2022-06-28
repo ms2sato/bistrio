@@ -13,22 +13,8 @@ import {
   ActionDescriptor,
 } from 'restrant2/client'
 import { filterWithoutKeys } from './object-util'
+import { pathJoin } from './path-util'
 import { PageNode } from './render-support'
-
-// @see https://stackoverflow.com/questions/29855098/is-there-a-built-in-javascript-function-similar-to-os-path-join
-function pathJoin(...parts: string[]) {
-  const separator = '/'
-  parts = parts.map((part, index) => {
-    if (index) {
-      part = part.replace(new RegExp('^' + separator), '')
-    }
-    if (index !== parts.length - 1) {
-      part = part.replace(new RegExp(separator + '$'), '')
-    }
-    return part
-  })
-  return parts.join(separator)
-}
 
 const createPath = (resourceUrl: string, pathFormat: string, option: Record<string, string | number>) => {
   const keys: string[] = []
@@ -144,7 +130,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
           resource[actionName] = createStubMethod(ad, resourceUrl, schema, method)
 
           const pagePath = pathJoin(httpPath, ad.path)
-          const Page = this.core.viewDescriptor[pagePath]
+          const Page = this.core.viewDescriptor[pagePath] // TODO: Can replace import?
           if (ad.page && Page) {
             this.core.pathToPage.set(pagePath, Page)
           }
