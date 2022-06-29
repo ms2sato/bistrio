@@ -10,22 +10,20 @@ const accessor = createPrismaEasyDataAccessor<Task, IdNumberParams, Prisma.TaskC
   'id'
 )
 
-export default defineResource((_support, _options) => {
-  return {
-    create: async (params: TaskCreateParams) => {
-      return accessor.create({ ...params, done: false })
-    },
+export default defineResource((_support, _options) => ({
+  create: async (params: TaskCreateParams) => {
+    return accessor.create({ ...params, done: false })
+  },
 
-    update: async (params: TaskUpdateParams) => {
-      return accessor.update(params)
-    },
+  update: async (params: TaskUpdateParams) => {
+    return accessor.update(params)
+  },
 
-    destroy: async (params: IdNumberParams) => {
-      return accessor.destroy(params)
-    },
+  destroy: async (params: IdNumberParams) => {
+    return accessor.destroy(params)
+  },
 
-    done: async ({ id }: IdNumberParams) => {
-      await prisma.task.update({ where: { id }, data: { done: true } })
-    },
-  }
-})
+  done: async ({ id }: IdNumberParams) => {
+    await prisma.task.update({ where: { id }, data: { done: true } })
+  },
+}))

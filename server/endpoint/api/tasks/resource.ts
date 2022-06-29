@@ -9,14 +9,12 @@ const accessor = createPrismaEasyDataAccessor<Task, IdNumberParams, Prisma.TaskC
   'id'
 )
 
-export default defineResource((_support, _options) => {
-  return {
-    index: async () => {
-      return accessor.list()
-    },
+export default defineResource((_support, _options) => ({
+  index: async () => {
+    return accessor.list()
+  },
 
-    show: async (params: IdNumberParams) => {
-      return accessor.get(params)
-    },
-  }
-})
+  show: async (params: IdNumberParams) => {
+    return accessor.get(params)
+  },
+}))
