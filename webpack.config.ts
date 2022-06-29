@@ -1,12 +1,18 @@
 import path from 'path'
 import { Configuration } from 'webpack'
+import { entries } from './routes/_entries'
 
 const prod = 'production'
 const dev = 'development'
 const env = process.env.NODE_ENV === prod ? prod : dev
 
+const entry = Object.keys(entries).reduce<Record<string, string>>((obj, name) => {
+  obj[name] = `./client/${name}.tsx`
+  return obj
+}, {})
+
 const config: Configuration = {
-  entry: './client/index.tsx',
+  entry,
   mode: env,
   module: {
     rules: [
@@ -32,7 +38,7 @@ const devConfig: Configuration = {
   ...config,
   devtool: 'inline-source-map',
   output: {
-    filename: 'bundle.js',
+    filename: '[name].js',
     publicPath: '/',
   },
   stats: 'normal',
@@ -41,7 +47,7 @@ const devConfig: Configuration = {
 const prodConfig: Configuration = {
   ...config,
   output: {
-    filename: 'bundle.js',
+    filename: '[name].js',
     path: path.resolve(__dirname, 'dist', 'public'),
   },
 }

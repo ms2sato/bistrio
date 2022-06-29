@@ -1,6 +1,6 @@
 // for bin/console
 // add modules for REPL
-import { routes } from '../../routes'
+import { routes } from '../../routes/all'
 import path from 'path'
 import { setup } from '../router-factory'
 

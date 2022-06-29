@@ -1,6 +1,8 @@
 import { generate } from '../support/generator'
 
-generate().catch((err) => {
+try {
+  generate()
+} catch (err) {
   console.error(err)
   process.exit(1)
-})
+}

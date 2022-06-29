@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Suspense } from 'react'
 import { Link } from 'react-router-dom'
-import { PageProps } from '../../_types'
+import { PageProps } from '../../.bistrio/generated/main/_types'
 
 export function Index({ rs }: PageProps) {
   const l = rs.getLocalizer()

@@ -1,9 +1,10 @@
 import path from 'path'
 import fs from 'fs'
-import glob from 'glob'
 import { RouteConfig, Router } from 'restrant2/client'
 
-import { routes } from '../routes'
+import { entries } from '../routes/_entries'
+import { routes as allRoutes } from '../routes/all'
+import { glob } from 'glob'
 
 class NameToPathRouter implements Router {
   constructor(private httpPath: string = '/', readonly nameToPath: { [path: string]: string } = {}) {}
@@ -30,7 +31,8 @@ class NameToPathRouter implements Router {
   createResources({ out }: { out: string }) {
     const ret = `${Object.keys(this.nameToPath)
       .map(
-        (name, index) => `import type __Resource${index} from '../../server/endpoint${this.nameToPath[name]}/resource'`
+        (name, index) =>
+          `import type __Resource${index} from '../../../server/endpoint${this.nameToPath[name]}/resource'`
       )
       .join('\n')}
     
@@ -42,43 +44,63 @@ export type Resources = {
 `
     fs.writeFileSync(out, ret)
   }
-}
 
-function initRouter() {
-  const router = new NameToPathRouter()
-  routes(router)
-  return router
-}
-
-function createViews({ out, projectRoot, viewPath }: { out: string; projectRoot: string; viewPath: string }) {
-  const viewRoot = path.join(projectRoot, viewPath)
-
-  return new Promise((resolve, reject) => {
-    glob(
-      path.join(viewRoot, '/**/*.tsx'),
-      { ignore: [path.join(viewRoot, '/**/_*.tsx'), path.join(viewRoot, '/error.tsx')] },
-      (err, files) => {
+  async createViews({ out, viewPath }: { out: string; viewPath: string }) {
+    const files = await new Promise<string[]>((resolve, reject) => {
+      glob(path.join(viewPath, '**/*.tsx'), { ignore: [path.join(viewPath, '**/_*.tsx')] }, (err, files) => {
         if (err) {
           return reject(err)
         }
-        const relativeViewPaths = files.map((vpath) => path.relative(viewRoot, vpath))
+        resolve(files)
+      })
+    })
 
-        const ret = `${relativeViewPaths
-          .map(
-            (vpath, index) =>
-              `import { Page as __Page${index} } from '../../${path.join(viewPath, vpath.replace(/\.tsx$/, ''))}'`
-          )
-          .join('\n')}
+    const targets = files.filter((file) =>
+      Object.values(this.nameToPath).some((path) => file.replace(viewPath, '').startsWith(path))
+    )
+
+    const ret = `${targets
+      .map((vpath, index) => `import { Page as __Page${index} } from '../../../${vpath.replace(/\.tsx$/, '')}'`)
+      .join('\n')}
 
 export const views = {
-  ${relativeViewPaths.map((vpath, index) => `"${vpath.replace(/\.tsx$/, '')}": __Page${index}`).join(',\n  ')}
+  ${targets
+    .map(
+      (vpath, index) =>
+        `"${vpath
+          .replace(viewPath, '')
+          .replace(/index\.tsx$/, '')
+          .replace(/\.tsx$/, '')}": __Page${index}`
+    )
+    .join(',\n  ')}
 }
 `
-        fs.writeFileSync(out, ret)
-        resolve(ret)
-      }
-    )
-  })
+    fs.writeFileSync(out, ret)
+  }
+
+  createTypes({ out }: { out: string }) {
+    const ret = `import { type Resource } from 'restrant2/client'
+import { PageProps as TPageProps } from '../../../lib/render-support'
+import { type NameToPath } from './_name_to_path'
+import { type Resources } from './_resources'
+
+export type ResourcesT = {
+  [path: string]: Resource
+}
+
+export type NameToPathT = {
+  [name: string]: string
+}
+
+type NameToResource<R extends ResourcesT, NP extends NameToPathT> = {
+  [name in keyof NP]: R[NP[name]]
+}
+
+export type N2R = NameToResource<Resources, NameToPath>
+export type PageProps = TPageProps<N2R>
+`
+    fs.writeFileSync(out, ret)
+  }
 }
 
 export async function generate(projectRoot = path.resolve(__dirname, '..')) {
@@ -94,10 +116,28 @@ export async function generate(projectRoot = path.resolve(__dirname, '..')) {
     fs.mkdirSync(bistrioGenRoot)
   }
 
-  const router = initRouter()
-  router.createNameToPath({ out: path.join(bistrioGenRoot, '_name_to_path.ts') })
-  await createViews({ out: path.join(bistrioGenRoot, '_views.ts'), projectRoot, viewPath: './views' })
-  router.createResources({ out: path.join(bistrioGenRoot, '_resources.ts') })
+  await Promise.all(
+    Object.entries(entries).map(([name, routes]) => {
+      return generateForEntry(bistrioGenRoot, name, routes)
+    })
+  )
+
+  await generateForEntry(bistrioGenRoot, 'all', allRoutes)
 
   console.log('Generated!')
+}
+
+async function generateForEntry(bistrioGenRoot: string, name: string, routes: (router: Router) => void) {
+  const router = new NameToPathRouter()
+  routes(router)
+
+  const genRoot = path.join(bistrioGenRoot, name)
+  if (!fs.existsSync(genRoot)) {
+    fs.mkdirSync(genRoot)
+  }
+
+  router.createNameToPath({ out: path.join(genRoot, '_name_to_path.ts') })
+  await router.createViews({ out: path.join(genRoot, '_views.ts'), viewPath: 'views' })
+  router.createResources({ out: path.join(genRoot, '_resources.ts') })
+  router.createTypes({ out: path.join(genRoot, '_types.ts') })
 }

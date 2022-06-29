@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { SchemaUtil, idNumberSchema } from 'restrant2/client'
 import { Form } from '../_form'
-import { type PageProps } from '../../../_types'
+import { type PageProps } from '../../../.bistrio/generated/main/_types'
 
 function MyForm({ rs }: PageProps) {
   const params = SchemaUtil.deepCast(idNumberSchema, rs.params)

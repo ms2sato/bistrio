@@ -7,7 +7,7 @@ import createDebug from 'debug'
 import methodOverride from 'method-override'
 
 import { ServerRouter } from 'restrant2'
-import { routes } from '../routes'
+import { routes } from '../routes/all'
 import * as RouterFactory from './router-factory'
 import { useTsxView } from './customizers/render-support'
 import { localeMiddleware } from './lib/locale-express'
@@ -57,10 +57,12 @@ export async function setup() {
   )
   app.use(methodOverride(methodName, { methods: ['GET', 'POST'] })) // for GET Parameter
 
-  app.use(localeMiddleware({
-    defaultLanguage: 'en',
-    localeMap: localeMap
-  }))
+  app.use(
+    localeMiddleware({
+      defaultLanguage: 'en',
+      localeMap: localeMap,
+    })
+  )
 
   app.use((req, res, next) => {
     debug(`${req.method} ${req.path}`)
@@ -88,7 +90,7 @@ export async function setup() {
     // @see https://stackoverflow.com/questions/51624117/how-to-check-for-the-property-type-of-an-unknown-value
     const isHttpError = (err: unknown): err is createError.HttpError<number> => {
       const herr = err as createError.HttpError<number>
-      return 'stasus' in herr && typeof herr.status === 'number'
+      return 'status' in herr && typeof herr.status === 'number'
     }
 
     if (req.app.get('env') === 'development') {
