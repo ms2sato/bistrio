@@ -1,9 +1,9 @@
 import type { Application } from 'express'
 import webpack from 'webpack'
 import webpackDevMiddleware from 'webpack-dev-middleware'
-import webpackConfig from '../../webpack.config'
+import { Configuration } from 'webpack'
 
-export function useWebpackDev(app: Application) {
+export function useWebpackDev(app: Application, webpackConfig:Configuration) {
   if (process.env.NODE_ENV !== 'production') {
     const compiler = webpack(webpackConfig)
 

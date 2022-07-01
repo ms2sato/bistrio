@@ -13,6 +13,7 @@ import { useTsxView } from './customizers/render-support'
 import { localeMiddleware } from './lib/locale-express'
 import { useWebpackDev } from './lib/webpack'
 import { localeMap } from '../locales'
+import webpackConfig from '../webpack.config'
 
 if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = 'development'
@@ -24,7 +25,7 @@ export async function setup() {
   const app = express()
 
   useTsxView(app, path.join(__dirname, '../views'))
-  useWebpackDev(app)
+  useWebpackDev(app, webpackConfig)
 
   app.use(logger('dev'))
   app.use(express.json())

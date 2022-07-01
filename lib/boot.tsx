@@ -6,20 +6,21 @@ import { hydrateRoot } from 'react-dom/client'
 import { NamedResources, Router } from 'restrant2/client'
 
 import { LocaleSelector } from './locale'
-import { initLocale } from './localizer'
+import { initLocale, LocaleDictionary } from './localizer'
 import { PageNode } from './render-support'
 import { setup, Engine, ClientRenderSupport } from './client'
 
-import { localeMap } from '../locales'
 import { ViewDescriptor } from './client-stub-router'
 
 export async function boot<R extends NamedResources>({
   routes,
   views,
+  localeMap,
   container,
 }: {
   routes: (router: Router) => void
   views: ViewDescriptor<R>
+  localeMap: Record<string, LocaleDictionary>
   container: Element | null
 }) {
   const PageAdapter = ({ Page, rs }: { Page: PageNode<R>; rs: ClientRenderSupport<R> }) => {
