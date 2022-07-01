@@ -111,7 +111,7 @@ export async function generate(projectRoot = path.resolve(__dirname, '..')) {
     fs.mkdirSync(bistrioRoot)
   }
 
-  const bistrioGenRoot = path.join(bistrioRoot, 'generated')
+  const bistrioGenRoot = path.join(bistrioRoot, 'routes')
   if (!fs.existsSync(bistrioGenRoot)) {
     fs.mkdirSync(bistrioGenRoot)
   }

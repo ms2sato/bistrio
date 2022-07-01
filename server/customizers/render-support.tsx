@@ -5,7 +5,7 @@ import { Layout } from '../../views/_layout'
 import { ReactNode, useState } from 'react'
 import { StaticRouter } from 'react-router-dom/server'
 import { PageNode } from '../../lib/render-support'
-import { N2R } from '../../.bistrio/generated/all/_types'
+import { N2R } from '../../.bistrio/routes/all/_types'
 
 const arrange: NodeArrangeFunc<N2R> = (Page, options, ctx) => {
   return <Wrapper ctx={ctx} Page={Page}></Wrapper>

@@ -1,8 +1,8 @@
 import { boot } from '../lib/boot'
 
 import { routes } from '../routes/admin'
-import { views } from '../.bistrio/generated/admin/_views'
-import { N2R } from '../.bistrio/generated/admin/_types'
+import { views } from '../.bistrio/routes/admin/_views'
+import { N2R } from '../.bistrio/routes/admin/_types'
 import { localeMap } from '../locales'
 
 boot<N2R>({

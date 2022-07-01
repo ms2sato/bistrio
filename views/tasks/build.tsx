@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Link } from 'react-router-dom'
-import { PageProps } from '../../.bistrio/generated/main/_types'
+import { PageProps } from '../../.bistrio/routes/main/_types'
 import { Form } from './_form'
 
 export function Build({ rs }: PageProps) {
