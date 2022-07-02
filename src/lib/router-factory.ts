@@ -1,5 +1,4 @@
 import { ResourceHolderCreateRouter, ServerRouter, ServerRouterConfig, Resource } from 'restrant2'
-import { config } from './config/server'
 
 class RouterFactory {
   constructor(private option: Partial<ServerRouterConfig>) {}
@@ -15,9 +14,9 @@ class RouterFactory {
 
 let _routerFactory: RouterFactory
 
-export function setup() {
+export function getRouterFactory(config:Partial<ServerRouterConfig>) {
   if (!_routerFactory) {
-    _routerFactory = new RouterFactory(config())
+    _routerFactory = new RouterFactory(config)
   }
   return _routerFactory
 }

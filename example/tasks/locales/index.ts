@@ -1,5 +1,5 @@
-import { dictionary as en } from './locale.en'
-import { dictionary as ja } from './locale.ja'
+import { dictionary as en } from './en'
+import { dictionary as ja } from './ja'
 
 export const localeMap = {
   en,

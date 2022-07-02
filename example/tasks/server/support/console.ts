@@ -2,9 +2,10 @@
 // add modules for REPL
 import { routes } from '../../routes/all'
 import path from 'path'
-import { setup } from '../router-factory'
+import { getRouterFactory } from 'bistrio'
+import { config } from '../config/server'
 
-const router = setup().getResourceHolderCreateRouter(global, path.join(__dirname, '..'))
+const router = getRouterFactory(config()).getResourceHolderCreateRouter(global, path.join(__dirname, '..'))
 routes(router)
 router.build().catch((err: Error) => {
   console.error(`console error: ${err.message}`)

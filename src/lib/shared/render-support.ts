@@ -1,5 +1,5 @@
-import { Localizer } from './locale'
 import { NamedResources } from 'restrant2/client'
+import { Localizer } from '../shared/locale'
 
 export type Reader<T> = () => T
 

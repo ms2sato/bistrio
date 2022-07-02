@@ -7,14 +7,14 @@ import createDebug from 'debug'
 import methodOverride from 'method-override'
 
 import { ServerRouter } from 'restrant2'
-import { useWebpackDev, localeMiddleware } from 'bistrio'
+import { useWebpackDev, localeMiddleware, getRouterFactory } from 'bistrio'
 
 import { routes } from '../routes/all'
-import * as RouterFactory from './router-factory'
 import { useTsxView } from './customizers/render-support'
 
 import { localeMap } from '../locales/index'
 import webpackConfig from '../webpack.config'
+import { config } from './config/server'
 
 if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = 'development'
@@ -77,7 +77,7 @@ export async function setup() {
     }
   })
 
-  const router: ServerRouter = RouterFactory.setup().getServerRouter(__dirname)
+  const router: ServerRouter = getRouterFactory(config()).getServerRouter(__dirname)
   routes(router)
   app.use(router.router)
   await router.build()
