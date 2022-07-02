@@ -49,8 +49,8 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
     private viewDescriptor: ViewDescriptor<RS>,
     private httpPath = '/',
     private core: ClientGenretateRouterCore<RS> = {
-      host: 'http://localhost:3000', // TODO: pluggable
-      constructConfig: Actions.defaultConstructConfig(),
+      host: window.location.origin, // TODO: pluggable
+      constructConfig: Actions.defaultConstructConfig(), // TODO: pluggable
       viewDescriptor,
       resourceNameToInfo: new Map<string, ResourceInfo>(),
       handlerBuildRunners: [],
