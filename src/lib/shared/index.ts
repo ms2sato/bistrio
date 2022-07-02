@@ -1,4 +1,4 @@
-export * from './boot'
+export * from './entry'
 export * from './client-stub-router'
 export * from './client'
 export * from './locale'

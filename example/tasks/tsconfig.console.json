@@ -2,14 +2,10 @@
   "extends": "./tsconfig.json",
   "ts-node": {
     "transpileOnly": true,
-    "files": true,
+    "files": true
   },
   "compilerOptions": {
-    "strict": false,
+    "strict": false
   },
-  "include": [
-    ".eslintrc.js",
-    "src",
-    "support/console.ts"
-  ]
+  "include": [".eslintrc.js", "src", "support/console.ts"]
 }

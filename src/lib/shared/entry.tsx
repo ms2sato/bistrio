@@ -12,7 +12,7 @@ import { setup, Engine, ClientRenderSupport } from './client'
 
 import { ViewDescriptor } from './client-stub-router'
 
-export async function boot<R extends NamedResources>({
+export async function entry<R extends NamedResources>({
   routes,
   views,
   localeMap,

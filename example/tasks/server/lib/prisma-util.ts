@@ -28,10 +28,10 @@ export const getPrismaCilent = (): PrismaClient => {
 }
 
 type PrismaAnyClient<T> = {
-  findMany: (args?: unknown) => Promise<T[]>,
-  findUnique: (args: unknown) => Promise<T>,
-  create: (args: unknown) => Promise<T>,
-  update: (args: unknown) => Promise<T>,
+  findMany: (args?: unknown) => Promise<T[]>
+  findUnique: (args: unknown) => Promise<T>
+  create: (args: unknown) => Promise<T>
+  update: (args: unknown) => Promise<T>
   delete: (args: unknown) => Promise<boolean>
 }
 
@@ -41,7 +41,7 @@ export const createPrismaEasyDataAccessor = <
   CP,
   UP,
   IN extends string = 'id',
-  IT = number,
+  IT = number
 >(
   unknownPrismaClient: unknown,
   keyName: IN
