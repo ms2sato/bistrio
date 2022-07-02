@@ -1,9 +1,9 @@
 const { setup } = require('../dist/server/app')
-const { boot } = require('../dist/server/support/boot')
+const { support } = require('bistrio')
 
 async function main() {
   const app = await setup()
-  await boot(app)
+  await support.boot(app)
 }
 
 main().catch((err) => {
