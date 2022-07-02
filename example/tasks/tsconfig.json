@@ -13,7 +13,5 @@
     "resolveJsonModule": true,
     "jsx": "react-jsx"
   },
-  "include": [
-    "server","params", "routes"
-, "tsconfig.console.json", "views", "locales" ] 
+  "include": ["server","params", "routes", "views", "locales" ] 
 }

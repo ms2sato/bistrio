@@ -9,7 +9,7 @@
     "prebuild": "npm run bistrio:gen",
     "build": "tsc && cpx 'views/**' dist/views && cpx 'public/**' dist/public",
     "clean": "rimraf dist",
-    "console": "ts-node --project ./tsconfig.console.json -r ./server/support/console.ts",
+    "console": "ts-node --project ./config/tsconfig.console.json -r ./server/support/console.ts",
     "lint": "npm run eslint && npm run check-types",
     "lint:fix": "npm run eslint:fix && npm run check-types && npm run format",
     "eslint": "eslint .",
@@ -18,7 +18,7 @@
     "check-types": "tsc --noEmit",
     "db:seed": "ts-node prisma/seed.ts",
     "db:truncate": "ts-node prisma/truncate.ts",
-    "build:client": "webpack",
+    "build:client": "webpack build --config ./config/webpack.config.ts",
     "bistrio:gen": "ts-node bin/generate.ts"
   },
   "dependencies": {

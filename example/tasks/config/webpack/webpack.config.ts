@@ -1,6 +1,6 @@
 import path from 'path'
 import { Configuration } from 'webpack'
-import { entries } from './routes/_entries'
+import { entries } from '../../routes/_entries'
 
 const prod = 'production'
 const dev = 'development'

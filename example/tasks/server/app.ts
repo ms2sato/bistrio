@@ -13,7 +13,7 @@ import { routes } from '../routes/all'
 import { useTsxView } from './customizers/render-support'
 
 import { localeMap } from '../locales/index'
-import webpackConfig from '../webpack.config'
+import webpackConfig from '../config/webpack/webpack.config'
 import { config } from './config/server'
 
 if (!process.env.NODE_ENV) {
