@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.client.production.json",
+  "compilerOptions": {
+    "sourceMap": true,
+    "target": "esnext"
+  }
+}

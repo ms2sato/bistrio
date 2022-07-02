@@ -11,8 +11,8 @@ import {
   NamedResources,
 } from 'restrant2'
 import { safeImport } from './safe-import'
-import { Localizer } from '../../lib/locale'
-import { PageNode, RenderSupport, suspense } from '../../lib/render-support'
+import { Localizer } from './shared/locale'
+import { PageNode, RenderSupport, suspense } from './shared/render-support'
 
 type Node = React.FC<unknown>
 

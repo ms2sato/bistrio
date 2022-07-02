@@ -1,10 +1,9 @@
 import { Application } from 'express'
 import { ActionContextCreator, ActionContext } from 'restrant2'
-import { buildActionContextCreator, NodeArrangeFunc, createRenderSupport } from '../lib/restrant2-react-render'
+import { PageNode, buildActionContextCreator, NodeArrangeFunc, createRenderSupport } from 'bistrio'
 import { Layout } from '../../views/_layout'
 import { ReactNode, useState } from 'react'
 import { StaticRouter } from 'react-router-dom/server'
-import { PageNode } from '../../lib/render-support'
 import { N2R } from '../../.bistrio/routes/all/_types'
 
 const arrange: NodeArrangeFunc<N2R> = (Page, options, ctx) => {

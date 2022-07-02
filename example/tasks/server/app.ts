@@ -7,12 +7,13 @@ import createDebug from 'debug'
 import methodOverride from 'method-override'
 
 import { ServerRouter } from 'restrant2'
+import { useWebpackDev, localeMiddleware } from 'bistrio'
+
 import { routes } from '../routes/all'
 import * as RouterFactory from './router-factory'
 import { useTsxView } from './customizers/render-support'
-import { localeMiddleware } from './lib/locale-express'
-import { useWebpackDev } from './lib/webpack'
-import { localeMap } from '../locales'
+
+import { localeMap } from '../locales/index'
 import webpackConfig from '../webpack.config'
 
 if (!process.env.NODE_ENV) {

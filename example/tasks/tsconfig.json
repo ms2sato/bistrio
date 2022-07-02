@@ -9,12 +9,11 @@
       "es6"
     ],
     "target": "es5",
-    "declaration": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "jsx": "react-jsx"
   },
   "include": [
-    "src"
-  ] 
+    "server","params", "routes"
+, "tsconfig.console.json", "views", "locales" ] 
 }

@@ -1,0 +1,21 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "server/**/*.ts",
+    "client/**/*.ts*",
+    "views/**/*.tsx",
+    "prisma/**/*.ts",
+    "locales/**/*.ts",
+    "lib/**/*.ts",
+    "bin/**/*.ts",
+    "bin/**/*.js",
+    "support/**/*.ts",
+    ".eslintrc.js"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "webpack.config.ts",
+    "tsconfig.*"
+  ]
+}

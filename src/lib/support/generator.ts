@@ -2,8 +2,6 @@ import path from 'path'
 import fs from 'fs'
 import { RouteConfig, Router } from 'restrant2/client'
 
-import { entries } from '../routes/_entries'
-import { routes as allRoutes } from '../routes/all'
 import { glob } from 'glob'
 
 class NameToPathRouter implements Router {
@@ -80,7 +78,7 @@ export const views = {
 
   createTypes({ out }: { out: string }) {
     const ret = `import { type Resource } from 'restrant2/client'
-import { PageProps as TPageProps } from '../../../lib/render-support'
+import { PageProps as TPageProps } from 'bistrio/client'
 import { type NameToPath } from './_name_to_path'
 import { type Resources } from './_resources'
 
@@ -103,7 +101,15 @@ export type PageProps = TPageProps<N2R>
   }
 }
 
-export async function generate(projectRoot = path.resolve(__dirname, '..')) {
+export async function generate({
+  projectRoot = path.resolve(__dirname, '..'),
+  entries,
+  allRoutes,
+}: {
+  projectRoot: string
+  entries: { [name: string]: (router: Router) => void }
+  allRoutes: (router: Router) => void
+}) {
   console.log('Generating...')
 
   const bistrioRoot = path.join(projectRoot, '.bistrio')

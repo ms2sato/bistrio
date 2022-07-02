@@ -1,6 +1,6 @@
 import express from 'express'
-import { LocaleSelector } from '../../lib/locale'
-import { initLocale, LocaleDictionary } from '../../lib/localizer'
+import { LocaleSelector } from './shared/locale'
+import { initLocale, LocaleDictionary } from './shared/localizer'
 
 let localeSelector: LocaleSelector
 

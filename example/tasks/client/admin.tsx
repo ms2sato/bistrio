@@ -1,4 +1,4 @@
-import { boot } from '../lib/boot'
+import { boot } from 'bistrio/client'
 
 import { routes } from '../routes/admin'
 import { views } from '../.bistrio/routes/admin/_views'
