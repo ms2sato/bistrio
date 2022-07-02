@@ -35,7 +35,7 @@
     "express": "~4.16.1",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "restrant2": "^0.0.2"
+    "restrant2": "^0.0.3"
   },
   "devDependencies": {
     "@types/debug": "^4.1.7",
