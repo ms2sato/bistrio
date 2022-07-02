@@ -1,4 +1,4 @@
-import { Localizer } from '../shared/locale'
+import { Localizer } from '../lib/shared/locale'
 
 declare global {
   namespace Express {
