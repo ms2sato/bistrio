@@ -12,7 +12,7 @@ export function Build({ rs }: PageProps) {
 
   return (
     <div>
-      <h2>{l.t`Hello`}</h2>
+      <h2>{l.t`Create new task`}</h2>
       <Form action="/tasks/" method="post" task={{ title: '', description: '' }}></Form>
       <button onClick={handleClick}>This is test button</button>
       <Link to="/tasks">To Top</Link>
