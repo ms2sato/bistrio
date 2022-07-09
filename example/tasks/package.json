@@ -16,6 +16,8 @@
     "eslint:fix": "eslint . --fix",
     "format": "prettier --write './**/*.{js,ts,tsx,json}'",
     "check-types": "tsc --noEmit",
+    "db:migrate": "prisma migrate dev",
+    "db:reset": "prisma migrate reset",
     "db:seed": "ts-node prisma/seed.ts",
     "db:truncate": "ts-node prisma/truncate.ts",
     "build:client": "webpack build --config ./config/webpack.config.ts",
