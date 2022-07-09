@@ -7,7 +7,7 @@
     "prepare": "npm run bistrio:gen",
     "dev": "DEBUG=bistrio:*,restrant2:* tsc-watch --onSuccess 'node ./bin/server'",
     "prebuild": "npm run clean && npm run bistrio:gen",
-    "build": "tsc && cpx 'views/**' dist/views && cpx 'public/**' dist/public",
+    "build": "tsc && cpx 'public/**' dist/public",
     "clean": "rimraf dist",
     "console": "ts-node --project ./config/tsconfig.console.json -r ./server/support/console.ts",
     "lint": "npm run eslint && npm run check-types",

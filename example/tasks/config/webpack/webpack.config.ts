@@ -6,6 +6,10 @@ const prod = 'production'
 const dev = 'development'
 const env = process.env.NODE_ENV === prod ? prod : dev
 
+if (env === 'development') {
+  console.log('Webpack is running in development mode...')
+}
+
 const entry = Object.keys(entries).reduce<Record<string, string>>((obj, name) => {
   obj[name] = `./client/${name}.tsx`
   return obj
@@ -22,7 +26,7 @@ const config: Configuration = {
           loader: 'ts-loader',
           options: {
             transpileOnly: true,
-            configFile: `tsconfig.client.${env}.json`,
+            configFile: `config/webpack/tsconfig.client.${env}.json`,
           },
         },
         exclude: /node_modules/,
