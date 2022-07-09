@@ -32,6 +32,7 @@ export function Form({
     <>
       {err && <ErrorPanel err={err}></ErrorPanel>}
       <form action={action} method="post">
+        {/* TODO: CSRF */}
         <input type="hidden" name="_method" value={method}></input>
         {'done' in task && (
           <div>
