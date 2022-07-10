@@ -1,6 +1,6 @@
 import { defineResource, IdNumberParams } from 'restrant2'
 import { Prisma, Task } from '@prisma/client'
-import { createPrismaEasyDataAccessor, getPrismaCilent } from '../../../lib/prisma-util'
+import { createPrismaEasyDataAccessor, getPrismaCilent } from '@server/lib/prisma-util'
 
 const prisma = getPrismaCilent()
 

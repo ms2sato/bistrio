@@ -3,8 +3,8 @@ import { StaticRouter } from 'react-router-dom/server'
 import { Application } from 'express'
 import { ActionContextCreator, ActionContext } from 'restrant2'
 import { PageNode, buildActionContextCreator, NodeArrangeFunc, createRenderSupport } from 'bistrio'
-import { Layout } from '../../views/_layout'
-import { N2R } from '../../.bistrio/routes/all/_types'
+import { Layout } from '@/views/_layout'
+import { N2R } from '@bistrio/routes/all/_types'
 
 const arrange: NodeArrangeFunc<N2R> = (Page, options, ctx) => {
   return <Wrapper ctx={ctx} Page={Page}></Wrapper>
