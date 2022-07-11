@@ -101,22 +101,24 @@ export type PageProps = TPageProps<N2R>
     fs.writeFileSync(out, ret)
   }
 
-  createEntry({ out }: { out: string }) {
-    const entryName = 'main'
-    const ret = `import { entry } from 'bistrio/client'
+  createEntry({ out, name }: { out: string; name: string }) {
+    const ret = `import { entry, EntriesConfig } from 'bistrio/client'
 
-import { bistrioConfig } from '../../../config/bistrio'
-
-import { routes } from '../../../routes/${entryName}'
+import { entries } from '../../../routes/_entries'
 import { views } from './_views'
 import { N2R } from './_types'
 import { localeMap } from '../../../locales'
 
+const entryConfig:EntriesConfig = entries['${name}']
+if(entryConfig === undefined) {
+  throw new Error('entry config "${name}" not found in routes/_entries.ts')
+}
+
 entry<N2R>({
-  routes,
+  routes: entryConfig.routes,
   views,
   localeMap,
-  container: bistrioConfig.getContainerElement('${entryName}'),
+  container: entryConfig.getContainerElement(),
 }).catch((err) => {
   console.error(err)
 })
@@ -152,7 +154,7 @@ export async function generate({
     })
   )
 
-  await generateForEntry(bistrioGenRoot, 'all', allRoutes)
+  generateForAll(bistrioGenRoot, allRoutes)
 
   console.log('Generated!')
 }
@@ -170,5 +172,22 @@ async function generateForEntry(bistrioGenRoot: string, name: string, routes: (r
   await router.createViews({ out: path.join(genRoot, '_views.ts'), viewPath: 'views' })
   router.createResources({ out: path.join(genRoot, '_resources.ts') })
   router.createTypes({ out: path.join(genRoot, '_types.ts') })
-  router.createEntry({ out: path.join(genRoot, '_entry.ts') })
+  router.createEntry({ out: path.join(genRoot, '_entry.ts'), name })
 }
+
+function generateForAll(bistrioGenRoot: string, routes: (router: Router) => void) {
+  const name = 'all'
+  
+  const router = new NameToPathRouter()
+  routes(router)
+
+  const genRoot = path.join(bistrioGenRoot, name)
+  if (!fs.existsSync(genRoot)) {
+    fs.mkdirSync(genRoot)
+  }
+
+  router.createNameToPath({ out: path.join(genRoot, '_name_to_path.ts') })
+  router.createResources({ out: path.join(genRoot, '_resources.ts') })
+  router.createTypes({ out: path.join(genRoot, '_types.ts') })
+}
+
