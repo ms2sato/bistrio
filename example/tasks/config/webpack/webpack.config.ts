@@ -1,13 +1,20 @@
 import path from 'path'
 import { Configuration } from 'webpack'
+import { TsconfigPathsPlugin } from 'tsconfig-paths-webpack-plugin'
 import { entries } from '../../routes/_entries'
 
 const prod = 'production'
 const dev = 'development'
 const env = process.env.NODE_ENV === prod ? prod : dev
 
+const configFile = path.join(__dirname, `tsconfig.client.${env}.json`)
+if (env === 'development') {
+  console.log('Webpack is running in development mode...')
+  console.log(`tsconfig: ${configFile}`)
+}
+
 const entry = Object.keys(entries).reduce<Record<string, string>>((obj, name) => {
-  obj[name] = `./client/${name}.tsx`
+  obj[name] = `./.bistrio/routes/${name}/_entry.ts`
   return obj
 }, {})
 
@@ -22,7 +29,7 @@ const config: Configuration = {
           loader: 'ts-loader',
           options: {
             transpileOnly: true,
-            configFile: `tsconfig.client.${env}.json`,
+            configFile: configFile,
           },
         },
         exclude: /node_modules/,
@@ -31,6 +38,7 @@ const config: Configuration = {
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
+    plugins: [new TsconfigPathsPlugin({ configFile, extensions: ['.tsx', '.ts', '.js'] })],
   },
 }
 
@@ -48,7 +56,7 @@ const prodConfig: Configuration = {
   ...config,
   output: {
     filename: '[name].js',
-    path: path.resolve(__dirname, 'dist', 'public'),
+    path: path.resolve(__dirname, '../../dist', 'public'),
   },
 }
 

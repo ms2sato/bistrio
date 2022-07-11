@@ -1,5 +1,10 @@
 {
   "compilerOptions": {
+    "baseUrl": "../..",
+    "paths": {
+      "@/*": ["*"],
+      "@bistrio/*": [".bistrio/*"]
+    },
     "outDir": "./dist/",
     "noImplicitAny": true,
     "module": "node16",
@@ -8,5 +13,6 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "moduleResolution": "node"
-  }
+  },
+  "include": ["../../.bistrio/**/*"]
 }

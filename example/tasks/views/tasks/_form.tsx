@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { ValidationError } from 'restrant2/client'
-import { TaskCreateParams, TaskUpdateParams } from '../../params'
+import { TaskCreateParams, TaskUpdateParams } from '@/params'
 
 function ErrorPanel({ err }: { err: ValidationError }) {
   return (
@@ -32,6 +32,7 @@ export function Form({
     <>
       {err && <ErrorPanel err={err}></ErrorPanel>}
       <form action={action} method="post">
+        {/* TODO: CSRF */}
         <input type="hidden" name="_method" value={method}></input>
         {'done' in task && (
           <div>

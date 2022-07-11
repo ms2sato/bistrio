@@ -12,6 +12,13 @@ import { setup, Engine, ClientRenderSupport } from './client'
 
 import { ViewDescriptor } from './client-stub-router'
 
+export type EntriesConfig = {
+  [key: string]: {
+    routes: (router: Router) => void
+    getContainerElement: () => HTMLElement
+  }
+}
+
 export async function entry<R extends NamedResources>({
   routes,
   views,

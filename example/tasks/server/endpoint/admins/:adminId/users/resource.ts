@@ -1,5 +1,5 @@
 import { defineResource } from 'restrant2'
-import { CustomMethodOption } from '../../../../customizers'
+import { CustomMethodOption } from '@server/customizers'
 
 export type User = {
   id: number

@@ -1,5 +1,11 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["*"],
+      "@server/*": ["server/*"],
+      "@bistrio/*": [".bistrio/*"]
+    },
     "sourceMap": true,
     "module": "node16",
     "outDir": "dist",
@@ -13,5 +19,5 @@
     "resolveJsonModule": true,
     "jsx": "react-jsx"
   },
-  "include": ["server","params", "routes", "views", "locales" ] 
+  "include": ["server/**/*","params/**/*", "routes/**/*", "views/**/*", "locales/**/*"] 
 }
