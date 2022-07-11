@@ -102,18 +102,23 @@ export type PageProps = TPageProps<N2R>
   }
 
   createEntry({ out, name }: { out: string; name: string }) {
-    const ret = `import { entry } from 'bistrio/client'
+    const ret = `import { entry, EntriesConfig } from 'bistrio/client'
 
 import { entries } from '../../../routes/_entries'
 import { views } from './_views'
 import { N2R } from './_types'
 import { localeMap } from '../../../locales'
 
+const entryConfig:EntriesConfig = entries['${name}']
+if(entryConfig === undefined) {
+  throw new Error('entry config "${name}" not found in routes/_entries.ts')
+}
+
 entry<N2R>({
-  routes: entries['${name}'].routes,
+  routes: entryConfig.routes,
   views,
   localeMap,
-  container: entries['${name}'].getContainerElement(),
+  container: entryConfig.getContainerElement(),
 }).catch((err) => {
   console.error(err)
 })
