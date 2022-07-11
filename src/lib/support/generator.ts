@@ -3,6 +3,7 @@ import fs from 'fs'
 import { RouteConfig, Router } from 'restrant2/client'
 
 import { glob } from 'glob'
+import { EntriesConfig } from '../../index'
 
 class NameToPathRouter implements Router {
   constructor(private httpPath: string = '/', readonly nameToPath: { [path: string]: string } = {}) {}
@@ -130,7 +131,7 @@ export async function generate({
   allRoutes,
 }: {
   projectRoot: string
-  entries: { [name: string]: (router: Router) => void }
+  entries: EntriesConfig
   allRoutes: (router: Router) => void
 }) {
   console.log('Generating...')
@@ -146,7 +147,7 @@ export async function generate({
   }
 
   await Promise.all(
-    Object.entries(entries).map(([name, routes]) => {
+    Object.entries(entries).map(([name, {routes}]) => {
       return generateForEntry(bistrioGenRoot, name, routes)
     })
   )
