@@ -99,6 +99,29 @@ export type PageProps = TPageProps<N2R>
 `
     fs.writeFileSync(out, ret)
   }
+
+  createEntry({ out }: { out: string }) {
+    const entryName = 'main'
+    const ret = `import { entry } from 'bistrio/client'
+
+import { bistrioConfig } from '../../../config/bistrio'
+
+import { routes } from '../../../routes/${entryName}'
+import { views } from './_views'
+import { N2R } from './_types'
+import { localeMap } from '../../../locales'
+
+entry<N2R>({
+  routes,
+  views,
+  localeMap,
+  container: bistrioConfig.getContainerElement('${entryName}'),
+}).catch((err) => {
+  console.error(err)
+})
+`
+    fs.writeFileSync(out, ret)
+  }
 }
 
 export async function generate({
@@ -146,4 +169,5 @@ async function generateForEntry(bistrioGenRoot: string, name: string, routes: (r
   await router.createViews({ out: path.join(genRoot, '_views.ts'), viewPath: 'views' })
   router.createResources({ out: path.join(genRoot, '_resources.ts') })
   router.createTypes({ out: path.join(genRoot, '_types.ts') })
+  router.createEntry({ out: path.join(genRoot, '_entry.ts') })
 }

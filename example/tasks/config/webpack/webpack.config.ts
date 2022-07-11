@@ -14,7 +14,7 @@ if (env === 'development') {
 }
 
 const entry = Object.keys(entries).reduce<Record<string, string>>((obj, name) => {
-  obj[name] = `./client/${name}.ts`
+  obj[name] = `./.bistrio/routes/${name}/_entry.ts`
   return obj
 }, {})
 

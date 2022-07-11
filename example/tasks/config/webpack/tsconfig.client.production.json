@@ -3,7 +3,6 @@
     "baseUrl": "../..",
     "paths": {
       "@/*": ["*"],
-      "@client/*": ["client/*"],
       "@bistrio/*": [".bistrio/*"]
     },
     "outDir": "./dist/",
@@ -15,5 +14,5 @@
     "allowJs": true,
     "moduleResolution": "node"
   },
-  "include": ["../../client/**/*"]
+  "include": ["../../.bistrio/**/*"]
 }
