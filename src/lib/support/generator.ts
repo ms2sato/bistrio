@@ -154,7 +154,7 @@ export async function generate({
     })
   )
 
-  await generateForEntry(bistrioGenRoot, 'all', allRoutes)
+  generateForAll(bistrioGenRoot, allRoutes)
 
   console.log('Generated!')
 }
@@ -174,3 +174,20 @@ async function generateForEntry(bistrioGenRoot: string, name: string, routes: (r
   router.createTypes({ out: path.join(genRoot, '_types.ts') })
   router.createEntry({ out: path.join(genRoot, '_entry.ts'), name })
 }
+
+function generateForAll(bistrioGenRoot: string, routes: (router: Router) => void) {
+  const name = 'all'
+  
+  const router = new NameToPathRouter()
+  routes(router)
+
+  const genRoot = path.join(bistrioGenRoot, name)
+  if (!fs.existsSync(genRoot)) {
+    fs.mkdirSync(genRoot)
+  }
+
+  router.createNameToPath({ out: path.join(genRoot, '_name_to_path.ts') })
+  router.createResources({ out: path.join(genRoot, '_resources.ts') })
+  router.createTypes({ out: path.join(genRoot, '_types.ts') })
+}
+
