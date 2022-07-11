@@ -12,4 +12,3 @@ export function pathJoin(...parts: string[]) {
   })
   return parts.join(separator)
 }
-

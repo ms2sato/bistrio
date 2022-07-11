@@ -147,7 +147,7 @@ export async function generate({
   }
 
   await Promise.all(
-    Object.entries(entries).map(([name, {routes}]) => {
+    Object.entries(entries).map(([name, { routes }]) => {
       return generateForEntry(bistrioGenRoot, name, routes)
     })
   )

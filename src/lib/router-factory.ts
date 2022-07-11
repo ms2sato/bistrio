@@ -14,7 +14,7 @@ class RouterFactory {
 
 let _routerFactory: RouterFactory
 
-export function getRouterFactory(config:Partial<ServerRouterConfig>) {
+export function getRouterFactory(config: Partial<ServerRouterConfig>) {
   if (!_routerFactory) {
     _routerFactory = new RouterFactory(config)
   }
