@@ -37,6 +37,7 @@ export async function entry<R extends NamedResources>({
   }
 
   const Root = ({ localeSelector }: { localeSelector: LocaleSelector }) => {
+    console.debug(engine.pathToPage())
     const [renderSupport] = useState(engine.createRenderSupport(localeSelector))
     return (
       <BrowserRouter>

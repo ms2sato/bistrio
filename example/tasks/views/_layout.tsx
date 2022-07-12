@@ -1,11 +1,15 @@
 import { ReactNode } from 'react'
 
-export function Layout({ children }: { children: ReactNode }) {
+type GlobalProps = {
+  hydrate: boolean
+}
+
+export function Layout({ children, props }: { children: ReactNode; props: GlobalProps }) {
   return (
     <html>
       <head>
         <link type="text/css" rel="stylesheet" href="/stylesheets/style.css"></link>
-        <script src="/main.js" defer></script>
+        {props.hydrate && <script src="/main.js" defer></script>}
       </head>
       <body>
         <div id="app">{children}</div>

@@ -20,4 +20,5 @@ export function Build({ rs }: PageProps) {
   )
 }
 
-export { Build as Page }
+const hydrate = true
+export { Build as Page, hydrate }

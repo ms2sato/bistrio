@@ -6,15 +6,25 @@ import { PageNode, buildActionContextCreator, NodeArrangeFunc, createRenderSuppo
 import { Layout } from '@/views/_layout'
 import { N2R } from '@bistrio/routes/all/_types'
 
-const arrange: NodeArrangeFunc<N2R> = (Page, options, ctx) => {
-  return <Wrapper ctx={ctx} Page={Page}></Wrapper>
+const arrange: NodeArrangeFunc<N2R> = (Page, hydrate, options, ctx) => {
+  return <Wrapper ctx={ctx} Page={Page} hydrate={hydrate}></Wrapper>
 }
 
-const Wrapper = ({ Page, ctx }: { ctx: ActionContext; Page: PageNode<N2R>; children?: ReactNode }) => {
+const Wrapper = ({
+  Page,
+  ctx,
+  hydrate,
+}: {
+  ctx: ActionContext
+  Page: PageNode<N2R>
+  hydrate: boolean
+  children?: ReactNode
+}) => {
   const [renderSupport] = useState(createRenderSupport<N2R>(ctx))
+  const props = { hydrate }
 
   return (
-    <Layout>
+    <Layout props={props}>
       <StaticRouter location={ctx.req.url}>
         <Page rs={renderSupport}></Page>
       </StaticRouter>

@@ -59,7 +59,13 @@ export type Resources = {
     )
 
     const ret = `${targets
-      .map((vpath, index) => `import { Page as __Page${index} } from '../../../${vpath.replace(/\.tsx$/, '')}'`)
+      .map(
+        (vpath, index) =>
+          `import { Page as __Page${index}, hydrate as __hydrate${index} } from '../../../${vpath.replace(
+            /\.tsx$/,
+            ''
+          )}'`
+      )
       .join('\n')}
 
 export const views = {
@@ -69,7 +75,7 @@ export const views = {
         `"${vpath
           .replace(viewPath, '')
           .replace(/index\.tsx$/, '')
-          .replace(/\.tsx$/, '')}": __Page${index}`
+          .replace(/\.tsx$/, '')}": { Page: __Page${index}, hydrate: __hydrate${index} }`
     )
     .join(',\n  ')}
 }
@@ -177,7 +183,7 @@ async function generateForEntry(bistrioGenRoot: string, name: string, routes: (r
 
 function generateForAll(bistrioGenRoot: string, routes: (router: Router) => void) {
   const name = 'all'
-  
+
   const router = new NameToPathRouter()
   routes(router)
 
@@ -190,4 +196,3 @@ function generateForAll(bistrioGenRoot: string, routes: (router: Router) => void
   router.createResources({ out: path.join(genRoot, '_resources.ts') })
   router.createTypes({ out: path.join(genRoot, '_types.ts') })
 }
-
