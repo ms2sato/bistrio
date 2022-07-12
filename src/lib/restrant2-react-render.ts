@@ -120,6 +120,9 @@ export function createRenderSupport<RS extends NamedResources>(ctx: ActionContex
 class ServerRenderSupport<RS extends NamedResources> implements RenderSupport<RS> {
   private suspense
 
+  readonly isClient: boolean = false
+  readonly isServer: boolean = true
+
   constructor(private ctx: ActionContext) {
     this.suspense = suspense()
   }

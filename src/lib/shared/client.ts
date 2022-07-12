@@ -7,6 +7,9 @@ export class ClientRenderSupport<RS extends NamedResources> implements RenderSup
   private suspense
   params: ParamsDictionary = {} as const
 
+  readonly isClient: boolean = true
+  readonly isServer: boolean = false
+
   constructor(private core: ClientGenretateRouterCore<RS>, private localeSelector: LocaleSelector) {
     this.suspense = suspense()
   }
