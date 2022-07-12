@@ -61,7 +61,7 @@ export type Resources = {
     const ret = `${targets
       .map(
         (vpath, index) =>
-          `import { Page as __Page${index}, hydrate as __hydrate${index} } from '../../../${vpath.replace(
+          `import * as __page${index} from '../../../${vpath.replace(
             /\.tsx$/,
             ''
           )}'`
@@ -75,7 +75,7 @@ export const views = {
         `"${vpath
           .replace(viewPath, '')
           .replace(/index\.tsx$/, '')
-          .replace(/\.tsx$/, '')}": { Page: __Page${index}, hydrate: __hydrate${index} }`
+          .replace(/\.tsx$/, '')}": __page${index}`
     )
     .join(',\n  ')}
 }
