@@ -30,7 +30,9 @@ const createPath = (resourceUrl: string, pathFormat: string, option: Record<stri
   return { httpPath: pathJoin(resourceUrl, apath), keys }
 }
 
-export type ViewDescriptor<RS extends NamedResources> = { [key: string]: PageNode<RS> }
+export type ViewDescriptor<RS extends NamedResources> = {
+  [key: string]: { Page: PageNode<RS>; hydrate: boolean }
+}
 
 export type ResourceInfo = { httpPath: string; resource: Resource }
 type ResourceNameToInfo = Map<string, ResourceInfo>
@@ -130,9 +132,9 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
           resource[actionName] = createStubMethod(ad, resourceUrl, schema, method)
 
           const pagePath = pathJoin(httpPath, ad.path)
-          const Page = this.core.viewDescriptor[pagePath] // TODO: Can replace import?
-          if (ad.page && Page) {
-            this.core.pathToPage.set(pagePath, Page)
+          const viewDescriptor = this.core.viewDescriptor[pagePath] // TODO: Can replace import?
+          if (ad.page && viewDescriptor.hydrate) {
+            this.core.pathToPage.set(pagePath, viewDescriptor.Page)
           }
         }
       }

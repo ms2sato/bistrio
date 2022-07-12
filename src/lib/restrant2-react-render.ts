@@ -18,17 +18,18 @@ type Node = React.FC<unknown>
 
 export type NodeArrangeFunc<RC extends NamedResources> = (
   node: PageNode<RC>,
+  hydrate: boolean,
   options: unknown,
   ctx: ActionContext
 ) => Promise<JSX.Element> | JSX.Element
 
 type PageExport = {
   Page: Node
+  hydrate: boolean
 }
 
-export const importPage = async (filePath: string) => {
-  const ret = (await safeImport(filePath)) as PageExport
-  return ret.Page
+export const importPage = async (filePath: string): Promise<PageExport> => {
+  return (await safeImport(filePath)) as PageExport
 }
 
 // @see https://reactjs.org/docs/react-dom-server.html#rendertopipeablestream
@@ -76,8 +77,8 @@ export function createRenderFunc<RS extends NamedResources>(
     callback?: (err: Error, html: string) => void
   ): void {
     importPage(path.join(viewRoot, view))
-      .then((Page) => {
-        return arrange(Page, options, this)
+      .then(({ Page, hydrate }) => {
+        return arrange(Page, hydrate, options, this)
       })
       .then((node) => {
         renderReactViewStream(this.res, node, failText)
@@ -119,6 +120,9 @@ export function createRenderSupport<RS extends NamedResources>(ctx: ActionContex
 
 class ServerRenderSupport<RS extends NamedResources> implements RenderSupport<RS> {
   private suspense
+
+  readonly isClient: boolean = false
+  readonly isServer: boolean = true
 
   constructor(private ctx: ActionContext) {
     this.suspense = suspense()

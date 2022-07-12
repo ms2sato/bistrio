@@ -55,4 +55,5 @@ const TaskTable = ({ rs }: PageProps) => {
   )
 }
 
-export { Index as Page }
+const hydrate = true
+export { Index as Page, hydrate }
