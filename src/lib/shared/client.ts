@@ -2,6 +2,7 @@ import { Resource, NamedResources, Router } from 'restrant2/client'
 import { LocaleSelector, Localizer } from './locale'
 import { PageNode, ParamsDictionary, RenderSupport, suspense } from './render-support'
 import { ClientGenretateRouter, ClientGenretateRouterCore, ResourceInfo, ViewDescriptor } from './client-stub-router'
+import { InvalidProps, StaticProps } from './static-props'
 
 export class ClientRenderSupport<RS extends NamedResources> implements RenderSupport<RS> {
   private suspense
@@ -10,7 +11,11 @@ export class ClientRenderSupport<RS extends NamedResources> implements RenderSup
   readonly isClient: boolean = true
   readonly isServer: boolean = false
 
-  constructor(private core: ClientGenretateRouterCore<RS>, private localeSelector: LocaleSelector) {
+  constructor(
+    private core: ClientGenretateRouterCore<RS>,
+    private localeSelector: LocaleSelector,
+    private staticProps: StaticProps
+  ) {
     this.suspense = suspense()
   }
 
@@ -41,10 +46,14 @@ export class ClientRenderSupport<RS extends NamedResources> implements RenderSup
   suspend<T>(asyncProcess: () => Promise<T>, key: string): T {
     return this.suspense.suspend(asyncProcess, key)
   }
+
+  get invalid(): InvalidProps | undefined {
+    return this.staticProps.invalid
+  }
 }
 
 export type Engine<RS extends NamedResources> = {
-  createRenderSupport: (localeSelector: LocaleSelector) => ClientRenderSupport<RS>
+  createRenderSupport: (localeSelector: LocaleSelector, staticProps: StaticProps) => ClientRenderSupport<RS>
   pathToPage: () => Map<string, PageNode<RS>>
 }
 
@@ -58,8 +67,8 @@ export async function setup<RS extends NamedResources>(
   const core = cgr.getCore()
 
   return {
-    createRenderSupport(localeSelector: LocaleSelector): ClientRenderSupport<RS> {
-      return new ClientRenderSupport<RS>(core, localeSelector)
+    createRenderSupport(localeSelector: LocaleSelector, staticProps: StaticProps): ClientRenderSupport<RS> {
+      return new ClientRenderSupport<RS>(core, localeSelector, staticProps)
     },
 
     pathToPage() {

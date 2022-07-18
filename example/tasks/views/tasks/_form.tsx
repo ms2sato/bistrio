@@ -3,11 +3,12 @@ import { ValidationError } from 'restrant2/client'
 import { TaskCreateParams, TaskUpdateParams } from '@/params'
 
 function ErrorPanel({ err }: { err: ValidationError }) {
+  console.log(err)
   return (
     <>
       <div>error</div>
       <ul>
-        {err.errors.map((er, i) => (
+        {err.issues.map((er, i) => (
           <li key={i}>
             {er.path.join('.')}: {er.message}
           </li>

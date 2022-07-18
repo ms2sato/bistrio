@@ -2,6 +2,7 @@ import * as React from 'react'
 import { Link } from 'react-router-dom'
 import { PageProps } from '@bistrio/routes/main/_types'
 import { Form } from './_form'
+import { TaskCreateParams } from '@/params'
 
 export function Build({ rs }: PageProps) {
   const handleClick = () => {
@@ -10,10 +11,12 @@ export function Build({ rs }: PageProps) {
 
   const l = rs.getLocalizer()
 
+  const { source, error } = rs.invalid || { source: { title: '', description: '' } }
+
   return (
     <div>
       <h2>{l.t`Create new task`}</h2>
-      <Form action="/tasks/" method="post" task={{ title: '', description: '' }}></Form>
+      <Form action="/tasks/" method="post" task={source as TaskCreateParams} err={error}></Form>
       <button onClick={handleClick}>This is test button</button>
       <Link to="/tasks">To Top</Link>
     </div>

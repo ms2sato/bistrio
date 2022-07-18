@@ -11,6 +11,7 @@ import { PageNode } from './render-support'
 import { setup, Engine, ClientRenderSupport } from './client'
 
 import { ViewDescriptor } from './client-stub-router'
+import { StaticProps } from './static-props'
 
 export type EntriesConfig = {
   [key: string]: {
@@ -36,9 +37,9 @@ export async function entry<R extends NamedResources>({
     return <Page rs={rs} />
   }
 
-  const Root = ({ localeSelector }: { localeSelector: LocaleSelector }) => {
+  const Root = ({ localeSelector, staticProps }: { localeSelector: LocaleSelector; staticProps: StaticProps }) => {
     console.debug(engine.pathToPage())
-    const [renderSupport] = useState(engine.createRenderSupport(localeSelector))
+    const [renderSupport] = useState(engine.createRenderSupport(localeSelector, staticProps))
     return (
       <BrowserRouter>
         <Routes>
@@ -54,12 +55,26 @@ export async function entry<R extends NamedResources>({
     throw new Error('container not found')
   }
 
+  const staticPropsJsonElement = document.querySelector('script[type="application/static-props.bistrio+json"]')
+  const staticPropsJson = staticPropsJsonElement?.innerHTML
+  let staticProps: StaticProps = {}
+  if (staticPropsJson) {
+    // TODO: validation?
+    staticProps = JSON.parse(decodeHtml(staticPropsJson)) as StaticProps
+  }
+
   const engine: Engine<R> = await setup<R>(routes, views)
   const localeSelector = initLocale(localeMap)
   hydrateRoot(
     container,
     <React.StrictMode>
-      <Root localeSelector={localeSelector}></Root>
+      <Root localeSelector={localeSelector} staticProps={staticProps}></Root>
     </React.StrictMode>
   )
+}
+
+function decodeHtml(html: string) {
+  const txt = document.createElement('textarea')
+  txt.innerHTML = html
+  return txt.value
 }

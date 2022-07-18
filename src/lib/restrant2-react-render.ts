@@ -153,4 +153,16 @@ class ServerRenderSupport<RS extends NamedResources> implements RenderSupport<RS
   get params() {
     return this.ctx.params
   }
+
+  get invalid() {
+    return this.getStaticProps().invalid
+  }
+
+  private getStaticProps() {
+    const staticProps = this.ctx.req.session.bistrio
+    if (!staticProps) {
+      return (this.ctx.req.session.bistrio = {})
+    }
+    return staticProps
+  }
 }

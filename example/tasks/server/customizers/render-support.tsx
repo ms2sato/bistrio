@@ -21,14 +21,18 @@ const Wrapper = ({
   children?: ReactNode
 }) => {
   const [renderSupport] = useState(createRenderSupport<N2R>(ctx))
+  const staticProps = ctx.req.session.bistrio
   const props = { hydrate }
 
   return (
-    <Layout props={props}>
-      <StaticRouter location={ctx.req.url}>
-        <Page rs={renderSupport}></Page>
-      </StaticRouter>
-    </Layout>
+    <>
+      <Layout props={props}>
+        <StaticRouter location={ctx.req.url}>
+          <Page rs={renderSupport}></Page>
+        </StaticRouter>
+      </Layout>
+      <script type="application/static-props.bistrio+json">{JSON.stringify(staticProps)}</script>
+    </>
   )
 }
 
