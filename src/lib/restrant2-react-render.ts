@@ -5,10 +5,12 @@ import { renderToPipeableStream } from 'react-dom/server'
 import {
   ActionContextImpl,
   ActionContextCreator,
-  createDefaultActionContext,
   ActionContext,
   NullActionContext,
   NamedResources,
+  ServerRouter,
+  ActionDescriptor,
+  ValidationError,
 } from 'restrant2'
 import { safeImport } from './safe-import'
 import { Localizer } from './shared/locale'
@@ -102,13 +104,34 @@ export type BuildActionContextCreator<RS extends NamedResources> = (
   failText: string
 ) => ActionContextCreator
 
+class BistrioActionContext extends ActionContextImpl {
+  constructor(
+    router: ServerRouter,
+    req: express.Request,
+    res: express.Response,
+    descriptor: ActionDescriptor,
+    httpPath: string
+  ) {
+    super(router, req, res, descriptor, httpPath)
+  }
+
+  responseInvalid(path: string, error: ValidationError, source: unknown): void {
+    let bistrio = this.req.session.bistrio
+    if (!bistrio) {
+      bistrio = this.req.session.bistrio = { custom: {} }
+    }
+    bistrio.invalid = { error, source }
+    this.redirect(path)
+  }
+}
+
 export function buildActionContextCreator<RS extends NamedResources>(
   viewRoot: string,
   arrange: NodeArrangeFunc<RS>,
   failText = ''
 ): ActionContextCreator {
   return (props) => {
-    const ctx = createDefaultActionContext(props)
+    const ctx = new BistrioActionContext(props.router, props.req, props.res, props.descriptor, props.httpPath)
     ctx.render = createRenderFunc(arrange, viewRoot, failText)
     return ctx
   }

@@ -9,13 +9,7 @@ export default defineAdapter<Adapter>((_support, _options) => ({
       ctx.redirect('/tasks')
     },
     invalid: (ctx, err, source) => {
-      // TODO: extract to ActionContext ?
-      let bistrio = ctx.req.session.bistrio
-      if (!bistrio) {
-        bistrio = ctx.req.session.bistrio = { custom: {} }
-      }
-      bistrio.invalid = { error: err, source }
-      ctx.redirect('/tasks/build')
+      ctx.responseInvalid('/tasks/build', err, source)
     },
   },
 
