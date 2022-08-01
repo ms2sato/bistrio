@@ -76,7 +76,11 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
         body,
       })
       const json = await ret.json()
-      return json.data
+      const data = json.data
+      if (data === undefined) {
+        throw new Error('response json has no data')
+      }
+      return data
     }
 
     const createStubMethod = (ad: ActionDescriptor, resourceUrl: string, schema: z.AnyZodObject, method: string) => {

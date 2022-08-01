@@ -18,7 +18,7 @@ export default defineAdapter<Adapter>((_support, _options) => ({
       ctx.redirect('/tasks')
     },
     invalid: (ctx, err, source) => {
-      ctx.render('tasks/edit', { task: source, err })
+      ctx.responseInvalid(`/tasks/${ctx.params.id}/edit`, err, source)
     },
   },
 

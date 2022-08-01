@@ -9,7 +9,12 @@ export function suspendable<T>(promise: Promise<T>): Reader<T> {
   let result: T
   let err: Error
   const suspender = promise.then(
-    (ret) => (result = ret),
+    (ret) => {
+      if (ret === undefined) {
+        throw new Error('suspendable: promise resolved with undefined')
+      }
+      result = ret
+    },
     (e: Error) => (err = e)
   )
   return () => {
