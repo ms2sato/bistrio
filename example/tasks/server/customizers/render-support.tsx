@@ -21,7 +21,7 @@ const Wrapper = ({
   children?: ReactNode
 }) => {
   const [renderSupport] = useState(createRenderSupport<N2R>(ctx))
-  const staticProps = ctx.req.session.bistrio
+  const staticProps = renderSupport.getStaticProps()
   const props = { hydrate }
 
   return (

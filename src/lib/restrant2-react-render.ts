@@ -15,6 +15,8 @@ import {
 import { safeImport } from './safe-import'
 import { Localizer } from './shared/locale'
 import { PageNode, RenderSupport, suspense } from './shared/render-support'
+import { StaticProps } from '../client'
+import { SessionData } from 'express-session'
 
 type Node = React.FC<unknown>
 
@@ -98,6 +100,16 @@ export function createRenderFunc<RS extends NamedResources>(
   return newRender
 }
 
+const safeStaticProps = (session: Partial<SessionData>): StaticProps => {
+  const sessionProps = session.bistrio
+  if (!sessionProps) {
+    const sessionProps = { __once: {} }
+    session.bistrio = sessionProps
+    return sessionProps.__once
+  }
+  return sessionProps.__once
+}
+
 export type BuildActionContextCreator<RS extends NamedResources> = (
   viewRoot: string,
   arrange: NodeArrangeFunc<RS>,
@@ -116,11 +128,8 @@ class BistrioActionContext extends ActionContextImpl {
   }
 
   responseInvalid(path: string, error: ValidationError, source: unknown): void {
-    let bistrio = this.req.session.bistrio
-    if (!bistrio) {
-      bistrio = this.req.session.bistrio = { custom: {} }
-    }
-    bistrio.invalid = { error, source }
+    const staticProps = safeStaticProps(this.req.session)
+    staticProps.invalid = { error, source }
     this.redirect(path)
   }
 }
@@ -138,17 +147,24 @@ export function buildActionContextCreator<RS extends NamedResources>(
 }
 
 export function createRenderSupport<RS extends NamedResources>(ctx: ActionContext = new NullActionContext()) {
-  return new ServerRenderSupport<RS>(ctx)
+  const rs = new ServerRenderSupport<RS>(ctx)
+  const bistrioSession = ctx.req.session.bistrio
+  if (bistrioSession) {
+    bistrioSession.__once = {}
+  }
+  return rs
 }
 
 class ServerRenderSupport<RS extends NamedResources> implements RenderSupport<RS> {
   private suspense
+  private session
 
   readonly isClient: boolean = false
   readonly isServer: boolean = true
 
   constructor(private ctx: ActionContext) {
     this.suspense = suspense()
+    this.session = { ...this.ctx.req.session, bistrio: { ...(this.ctx.req.session.bistrio || { __once: {} }) } } // for session.destroy() on streaming
   }
 
   getLocalizer(): Localizer {
@@ -181,11 +197,7 @@ class ServerRenderSupport<RS extends NamedResources> implements RenderSupport<RS
     return this.getStaticProps().invalid
   }
 
-  private getStaticProps() {
-    const staticProps = this.ctx.req.session.bistrio
-    if (!staticProps) {
-      return (this.ctx.req.session.bistrio = {})
-    }
-    return staticProps
+  getStaticProps(): StaticProps {
+    return safeStaticProps(this.session)
   }
 }

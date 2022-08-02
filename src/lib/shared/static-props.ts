@@ -9,3 +9,8 @@ export type StaticProps = {
   invalid?: InvalidProps
   custom?: Record<string, unknown>
 }
+
+export type SessionProps = {
+  [key: string]: unknown
+  __once: StaticProps
+}
