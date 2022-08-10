@@ -19,5 +19,5 @@
     "resolveJsonModule": true,
     "jsx": "react-jsx"
   },
-  "include": ["server/**/*","params/**/*", "routes/**/*", "views/**/*", "locales/**/*", "server/types"] 
+  "include": ["server/**/*","params/**/*", "routes/**/*", "views/**/*", "locales/**/*", "server/types"]
 }

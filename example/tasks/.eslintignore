@@ -4,3 +4,7 @@ bin
 public
 
 prisma
+config
+
+.eslintrc.js
+jest.config.js
