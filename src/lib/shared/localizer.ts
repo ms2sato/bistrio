@@ -77,7 +77,8 @@ export class LocalizerImpl implements Localizer {
 
 export const initLocale = <LM extends Record<string, LocaleDictionary>>(localeMap: LM): LocaleSelector => {
   const select = (lang: string) => {
-    const dictionary = localeMap[lang]
+    const delimAt = lang.indexOf('-')
+    const dictionary = localeMap[delimAt === -1 ? lang : lang.substring(0, delimAt)]
     if (dictionary == undefined) {
       throw new Error(`Unexpected locale: ${lang}`)
     }

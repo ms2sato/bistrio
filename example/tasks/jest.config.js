@@ -9,6 +9,7 @@ const config = {
       tsconfig: './config/tsconfig.test.json',
     },
   },
+  testPathIgnorePatterns: ["<rootDir>/__tests__/support/"],
 }
 
 module.exports = config

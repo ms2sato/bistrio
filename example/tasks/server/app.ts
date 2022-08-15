@@ -36,7 +36,6 @@ export async function setup() {
   app.use(express.static(path.join(__dirname, '../public')))
 
   // TODO: can configure
-  console.log(process.env.SESSION_SECRET)
   app.use(
     session({
       secret: process.env.SESSION_SECRET || 'secret',
