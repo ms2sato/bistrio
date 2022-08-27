@@ -1,25 +1,69 @@
-import { asURL, extend } from '../support'
+import { asURL, extend, RequestHolder } from '../support'
 
-describe('/tasks', () => {
+describe('senario /tasks', () => {
+  let req: RequestHolder
+
   beforeAll(async () => {
-    extend(page)
+    req = extend(page)
     await page.goto(asURL('tasks'))
   })
 
-  it('should be titled "Tasks"', async () => {
+  test('senario', async () => {
     await page.waitForSelector('table') // wait for suspense
+    await req.waitForAllResponses()
+
+    expect(req.requested.where({ resourceType: 'ajax', method: 'GET', url: asURL('api/tasks/') })).toHaveLength(1)
+    expect(req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL('api/tasks/') })).toHaveLength(1)
     await expect(page.title()).resolves.toMatch('Tasks')
-  })
-})
+    req.clear()
+    await page.click('a[href="/tasks/build"]')
 
-describe('/tasks/build', () => {
-  beforeAll(async () => {
-    extend(page)
-    await page.goto(asURL('tasks/build'))
-  })
-
-  it('should be titled "Tasks"', async () => {
     await page.waitForSelector('body')
+    await req.waitForAllResponses()
+    expect(req.requested.where({ resourceType: 'ajax' })).toHaveLength(0)
     await expect(page.title()).resolves.toMatch('Tasks')
+    req.clear()
+
+    await page.$eval('input[name=title]', (el) => ((el as HTMLInputElement).value = 'TestTitle'))
+    await page.$eval('textarea[name=description]', (el) => ((el as HTMLInputElement).value = 'TestDescription'))
+    await page.click('input[type="submit"]')
+
+    await page.waitForSelector('table') // wait for suspense
+    await req.waitForAllResponses()
+
+    expect(req.requested.where({ resourceType: 'ajax', method: 'GET', url: asURL('api/tasks/') })).toHaveLength(1)
+    expect(req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL('api/tasks/') })).toHaveLength(1)
+    await expect(page.title()).resolves.toMatch('Tasks')
+    req.clear()
   })
 })
+
+// describe('/tasks', () => {
+//   let req: RequestHolder
+
+//   beforeAll(async () => {
+//     req = extend(page)
+//     await page.goto(asURL('tasks'))
+//   })
+
+//   it('should be titled "Tasks"', async () => {
+//     await page.waitForSelector('table') // wait for suspense
+//     expect(req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL('api/tasks/') })).toHaveLength(1)
+//     await expect(page.title()).resolves.toMatch('Tasks')
+//   })
+// })
+
+// describe('/tasks/build', () => {
+//   let req: RequestHolder
+
+//   beforeAll(async () => {
+//     req = extend(page)
+//     await page.goto(asURL('tasks/build'))
+//   })
+
+//   it('should be titled "Tasks"', async () => {
+//     await page.waitForSelector('body')
+//     expect(req.requested.where({ resourceType: 'ajax'})).toHaveLength(0)
+//     await expect(page.title()).resolves.toMatch('Tasks')
+//   })
+// })
