@@ -44,12 +44,6 @@ export function matchCriteria(request: HTTPRequest, criteria: Criteria) {
 }
 
 export function match(criterias: Criteria[], request: HTTPRequest): boolean {
-  // console.log('criterias:', criterias)
-  // console.log(
-  //   'criteria.find',
-  //   criterias.find((criteria) => matchCriteria(request, criteria))
-  // )
-
   return criterias.find((criteria) => matchCriteria(request, criteria)) !== undefined
 }
 
@@ -91,7 +85,8 @@ export type RequestHolder = {
   finished: RequestMap
   errors: Error[]
   waitForAllResponses(): Promise<void>
-  waitForResponses(criteria: Criteria[], count: number): Promise<void>
+  waitForResponses(count: number): Promise<void>
+  waitForResponses(count: number, criterias: Criteria | Criteria[]): Promise<void>
   clear(): void
 }
 
@@ -144,7 +139,6 @@ function requestHoldable(page: Page): RequestHolder {
     const resolver = requestIdToResolver.get(requestId)
     if (resolver === undefined) {
       // console.debug(`resolver is undefined; requestId: ${requestId}`)
-
       // request and requestfinished is random order
     } else {
       resolver()
@@ -165,8 +159,13 @@ function requestHoldable(page: Page): RequestHolder {
     async waitForAllResponses() {
       await Promise.all(promises)
     },
-    async waitForResponses(criterias: Criteria[], count: number = criterias.length) {
-      waitingCriterias = criterias
+    async waitForResponses(count: number, criterias: Criteria | Criteria[] = []) {
+      if (Array.isArray(criterias)) {
+        waitingCriterias = criterias
+      } else {
+        waitingCriterias = [criterias]
+      }
+
       const criteriadPromise = new Promise<void>((resolve) => {
         criteriaPromiseResolver = resolve
       })
