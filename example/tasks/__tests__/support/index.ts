@@ -79,53 +79,37 @@ export class RequestMap {
 }
 
 export type RequestHolder = {
-  promises: Promise<void>[]
   requested: RequestMap
   failed: RequestMap
   finished: RequestMap
   errors: Error[]
-  waitForAllResponses(): Promise<void>
   waitForResponses(count: number): Promise<void>
   waitForResponses(count: number, criterias: Criteria | Criteria[]): Promise<void>
   clear(): void
 }
 
 function requestHoldable(page: Page): RequestHolder {
+  const getRequestId = (request: HTTPRequest) => (request as HttpRequestImpl)._requestId
+
   const requested: RequestMap = new RequestMap()
   const failed: RequestMap = new RequestMap()
   const finished: RequestMap = new RequestMap()
   const errors: Error[] = []
 
-  const promises: Promise<void>[] = []
   let waitingCriterias: Criteria[] = []
   let matchingCriteriaCount: number
   let criteriaPromiseResolver: () => void
-  const requestIdToResolver: Map<RequestId, () => void> = new Map()
 
   page.on('pageerror', (error) => {
     errors.push(error)
   })
 
   page.on('request', (request) => {
-    const requestId: string = (request as HttpRequestImpl)._requestId
-    requested.set(requestId, request)
-
-    // request and requestfinishe is random order
-    if (finished.has(requestId)) {
-      // request already finished
-      // console.debug('request already finished')
-    } else {
-      promises.push(
-        new Promise<void>((resolve) => {
-          requestIdToResolver.set(requestId, resolve)
-        })
-      )
-    }
+    requested.set(getRequestId(request), request)
   })
 
   page.on('requestfinished', (request) => {
-    const requestId: string = (request as HttpRequestImpl)._requestId
-    finished.set(requestId, request)
+    finished.set(getRequestId(request), request)
 
     // console.log('matchCriteria', matchCriteria(request, { resourceType: 'ajax' }))
 
@@ -135,30 +119,17 @@ function requestHoldable(page: Page): RequestHolder {
         criteriaPromiseResolver()
       }
     }
-
-    const resolver = requestIdToResolver.get(requestId)
-    if (resolver === undefined) {
-      // console.debug(`resolver is undefined; requestId: ${requestId}`)
-      // request and requestfinished is random order
-    } else {
-      resolver()
-    }
   })
 
   page.on('requestfailed', (request) => {
-    const requestId: string = (request as HttpRequestImpl)._requestId
-    failed.set(requestId, request)
+    failed.set(getRequestId(request), request)
   })
 
   return {
-    promises,
     requested,
     failed,
     finished,
     errors,
-    async waitForAllResponses() {
-      await Promise.all(promises)
-    },
     async waitForResponses(count: number, criterias: Criteria | Criteria[] = []) {
       if (Array.isArray(criterias)) {
         waitingCriterias = criterias
@@ -174,8 +145,6 @@ function requestHoldable(page: Page): RequestHolder {
     },
     clear() {
       // console.log('clear')
-
-      this.promises.length = 0
       this.requested.clear()
       this.failed.clear()
       this.finished.clear()
