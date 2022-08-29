@@ -9,17 +9,16 @@ describe('senario /tasks', () => {
   })
 
   test('senario', async () => {
-    await page.waitForSelector('table') // wait for suspense
-    await req.waitForAllResponses()
+    await req.waitForResponses([{resourceType: 'ajax'}], 1)
+    expect(req.errors).toHaveLength(0)
 
-    expect(req.requested.where({ resourceType: 'ajax', method: 'GET', url: asURL('api/tasks/') })).toHaveLength(1)
     expect(req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL('api/tasks/') })).toHaveLength(1)
     await expect(page.title()).resolves.toMatch('Tasks')
     req.clear()
     await page.click('a[href="/tasks/build"]')
 
-    await page.waitForSelector('body')
     await req.waitForAllResponses()
+    expect(req.errors).toHaveLength(0)
     expect(req.requested.where({ resourceType: 'ajax' })).toHaveLength(0)
     await expect(page.title()).resolves.toMatch('Tasks')
     req.clear()
@@ -28,13 +27,10 @@ describe('senario /tasks', () => {
     await page.$eval('textarea[name=description]', (el) => ((el as HTMLInputElement).value = 'TestDescription'))
     await page.click('input[type="submit"]')
 
-    await page.waitForSelector('table') // wait for suspense
-    await req.waitForAllResponses()
-
-    expect(req.requested.where({ resourceType: 'ajax', method: 'GET', url: asURL('api/tasks/') })).toHaveLength(1)
+    await req.waitForResponses([{resourceType: 'ajax'}], 1)
+    expect(req.errors).toHaveLength(0)
     expect(req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL('api/tasks/') })).toHaveLength(1)
     await expect(page.title()).resolves.toMatch('Tasks')
-    req.clear()
   })
 })
 
