@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser'
 import logger from 'morgan'
 import createDebug from 'debug'
 import methodOverride from 'method-override'
+import session from 'express-session'
 
 import { ServerRouter } from 'restrant2'
 import { useWebpackDev, localeMiddleware, getRouterFactory } from 'bistrio'
@@ -33,6 +34,19 @@ export async function setup() {
   app.use(express.urlencoded({ extended: false }))
   app.use(cookieParser())
   app.use(express.static(path.join(__dirname, '../public')))
+
+  // TODO: can configure
+  app.use(
+    session({
+      secret: process.env.SESSION_SECRET || 'secret',
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+      },
+    })
+  )
 
   // @see http://expressjs.com/en/resources/middleware/method-override.html
   type BodyType = {

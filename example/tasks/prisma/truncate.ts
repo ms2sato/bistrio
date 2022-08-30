@@ -1,9 +1,11 @@
 import { PrismaClient } from '@prisma/client'
 
+const env = process.env.NODE_ENV || 'development'
+
 async function main(prisma: PrismaClient) {
-  console.log('NODE_ENV', process.env.NODE_ENV)
-  if (process.env.NODE_ENV !== 'development') {
-    throw new Error('[CAUTION!]truncate can on NODE_ENV=development')
+  console.log('NODE_ENV', env)
+  if (env === 'production') {
+    throw new Error('[CAUTION!]truncate cannot on NODE_ENV=production')
   }
 
   const ret = await prisma.$queryRaw<

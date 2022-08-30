@@ -1,5 +1,6 @@
 import { NamedResources } from 'restrant2/client'
 import { Localizer } from '../shared/locale'
+import { InvalidProps } from './static-props'
 
 export type Reader<T> = () => T
 
@@ -8,7 +9,12 @@ export function suspendable<T>(promise: Promise<T>): Reader<T> {
   let result: T
   let err: Error
   const suspender = promise.then(
-    (ret) => (result = ret),
+    (ret) => {
+      if (ret === undefined) {
+        throw new Error('suspendable: promise resolved with undefined')
+      }
+      result = ret
+    },
     (e: Error) => (err = e)
   )
   return () => {
@@ -27,8 +33,9 @@ export type RenderSupport<RS extends NamedResources> = {
   suspend: <T>(asyncProcess: () => Promise<T>, key: string) => T
   params: Readonly<ParamsDictionary>
   // TODO: query
-  isClient: boolean
-  isServer: boolean
+  readonly isClient: boolean
+  readonly isServer: boolean
+  readonly invalid: InvalidProps | undefined
 }
 
 export type PageProps<RS extends NamedResources> = { rs: RenderSupport<RS> }

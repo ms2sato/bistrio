@@ -5,14 +5,18 @@ import { renderToPipeableStream } from 'react-dom/server'
 import {
   ActionContextImpl,
   ActionContextCreator,
-  createDefaultActionContext,
   ActionContext,
   NullActionContext,
   NamedResources,
+  ServerRouter,
+  ActionDescriptor,
+  ValidationError,
 } from 'restrant2'
 import { safeImport } from './safe-import'
 import { Localizer } from './shared/locale'
 import { PageNode, RenderSupport, suspense } from './shared/render-support'
+import { StaticProps } from '../client'
+import { SessionData } from 'express-session'
 
 type Node = React.FC<unknown>
 
@@ -96,11 +100,39 @@ export function createRenderFunc<RS extends NamedResources>(
   return newRender
 }
 
+const safeStaticProps = (session: Partial<SessionData>): StaticProps => {
+  const sessionProps = session.bistrio
+  if (!sessionProps) {
+    const sessionProps = { __once: {} }
+    session.bistrio = sessionProps
+    return sessionProps.__once
+  }
+  return sessionProps.__once
+}
+
 export type BuildActionContextCreator<RS extends NamedResources> = (
   viewRoot: string,
   arrange: NodeArrangeFunc<RS>,
   failText: string
 ) => ActionContextCreator
+
+class BistrioActionContext extends ActionContextImpl {
+  constructor(
+    router: ServerRouter,
+    req: express.Request,
+    res: express.Response,
+    descriptor: ActionDescriptor,
+    httpPath: string
+  ) {
+    super(router, req, res, descriptor, httpPath)
+  }
+
+  responseInvalid(path: string, error: ValidationError, source: unknown): void {
+    const staticProps = safeStaticProps(this.req.session)
+    staticProps.invalid = { error, source }
+    this.redirect(path)
+  }
+}
 
 export function buildActionContextCreator<RS extends NamedResources>(
   viewRoot: string,
@@ -108,24 +140,31 @@ export function buildActionContextCreator<RS extends NamedResources>(
   failText = ''
 ): ActionContextCreator {
   return (props) => {
-    const ctx = createDefaultActionContext(props)
+    const ctx = new BistrioActionContext(props.router, props.req, props.res, props.descriptor, props.httpPath)
     ctx.render = createRenderFunc(arrange, viewRoot, failText)
     return ctx
   }
 }
 
 export function createRenderSupport<RS extends NamedResources>(ctx: ActionContext = new NullActionContext()) {
-  return new ServerRenderSupport<RS>(ctx)
+  const rs = new ServerRenderSupport<RS>(ctx)
+  const bistrioSession = ctx.req.session.bistrio
+  if (bistrioSession) {
+    bistrioSession.__once = {}
+  }
+  return rs
 }
 
 class ServerRenderSupport<RS extends NamedResources> implements RenderSupport<RS> {
   private suspense
+  private session
 
   readonly isClient: boolean = false
   readonly isServer: boolean = true
 
   constructor(private ctx: ActionContext) {
     this.suspense = suspense()
+    this.session = { ...this.ctx.req.session, bistrio: { ...(this.ctx.req.session.bistrio || { __once: {} }) } } // for session.destroy() on streaming
   }
 
   getLocalizer(): Localizer {
@@ -152,5 +191,13 @@ class ServerRenderSupport<RS extends NamedResources> implements RenderSupport<RS
 
   get params() {
     return this.ctx.params
+  }
+
+  get invalid() {
+    return this.getStaticProps().invalid
+  }
+
+  getStaticProps(): StaticProps {
+    return safeStaticProps(this.session)
   }
 }
