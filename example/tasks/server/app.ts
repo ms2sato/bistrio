@@ -96,11 +96,6 @@ export async function setup() {
   app.use(router.router)
   await router.build()
 
-  // catch 404 and forward to error handler
-  app.use(function (req, res, next) {
-    next(createError(404))
-  })
-
   // error handler
   app.use(function (err: unknown, req, res, _next) {
     // @see https://stackoverflow.com/questions/51624117/how-to-check-for-the-property-type-of-an-unknown-value
@@ -119,6 +114,11 @@ export async function setup() {
     res.status(isHttpError(err) ? err.status : 500)
     // res.render('error', { err })
   } as express.ErrorRequestHandler)
+
+  // catch 404 and forward to error handler
+  app.use((req, res, next) => {
+    next(createError(404))
+  })
 
   return app
 }
