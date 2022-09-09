@@ -7,7 +7,7 @@ import { NamedResources, Router } from 'restrant2/client'
 
 import { LocaleSelector } from './locale'
 import { initLocale, LocaleDictionary } from './localizer'
-import { PageNode } from './render-support'
+import { PageNode, SuspendedNamedResources } from './render-support'
 import { setup, Engine, ClientRenderSupport } from './client'
 
 import { ViewDescriptor } from './client-stub-router'
@@ -20,18 +20,18 @@ export type EntriesConfig = {
   }
 }
 
-export async function entry<R extends NamedResources>({
+export async function entry<R extends NamedResources, SRS extends SuspendedNamedResources>({
   routes,
   views,
   localeMap,
   container,
 }: {
   routes: (router: Router) => void
-  views: ViewDescriptor<R>
+  views: ViewDescriptor<R, SRS>
   localeMap: Record<string, LocaleDictionary>
   container: Element | null
 }) {
-  const PageAdapter = ({ Page, rs }: { Page: PageNode<R>; rs: ClientRenderSupport<R> }) => {
+  const PageAdapter = ({ Page, rs }: { Page: PageNode<R, SRS>; rs: ClientRenderSupport<R, SRS> }) => {
     const params = useParams()
     rs.params = params
     return <Page rs={rs} />
@@ -63,7 +63,7 @@ export async function entry<R extends NamedResources>({
     staticProps = JSON.parse(decodeHtml(staticPropsJson)) as StaticProps
   }
 
-  const engine: Engine<R> = await setup<R>(routes, views)
+  const engine: Engine<R, SRS> = await setup<R, SRS>(routes, views)
   const localeSelector = initLocale(localeMap)
   hydrateRoot(
     container,

@@ -59,13 +59,7 @@ export type Resources = {
     )
 
     const ret = `${targets
-      .map(
-        (vpath, index) =>
-          `import * as __page${index} from '../../../${vpath.replace(
-            /\.tsx$/,
-            ''
-          )}'`
-      )
+      .map((vpath, index) => `import * as __page${index} from '../../../${vpath.replace(/\.tsx$/, '')}'`)
       .join('\n')}
 
 export const views = {
@@ -101,8 +95,17 @@ type NameToResource<R extends ResourcesT, NP extends NameToPathT> = {
   [name in keyof NP]: R[NP[name]]
 }
 
+type UnwrapPromiseFromMethods<R extends Resource> = {
+  [name in keyof R]: (...args:any[]) => Awaited<ReturnType<R[name]>>
+}
+
+type NameToSuspendedResource<R extends ResourcesT, NP extends NameToPathT> = {
+  [name in keyof NP]: UnwrapPromiseFromMethods<R[NP[name]]>
+}
+
 export type N2R = NameToResource<Resources, NameToPath>
-export type PageProps = TPageProps<N2R>
+export type N2SR = NameToSuspendedResource<Resources, NameToPath>
+export type PageProps = TPageProps<N2R, N2SR>
 `
     fs.writeFileSync(out, ret)
   }

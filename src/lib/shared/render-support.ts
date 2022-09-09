@@ -1,6 +1,12 @@
 import { NamedResources } from 'restrant2/client'
 import { Localizer } from '../shared/locale'
-import { InvalidProps } from './static-props'
+import { InvalidStateOrDefaultProps, InvalidState } from './static-props'
+
+export type SuspendedResourceMethod = (input?: any, ...args: any[]) => any
+export type SuspendedResource = Record<string, SuspendedResourceMethod>
+export type SuspendedNamedResources = {
+  [name: string]: SuspendedResource
+}
 
 export type Reader<T> = () => T
 
@@ -26,20 +32,22 @@ export function suspendable<T>(promise: Promise<T>): Reader<T> {
 
 export type ParamsDictionary = { [key: string]: string | undefined }
 
-export type RenderSupport<RS extends NamedResources> = {
+export type RenderSupport<RS extends NamedResources, SRS extends SuspendedNamedResources> = {
   getLocalizer: () => Localizer
   fetchJson: <T>(url: string, key?: string) => T
   resources: () => RS
+  suspendedResources: () => SRS
   suspend: <T>(asyncProcess: () => Promise<T>, key: string) => T
   params: Readonly<ParamsDictionary>
   // TODO: query
   readonly isClient: boolean
   readonly isServer: boolean
-  readonly invalid: InvalidProps | undefined
+  readonly invalidState: InvalidState | undefined
+  invalidStateOrDefault: <T>(source: T) => InvalidStateOrDefaultProps<T>
 }
 
-export type PageProps<RS extends NamedResources> = { rs: RenderSupport<RS> }
-export type PageNode<RS extends NamedResources> = React.FC<PageProps<RS>>
+export type PageProps<RS extends NamedResources, SRS extends SuspendedNamedResources> = { rs: RenderSupport<RS, SRS> }
+export type PageNode<RS extends NamedResources, SRS extends SuspendedNamedResources> = React.FC<PageProps<RS, SRS>>
 
 type ReaderMap = Map<string, Reader<unknown>>
 
@@ -67,8 +75,19 @@ export const suspense = () => {
   }
 }
 
-//export type ResourceOf<R extends ResourceFunc> = ReturnType<R>
-
-// type SuspendableResource<RF extends ResourceFunc> = {
-//   [key in keyof ResourceOf<RF>]: (...args: Parameters<ResourceOf<RF>[key]>) => Awaited<ReturnType<ResourceOf<RF>[key]>>
-// }
+export function createSuspendedResourcesProxy<RS extends NamedResources, SRS extends SuspendedNamedResources>(
+  rs: RenderSupport<RS, SRS>
+) {
+  const proxy: { [key: string]: { [methodName: string]: any } } = {}
+  for (const [name, resource] of Object.entries(rs.resources())) {
+    proxy[name] = {}
+    for (const [methodName] of Object.entries(resource)) {
+      proxy[name][methodName] = function (...args: any[]) {
+        // rs.suspend(() => rs.resources().api_task.show(params), 'api_task_show'),
+        console.log(`${name}/${methodName}`)
+        return rs.suspend(() => rs.resources()[name][methodName](...args), `${name}_${methodName}`)
+      }
+    }
+  }
+  return proxy
+}

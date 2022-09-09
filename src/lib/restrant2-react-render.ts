@@ -14,14 +14,14 @@ import {
 } from 'restrant2'
 import { safeImport } from './safe-import'
 import { Localizer } from './shared/locale'
-import { PageNode, RenderSupport, suspense } from './shared/render-support'
+import { createSuspendedResourcesProxy, PageNode, RenderSupport, SuspendedNamedResources, suspense } from './shared/render-support'
 import { StaticProps } from '../client'
 import { SessionData } from 'express-session'
 
 type Node = React.FC<unknown>
 
-export type NodeArrangeFunc<RC extends NamedResources> = (
-  node: PageNode<RC>,
+export type NodeArrangeFunc<RS extends NamedResources, SRS extends SuspendedNamedResources> = (
+  node: PageNode<RS, SRS>,
   hydrate: boolean,
   options: unknown,
   ctx: ActionContext
@@ -62,8 +62,8 @@ export function renderReactViewStream(res: express.Response, node: React.ReactNo
   })
 }
 
-export function createRenderFunc<RS extends NamedResources>(
-  arrange: NodeArrangeFunc<RS>,
+export function createRenderFunc<RS extends NamedResources, SRS extends SuspendedNamedResources>(
+  arrange: NodeArrangeFunc<RS, SRS>,
   viewRoot: string,
   failText = ''
 ) {
@@ -110,9 +110,9 @@ const safeStaticProps = (session: Partial<SessionData>): StaticProps => {
   return sessionProps.__once
 }
 
-export type BuildActionContextCreator<RS extends NamedResources> = (
+export type BuildActionContextCreator<RS extends NamedResources, SRS extends SuspendedNamedResources> = (
   viewRoot: string,
-  arrange: NodeArrangeFunc<RS>,
+  arrange: NodeArrangeFunc<RS, SRS>,
   failText: string
 ) => ActionContextCreator
 
@@ -129,14 +129,14 @@ class BistrioActionContext extends ActionContextImpl {
 
   responseInvalid(path: string, error: ValidationError, source: unknown): void {
     const staticProps = safeStaticProps(this.req.session)
-    staticProps.invalid = { error, source }
+    staticProps.invalidState = { error, source }
     this.redirect(path)
   }
 }
 
-export function buildActionContextCreator<RS extends NamedResources>(
+export function buildActionContextCreator<RS extends NamedResources, SRS extends SuspendedNamedResources>(
   viewRoot: string,
-  arrange: NodeArrangeFunc<RS>,
+  arrange: NodeArrangeFunc<RS, SRS>,
   failText = ''
 ): ActionContextCreator {
   return (props) => {
@@ -146,8 +146,10 @@ export function buildActionContextCreator<RS extends NamedResources>(
   }
 }
 
-export function createRenderSupport<RS extends NamedResources>(ctx: ActionContext = new NullActionContext()) {
-  const rs = new ServerRenderSupport<RS>(ctx)
+export function createRenderSupport<RS extends NamedResources, SRS extends SuspendedNamedResources>(
+  ctx: ActionContext = new NullActionContext()
+) {
+  const rs = new ServerRenderSupport<RS, SRS>(ctx)
   const bistrioSession = ctx.req.session.bistrio
   if (bistrioSession) {
     bistrioSession.__once = {}
@@ -155,7 +157,9 @@ export function createRenderSupport<RS extends NamedResources>(ctx: ActionContex
   return rs
 }
 
-class ServerRenderSupport<RS extends NamedResources> implements RenderSupport<RS> {
+class ServerRenderSupport<RS extends NamedResources, SRS extends SuspendedNamedResources>
+  implements RenderSupport<RS, SRS>
+{
   private suspense
   private session
 
@@ -189,12 +193,22 @@ class ServerRenderSupport<RS extends NamedResources> implements RenderSupport<RS
     return ret as RS
   }
 
+  suspendedResources(): SRS {
+    return createSuspendedResourcesProxy(this) as SRS
+  }
+
   get params() {
     return this.ctx.params
   }
 
-  get invalid() {
-    return this.getStaticProps().invalid
+  get invalidState() {
+    return this.getStaticProps().invalidState
+  }
+
+  invalidStateOrDefault<S>(source: S) {
+    // TODO: fix types
+    const inv = this.invalidState
+    return inv ? { error: inv.error, source: inv.source as S } : { source }
   }
 
   getStaticProps(): StaticProps {

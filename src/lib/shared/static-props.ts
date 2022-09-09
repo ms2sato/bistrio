@@ -1,12 +1,17 @@
 import { ValidationError } from 'restrant2/client'
 
-export type InvalidProps = {
+export type InvalidState<S = unknown> = {
   error: ValidationError
-  source: unknown
+  source: S
+}
+
+export type InvalidStateOrDefaultProps<S = unknown> = {
+  error?: ValidationError
+  source: S
 }
 
 export type StaticProps = {
-  invalid?: InvalidProps
+  invalidState?: InvalidState
   custom?: Record<string, unknown>
 }
 

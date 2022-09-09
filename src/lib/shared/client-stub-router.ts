@@ -14,7 +14,7 @@ import {
 } from 'restrant2/client'
 import { filterWithoutKeys } from './object-util'
 import { pathJoin } from './path-util'
-import { PageNode } from './render-support'
+import { PageNode, SuspendedNamedResources } from './render-support'
 
 const createPath = (resourceUrl: string, pathFormat: string, option: Record<string, string | number>) => {
   const keys: string[] = []
@@ -30,27 +30,27 @@ const createPath = (resourceUrl: string, pathFormat: string, option: Record<stri
   return { httpPath: pathJoin(resourceUrl, apath), keys }
 }
 
-export type ViewDescriptor<RS extends NamedResources> = {
-  [key: string]: { Page: PageNode<RS>; hydrate: boolean }
+export type ViewDescriptor<RS extends NamedResources, SRS extends SuspendedNamedResources> = {
+  [key: string]: { Page: PageNode<RS, SRS>; hydrate: boolean }
 }
 
 export type ResourceInfo = { httpPath: string; resource: Resource }
 type ResourceNameToInfo = Map<string, ResourceInfo>
 
-export type ClientGenretateRouterCore<RS extends NamedResources> = {
+export type ClientGenretateRouterCore<RS extends NamedResources, SRS extends SuspendedNamedResources> = {
   host: string
   constructConfig: ConstructConfig
-  viewDescriptor: ViewDescriptor<RS>
+  viewDescriptor: ViewDescriptor<RS, SRS>
   handlerBuildRunners: HandlerBuildRunner[]
   resourceNameToInfo: ResourceNameToInfo
-  pathToPage: Map<string, PageNode<RS>>
+  pathToPage: Map<string, PageNode<RS, SRS>>
 }
 
-export class ClientGenretateRouter<RS extends NamedResources> implements Router {
+export class ClientGenretateRouter<RS extends NamedResources, SRS extends SuspendedNamedResources> implements Router {
   constructor(
-    private viewDescriptor: ViewDescriptor<RS>,
+    private viewDescriptor: ViewDescriptor<RS, SRS>,
     private httpPath = '/',
-    private core: ClientGenretateRouterCore<RS> = {
+    private core: ClientGenretateRouterCore<RS, SRS> = {
       host: window.location.origin, // TODO: pluggable
       constructConfig: Actions.defaultConstructConfig(), // TODO: pluggable
       viewDescriptor,
@@ -62,7 +62,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
 
   sub(rpath: string, ..._args: unknown[]): Router {
     // TODO: args and middlewares
-    return new ClientGenretateRouter<RS>(this.viewDescriptor, pathJoin(this.httpPath, rpath), this.core)
+    return new ClientGenretateRouter<RS, SRS>(this.viewDescriptor, pathJoin(this.httpPath, rpath), this.core)
   }
 
   resources(rpath: string, routeConfig: RouteConfig): void {
