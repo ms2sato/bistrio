@@ -7,7 +7,7 @@ import { NamedResources, Router } from 'restrant2/client'
 
 import { LocaleSelector } from './locale'
 import { initLocale, LocaleDictionary } from './localizer'
-import { PageNode } from './render-support'
+import { PageNode, SuspendedNamedResources } from './render-support'
 import { setup, Engine, ClientRenderSupport } from './client'
 
 import { ViewDescriptor } from './client-stub-router'

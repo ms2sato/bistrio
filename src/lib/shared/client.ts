@@ -1,8 +1,16 @@
 import { Resource, NamedResources, Router } from 'restrant2/client'
 import { LocaleSelector, Localizer } from './locale'
-import { PageNode, ParamsDictionary, RenderSupport, suspense } from './render-support'
+import {
+  createSuspendedResourcesProxy,
+  PageNode,
+  ParamsDictionary,
+  RenderSupport,
+  StubResources,
+  StubSuspendedResources,
+  suspense,
+} from './render-support'
 import { ClientGenretateRouter, ClientGenretateRouterCore, ResourceInfo, ViewDescriptor } from './client-stub-router'
-import { InvalidProps, StaticProps } from './static-props'
+import { InvalidState, InvalidStateOrDefaultProps, StaticProps } from './static-props'
 
 export class ClientRenderSupport<RS extends NamedResources> implements RenderSupport<RS> {
   private suspense
@@ -35,20 +43,29 @@ export class ClientRenderSupport<RS extends NamedResources> implements RenderSup
     return info.resource
   }
 
-  resources(): RS {
+  resources(): StubResources<RS> {
     const ret: { [name: string]: Resource } = {}
     this.core.resourceNameToInfo.forEach((info, name) => {
       ret[name] = info.resource
     })
-    return ret as RS
+    return ret as StubResources<RS>
+  }
+
+  suspendedResources(): StubSuspendedResources<RS> {
+    return createSuspendedResourcesProxy(this) as StubSuspendedResources<RS>
   }
 
   suspend<T>(asyncProcess: () => Promise<T>, key: string): T {
     return this.suspense.suspend(asyncProcess, key)
   }
 
-  get invalid(): InvalidProps | undefined {
-    return this.staticProps.invalid
+  get invalidState(): InvalidState | undefined {
+    return this.staticProps.invalidState
+  }
+
+  invalidStateOrDefault<S>(source: S): InvalidStateOrDefaultProps<S> {
+    const inv = this.invalidState
+    return inv ? { error: inv.error, source: inv.source as S } : { source }
   }
 }
 

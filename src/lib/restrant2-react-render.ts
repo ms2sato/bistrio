@@ -14,14 +14,21 @@ import {
 } from 'restrant2'
 import { safeImport } from './safe-import'
 import { Localizer } from './shared/locale'
-import { PageNode, RenderSupport, suspense } from './shared/render-support'
+import {
+  PageNode,
+  RenderSupport,
+  suspense,
+  createSuspendedResourcesProxy,
+  StubResources,
+  StubSuspendedResources,
+} from './shared/render-support'
 import { StaticProps } from '../client'
 import { SessionData } from 'express-session'
 
 type Node = React.FC<unknown>
 
-export type NodeArrangeFunc<RC extends NamedResources> = (
-  node: PageNode<RC>,
+export type NodeArrangeFunc<RS extends NamedResources> = (
+  node: PageNode<RS>,
   hydrate: boolean,
   options: unknown,
   ctx: ActionContext
@@ -129,7 +136,7 @@ class BistrioActionContext extends ActionContextImpl {
 
   responseInvalid(path: string, error: ValidationError, source: unknown): void {
     const staticProps = safeStaticProps(this.req.session)
-    staticProps.invalid = { error, source }
+    staticProps.invalidState = { error, source }
     this.redirect(path)
   }
 }
@@ -183,18 +190,28 @@ class ServerRenderSupport<RS extends NamedResources> implements RenderSupport<RS
     return this.suspense.suspend(asyncProcess, key)
   }
 
-  resources(): RS {
+  resources(): StubResources<RS> {
     const ret = this.ctx.resources()
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return ret as RS
+    return ret as StubResources<RS>
+  }
+
+  suspendedResources(): StubSuspendedResources<RS> {
+    return createSuspendedResourcesProxy(this) as StubSuspendedResources<RS>
   }
 
   get params() {
     return this.ctx.params
   }
 
-  get invalid() {
-    return this.getStaticProps().invalid
+  get invalidState() {
+    return this.getStaticProps().invalidState
+  }
+
+  invalidStateOrDefault<S>(source: S) {
+    // TODO: fix types
+    const inv = this.invalidState
+    return inv ? { error: inv.error, source: inv.source as S } : { source }
   }
 
   getStaticProps(): StaticProps {

@@ -59,13 +59,7 @@ export type Resources = {
     )
 
     const ret = `${targets
-      .map(
-        (vpath, index) =>
-          `import * as __page${index} from '../../../${vpath.replace(
-            /\.tsx$/,
-            ''
-          )}'`
-      )
+      .map((vpath, index) => `import * as __page${index} from '../../../${vpath.replace(/\.tsx$/, '')}'`)
       .join('\n')}
 
 export const views = {

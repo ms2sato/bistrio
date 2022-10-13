@@ -14,7 +14,7 @@ import {
 } from 'restrant2/client'
 import { filterWithoutKeys } from './object-util'
 import { pathJoin } from './path-util'
-import { PageNode } from './render-support'
+import { PageNode, SuspendedNamedResources } from './render-support'
 
 const createPath = (resourceUrl: string, pathFormat: string, option: Record<string, string | number>) => {
   const keys: string[] = []
