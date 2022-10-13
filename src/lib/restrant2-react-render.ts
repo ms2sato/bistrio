@@ -14,14 +14,21 @@ import {
 } from 'restrant2'
 import { safeImport } from './safe-import'
 import { Localizer } from './shared/locale'
-import { createSuspendedResourcesProxy, PageNode, RenderSupport, SuspendedNamedResources, suspense } from './shared/render-support'
+import {
+  PageNode,
+  RenderSupport,
+  suspense,
+  createSuspendedResourcesProxy,
+  StubResources,
+  StubSuspendedResources,
+} from './shared/render-support'
 import { StaticProps } from '../client'
 import { SessionData } from 'express-session'
 
 type Node = React.FC<unknown>
 
-export type NodeArrangeFunc<RS extends NamedResources, SRS extends SuspendedNamedResources> = (
-  node: PageNode<RS, SRS>,
+export type NodeArrangeFunc<RS extends NamedResources> = (
+  node: PageNode<RS>,
   hydrate: boolean,
   options: unknown,
   ctx: ActionContext
@@ -62,8 +69,8 @@ export function renderReactViewStream(res: express.Response, node: React.ReactNo
   })
 }
 
-export function createRenderFunc<RS extends NamedResources, SRS extends SuspendedNamedResources>(
-  arrange: NodeArrangeFunc<RS, SRS>,
+export function createRenderFunc<RS extends NamedResources>(
+  arrange: NodeArrangeFunc<RS>,
   viewRoot: string,
   failText = ''
 ) {
@@ -110,9 +117,9 @@ const safeStaticProps = (session: Partial<SessionData>): StaticProps => {
   return sessionProps.__once
 }
 
-export type BuildActionContextCreator<RS extends NamedResources, SRS extends SuspendedNamedResources> = (
+export type BuildActionContextCreator<RS extends NamedResources> = (
   viewRoot: string,
-  arrange: NodeArrangeFunc<RS, SRS>,
+  arrange: NodeArrangeFunc<RS>,
   failText: string
 ) => ActionContextCreator
 
@@ -134,9 +141,9 @@ class BistrioActionContext extends ActionContextImpl {
   }
 }
 
-export function buildActionContextCreator<RS extends NamedResources, SRS extends SuspendedNamedResources>(
+export function buildActionContextCreator<RS extends NamedResources>(
   viewRoot: string,
-  arrange: NodeArrangeFunc<RS, SRS>,
+  arrange: NodeArrangeFunc<RS>,
   failText = ''
 ): ActionContextCreator {
   return (props) => {
@@ -146,10 +153,8 @@ export function buildActionContextCreator<RS extends NamedResources, SRS extends
   }
 }
 
-export function createRenderSupport<RS extends NamedResources, SRS extends SuspendedNamedResources>(
-  ctx: ActionContext = new NullActionContext()
-) {
-  const rs = new ServerRenderSupport<RS, SRS>(ctx)
+export function createRenderSupport<RS extends NamedResources>(ctx: ActionContext = new NullActionContext()) {
+  const rs = new ServerRenderSupport<RS>(ctx)
   const bistrioSession = ctx.req.session.bistrio
   if (bistrioSession) {
     bistrioSession.__once = {}
@@ -157,9 +162,7 @@ export function createRenderSupport<RS extends NamedResources, SRS extends Suspe
   return rs
 }
 
-class ServerRenderSupport<RS extends NamedResources, SRS extends SuspendedNamedResources>
-  implements RenderSupport<RS, SRS>
-{
+class ServerRenderSupport<RS extends NamedResources> implements RenderSupport<RS> {
   private suspense
   private session
 
@@ -187,14 +190,14 @@ class ServerRenderSupport<RS extends NamedResources, SRS extends SuspendedNamedR
     return this.suspense.suspend(asyncProcess, key)
   }
 
-  resources(): RS {
+  resources(): StubResources<RS> {
     const ret = this.ctx.resources()
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return ret as RS
+    return ret as StubResources<RS>
   }
 
-  suspendedResources(): SRS {
-    return createSuspendedResourcesProxy(this) as SRS
+  suspendedResources(): StubSuspendedResources<RS> {
+    return createSuspendedResourcesProxy(this) as StubSuspendedResources<RS>
   }
 
   get params() {

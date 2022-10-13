@@ -1,4 +1,4 @@
-import { CreateActionOptionsFunction } from 'restrant2'
+import { CreateActionOptionFunction } from 'restrant2'
 import createDebug from 'debug'
 
 const debug = createDebug('bistrio:customizer')
@@ -10,7 +10,7 @@ export type CustomMethodOption = {
   }
 }
 
-export const createActionOptions: CreateActionOptionsFunction = (ctx, _httpPath, _ad) => {
+export const createActionOptions: CreateActionOptionFunction = (ctx, _httpPath, _ad) => {
   debug('createOptions: req.params %s', ctx.params)
 
   const customMethodOption: CustomMethodOption = {}

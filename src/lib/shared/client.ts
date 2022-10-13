@@ -5,15 +5,14 @@ import {
   PageNode,
   ParamsDictionary,
   RenderSupport,
-  SuspendedNamedResources,
+  StubResources,
+  StubSuspendedResources,
   suspense,
 } from './render-support'
 import { ClientGenretateRouter, ClientGenretateRouterCore, ResourceInfo, ViewDescriptor } from './client-stub-router'
 import { InvalidState, InvalidStateOrDefaultProps, StaticProps } from './static-props'
 
-export class ClientRenderSupport<RS extends NamedResources, SRS extends SuspendedNamedResources>
-  implements RenderSupport<RS, SRS>
-{
+export class ClientRenderSupport<RS extends NamedResources> implements RenderSupport<RS> {
   private suspense
   params: ParamsDictionary = {} as const
 
@@ -21,7 +20,7 @@ export class ClientRenderSupport<RS extends NamedResources, SRS extends Suspende
   readonly isServer: boolean = false
 
   constructor(
-    private core: ClientGenretateRouterCore<RS, SRS>,
+    private core: ClientGenretateRouterCore<RS>,
     private localeSelector: LocaleSelector,
     private staticProps: StaticProps
   ) {
@@ -44,16 +43,16 @@ export class ClientRenderSupport<RS extends NamedResources, SRS extends Suspende
     return info.resource
   }
 
-  resources(): RS {
+  resources(): StubResources<RS> {
     const ret: { [name: string]: Resource } = {}
     this.core.resourceNameToInfo.forEach((info, name) => {
       ret[name] = info.resource
     })
-    return ret as RS
+    return ret as StubResources<RS>
   }
 
-  suspendedResources(): SRS {
-    return createSuspendedResourcesProxy(this) as SRS
+  suspendedResources(): StubSuspendedResources<RS> {
+    return createSuspendedResourcesProxy(this) as StubSuspendedResources<RS>
   }
 
   suspend<T>(asyncProcess: () => Promise<T>, key: string): T {
@@ -70,23 +69,23 @@ export class ClientRenderSupport<RS extends NamedResources, SRS extends Suspende
   }
 }
 
-export type Engine<RS extends NamedResources, SRS extends SuspendedNamedResources> = {
-  createRenderSupport: (localeSelector: LocaleSelector, staticProps: StaticProps) => ClientRenderSupport<RS, SRS>
-  pathToPage: () => Map<string, PageNode<RS, SRS>>
+export type Engine<RS extends NamedResources> = {
+  createRenderSupport: (localeSelector: LocaleSelector, staticProps: StaticProps) => ClientRenderSupport<RS>
+  pathToPage: () => Map<string, PageNode<RS>>
 }
 
-export async function setup<RS extends NamedResources, SRS extends SuspendedNamedResources>(
+export async function setup<RS extends NamedResources>(
   routes: (router: Router) => void,
-  views: ViewDescriptor<RS, SRS>
-): Promise<Engine<RS, SRS>> {
-  const cgr = new ClientGenretateRouter<RS, SRS>(views)
+  views: ViewDescriptor<RS>
+): Promise<Engine<RS>> {
+  const cgr = new ClientGenretateRouter<RS>(views)
   routes(cgr)
   await cgr.build()
   const core = cgr.getCore()
 
   return {
-    createRenderSupport(localeSelector: LocaleSelector, staticProps: StaticProps): ClientRenderSupport<RS, SRS> {
-      return new ClientRenderSupport<RS, SRS>(core, localeSelector, staticProps)
+    createRenderSupport(localeSelector: LocaleSelector, staticProps: StaticProps): ClientRenderSupport<RS> {
+      return new ClientRenderSupport<RS>(core, localeSelector, staticProps)
     },
 
     pathToPage() {

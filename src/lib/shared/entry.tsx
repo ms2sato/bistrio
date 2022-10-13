@@ -20,18 +20,18 @@ export type EntriesConfig = {
   }
 }
 
-export async function entry<R extends NamedResources, SRS extends SuspendedNamedResources>({
+export async function entry<R extends NamedResources>({
   routes,
   views,
   localeMap,
   container,
 }: {
   routes: (router: Router) => void
-  views: ViewDescriptor<R, SRS>
+  views: ViewDescriptor<R>
   localeMap: Record<string, LocaleDictionary>
   container: Element | null
 }) {
-  const PageAdapter = ({ Page, rs }: { Page: PageNode<R, SRS>; rs: ClientRenderSupport<R, SRS> }) => {
+  const PageAdapter = ({ Page, rs }: { Page: PageNode<R>; rs: ClientRenderSupport<R> }) => {
     const params = useParams()
     rs.params = params
     return <Page rs={rs} />
@@ -63,7 +63,7 @@ export async function entry<R extends NamedResources, SRS extends SuspendedNamed
     staticProps = JSON.parse(decodeHtml(staticPropsJson)) as StaticProps
   }
 
-  const engine: Engine<R, SRS> = await setup<R, SRS>(routes, views)
+  const engine: Engine<R> = await setup<R>(routes, views)
   const localeSelector = initLocale(localeMap)
   hydrateRoot(
     container,

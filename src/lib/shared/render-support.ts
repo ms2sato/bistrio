@@ -1,4 +1,4 @@
-import { NamedResources } from 'restrant2/client'
+import { NamedResources, opt, Resource, ResourceMethod } from 'restrant2/client'
 import { Localizer } from '../shared/locale'
 import { InvalidStateOrDefaultProps, InvalidState } from './static-props'
 
@@ -32,11 +32,44 @@ export function suspendable<T>(promise: Promise<T>): Reader<T> {
 
 export type ParamsDictionary = { [key: string]: string | undefined }
 
-export type RenderSupport<RS extends NamedResources, SRS extends SuspendedNamedResources> = {
+export type StubMethodParams<P> = {
+  [K in keyof P]: P[K] extends opt<unknown> ? ResourceMethodOptions : P[K]
+}
+
+export type StubMethodArguments<T extends ResourceMethod> = T extends (...args: infer P) => any
+  ? StubMethodParams<P>
+  : never
+
+export type StubResource<R extends Resource> = {
+  [MN in keyof R]: (...args: StubMethodArguments<R[MN]>) => ReturnType<R[MN]>
+}
+
+export type StubResources<RS extends NamedResources> = {
+  [RN in keyof RS]: StubResource<RS[RN]>
+}
+
+export type StubSuspendedResource<R extends Resource> = {
+  [MN in keyof R]: (...args: StubMethodArguments<R[MN]>) => Awaited<ReturnType<R[MN]>>
+}
+
+export type StubSuspendedResources<RS extends NamedResources> = {
+  [RN in keyof RS]: StubSuspendedResource<RS[RN]>
+}
+
+// type Test = {
+//   abc: {
+//     index: (date: Date) => Promise<number>
+//   }
+// }
+
+// type TstStub = StubResources<Test>
+// type TstMethod = TstStub['abc']['index']
+
+export type RenderSupport<RS extends NamedResources> = {
   getLocalizer: () => Localizer
   fetchJson: <T>(url: string, key?: string) => T
-  resources: () => RS
-  suspendedResources: () => SRS
+  resources: () => StubResources<RS>
+  suspendedResources: () => StubSuspendedResources<RS>
   suspend: <T>(asyncProcess: () => Promise<T>, key: string) => T
   params: Readonly<ParamsDictionary>
   // TODO: query
@@ -46,8 +79,8 @@ export type RenderSupport<RS extends NamedResources, SRS extends SuspendedNamedR
   invalidStateOrDefault: <T>(source: T) => InvalidStateOrDefaultProps<T>
 }
 
-export type PageProps<RS extends NamedResources, SRS extends SuspendedNamedResources> = { rs: RenderSupport<RS, SRS> }
-export type PageNode<RS extends NamedResources, SRS extends SuspendedNamedResources> = React.FC<PageProps<RS, SRS>>
+export type PageProps<RS extends NamedResources> = { rs: RenderSupport<RS> }
+export type PageNode<RS extends NamedResources> = React.FC<PageProps<RS>>
 
 type ReaderMap = Map<string, Reader<unknown>>
 
@@ -75,17 +108,50 @@ export const suspense = () => {
   }
 }
 
-export function createSuspendedResourcesProxy<RS extends NamedResources, SRS extends SuspendedNamedResources>(
-  rs: RenderSupport<RS, SRS>
-) {
+export class ResourceMethodOptions<SO = unknown, CO = RequestInit> {
+  method_key?: string
+  server?: {
+    options: SO
+  }
+  client?: {
+    options: CO
+  }
+}
+
+export function createSuspendedResourcesProxy<RS extends NamedResources>(rs: RenderSupport<RS>) {
   const proxy: { [key: string]: { [methodName: string]: any } } = {}
-  for (const [name, resource] of Object.entries(rs.resources())) {
-    proxy[name] = {}
+  const namedResources = rs.resources()
+  for (const [resourceName, resource] of Object.entries<Resource>(namedResources)) {
+    proxy[resourceName] = {}
     for (const [methodName] of Object.entries(resource)) {
-      proxy[name][methodName] = function (...args: any[]) {
-        // rs.suspend(() => rs.resources().api_task.show(params), 'api_task_show'),
-        console.log(`${name}/${methodName}`)
-        return rs.suspend(() => rs.resources()[name][methodName](...args), `${name}_${methodName}`)
+      // 1. no args
+      // 2. input
+      // 3. options
+      // 4. input, options
+      proxy[resourceName][methodName] = function (...args: any[]) {
+        let methodArgs: unknown[]
+        let methodKey = `${resourceName}_${methodName}`
+        if (args.length === 1) {
+          if (args[0] instanceof ResourceMethodOptions) {
+            methodArgs = [rs.isServer ? args[0].server?.options : args[0].client?.options]
+            methodKey = args[0].method_key || methodKey
+          } else {
+            methodArgs = args
+          }
+        } else if (args.length === 2) {
+          if (!(args[1] instanceof ResourceMethodOptions)) {
+            throw new Error('ResourceMethod 2nd argument must be ResourceMethodOptions')
+          }
+          methodArgs = [args[0], rs.isServer ? args[1].server?.options : args[1].client?.options]
+          methodKey = args[1].method_key || methodKey
+        } else {
+          methodArgs = args
+        }
+
+        console.log(`${resourceName}/${methodName}`)
+        const method = resource[methodName]
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        return rs.suspend(async () => await method(...methodArgs), methodKey)
       }
     }
   }

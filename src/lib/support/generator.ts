@@ -95,17 +95,8 @@ type NameToResource<R extends ResourcesT, NP extends NameToPathT> = {
   [name in keyof NP]: R[NP[name]]
 }
 
-type UnwrapPromiseFromMethods<R extends Resource> = {
-  [name in keyof R]: (...args:any[]) => Awaited<ReturnType<R[name]>>
-}
-
-type NameToSuspendedResource<R extends ResourcesT, NP extends NameToPathT> = {
-  [name in keyof NP]: UnwrapPromiseFromMethods<R[NP[name]]>
-}
-
 export type N2R = NameToResource<Resources, NameToPath>
-export type N2SR = NameToSuspendedResource<Resources, NameToPath>
-export type PageProps = TPageProps<N2R, N2SR>
+export type PageProps = TPageProps<N2R>
 `
     fs.writeFileSync(out, ret)
   }
