@@ -89,6 +89,10 @@ export function createRenderFunc<RS extends NamedResources>(
   ): void {
     importPage(path.join(viewRoot, view))
       .then(({ Page, hydrate }) => {
+        if (Page === undefined) {
+          throw new Error(`Page is undefined, Must export { Page } on ${path.join('/views', view)}`)
+        }
+
         return arrange(Page, hydrate, options, this)
       })
       .then((node) => {
