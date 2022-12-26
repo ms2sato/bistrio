@@ -1,15 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import fs from 'fs'
-
-type ErrorWithCode = Error & {
-  code: string
-}
-
-// TODO: should in lib?
-const isErrorWithCode = (err: unknown): err is ErrorWithCode => {
-  const error = err as ErrorWithCode
-  return 'code' in error && typeof error.code === 'string'
-}
+import { isErrorWithCode } from './error-with-code'
 
 // TODO: think performance of production
 export const safeImport = async (filePath: string): Promise<unknown> => {

@@ -24,6 +24,7 @@ import {
 } from './shared/render-support'
 import { StaticProps } from '../client'
 import { SessionData } from 'express-session'
+import { isErrorWithCode } from './error-with-code'
 
 type Node = React.FC<unknown>
 
@@ -87,10 +88,12 @@ export function createRenderFunc<RS extends NamedResources>(
     options: object | undefined | { (err: Error, html: string): void },
     callback?: (err: Error, html: string) => void
   ): void {
+    // TODO: refactor hardcording /views
+    const simpleViewPath = path.join('/views', view)
     importPage(path.join(viewRoot, view))
       .then(({ Page, hydrate }) => {
         if (Page === undefined) {
-          throw new Error(`Page is undefined, Must export { Page } on ${path.join('/views', view)}`)
+          throw new Error(`Page is undefined, Must export { Page } on ${simpleViewPath}`)
         }
 
         return arrange(Page, hydrate, options, this)
@@ -99,11 +102,18 @@ export function createRenderFunc<RS extends NamedResources>(
         renderReactViewStream(this.res, node, failText)
       })
       .catch((err) => {
-        console.error(err)
-        if (callback) {
-          callback(err as Error, '')
+        let message
+        if (isErrorWithCode(err) && err.code == 'ERR_MODULE_NOT_FOUND') {
+          message = 'View file not found'
         } else {
-          throw err
+          message = 'View rendering failed'
+        }
+
+        const error = new Error(`${message}: ${simpleViewPath}; caused '${JSON.stringify(err)}'`)
+        if (callback) {
+          callback(error, '')
+        } else {
+          throw error
         }
       })
   }
