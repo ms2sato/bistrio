@@ -24,7 +24,7 @@ import {
 } from './shared/render-support'
 import { StaticProps } from '../client'
 import { SessionData } from 'express-session'
-import { isErrorWithCode } from './error-with-code'
+import { isError, isErrorWithCode } from './is-error'
 
 type Node = React.FC<unknown>
 
@@ -105,11 +105,13 @@ export function createRenderFunc<RS extends NamedResources>(
         let message
         if (isErrorWithCode(err) && err.code == 'ERR_MODULE_NOT_FOUND') {
           message = 'View file not found'
+        } else if (isError(err)) {
+          message = err.message
         } else {
           message = 'View rendering failed'
         }
 
-        const error = new Error(`${message}: ${simpleViewPath}; caused '${JSON.stringify(err)}'`)
+        const error = new Error(`${message}: ${simpleViewPath}; detail '${JSON.stringify(err)}'`)
         if (callback) {
           callback(error, '')
         } else {

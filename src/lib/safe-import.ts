@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import fs from 'fs'
-import { isErrorWithCode } from './error-with-code'
+import { isErrorWithCode } from './is-error'
 
 // TODO: think performance of production
 export const safeImport = async (filePath: string): Promise<unknown> => {
