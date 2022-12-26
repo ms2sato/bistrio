@@ -2,6 +2,11 @@ import { Router, Actions, idNumberSchema } from 'restrant2/client'
 import { taskCreateSchema, taskUpdateSchema } from '../params'
 
 export function routes(router: Router) {
+  router.resources('/', {
+    name: 'root',
+    actions: Actions.standard({only: ['index']})
+  })
+
   router.resources('/tasks', {
     construct: {
       create: { schema: taskCreateSchema },
