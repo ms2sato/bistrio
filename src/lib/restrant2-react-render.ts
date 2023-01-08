@@ -28,7 +28,7 @@ import { isError, isErrorWithCode } from './is-error'
 
 type Node = React.FC<unknown>
 
-export type NodeArrangeFunc<RS extends NamedResources> = (
+export type ConstructViewFunc<RS extends NamedResources> = (
   node: PageNode<RS>,
   hydrate: boolean,
   options: unknown,
@@ -71,7 +71,7 @@ export function renderReactViewStream(res: express.Response, node: React.ReactNo
 }
 
 export function createRenderFunc<RS extends NamedResources>(
-  arrange: NodeArrangeFunc<RS>,
+  constructView: ConstructViewFunc<RS>,
   viewRoot: string,
   failText = ''
 ) {
@@ -95,7 +95,7 @@ export function createRenderFunc<RS extends NamedResources>(
           throw new Error(`Page is undefined, Must export { Page } on ${viewPath}`)
         }
 
-        return arrange(Page, hydrate, options, this)
+        return constructView(Page, hydrate, options, this)
       })
       .then((node) => {
         renderReactViewStream(this.res, node, failText)
@@ -134,7 +134,7 @@ const safeStaticProps = (session: Partial<SessionData>): StaticProps => {
 
 export type BuildActionContextCreator<RS extends NamedResources> = (
   viewRoot: string,
-  arrange: NodeArrangeFunc<RS>,
+  arrange: ConstructViewFunc<RS>,
   failText: string
 ) => ActionContextCreator
 
@@ -158,12 +158,12 @@ class BistrioActionContext extends ActionContextImpl {
 
 export function buildActionContextCreator<RS extends NamedResources>(
   viewRoot: string,
-  arrange: NodeArrangeFunc<RS>,
+  constructView: ConstructViewFunc<RS>,
   failText = ''
 ): ActionContextCreator {
   return (props) => {
     const ctx = new BistrioActionContext(props.router, props.req, props.res, props.descriptor, props.httpPath)
-    ctx.render = createRenderFunc(arrange, viewRoot, failText)
+    ctx.render = createRenderFunc(constructView, viewRoot, failText)
     return ctx
   }
 }

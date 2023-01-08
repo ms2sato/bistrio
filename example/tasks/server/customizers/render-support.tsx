@@ -2,11 +2,11 @@ import { ReactNode, useState } from 'react'
 import { StaticRouter } from 'react-router-dom/server'
 import { Application } from 'express'
 import { ActionContextCreator, ActionContext } from 'restrant2'
-import { PageNode, buildActionContextCreator, NodeArrangeFunc, createRenderSupport } from 'bistrio'
+import { PageNode, buildActionContextCreator, ConstructViewFunc, createRenderSupport } from 'bistrio'
 import { Layout } from '@/views/_layout'
 import { N2R } from '@bistrio/routes/all/_types'
 
-const arrange: NodeArrangeFunc<N2R> = (Page, hydrate, options, ctx) => {
+const constructView: ConstructViewFunc<N2R> = (Page, hydrate, options, ctx) => {
   return <Wrapper ctx={ctx} Page={Page} hydrate={hydrate}></Wrapper>
 }
 
@@ -39,7 +39,7 @@ const Wrapper = ({
 let createActionCtx: ActionContextCreator
 
 export const useTsxView = (app: Application, viewRoot: string) => {
-  createActionCtx = buildActionContextCreator<N2R>(viewRoot, arrange, '')
+  createActionCtx = buildActionContextCreator<N2R>(viewRoot, constructView, '')
 }
 
 export const createActionContext: ActionContextCreator = (props) => {
