@@ -88,12 +88,11 @@ export function createRenderFunc<RS extends NamedResources>(
     options: object | undefined | { (err: Error, html: string): void },
     callback?: (err: Error, html: string) => void
   ): void {
-    // TODO: refactor hardcording /views
-    const simpleViewPath = path.join('/views', view)
-    importPage(path.join(viewRoot, view))
+    const viewPath = path.join(viewRoot, view)
+    importPage(viewPath)
       .then(({ Page, hydrate }) => {
         if (Page === undefined) {
-          throw new Error(`Page is undefined, Must export { Page } on ${simpleViewPath}`)
+          throw new Error(`Page is undefined, Must export { Page } on ${viewPath}`)
         }
 
         return arrange(Page, hydrate, options, this)
@@ -111,7 +110,7 @@ export function createRenderFunc<RS extends NamedResources>(
           message = 'View rendering failed'
         }
 
-        const error = new Error(`${message}: ${simpleViewPath}; detail '${JSON.stringify(err)}'`)
+        const error = new Error(`${message}: ${viewPath}; detail '${JSON.stringify(err)}'`)
         if (callback) {
           callback(error, '')
         } else {
