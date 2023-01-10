@@ -2,8 +2,11 @@ import * as React from 'react'
 import { Suspense } from 'react'
 import { Link } from 'react-router-dom'
 import { PageProps } from '@bistrio/routes/main/_types'
+import { N2R } from '@bistrio/routes/main/_types'
+import { useRenderSupport } from 'bistrio/client'
 
-export function Index({ rs }: PageProps) {
+export function Index() {
+  const rs = useRenderSupport<N2R>()
   const l = rs.getLocalizer()
   return (
     <>

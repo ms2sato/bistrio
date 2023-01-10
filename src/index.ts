@@ -1,5 +1,6 @@
 export * from './lib/locale-express'
-export * from './lib/restrant2-react-render'
+export * from './lib/bistrio-react-render-support'
+export * from './lib/bistrio-react-view'
 export * from './lib/safe-import'
 export * from './lib/webpack'
 export * as support from './lib/support'

@@ -7,11 +7,12 @@ import { NamedResources, Router } from 'restrant2/client'
 
 import { LocaleSelector } from './locale'
 import { initLocale, LocaleDictionary } from './localizer'
-import { PageNode, SuspendedNamedResources } from './render-support'
-import { setup, Engine, ClientRenderSupport } from './client'
+import { PageNode, RenderSupport } from './render-support'
+import { setup, Engine } from './client'
 
 import { ViewDescriptor } from './client-stub-router'
 import { StaticProps } from './static-props'
+import { setRenderSupportContext, useRenderSupport } from './render-support-context'
 
 export type EntriesConfig = {
   [key: string]: {
@@ -27,27 +28,33 @@ export async function entry<R extends NamedResources>({
   container,
 }: {
   routes: (router: Router) => void
-  views: ViewDescriptor<R>
+  views: ViewDescriptor
   localeMap: Record<string, LocaleDictionary>
   container: Element | null
 }) {
-  const PageAdapter = ({ Page, rs }: { Page: PageNode<R>; rs: ClientRenderSupport<R> }) => {
+  const PageAdapter = ({ Page }: { Page: PageNode }) => {
     const params = useParams()
+    const rs = useRenderSupport<R>()
     rs.params = params
-    return <Page rs={rs} />
+    return <Page />
   }
+
+  const RenderSupportContext = React.createContext({} as RenderSupport<R>)
+  setRenderSupportContext(RenderSupportContext)
 
   const Root = ({ localeSelector, staticProps }: { localeSelector: LocaleSelector; staticProps: StaticProps }) => {
     console.debug(engine.pathToPage())
     const [renderSupport] = useState(engine.createRenderSupport(localeSelector, staticProps))
     return (
-      <BrowserRouter>
-        <Routes>
-          {Array.from(engine.pathToPage(), ([path, Page]) => (
-            <Route key={path} path={path} element={<PageAdapter Page={Page} rs={renderSupport} />}></Route>
-          ))}
-        </Routes>
-      </BrowserRouter>
+      <RenderSupportContext.Provider value={renderSupport}>
+        <BrowserRouter>
+          <Routes>
+            {Array.from(engine.pathToPage(), ([path, Page]) => (
+              <Route key={path} path={path} element={<PageAdapter Page={Page} />}></Route>
+            ))}
+          </Routes>
+        </BrowserRouter>
+      </RenderSupportContext.Provider>
     )
   }
 

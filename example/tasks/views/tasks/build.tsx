@@ -1,9 +1,11 @@
 import * as React from 'react'
+import { useRenderSupport } from 'bistrio/client'
 import { Link } from 'react-router-dom'
-import { PageProps } from '@bistrio/routes/main/_types'
 import { Form } from './_form'
+import { N2R } from '@bistrio/routes/main/_types'
 
-export function Build({ rs }: PageProps) {
+export function Build() {
+  const rs = useRenderSupport<N2R>()
   const handleClick = () => {
     alert('Test!')
   }

@@ -20,7 +20,7 @@ export class ClientRenderSupport<RS extends NamedResources> implements RenderSup
   readonly isServer: boolean = false
 
   constructor(
-    private core: ClientGenretateRouterCore<RS>,
+    private core: ClientGenretateRouterCore,
     private localeSelector: LocaleSelector,
     private staticProps: StaticProps
   ) {
@@ -71,12 +71,12 @@ export class ClientRenderSupport<RS extends NamedResources> implements RenderSup
 
 export type Engine<RS extends NamedResources> = {
   createRenderSupport: (localeSelector: LocaleSelector, staticProps: StaticProps) => ClientRenderSupport<RS>
-  pathToPage: () => Map<string, PageNode<RS>>
+  pathToPage: () => Map<string, PageNode>
 }
 
 export async function setup<RS extends NamedResources>(
   routes: (router: Router) => void,
-  views: ViewDescriptor<RS>
+  views: ViewDescriptor
 ): Promise<Engine<RS>> {
   const cgr = new ClientGenretateRouter<RS>(views)
   routes(cgr)

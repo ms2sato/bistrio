@@ -28,8 +28,8 @@ import { isError, isErrorWithCode } from './is-error'
 
 type Node = React.FC<unknown>
 
-export type ConstructViewFunc<RS extends NamedResources> = (
-  node: PageNode<RS>,
+export type ConstructViewFunc = (
+  node: PageNode,
   hydrate: boolean,
   options: unknown,
   ctx: ActionContext
@@ -70,8 +70,8 @@ export function renderReactViewStream(res: express.Response, node: React.ReactNo
   })
 }
 
-export function createRenderFunc<RS extends NamedResources>(
-  constructView: ConstructViewFunc<RS>,
+export function createRenderFunc(
+  constructView: ConstructViewFunc,
   viewRoot: string,
   failText = ''
 ) {
@@ -132,9 +132,9 @@ const safeStaticProps = (session: Partial<SessionData>): StaticProps => {
   return sessionProps.__once
 }
 
-export type BuildActionContextCreator<RS extends NamedResources> = (
+export type BuildActionContextCreator = (
   viewRoot: string,
-  arrange: ConstructViewFunc<RS>,
+  arrange: ConstructViewFunc,
   failText: string
 ) => ActionContextCreator
 
@@ -156,9 +156,9 @@ class BistrioActionContext extends ActionContextImpl {
   }
 }
 
-export function buildActionContextCreator<RS extends NamedResources>(
+export function buildActionContextCreator(
   viewRoot: string,
-  constructView: ConstructViewFunc<RS>,
+  constructView: ConstructViewFunc,
   failText = ''
 ): ActionContextCreator {
   return (props) => {
@@ -168,7 +168,7 @@ export function buildActionContextCreator<RS extends NamedResources>(
   }
 }
 
-export function createRenderSupport<RS extends NamedResources>(ctx: ActionContext = new NullActionContext()) {
+export function createRenderSupport<RS extends NamedResources>(ctx: ActionContext = new NullActionContext()):ServerRenderSupport<RS> {
   const rs = new ServerRenderSupport<RS>(ctx)
   const bistrioSession = ctx.req.session.bistrio
   if (bistrioSession) {
@@ -177,7 +177,7 @@ export function createRenderSupport<RS extends NamedResources>(ctx: ActionContex
   return rs
 }
 
-class ServerRenderSupport<RS extends NamedResources> implements RenderSupport<RS> {
+export class ServerRenderSupport<RS extends NamedResources> implements RenderSupport<RS> {
   private suspense
   private session
 
