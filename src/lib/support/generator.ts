@@ -79,7 +79,7 @@ export const views = {
 
   createTypes({ out }: { out: string }) {
     const ret = `import { type Resource } from 'restrant2/client'
-import { PageProps as TPageProps } from 'bistrio/client'
+import { useRenderSupport as useRenderSupportOrg, RenderSupport as TRenderSupport } from 'bistrio/client'
 import { type NameToPath } from './_name_to_path'
 import { type Resources } from './_resources'
 
@@ -96,7 +96,8 @@ type NameToResource<R extends ResourcesT, NP extends NameToPathT> = {
 }
 
 export type N2R = NameToResource<Resources, NameToPath>
-export type PageProps = TPageProps<N2R>
+export type RenderSupport = TRenderSupport<N2R>
+export const useRenderSupport = () => (useRenderSupportOrg<N2R>())
 `
     fs.writeFileSync(out, ret)
   }

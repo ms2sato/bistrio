@@ -1,11 +1,10 @@
 import * as React from 'react'
-import { useRenderSupport } from 'bistrio/client'
 import { Link } from 'react-router-dom'
 import { Form } from './_form'
-import { N2R } from '@bistrio/routes/main/_types'
+import { useRenderSupport } from '@bistrio/routes/main/_types'
 
 export function Build() {
-  const rs = useRenderSupport<N2R>()
+  const rs = useRenderSupport()
   const handleClick = () => {
     alert('Test!')
   }

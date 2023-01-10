@@ -1,12 +1,10 @@
 import * as React from 'react'
 import { Suspense } from 'react'
 import { Link } from 'react-router-dom'
-import { PageProps } from '@bistrio/routes/main/_types'
-import { N2R } from '@bistrio/routes/main/_types'
-import { useRenderSupport } from 'bistrio/client'
+import { useRenderSupport, RenderSupport } from '@bistrio/routes/main/_types'
 
 export function Index() {
-  const rs = useRenderSupport<N2R>()
+  const rs = useRenderSupport()
   const l = rs.getLocalizer()
   return (
     <>
@@ -19,7 +17,7 @@ export function Index() {
   )
 }
 
-const TaskTable = ({ rs }: PageProps) => {
+const TaskTable = ({ rs }: { rs: RenderSupport }) => {
   const l = rs.getLocalizer()
 
   const tasks = rs.suspend(() => rs.resources().api_task.index(), 'api_task_index')

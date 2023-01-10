@@ -79,7 +79,6 @@ export type RenderSupport<RS extends NamedResources> = {
   invalidStateOrDefault: <T>(source: T) => InvalidStateOrDefaultProps<T>
 }
 
-export type PageProps<RS extends NamedResources> = { rs: RenderSupport<RS> }
 export type PageNode = React.FC
 
 type ReaderMap = Map<string, Reader<unknown>>
