@@ -27,7 +27,7 @@ export function Form({
   action: string
   method: string
   task: TaskCreateParams | TaskUpdateParams
-  err?: ValidationError | undefined
+  err?: ValidationError
 }) {
   return (
     <>

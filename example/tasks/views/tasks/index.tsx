@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Suspense } from 'react'
 import { Link } from 'react-router-dom'
-import { useRenderSupport, RenderSupport } from '@bistrio/routes/main/_types'
+import { useRenderSupport } from '@bistrio/routes/main/_types'
 
 export function Index() {
   const rs = useRenderSupport()
@@ -11,13 +11,14 @@ export function Index() {
       <h1>{l.t`Task list`}</h1>
       <Link to="/tasks/build">{l.t`Create new task`}</Link>
       <Suspense fallback={<p>{l.t`Loading...`}</p>}>
-        <TaskTable rs={rs}></TaskTable>
+        <TaskTable></TaskTable>
       </Suspense>
     </>
   )
 }
 
-const TaskTable = ({ rs }: { rs: RenderSupport }) => {
+const TaskTable = () => {
+  const rs = useRenderSupport()
   const l = rs.getLocalizer()
 
   const tasks = rs.suspend(() => rs.resources().api_task.index(), 'api_task_index')
