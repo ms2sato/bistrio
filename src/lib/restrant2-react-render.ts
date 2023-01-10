@@ -35,13 +35,13 @@ export type ConstructViewFunc<RS extends NamedResources> = (
   ctx: ActionContext
 ) => Promise<JSX.Element> | JSX.Element
 
-type PageExport = {
+type PageMaterial = {
   Page: Node
   hydrate: boolean
 }
 
-export const importPage = async (filePath: string): Promise<PageExport> => {
-  return (await safeImport(filePath)) as PageExport
+export const importPage = async (filePath: string): Promise<PageMaterial> => {
+  return (await safeImport(filePath)) as PageMaterial
 }
 
 // @see https://reactjs.org/docs/react-dom-server.html#rendertopipeablestream
