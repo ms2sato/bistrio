@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { SchemaUtil, idNumberSchema } from 'restrant2/client'
 import { Form } from '../_form'
-import { useRenderSupport } from '@bistrio/routes/main/_types'
+import { useRenderSupport } from '@bistrio/routes/main'
 
 function MyForm() {
   const rs = useRenderSupport()

@@ -4,7 +4,7 @@ import { Application } from 'express'
 import { ActionContextCreator } from 'restrant2'
 import { buildActionContextCreator, ConstructViewFunc, initBistrioReactView } from 'bistrio'
 import { Layout } from '@/views/_layout'
-import { N2R } from '@bistrio/routes/all/_types'
+import { N2R } from '@bistrio/routes/all'
 
 const { Wrapper } = initBistrioReactView<N2R>()
 

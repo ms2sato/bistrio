@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Suspense } from 'react'
 import { Link } from 'react-router-dom'
-import { useRenderSupport } from '@bistrio/routes/main/_types'
+import { useRenderSupport } from '@bistrio/routes/main'
 
 export function Index() {
   const rs = useRenderSupport()

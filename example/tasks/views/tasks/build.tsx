@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Link } from 'react-router-dom'
 import { Form } from './_form'
-import { useRenderSupport } from '@bistrio/routes/main/_types'
+import { useRenderSupport } from '@bistrio/routes/main'
 
 export function Build() {
   const rs = useRenderSupport()

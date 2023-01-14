@@ -78,8 +78,7 @@ export const views = {
   }
 
   createTypes({ out }: { out: string }) {
-    const ret = `import { type Resource } from 'restrant2/client'
-import { useRenderSupport as useRenderSupportT, RenderSupport as RenderSupportT, NameToResource } from 'bistrio/client'
+    const ret = `import { useRenderSupport as useRenderSupportT, RenderSupport as RenderSupportT, NameToResource } from 'bistrio/client'
 import { type NameToPath } from './_name_to_path'
 import { type Resources } from './_resources'
 
@@ -95,7 +94,7 @@ export const useRenderSupport = useRenderSupportT<N2R>
 
 import { entries } from '../../../routes/_entries'
 import { views } from './_views'
-import { N2R } from './_types'
+import { N2R } from './index'
 import { localeMap } from '../../../locales'
 
 entry<N2R>({
@@ -155,7 +154,7 @@ async function generateForEntry(bistrioGenRoot: string, name: string, routes: (r
   router.createNameToPath({ out: path.join(genRoot, '_name_to_path.ts') })
   await router.createViews({ out: path.join(genRoot, '_views.ts'), viewPath: 'views' })
   router.createResources({ out: path.join(genRoot, '_resources.ts') })
-  router.createTypes({ out: path.join(genRoot, '_types.ts') })
+  router.createTypes({ out: path.join(genRoot, 'index.ts') })
   router.createEntry({ out: path.join(genRoot, '_entry.ts'), name })
 }
 
@@ -172,5 +171,5 @@ function generateForAll(bistrioGenRoot: string, routes: (router: Router) => void
 
   router.createNameToPath({ out: path.join(genRoot, '_name_to_path.ts') })
   router.createResources({ out: path.join(genRoot, '_resources.ts') })
-  router.createTypes({ out: path.join(genRoot, '_types.ts') })
+  router.createTypes({ out: path.join(genRoot, 'index.ts') })
 }
