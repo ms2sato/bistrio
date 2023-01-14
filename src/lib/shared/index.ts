@@ -1,6 +1,7 @@
 export * from './entry'
 export * from './client-stub-router'
 export * from './client'
+export * from './generated'
 export * from './locale'
 export * from './localizer'
 export * from './object-util'

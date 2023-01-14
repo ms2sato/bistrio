@@ -18,11 +18,11 @@ class NameToPathRouter implements Router {
 
   createNameToPath({ out }: { out: string }) {
     const text = `export type NameToPath = {
-    ${Object.keys(this.nameToPath)
+  ${Object.keys(this.nameToPath)
       .map((name) => `${name}: '${this.nameToPath[name]}'`)
       .join('\n  ')}
-  }
-  `
+}
+`
 
     fs.writeFileSync(out, text)
   }
@@ -34,12 +34,12 @@ class NameToPathRouter implements Router {
           `import type __Resource${index} from '../../../server/endpoint${this.nameToPath[name]}/resource'`
       )
       .join('\n')}
-    
+
 export type Resources = {
   ${Object.keys(this.nameToPath)
     .map((name, index) => `'${this.nameToPath[name]}': ReturnType<typeof __Resource${index}>`)
     .join('\n  ')}
-}    
+}
 `
     fs.writeFileSync(out, ret)
   }
@@ -79,47 +79,30 @@ export const views = {
 
   createTypes({ out }: { out: string }) {
     const ret = `import { type Resource } from 'restrant2/client'
-import { useRenderSupport as useRenderSupportOrg, RenderSupport as TRenderSupport } from 'bistrio/client'
+import { useRenderSupport as useRenderSupportT, RenderSupport as RenderSupportT, NameToResource } from 'bistrio/client'
 import { type NameToPath } from './_name_to_path'
 import { type Resources } from './_resources'
 
-export type ResourcesT = {
-  [path: string]: Resource
-}
-
-export type NameToPathT = {
-  [name: string]: string
-}
-
-type NameToResource<R extends ResourcesT, NP extends NameToPathT> = {
-  [name in keyof NP]: R[NP[name]]
-}
-
 export type N2R = NameToResource<Resources, NameToPath>
-export type RenderSupport = TRenderSupport<N2R>
-export const useRenderSupport = () => (useRenderSupportOrg<N2R>())
+export type RenderSupport = RenderSupportT<N2R>
+export const useRenderSupport = useRenderSupportT<N2R>
 `
     fs.writeFileSync(out, ret)
   }
 
   createEntry({ out, name }: { out: string; name: string }) {
-    const ret = `import { entry, EntriesConfig } from 'bistrio/client'
+    const ret = `import { entry } from 'bistrio/client'
 
 import { entries } from '../../../routes/_entries'
 import { views } from './_views'
 import { N2R } from './_types'
 import { localeMap } from '../../../locales'
 
-const entryConfig:EntriesConfig = entries['${name}']
-if(entryConfig === undefined) {
-  throw new Error('entry config "${name}" not found in routes/_entries.ts')
-}
-
 entry<N2R>({
-  routes: entryConfig.routes,
+  entries,
+  name: "${name}",
   views,
   localeMap,
-  container: entryConfig.getContainerElement(),
 }).catch((err) => {
   console.error(err)
 })

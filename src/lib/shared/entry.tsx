@@ -22,16 +22,22 @@ export type EntriesConfig = {
 }
 
 export async function entry<R extends NamedResources>({
-  routes,
+  entries,
+  name,
   views,
   localeMap,
-  container,
 }: {
-  routes: (router: Router) => void
+  entries: EntriesConfig,
+  name: string,
   views: ViewDescriptor
   localeMap: Record<string, LocaleDictionary>
   container: Element | null
 }) {
+  const entryItem = entries[name]
+  if(entryItem === undefined) {
+    throw new Error(`entry config "${name}" not found in routes/_entries.ts`)
+  }
+
   const PageAdapter = ({ Page }: { Page: PageNode }) => {
     const params = useParams()
     const rs = useRenderSupport<R>()
@@ -58,10 +64,6 @@ export async function entry<R extends NamedResources>({
     )
   }
 
-  if (!container) {
-    throw new Error('container not found')
-  }
-
   const staticPropsJsonElement = document.querySelector('script[type="application/static-props.bistrio+json"]')
   const staticPropsJson = staticPropsJsonElement?.innerHTML
   let staticProps: StaticProps = {}
@@ -70,6 +72,12 @@ export async function entry<R extends NamedResources>({
     staticProps = JSON.parse(decodeHtml(staticPropsJson)) as StaticProps
   }
 
+  const container = entryItem.getContainerElement()
+  if (!container) {
+    throw new Error('container not found')
+  }
+
+  const routes = entryItem.routes
   const engine: Engine<R> = await setup<R>(routes, views)
   const localeSelector = initLocale(localeMap)
   hydrateRoot(
