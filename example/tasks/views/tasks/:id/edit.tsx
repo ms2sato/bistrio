@@ -6,7 +6,7 @@ import { useRenderSupport } from '@bistrio/routes/main/_types'
 function MyForm() {
   const rs = useRenderSupport()
   const params = SchemaUtil.deepCast(idNumberSchema, rs.params)
-  const { source, error } = rs.invalidStateOrDefault(rs.suspendedResources().api_task.show(params))
+  const { source, error } = rs.invalidStateOr(() => rs.suspendedResources().api_task.show(params))
   return <Form action={`/tasks/${params.id}`} method="patch" task={source} err={error}></Form>
 }
 

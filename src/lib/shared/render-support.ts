@@ -56,15 +56,6 @@ export type StubSuspendedResources<RS extends NamedResources> = {
   [RN in keyof RS]: StubSuspendedResource<RS[RN]>
 }
 
-// type Test = {
-//   abc: {
-//     index: (date: Date) => Promise<number>
-//   }
-// }
-
-// type TstStub = StubResources<Test>
-// type TstMethod = TstStub['abc']['index']
-
 export type RenderSupport<RS extends NamedResources> = {
   getLocalizer: () => Localizer
   fetchJson: <T>(url: string, key?: string) => T
@@ -76,7 +67,7 @@ export type RenderSupport<RS extends NamedResources> = {
   readonly isClient: boolean
   readonly isServer: boolean
   readonly invalidState: InvalidState | undefined
-  invalidStateOrDefault: <T>(source: T) => InvalidStateOrDefaultProps<T>
+  invalidStateOr: <T>(source: T | (() => T)) => InvalidStateOrDefaultProps<T>
 }
 
 export type PageNode = React.FC

@@ -11,7 +11,7 @@ export function Build() {
 
   const l = rs.getLocalizer()
 
-  const { source, error } = rs.invalidStateOrDefault({ title: '', description: '' })
+  const { source, error } = rs.invalidStateOr({ title: '', description: '' })
 
   return (
     <div>

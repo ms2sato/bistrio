@@ -63,9 +63,13 @@ export class ClientRenderSupport<RS extends NamedResources> implements RenderSup
     return this.staticProps.invalidState
   }
 
-  invalidStateOrDefault<S>(source: S): InvalidStateOrDefaultProps<S> {
+  invalidStateOr<S>(source: S|(()=>S)): InvalidStateOrDefaultProps<S> {
     const inv = this.invalidState
-    return inv ? { error: inv.error, source: inv.source as S } : { source }
+    if(inv) {
+      return { error: inv.error, source: inv.source as S }
+    }
+
+    return (source instanceof Function) ? { source: source() } : { source }
   }
 }
 

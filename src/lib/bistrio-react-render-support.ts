@@ -223,10 +223,13 @@ export class ServerRenderSupport<RS extends NamedResources> implements RenderSup
     return this.getStaticProps().invalidState
   }
 
-  invalidStateOrDefault<S>(source: S) {
-    // TODO: fix types
+  invalidStateOr<S>(source: S | (() => S)) {
     const inv = this.invalidState
-    return inv ? { error: inv.error, source: inv.source as S } : { source }
+    if(inv) {
+      return { error: inv.error, source: inv.source as S }
+    }
+
+    return (source instanceof Function) ? { source: source() } : { source }
   }
 
   getStaticProps(): StaticProps {
