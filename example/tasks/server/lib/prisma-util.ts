@@ -30,6 +30,7 @@ export const getPrismaCilent = (): PrismaClient => {
 type PrismaAnyClient<T> = {
   findMany: (args?: unknown) => Promise<T[]>
   findUnique: (args: unknown) => Promise<T>
+  findUniqueOrThrow: (args: unknown) => Promise<T>
   create: (args: unknown) => Promise<T>
   update: (args: unknown) => Promise<T>
   delete: (args: unknown) => Promise<boolean>
@@ -53,7 +54,7 @@ export const createPrismaEasyDataAccessor = <
     },
 
     get: async (params: IP): Promise<T> => {
-      return await client.findUnique({ where: { [keyName]: params[keyName] }, rejectOnNotFound: true })
+      return await client.findUniqueOrThrow({ where: { [keyName]: params[keyName] } })
     },
 
     create: async (params: CP): Promise<T> => {
