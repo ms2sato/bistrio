@@ -67,6 +67,7 @@ describe('senario /tasks', () => {
     await page.$eval('textarea[name=description]', (el) => ((el as HTMLInputElement).value = 'NewDescription'))
     req.clear()
     await page.click('input[type="submit"]') // Update SSR + Ajax
+    await page.waitForSelector('table')
 
     await expect(page.title()).resolves.toMatch('Tasks')
     await expect(page.content()).resolves.toMatch('Task list')
