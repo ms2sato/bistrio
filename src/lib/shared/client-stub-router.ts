@@ -66,7 +66,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
   }
 
   resources(rpath: string, routeConfig: RouteConfig): void {
-    const fetchJson = async (url: string, method: string, body?: BodyInit | null) => {
+    const fetchJson = async (url: string, method: string, body?: BodyInit | null): Promise<unknown> => {
       // TODO: pluggable
       const ret = await fetch(url, {
         method,
@@ -75,12 +75,18 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
         },
         body,
       })
+
+      if(!ret.ok) {
+        throw new Error(`Response status error: ${ret.status}; ${ret.statusText};`)
+      }
+
+      // TODO: from ServerResponcePolicy
       const json = await ret.json()
       const data = json.data
       if (data === undefined) {
-        throw new Error('response json has no data')
+        throw new Error('Response json has no data')
       }
-      return data
+      return data as unknown
     }
 
     const createStubMethod = (ad: ActionDescriptor, resourceUrl: string, schema: z.AnyZodObject, method: string) => {
