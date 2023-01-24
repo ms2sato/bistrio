@@ -11,6 +11,7 @@ import {
   blankSchema,
   z,
   ActionDescriptor,
+  HttpMethod,
 } from 'restrant2/client'
 import { filterWithoutKeys } from './object-util'
 import { pathJoin } from './path-util'
@@ -66,7 +67,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
   }
 
   resources(rpath: string, routeConfig: RouteConfig): void {
-    const fetchJson = async (url: string, method: string, body?: BodyInit | null): Promise<unknown> => {
+    const fetchJson = async (url: string, method: HttpMethod, body?: BodyInit | null): Promise<unknown> => {
       // TODO: pluggable
       const ret = await fetch(url, {
         method,
@@ -89,7 +90,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
       return data as unknown
     }
 
-    const createStubMethod = (ad: ActionDescriptor, resourceUrl: string, schema: z.AnyZodObject, method: string) => {
+    const createStubMethod = (ad: ActionDescriptor, resourceUrl: string, schema: z.AnyZodObject, method: HttpMethod) => {
       // TODO: Error handling and throw as Error
 
       if (schema === blankSchema) {
@@ -100,10 +101,8 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
         }
       } else {
         return async function (input: unknown, ..._options: unknown[]) {
+          // TODO: catch error and rethrow with custom error type
           const parsedInput = schema.parse(input)
-          if (parsedInput === undefined) {
-            throw new Error('UnexpectedInput')
-          }
 
           const { httpPath, keys } = createPath(resourceUrl, ad.path, input as Record<string, string | number>)
 
@@ -124,7 +123,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
       if (routeConfig.actions) {
         for (const ad of routeConfig.actions) {
           const actionName = ad.action
-          let method: string
+          let method: HttpMethod
           if (typeof ad.method === 'string') {
             method = ad.method
           } else {
