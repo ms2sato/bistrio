@@ -11,11 +11,13 @@ import { ServerRouter } from 'restrant2'
 import { useWebpackDev, localeMiddleware, getRouterFactory } from 'bistrio'
 
 import { routes } from '../routes/all'
+import { checkAdmin, checkLoggedIn } from './middlewares'
 import { useTsxView } from './customizers/render-support'
 
 import { localeMap } from '../locales/index'
 import webpackConfig from '../config/webpack/webpack.config'
 import { config } from './config/server'
+import { Middlewares } from '@/routes/_middlewares'
 
 if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = 'development'
@@ -92,7 +94,14 @@ export async function setup() {
   })
 
   const router: ServerRouter = getRouterFactory(config()).getServerRouter(__dirname)
-  routes(router)
+  routes(router, {
+    middlewares() {
+      return {
+        checkAdmin,
+        checkLoggedIn,
+      }
+    },
+  })
   app.use(router.router)
   await router.build()
 

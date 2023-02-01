@@ -16,7 +16,7 @@ import { setRenderSupportContext, useRenderSupport } from './render-support-cont
 
 export type EntriesConfig = {
   [key: string]: {
-    routes: (router: Router) => void
+    routes: (router: Router, middlewares?:any) => void
     getContainerElement: () => HTMLElement
   }
 }
