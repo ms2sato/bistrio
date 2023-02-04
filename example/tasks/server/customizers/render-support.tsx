@@ -9,7 +9,10 @@ import { N2R } from '@bistrio/routes/all'
 const { Wrapper } = initBistrioReactView<N2R>()
 
 const constructView: ConstructViewFunc = (Page, hydrate, options, ctx) => {
-  const props = { hydrate }
+  // This is sample impl, changing js for any roles
+  const script = ctx.query['admin'] == 'true' ? 'admin' : 'main'
+
+  const props = { hydrate, script }
   return (
     <Wrapper ctx={ctx}>
       <Layout props={props}>

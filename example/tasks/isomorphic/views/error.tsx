@@ -3,7 +3,7 @@ import 'react'
 import { Layout } from './_layout'
 
 export default function ({ err }: { err: HttpError }) {
-  const props = { hydrate: false }
+  const props = { hydrate: false, script: 'error' }
   return (
     <Layout props={props}>
       <h1>{err.message}</h1>
