@@ -5,6 +5,7 @@ import { RouteConfig, Router } from 'restrant2/client'
 import { glob } from 'glob'
 import { EntriesConfig, Middlewares, nullRouterSupport, RouterSupport } from '../../index'
 
+// TODO: to config
 const entriesPath = '../../../isomorphic/routes/_entries'
 const localesPath = '../../../isomorphic/locales'
 const viewPath = 'isomorphic/views'
