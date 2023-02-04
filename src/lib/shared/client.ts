@@ -11,6 +11,7 @@ import {
 } from './render-support'
 import { ClientGenretateRouter, ClientGenretateRouterCore, ResourceInfo, ViewDescriptor } from './client-stub-router'
 import { InvalidState, InvalidStateOrDefaultProps, StaticProps } from './static-props'
+import { nullRouterSupport } from './router-support'
 
 export class ClientRenderSupport<RS extends NamedResources> implements RenderSupport<RS> {
   private suspense
@@ -63,13 +64,13 @@ export class ClientRenderSupport<RS extends NamedResources> implements RenderSup
     return this.staticProps.invalidState
   }
 
-  invalidStateOr<S>(source: S|(()=>S)): InvalidStateOrDefaultProps<S> {
+  invalidStateOr<S>(source: S | (() => S)): InvalidStateOrDefaultProps<S> {
     const inv = this.invalidState
-    if(inv) {
+    if (inv) {
       return { error: inv.error, source: inv.source as S }
     }
 
-    return (source instanceof Function) ? { source: source() } : { source }
+    return source instanceof Function ? { source: source() } : { source }
   }
 }
 
@@ -79,11 +80,11 @@ export type Engine<RS extends NamedResources> = {
 }
 
 export async function setup<RS extends NamedResources>(
-  routes: (router: Router) => void,
+  routes: (router: Router, middlewares?: any) => void,
   views: ViewDescriptor
 ): Promise<Engine<RS>> {
   const cgr = new ClientGenretateRouter<RS>(views)
-  routes(cgr)
+  routes(cgr, nullRouterSupport)
   await cgr.build()
   const core = cgr.getCore()
 

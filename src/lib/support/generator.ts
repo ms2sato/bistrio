@@ -3,7 +3,8 @@ import fs from 'fs'
 import { RouteConfig, Router } from 'restrant2/client'
 
 import { glob } from 'glob'
-import { EntriesConfig } from '../../index'
+import { EntriesConfig, Middlewares, nullRouterSupport, RenderSupport, RouterSupport } from '../../index'
+import { Middleware } from 'webpack-dev-middleware'
 
 class NameToPathRouter implements Router {
   constructor(private httpPath: string = '/', readonly nameToPath: { [path: string]: string } = {}) {}
@@ -19,8 +20,8 @@ class NameToPathRouter implements Router {
   createNameToPath({ out }: { out: string }) {
     const text = `export type NameToPath = {
   ${Object.keys(this.nameToPath)
-      .map((name) => `${name}: '${this.nameToPath[name]}'`)
-      .join('\n  ')}
+    .map((name) => `${name}: '${this.nameToPath[name]}'`)
+    .join('\n  ')}
 }
 `
 
@@ -110,14 +111,14 @@ entry<N2R>({
   }
 }
 
-export async function generate({
+export async function generate<M extends Middlewares>({
   projectRoot = path.resolve(__dirname, '..'),
   entries,
   allRoutes,
 }: {
   projectRoot: string
   entries: EntriesConfig
-  allRoutes: (router: Router) => void
+  allRoutes: (router: Router, support: RouterSupport<M>) => void
 }) {
   console.log('Generating...')
 
@@ -142,9 +143,13 @@ export async function generate({
   console.log('Generated!')
 }
 
-async function generateForEntry(bistrioGenRoot: string, name: string, routes: (router: Router) => void) {
-  const router = new NameToPathRouter()
-  routes(router)
+const router = new NameToPathRouter()
+async function generateForEntry<M extends Middlewares>(
+  bistrioGenRoot: string,
+  name: string,
+  routes: (router: Router, support: RouterSupport<M>) => void
+) {
+  routes(router, nullRouterSupport as RouterSupport<M>)
 
   const genRoot = path.join(bistrioGenRoot, name)
   if (!fs.existsSync(genRoot)) {
@@ -158,11 +163,14 @@ async function generateForEntry(bistrioGenRoot: string, name: string, routes: (r
   router.createEntry({ out: path.join(genRoot, '_entry.ts'), name })
 }
 
-function generateForAll(bistrioGenRoot: string, routes: (router: Router) => void) {
+function generateForAll<M extends Middlewares>(
+  bistrioGenRoot: string,
+  routes: (router: Router, support: RouterSupport<M>) => void
+) {
   const name = 'all'
 
   const router = new NameToPathRouter()
-  routes(router)
+  routes(router, nullRouterSupport as RouterSupport<M>)
 
   const genRoot = path.join(bistrioGenRoot, name)
   if (!fs.existsSync(genRoot)) {
