@@ -31,7 +31,7 @@
     "package": "npm run build && npm pack",
     "prepare": "npm run build",
     "test": "npm run --prefix example/tasks test",
-    "ci-all": "npm ci && npm run package && npm --prefix example/tasks ci"
+    "ci-all": "npm ci && npm run package && npm --prefix example/tasks i"
   },
   "dependencies": {
     "debug": "~4.3.4",
