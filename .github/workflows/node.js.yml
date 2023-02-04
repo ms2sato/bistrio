@@ -7,7 +7,7 @@ on:
   push:
     branches: ['main']
   pull_request:
-    branches: ['main']
+    branches: '*'
 
 env:
   TZ: 'Asia/Tokyo'
@@ -42,4 +42,5 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
       - run: npm run ci-all
+      - run: npm run build-all
       - run: npm test
