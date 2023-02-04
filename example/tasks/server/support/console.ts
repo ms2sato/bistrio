@@ -4,7 +4,7 @@ import { routes } from '../../routes/all'
 import path from 'path'
 import { getRouterFactory, nullRouterSupport, RouterSupport } from 'bistrio'
 import { config } from '../config/server'
-import { Middlewares } from '@/routes/_middlewares'
+import { Middlewares } from '@/routes/middlewares'
 
 const router = getRouterFactory(config()).getResourceHolderCreateRouter(global, path.join(__dirname, '..'))
 routes(router, nullRouterSupport as RouterSupport<Middlewares>)

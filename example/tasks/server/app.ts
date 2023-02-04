@@ -8,7 +8,7 @@ import methodOverride from 'method-override'
 import session from 'express-session'
 
 import { ServerRouter } from 'restrant2'
-import { useWebpackDev, localeMiddleware, getRouterFactory } from 'bistrio'
+import { useWebpackDev, localeMiddleware, getRouterFactory, NormalRouterSupport } from 'bistrio'
 
 import { routes } from '../routes/all'
 import { checkAdmin, checkLoggedIn } from './middlewares'
@@ -17,7 +17,7 @@ import { useTsxView } from './customizers/render-support'
 import { localeMap } from '../locales/index'
 import webpackConfig from '../config/webpack/webpack.config'
 import { config } from './config/server'
-import { Middlewares } from '@/routes/_middlewares'
+import { Middlewares } from '@/routes/middlewares'
 
 if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = 'development'
@@ -94,14 +94,12 @@ export async function setup() {
   })
 
   const router: ServerRouter = getRouterFactory(config()).getServerRouter(__dirname)
-  routes(router, {
-    middlewares() {
-      return {
-        checkAdmin,
-        checkLoggedIn,
-      }
-    },
-  })
+  const middlewares: Middlewares = {
+    checkAdmin,
+    checkLoggedIn,
+  }
+  const routerSupport = new NormalRouterSupport<Middlewares>(middlewares)
+  routes(router, routerSupport)
   app.use(router.router)
   await router.build()
 

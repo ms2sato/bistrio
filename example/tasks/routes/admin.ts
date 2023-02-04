@@ -1,6 +1,6 @@
 import { Router, Actions } from 'restrant2/client'
 import { routes as mainRoutes } from './main'
-import { Middlewares } from '../routes/_middlewares'
+import { Middlewares } from './middlewares'
 import { RouterSupport } from 'bistrio'
 
 export function routes(router: Router, support: RouterSupport<Middlewares>) {
