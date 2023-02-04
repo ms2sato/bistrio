@@ -4,7 +4,8 @@
     "paths": {
       "@/*": ["*"],
       "@server/*": ["server/*"],
-      "@bistrio/*": [".bistrio/*"]
+      "@bistrio/*": [".bistrio/*"],
+      "@isomorphic/*": ["isomorphic/*"]
     },
     "sourceMap": true,
     "module": "node16",
@@ -19,6 +20,6 @@
     "resolveJsonModule": true,
     "jsx": "react-jsx"
   },
-  "include": ["server/**/*","params/**/*", "routes/**/*", "views/**/*", "locales/**/*", "server/types"],
+  "include": ["server/**/*", "isomorphic/**/*"],
   "exclude": ["node_modules"]
 }

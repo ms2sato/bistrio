@@ -1,7 +1,7 @@
 import path from 'path'
 import { Configuration } from 'webpack'
 import { TsconfigPathsPlugin } from 'tsconfig-paths-webpack-plugin'
-import { entries } from '../../routes/_entries'
+import { entries } from '../../isomorphic/routes/_entries'
 
 const prod = 'production'
 const dev = 'development'

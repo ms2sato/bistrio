@@ -3,8 +3,12 @@ import fs from 'fs'
 import { RouteConfig, Router } from 'restrant2/client'
 
 import { glob } from 'glob'
-import { EntriesConfig, Middlewares, nullRouterSupport, RenderSupport, RouterSupport } from '../../index'
-import { Middleware } from 'webpack-dev-middleware'
+import { EntriesConfig, Middlewares, nullRouterSupport, RouterSupport } from '../../index'
+
+// TODO: to config
+const entriesPath = '../../../isomorphic/routes/_entries'
+const localesPath = '../../../isomorphic/locales'
+const viewPath = 'isomorphic/views'
 
 class NameToPathRouter implements Router {
   constructor(private httpPath: string = '/', readonly nameToPath: { [path: string]: string } = {}) {}
@@ -93,10 +97,10 @@ export const useRenderSupport = useRenderSupportT<N2R>
   createEntry({ out, name }: { out: string; name: string }) {
     const ret = `import { entry } from 'bistrio/client'
 
-import { entries } from '../../../routes/_entries'
+import { entries } from '${entriesPath}'
 import { views } from './_views'
 import { N2R } from './index'
-import { localeMap } from '../../../locales'
+import { localeMap } from '${localesPath}'
 
 entry<N2R>({
   entries,
@@ -157,7 +161,7 @@ async function generateForEntry<M extends Middlewares>(
   }
 
   router.createNameToPath({ out: path.join(genRoot, '_name_to_path.ts') })
-  await router.createViews({ out: path.join(genRoot, '_views.ts'), viewPath: 'views' })
+  await router.createViews({ out: path.join(genRoot, '_views.ts'), viewPath: viewPath })
   router.createResources({ out: path.join(genRoot, '_resources.ts') })
   router.createTypes({ out: path.join(genRoot, 'index.ts') })
   router.createEntry({ out: path.join(genRoot, '_entry.ts'), name })

@@ -3,13 +3,16 @@ import { StaticRouter } from 'react-router-dom/server'
 import { Application } from 'express'
 import { ActionContextCreator } from 'restrant2'
 import { buildActionContextCreator, ConstructViewFunc, initBistrioReactView } from 'bistrio'
-import { Layout } from '@/views/_layout'
+import { Layout } from '../../isomorphic/views/_layout'
 import { N2R } from '@bistrio/routes/all'
 
 const { Wrapper } = initBistrioReactView<N2R>()
 
 const constructView: ConstructViewFunc = (Page, hydrate, options, ctx) => {
-  const props = { hydrate }
+  // This is sample impl, changing js for any roles
+  const script = ctx.query['admin'] == 'true' ? 'admin' : 'main'
+
+  const props = { hydrate, script }
   return (
     <Wrapper ctx={ctx}>
       <Layout props={props}>

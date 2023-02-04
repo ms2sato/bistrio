@@ -1,8 +1,8 @@
 import path from 'path'
 import { support } from 'bistrio'
 
-import { entries } from '../routes/_entries'
-import { routes as allRoutes } from '../routes/all'
+import { entries } from '../isomorphic/routes/_entries'
+import { routes as allRoutes } from '../isomorphic/routes/all'
 
 const main = async () => {
   const projectRoot = path.resolve(__dirname, '..')
