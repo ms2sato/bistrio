@@ -1,7 +1,7 @@
 import { RouterSupport } from 'bistrio'
 import { Router, Actions, idNumberSchema } from 'restrant2/client'
 import { taskCreateSchema, taskUpdateSchema } from '../params'
-import { Middlewares } from '../routes/middlewares'
+import { Middlewares } from './middlewares'
 
 export function routes(router: Router, support: RouterSupport<Middlewares>) {
   router = router.sub('/', support.middlewares.checkLoggedIn())
