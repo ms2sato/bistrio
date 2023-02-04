@@ -3,7 +3,8 @@
     "baseUrl": "../..",
     "paths": {
       "@/*": ["*"],
-      "@bistrio/*": [".bistrio/*"]
+      "@bistrio/*": [".bistrio/*"],
+      "@isomorphic/*": ["isomorphic/*"]
     },
     "outDir": "./dist/",
     "noImplicitAny": true,

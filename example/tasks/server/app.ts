@@ -10,14 +10,14 @@ import session from 'express-session'
 import { ServerRouter } from 'restrant2'
 import { useWebpackDev, localeMiddleware, getRouterFactory, NormalRouterSupport } from 'bistrio'
 
-import { routes } from '../isomorphic/routes/all'
+import { routes } from '@isomorphic//routes/all'
 import { checkAdmin, checkLoggedIn } from './middlewares'
 import { useTsxView } from './customizers/render-support'
 
-import { localeMap } from '../isomorphic/locales/index'
+import { localeMap } from '@isomorphic//locales/index'
 import webpackConfig from '../config/webpack/webpack.config'
 import { config } from './config/server'
-import { Middlewares } from '@/isomorphic/routes/middlewares'
+import { Middlewares } from '@isomorphic/routes/middlewares'
 
 if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = 'development'
