@@ -1,4 +1,4 @@
-import { defineAdapter, AdapterOf } from 'restrant2'
+import { defineAdapter, AdapterOf } from 'bistrio'
 import type resource from './resource'
 
 type Adapter = AdapterOf<typeof resource>

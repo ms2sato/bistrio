@@ -1,3 +1,4 @@
+export * from 'restrant2'
 export * from './lib/locale-express'
 export * from './lib/bistrio-react-render-support'
 export * from './lib/bistrio-react-view'

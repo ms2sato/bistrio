@@ -1,8 +1,7 @@
 import React from 'react'
 import { StaticRouter } from 'react-router-dom/server'
 import { Application } from 'express'
-import { ActionContextCreator } from 'restrant2'
-import { buildActionContextCreator, ConstructViewFunc, initBistrioReactView } from 'bistrio'
+import { ActionContextCreator, buildActionContextCreator, ConstructViewFunc, initBistrioReactView } from 'bistrio'
 import { Layout } from '../../isomorphic/views/_layout'
 import { N2R } from '@bistrio/routes/all'
 

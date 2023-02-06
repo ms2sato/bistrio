@@ -1,7 +1,6 @@
-import { Router, Actions } from 'restrant2/client'
 import { routes as mainRoutes } from './main'
 import { Middlewares } from './middlewares'
-import { RouterSupport } from 'bistrio'
+import { Router, Actions, RouterSupport } from 'bistrio/client'
 
 export function routes(router: Router, support: RouterSupport<Middlewares>) {
   mainRoutes(router, support)

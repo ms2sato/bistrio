@@ -1,5 +1,4 @@
-import { RouterSupport } from 'bistrio'
-import { Router, Actions, idNumberSchema } from 'restrant2/client'
+import { RouterSupport, Router, Actions, idNumberSchema } from 'bistrio/client'
 import { taskCreateSchema, taskUpdateSchema } from '../params'
 import { Middlewares } from './middlewares'
 

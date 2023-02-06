@@ -1,4 +1,4 @@
-import { defineResource } from 'restrant2'
+import { defineResource } from 'bistrio'
 import { CustomMethodOption } from '@server/customizers'
 
 export type User = {

@@ -1,4 +1,4 @@
-import { ServerRouterConfig } from 'restrant2'
+import { ServerRouterConfig } from 'bistrio'
 import { createActionOptions } from '../customizers/index'
 import { createActionContext } from '../customizers/render-support'
 

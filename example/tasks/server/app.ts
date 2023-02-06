@@ -7,8 +7,7 @@ import createDebug from 'debug'
 import methodOverride from 'method-override'
 import session from 'express-session'
 
-import { ServerRouter } from 'restrant2'
-import { useWebpackDev, localeMiddleware, getRouterFactory, NormalRouterSupport } from 'bistrio'
+import { ServerRouter, useWebpackDev, localeMiddleware, getRouterFactory, NormalRouterSupport } from 'bistrio'
 
 import { routes } from '@isomorphic/routes/all'
 import { checkAdmin, checkLoggedIn } from './middlewares'

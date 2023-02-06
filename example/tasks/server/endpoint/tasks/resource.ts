@@ -1,4 +1,4 @@
-import { defineResource, IdNumberParams } from 'restrant2'
+import { defineResource, IdNumberParams } from 'bistrio'
 import { Prisma, Task } from '@prisma/client'
 import { TaskCreateParams, TaskUpdateParams } from '@isomorphic/params'
 import { createPrismaEasyDataAccessor, getPrismaCilent } from '@server/lib/prisma-util'

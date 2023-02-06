@@ -1,4 +1,4 @@
-import { CreateActionOptionFunction } from 'restrant2'
+import { CreateActionOptionFunction } from 'bistrio'
 import createDebug from 'debug'
 
 const debug = createDebug('bistrio:customizer')

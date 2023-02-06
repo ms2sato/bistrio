@@ -1,5 +1,5 @@
 import createDebug from 'debug'
-import { PrimaryKeyParams } from 'restrant2'
+import { PrimaryKeyParams } from 'bistrio'
 import { PrismaClient } from '@prisma/client'
 
 const log = createDebug('bistrio:sql')

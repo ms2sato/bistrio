@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ValidationError } from 'restrant2/client'
+import { ValidationError } from 'bistrio/client'
 import { TaskCreateParams, TaskUpdateParams } from '@isomorphic/params'
 
 function ErrorPanel({ err }: { err: ValidationError }) {
