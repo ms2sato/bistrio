@@ -2,10 +2,8 @@
   "extends": "../tsconfig.json",
   "include": [
     "../server/**/*.ts",
-    "../views/**/*.tsx",
+    "../isomorphic/**/*.tsx",
     "../prisma/**/*.ts",
-    "../locales/**/*.ts",
-    "../lib/**/*.ts",
     "../bin/**/*.ts",
     "../bin/**/*.js",
     "../__tests__/**/*.ts",
