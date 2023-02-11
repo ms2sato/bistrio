@@ -6,7 +6,7 @@
     "start": "node ./bin/server",
     "prepare": "npm run bistrio:gen",
     "predev": "npm run prebuild",
-    "dev_ts_node": "DEBUG=bistrio:*,restrant2:* dotenv -e .env.development -- node -r tsconfig-paths/register -r ts-node/register ./bin/dev",
+    "dev_ts_node": "npm run watch & DEBUG=bistrio:*,restrant2:* dotenv -e .env.development -- node -r ./tsnode_boot ./bin/dev",
     "dev:server": "tsc-alias && dotenv -e .env.development -- node ./bin/server",
     "dev": "npm run watch & DEBUG=bistrio:*,restrant2:* tsc-watch --onSuccess 'npm run dev:server'",
     "watch": "npm-watch",
@@ -35,12 +35,16 @@
     "db:truncate:test": "dotenv -e .env.test -- ts-node prisma/truncate.ts",
     "build:client": "webpack build --config ./config/webpack/webpack.config.ts",
     "build:server": "tsc && tsc-alias",
-    "prebistrio:gen": "npm run bistrio:gen:clean",
+    "build:isomorphic": "tsc --project ./config/tsconfig.isomorphic.json && tsc-alias --project ./config/tsconfig.isomorphic.json",
     "bistrio:gen": "ts-node bin/generate.ts",
     "bistrio:gen:clean": "rimraf .bistrio"
   },
   "watch": {
-    "bistrio:gen": "routes/*.ts"
+    "bistrio:gen": "routes/*.ts",
+    "build:isomorphic": {
+      "patterns": ["isomorphic", ".bistrio"],
+      "extensions": "ts,tsx"
+    }
   },
   "dependencies": {
     "@prisma/client": "^4.9.0",

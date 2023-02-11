@@ -10,13 +10,13 @@ import session from 'express-session'
 import { ServerRouter, useWebpackDev, localeMiddleware, getRouterFactory, NormalRouterSupport } from 'bistrio'
 
 import { routes } from '@isomorphic/routes/all'
-import { checkAdmin, checkLoggedIn } from './middlewares'
-import { useTsxView } from './customizers/render-support'
-
 import { localeMap } from '@isomorphic/locales/index'
-import webpackConfig from '../config/webpack/webpack.config'
-import { config } from './config/server'
 import { Middlewares } from '@isomorphic/routes/middlewares'
+
+import { checkAdmin, checkLoggedIn } from './middlewares'
+import { config } from './config/server'
+import webpackConfig from '../config/webpack/webpack.config'
+import { useTsxView } from './customizers/render-support'
 
 if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = 'development'
@@ -27,8 +27,12 @@ const debug = createDebug('bistrio:params')
 export async function setup() {
   const app = express()
 
-  useTsxView(app, path.join(__dirname, '../isomorphic/views'))
-  useWebpackDev(app, webpackConfig)
+  if (process.env.NODE_ENV == 'development') {
+    useTsxView(app, path.join(__dirname, '../dist/isomorphic/views'))
+    useWebpackDev(app, webpackConfig)
+  } else {
+    useTsxView(app, path.join(__dirname, '../isomorphic/views'))
+  }
 
   app.use(logger('dev'))
   app.use(express.json())
