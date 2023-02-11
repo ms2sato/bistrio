@@ -5,14 +5,10 @@
   "scripts": {
     "start": "node ./bin/server",
     "prepare": "npm run bistrio:gen",
-    "predev": "npm run prebuild",
-    "dev_ts_node": "npm run watch & DEBUG=bistrio:*,restrant2:* dotenv -e .env.development -- node -r ./tsnode_boot ./bin/dev",
-    "dev:server": "tsc-alias && dotenv -e .env.development -- node ./bin/server",
-    "dev": "npm run watch & DEBUG=bistrio:*,restrant2:* tsc-watch --onSuccess 'npm run dev:server'",
+    "dev": "DEBUG=bistrio:*,restrant2:* dotenv -e .env.development -- node -r ./server/support/tsnode_register ./bin/dev && npm run watch",
     "watch": "npm-watch",
-    "prebuild": "npm run clean && npm run copy-assets",
     "copy-assets": "cpx 'public/**' dist/public && cpx 'config/**' dist/config",
-    "build": "npm run build:server && npm run build:client",
+    "build": "npm run copy-assets && npm run build:server && npm run build:client",
     "clean": "rimraf dist",
     "console": "ts-node --project ./config/tsconfig.console.json -r ./server/support/console.ts",
     "lint": "npm run eslint && npm run check-types",
@@ -40,9 +36,15 @@
     "bistrio:gen:clean": "rimraf .bistrio"
   },
   "watch": {
-    "bistrio:gen": "routes/*.ts",
+    "bistrio:gen": {
+      "patterns": [
+        "isomorphic"
+      ]
+    },
     "build:isomorphic": {
-      "patterns": ["isomorphic", ".bistrio"],
+      "patterns": [
+        ".bistrio"
+      ],
       "extensions": "ts,tsx"
     }
   },
@@ -92,7 +94,6 @@
     "start-server-and-test": "^1.15.2",
     "ts-loader": "^9.4.2",
     "tsc-alias": "^1.8.2",
-    "tsc-watch": "^6.0.0",
     "tsconfig-paths": "^4.1.2",
     "tsconfig-paths-webpack-plugin": "^4.0.0",
     "typescript": "^4.9.4",
