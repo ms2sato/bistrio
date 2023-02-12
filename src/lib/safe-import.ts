@@ -1,18 +1,42 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import fs from 'fs'
 import { isErrorWithCode } from './is-error'
+import createDebug from 'debug'
 
-// TODO: think performance of production
+const debug = createDebug('bistrio:view')
+
+const isDev = !process.env.NODE_ENV || process.env.NODE_ENV == 'development'
+
+const removeCache = (modulePath: string) => {
+  const resolved = require.resolve(modulePath)
+  debug('removeCache: %s', resolved)
+  delete require.cache[resolved]
+}
+
+const forceImportAsJs = async (filePath: string) => {
+  const jsPath = `${filePath}.js`
+  if (fs.existsSync(jsPath)) {
+    if (isDev) {
+      removeCache(jsPath)
+    }
+    debug(`require: %s`, jsPath)
+    return await require(jsPath)
+  }
+}
+
 export const safeImport = async (filePath: string): Promise<unknown> => {
+  debug(`safeImport: %s`, filePath)
+  if (isDev) {
+    return forceImportAsJs(filePath)
+  }
+
   try {
-    return await import(filePath)
+    debug(`require: %s`, filePath)
+    return await require(filePath)
   } catch (err) {
-    // code: 'ERR_MODULE_NOT_FOUND' caused in JS
     if (isErrorWithCode(err) && err.code === 'ERR_MODULE_NOT_FOUND') {
-      const jsPath = `${filePath}.js`
-      if (fs.existsSync(jsPath)) {
-        return await import(jsPath)
-      }
+      debug(`error hooked, import force as js`)
+      return forceImportAsJs(filePath)
     }
 
     throw err

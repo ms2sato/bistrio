@@ -3,9 +3,11 @@ import { Configuration } from 'webpack'
 import { TsconfigPathsPlugin } from 'tsconfig-paths-webpack-plugin'
 import { entries } from '../../isomorphic/routes/_entries'
 
+console.log(`NODE_ENV=${process.env.NODE_ENV}`)
+
 const prod = 'production'
 const dev = 'development'
-const env = process.env.NODE_ENV === prod ? prod : dev
+const env = process.env.NODE_ENV === dev ? dev : prod
 
 const configFile = path.join(__dirname, `tsconfig.client.${env}.json`)
 if (env === 'development') {
