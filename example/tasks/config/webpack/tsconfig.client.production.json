@@ -7,7 +7,7 @@
       "@bistrio/*": [".bistrio/*"],
       "@isomorphic/*": ["isomorphic/*"]
     },
-    "outDir": "dist",
+    "outDir": "dist/public",
   },
   "include": ["../../.bistrio/**/*"]
 }
