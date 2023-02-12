@@ -26,6 +26,9 @@ import { StaticProps } from '../client'
 import { SessionData } from 'express-session'
 import { isError, isErrorWithCode } from './is-error'
 
+// import createDebug from 'debug'
+// const debug = createDebug('bistrio:react-render-support')
+
 type Node = React.FC<unknown>
 
 export type ConstructViewFunc = (
@@ -70,11 +73,7 @@ export function renderReactViewStream(res: express.Response, node: React.ReactNo
   })
 }
 
-export function createRenderFunc(
-  constructView: ConstructViewFunc,
-  viewRoot: string,
-  failText = ''
-) {
+export function createRenderFunc(constructView: ConstructViewFunc, viewRoot: string, failText = '') {
   function newRender(
     this: ActionContextImpl,
     view: string,
@@ -91,6 +90,8 @@ export function createRenderFunc(
     const viewPath = path.join(viewRoot, view)
     importPage(viewPath)
       .then(({ Page, hydrate }) => {
+        // debug('Page: %s', Page.toString())
+
         if (Page === undefined) {
           throw new Error(`Page is undefined, Must export { Page } on ${viewPath}`)
         }
@@ -168,7 +169,9 @@ export function buildActionContextCreator(
   }
 }
 
-export function createRenderSupport<RS extends NamedResources>(ctx: ActionContext = new NullActionContext()):ServerRenderSupport<RS> {
+export function createRenderSupport<RS extends NamedResources>(
+  ctx: ActionContext = new NullActionContext()
+): ServerRenderSupport<RS> {
   const rs = new ServerRenderSupport<RS>(ctx)
   const bistrioSession = ctx.req.session.bistrio
   if (bistrioSession) {
@@ -225,11 +228,11 @@ export class ServerRenderSupport<RS extends NamedResources> implements RenderSup
 
   invalidStateOr<S>(source: S | (() => S)) {
     const inv = this.invalidState
-    if(inv) {
+    if (inv) {
       return { error: inv.error, source: inv.source as S }
     }
 
-    return (source instanceof Function) ? { source: source() } : { source }
+    return source instanceof Function ? { source: source() } : { source }
   }
 
   getStaticProps(): StaticProps {
