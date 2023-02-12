@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node ./bin/server",
     "prepare": "npm run bistrio:gen",
-    "dev": "DEBUG=bistrio:*,restrant2:* dotenv -e .env.development -- node -r ./server/support/tsnode_register ./bin/dev && npm run watch",
+    "dev": "npm run build:isomorphic && NODE_ENV=development DEBUG=bistrio:*,restrant2:* dotenv -e .env.development -- node -r ./server/support/tsnode_register ./bin/dev && npm run watch",
     "watch": "npm-watch",
     "copy-assets": "cpx 'public/**' dist/public && cpx 'config/**' dist/config",
     "build": "npm run copy-assets && npm run build:server && npm run build:client",
@@ -45,6 +45,7 @@
       "patterns": [
         ".bistrio"
       ],
+      "delay": 2500,
       "extensions": "ts,tsx"
     }
   },
