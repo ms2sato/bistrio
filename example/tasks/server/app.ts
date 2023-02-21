@@ -7,16 +7,13 @@ import createDebug from 'debug'
 import methodOverride from 'method-override'
 import session from 'express-session'
 
-import { ServerRouter, useWebpackDev, localeMiddleware, getRouterFactory, NormalRouterSupport } from 'bistrio'
-
-import { routes } from '@isomorphic/routes/all'
-import { localeMap } from '@isomorphic/locales/index'
-import { Middlewares } from '@isomorphic/routes/middlewares'
-
+import { localeMiddleware } from 'bistrio'
 import { checkAdmin, checkLoggedIn } from './middlewares'
+import { localeMap } from '@isomorphic/locales/index'
+import { constructView, useExpressRouter } from './customizers/render-support'
+import { routes } from '@isomorphic/routes/all'
+import { Middlewares } from '@/isomorphic/routes/middlewares'
 import { config } from './config/server'
-import webpackConfig from '../config/webpack/webpack.config'
-import { useTsxView } from './customizers/render-support'
 
 if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = 'development'
@@ -26,13 +23,6 @@ const debug = createDebug('bistrio:params')
 
 export async function setup() {
   const app = express()
-
-  if (process.env.NODE_ENV == 'development') {
-    useTsxView(app, path.join(__dirname, '../dist/isomorphic/views'))
-    useWebpackDev(app, webpackConfig)
-  } else {
-    useTsxView(app, path.join(__dirname, '../isomorphic/views'))
-  }
 
   app.use(logger('dev'))
   app.use(express.json())
@@ -96,15 +86,12 @@ export async function setup() {
     }
   })
 
-  const router: ServerRouter = getRouterFactory(config()).getServerRouter(__dirname)
   const middlewares: Middlewares = {
     checkAdmin,
     checkLoggedIn,
   }
-  const routerSupport = new NormalRouterSupport<Middlewares>(middlewares)
-  routes(router, routerSupport)
-  app.use(router.router)
-  await router.build()
+
+  await useExpressRouter({ app, baseDir: __dirname, middlewares, routes, constructView, serverRouterConfig: config() })
 
   // error handler
   app.use(function (err: unknown, req, res, _next) {
