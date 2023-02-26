@@ -14,12 +14,10 @@ import {
   RouterSupport,
   ServerRouterConfig,
 } from 'bistrio'
-import { ServerRouter, useWebpackDev, getRouterFactory, NormalRouterSupport } from 'bistrio'
+import { ServerRouter, getRouterFactory, NormalRouterSupport } from 'bistrio'
 
 import { N2R } from '@bistrio/routes/all'
 import { Layout } from '../../isomorphic/views/_layout'
-
-import webpackConfig from '../../config/client/webpack.config'
 
 const { Wrapper } = initBistrioReactView<N2R>()
 
@@ -60,7 +58,6 @@ export const useExpressRouter = async <M extends Middlewares>({
   if (process.env.NODE_ENV == 'development') {
     // TODO: customizable
     viewRoot = path.join(baseDir, '../dist/isomorphic/views')
-    useWebpackDev(app, webpackConfig)
   } else {
     // TODO: customizable
     viewRoot = path.join(baseDir, '../isomorphic/views')
