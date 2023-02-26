@@ -1,20 +1,8 @@
 import React from 'react'
-import path from 'path'
-import { Application } from 'express'
 
 import { StaticRouter } from 'react-router-dom/server'
 
-import {
-  ActionContextCreator,
-  buildActionContextCreator,
-  ConstructViewFunc,
-  initBistrioReactView,
-  Middlewares,
-  Router,
-  RouterSupport,
-  ServerRouterConfig,
-} from 'bistrio'
-import { ServerRouter, getRouterFactory, NormalRouterSupport } from 'bistrio'
+import { ConstructViewFunc, initBistrioReactView } from 'bistrio'
 
 import { N2R } from '@bistrio/routes/all'
 import { Layout } from '../../isomorphic/views/_layout'
@@ -35,40 +23,4 @@ export const constructView: ConstructViewFunc = (Page, hydrate, options, ctx) =>
       </Layout>
     </Wrapper>
   )
-}
-
-export type ExpressRouterConfig<M extends Middlewares> = {
-  app: Application
-  baseDir: string
-  middlewares: M
-  constructView: ConstructViewFunc
-  routes: (router: Router, support: RouterSupport<M>) => void
-  serverRouterConfig?: Partial<ServerRouterConfig>
-}
-
-export const useExpressRouter = async <M extends Middlewares>({
-  app,
-  baseDir,
-  middlewares,
-  constructView,
-  routes,
-  serverRouterConfig = {},
-}: ExpressRouterConfig<M>) => {
-  let viewRoot
-  if (process.env.NODE_ENV == 'development') {
-    // TODO: customizable
-    viewRoot = path.join(baseDir, '../dist/isomorphic/views')
-  } else {
-    // TODO: customizable
-    viewRoot = path.join(baseDir, '../isomorphic/views')
-  }
-
-  const createActionContext: ActionContextCreator = buildActionContextCreator(viewRoot, constructView, '')
-  const serverConfig: Partial<ServerRouterConfig> = { createActionContext, ...serverRouterConfig }
-
-  const router: ServerRouter = getRouterFactory(serverConfig).getServerRouter(baseDir)
-  const routerSupport = new NormalRouterSupport<M>(middlewares)
-  routes(router, routerSupport)
-  app.use(router.router)
-  await router.build()
 }
