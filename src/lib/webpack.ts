@@ -3,7 +3,20 @@ import type { Application } from 'express'
 import webpack, { Configuration } from 'webpack'
 import webpackDevMiddleware from 'webpack-dev-middleware'
 import { TsconfigPathsPlugin } from 'tsconfig-paths-webpack-plugin'
-import { EntriesConfig } from '../'
+
+import {
+  EntriesConfig,
+  ActionContextCreator,
+  buildActionContextCreator,
+  ConstructViewFunc,
+  Middlewares,
+  Router,
+  RouterSupport,
+  ServerRouterConfig,
+  ServerRouter,
+  getRouterFactory,
+  NormalRouterSupport,
+} from '../'
 
 export function useWebpackDev(app: Application, webpackConfig: Configuration) {
   if (process.env.NODE_ENV !== 'production') {
@@ -83,4 +96,40 @@ export const generateWebpackCoonfig = ({ entries, baseDir }: GenerateWebpackConf
   }
 
   return env === dev ? devConfig : prodConfig
+}
+
+export type ExpressRouterConfig<M extends Middlewares> = {
+  app: Application
+  baseDir: string
+  middlewares: M
+  constructView: ConstructViewFunc
+  routes: (router: Router, support: RouterSupport<M>) => void
+  serverRouterConfig?: Partial<ServerRouterConfig>
+}
+
+export const useExpressRouter = async <M extends Middlewares>({
+  app,
+  baseDir,
+  middlewares,
+  constructView,
+  routes,
+  serverRouterConfig = {},
+}: ExpressRouterConfig<M>) => {
+  let viewRoot
+  if (process.env.NODE_ENV == 'development') {
+    // TODO: customizable
+    viewRoot = path.join(baseDir, '../dist/isomorphic/views')
+  } else {
+    // TODO: customizable
+    viewRoot = path.join(baseDir, '../isomorphic/views')
+  }
+
+  const createActionContext: ActionContextCreator = buildActionContextCreator(viewRoot, constructView, '')
+  const serverConfig: Partial<ServerRouterConfig> = { createActionContext, ...serverRouterConfig }
+
+  const router: ServerRouter = getRouterFactory(serverConfig).getServerRouter(baseDir)
+  const routerSupport = new NormalRouterSupport<M>(middlewares)
+  routes(router, routerSupport)
+  app.use(router.router)
+  await router.build()
 }
