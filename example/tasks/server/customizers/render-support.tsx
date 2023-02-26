@@ -19,7 +19,7 @@ import { ServerRouter, useWebpackDev, getRouterFactory, NormalRouterSupport } fr
 import { N2R } from '@bistrio/routes/all'
 import { Layout } from '../../isomorphic/views/_layout'
 
-import webpackConfig from '../../config/webpack/webpack.config'
+import webpackConfig from '../../config/client/webpack.config'
 
 const { Wrapper } = initBistrioReactView<N2R>()
 

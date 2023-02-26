@@ -7,6 +7,6 @@
     "../bin/**/*.ts",
     "../bin/**/*.js",
     "../__tests__/**/*.ts",
-    "./webpack/webpack.config.ts",
+    "./client/webpack.config.ts",
   ]
 }
