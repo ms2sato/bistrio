@@ -1,4 +1,5 @@
 import path from 'path'
+import createDebug from 'debug'
 import type { Application } from 'express'
 import webpack, { Configuration } from 'webpack'
 import webpackDevMiddleware from 'webpack-dev-middleware'
@@ -18,6 +19,8 @@ import {
   NormalRouterSupport,
 } from '../'
 
+const debug = createDebug('bistrio:webpack')
+
 export function useWebpackDev(app: Application, webpackConfig: Configuration) {
   if (process.env.NODE_ENV !== 'production') {
     const compiler = webpack(webpackConfig)
@@ -36,7 +39,7 @@ export type GenerateWebpackConfigParams = {
 }
 
 export const generateWebpackCoonfig = ({ entries, baseDir }: GenerateWebpackConfigParams) => {
-  console.log(`NODE_ENV=${process.env.NODE_ENV}`)
+  debug('NODE_ENV=%s', process.env.NODE_ENV)
 
   const prod = 'production'
   const dev = 'development'
@@ -44,8 +47,8 @@ export const generateWebpackCoonfig = ({ entries, baseDir }: GenerateWebpackConf
 
   const configFile = path.join(baseDir, 'config', 'client', `tsconfig.client.${env}.json`)
   if (env === 'development') {
-    console.log('Webpack is running in development mode...')
-    console.log(`tsconfig: ${configFile}`)
+    debug('Webpack is running in development mode...')
+    debug('tsconfig: %s', configFile)
   }
 
   const entry = Object.keys(entries).reduce<Record<string, string>>((obj, name) => {
