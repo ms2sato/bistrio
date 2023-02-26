@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node ./bin/server",
     "prepare": "npm run bistrio:gen",
-    "dev": "npm run build:isomorphic && concurrently --raw \"npm run dev:server\" \"npm run watch\"",
+    "dev": "concurrently --raw \"npm run dev:server\" \"npm run build:isomorphic && npm run watch\"",
     "dev:server": "NODE_ENV=development DEBUG=bistrio:*,restrant2:* dotenv -e .env.development -- node -r ./server/support/tsnode_register ./bin/dev",
     "watch": "npm-watch",
     "copy-assets": "cpx 'public/**' dist/public && cpx 'config/**' dist/config",
