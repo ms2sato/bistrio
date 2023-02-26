@@ -7,13 +7,14 @@ import createDebug from 'debug'
 import methodOverride from 'method-override'
 import session from 'express-session'
 
-import { localeMiddleware } from 'bistrio'
+import { localeMiddleware, useExpressRouter, useWebpackDev } from 'bistrio'
 import { checkAdmin, checkLoggedIn } from './middlewares'
 import { localeMap } from '@isomorphic/locales/index'
-import { constructView, useExpressRouter } from './customizers/render-support'
+import { constructView } from './customizers/render-support'
 import { routes } from '@isomorphic/routes/all'
 import { Middlewares } from '@/isomorphic/routes/middlewares'
 import { config } from './config/server'
+import webpackConfig from '../config/client/webpack.config'
 
 if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = 'development'
@@ -91,6 +92,7 @@ export async function setup() {
     checkLoggedIn,
   }
 
+  useWebpackDev(app, webpackConfig)
   await useExpressRouter({ app, baseDir: __dirname, middlewares, routes, constructView, serverRouterConfig: config() })
 
   // error handler
