@@ -30,7 +30,7 @@
     "db:reset:test": "dotenv -e .env.test -- prisma migrate reset",
     "db:seed:test": "dotenv -e .env.test -- ts-node prisma/seed.ts",
     "db:truncate:test": "dotenv -e .env.test -- ts-node prisma/truncate.ts",
-    "build:client": "webpack build --config ./config/webpack/webpack.config.ts",
+    "build:client": "webpack build --config ./config/client/webpack.config.ts",
     "build:server": "tsc && tsc-alias",
     "build:isomorphic": "tsc --project ./config/tsconfig.isomorphic.json && tsc-alias --project ./config/tsconfig.isomorphic.json",
     "bistrio:gen": "ts-node bin/generate.ts",
