@@ -8,7 +8,7 @@
       "@server/*": ["server/*"],
       "@bistrio/*": [".bistrio/*"],
       "@isomorphic/*": ["isomorphic/*"]
-    },
+    }
   },
   "exclude": ["dist", "node_modules"]
 }
