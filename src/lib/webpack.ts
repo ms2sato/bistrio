@@ -33,12 +33,22 @@ export function useWebpackDev(app: Application, webpackConfig: Configuration) {
   }
 }
 
+export type GenereteEntryFunc = (params: GenerateWebpackConfigParams)=> Configuration['entry']
+
 export type GenerateWebpackConfigParams = {
   entries: EntriesConfig
   baseDir: string
+  generateEntry?: GenereteEntryFunc
 }
 
-export const generateWebpackCoonfig = ({ entries, baseDir }: GenerateWebpackConfigParams) => {
+const defaultGenerateEntry = ({ entries }: GenerateWebpackConfigParams): Configuration['entry'] => {
+  return Object.keys(entries).reduce<Record<string, string>>((obj, name) => {
+    obj[name] = `./.bistrio/routes/${name}/_entry.ts`
+    return obj
+  }, {})
+}
+
+export const generateWebpackCoonfig = ({ entries, baseDir, generateEntry = defaultGenerateEntry }: GenerateWebpackConfigParams) => {
   debug('NODE_ENV=%s', process.env.NODE_ENV)
 
   const prod = 'production'
@@ -51,10 +61,7 @@ export const generateWebpackCoonfig = ({ entries, baseDir }: GenerateWebpackConf
     debug('tsconfig: %s', configFile)
   }
 
-  const entry = Object.keys(entries).reduce<Record<string, string>>((obj, name) => {
-    obj[name] = `./.bistrio/routes/${name}/_entry.ts`
-    return obj
-  }, {})
+  const entry = generateEntry({ entries, baseDir })
 
   const config: Configuration = {
     entry,

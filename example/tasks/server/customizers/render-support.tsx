@@ -11,7 +11,7 @@ const { Wrapper } = initBistrioReactView<N2R>()
 
 export const constructView: ConstructViewFunc = (Page, hydrate, options, ctx) => {
   // This is sample impl, changing js for any roles
-  const script = ctx.query['admin'] == 'true' ? 'admin' : 'main'
+  const script = ctx.query['admin'] == 'true' ? ['runtime', 'admin'] : ['runtime', 'main']
 
   const props = { hydrate, script }
   return (
