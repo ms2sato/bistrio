@@ -10,7 +10,7 @@ function Scripts({ props }: { props: GlobalProps }) {
     <>
       {props.hydrate &&
         (Array.isArray(props.script) ? (
-          props.script.map((js) => <script src={`/${js}.js`} defer></script>)
+          props.script.map((js) => <script key={js} src={`/${js}.js`} defer></script>)
         ) : (
           <script src={`/${props.script}.js`} defer></script>
         ))}

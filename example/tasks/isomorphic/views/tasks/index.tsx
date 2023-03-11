@@ -21,7 +21,7 @@ const TaskTable = () => {
   const rs = useRenderSupport()
   const l = rs.getLocalizer()
 
-  const tasks = rs.suspend(() => rs.resources().api_task.index(), 'api_task_index')
+  const tasks = rs.suspendedResources().api_task.index()
   return (
     <table>
       <thead>
