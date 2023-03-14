@@ -11,13 +11,9 @@ if (process.env.NODE_ENV !== 'development') {
     baseDir,
     generateEntry: () => {
       const entry = Object.keys(entries).reduce<webpack.EntryObject>((obj, name) => {
-        obj[name] = {
-          import: `./.bistrio/routes/${name}/_entry.ts`,
-          dependOn: 'bistrio',
-        }
+        obj[name] = `./.bistrio/routes/${name}/_entry.ts`
         return obj
       }, {})
-      entry['bistrio'] = 'bistrio/client'
       return entry
     },
   }
@@ -30,6 +26,15 @@ if (process.env.NODE_ENV !== 'development') {
 
 const webpackConfig = generateWebpackCoonfig(generateWebpackCoonfigParams)
 webpackConfig.optimization = {
-  runtimeChunk: 'single',
+  splitChunks: {
+    chunks: 'initial',
+    cacheGroups: {
+      default: {
+        name: 'vendors',
+        reuseExistingChunk: true,
+      },
+    },
+  },
 }
+
 export default webpackConfig
