@@ -10,31 +10,30 @@ import { initLocale, LocaleDictionary } from './localizer'
 import { PageNode, RenderSupport } from './render-support'
 import { setup, Engine } from './client'
 
-import { ViewDescriptor } from './client-stub-router'
 import { StaticProps } from './static-props'
 import { setRenderSupportContext, useRenderSupport } from './render-support-context'
 
+export type PageLoadFunc = (pagePath: string) => PageNode | React.LazyExoticComponent<any> // TODO: generics?
+
 export type EntriesConfig = {
   [key: string]: {
-    routes: (router: Router, middlewares?:any) => void
+    routes: (router: Router, middlewares?: any) => void
     getContainerElement: () => HTMLElement
+    pageLoadFunc: PageLoadFunc
   }
 }
 
 export async function entry<R extends NamedResources>({
   entries,
   name,
-  views,
   localeMap,
 }: {
-  entries: EntriesConfig,
-  name: string,
-  views: ViewDescriptor
+  entries: EntriesConfig
+  name: string
   localeMap: Record<string, LocaleDictionary>
-  container: Element | null
 }) {
   const entryItem = entries[name]
-  if(entryItem === undefined) {
+  if (entryItem === undefined) {
     throw new Error(`entry config "${name}" not found in routes/_entries.ts`)
   }
 
@@ -48,17 +47,22 @@ export async function entry<R extends NamedResources>({
   const RenderSupportContext = React.createContext({} as RenderSupport<R>)
   setRenderSupportContext(RenderSupportContext)
 
-  const Root = ({ localeSelector, staticProps }: { localeSelector: LocaleSelector; staticProps: StaticProps }) => {
-    console.debug(engine.pathToPage())
+  const Root = ({
+    localeSelector,
+    staticProps,
+    children,
+  }: {
+    children: React.ReactNode
+    localeSelector: LocaleSelector
+    staticProps: StaticProps
+  }) => {
     const [renderSupport] = useState(engine.createRenderSupport(localeSelector, staticProps))
     return (
       <RenderSupportContext.Provider value={renderSupport}>
         <BrowserRouter>
-          <Routes>
-            {Array.from(engine.pathToPage(), ([path, Page]) => (
-              <Route key={path} path={path} element={<PageAdapter Page={Page} />}></Route>
-            ))}
-          </Routes>
+          <React.Suspense>
+            <Routes>{children}</Routes>
+          </React.Suspense>
         </BrowserRouter>
       </RenderSupportContext.Provider>
     )
@@ -78,12 +82,21 @@ export async function entry<R extends NamedResources>({
   }
 
   const routes = entryItem.routes
-  const engine: Engine<R> = await setup<R>(routes, views)
+  const engine: Engine<R> = await setup<R>(routes, entryItem.pageLoadFunc)
+
+  const RouteList = await Promise.all(
+    Array.from(engine.pathToPage(), ([path, Page]) => {
+      return <Route key={path} path={path} element={<PageAdapter Page={Page} />}></Route>
+    })
+  )
+
   const localeSelector = initLocale(localeMap)
   hydrateRoot(
     container,
     <React.StrictMode>
-      <Root localeSelector={localeSelector} staticProps={staticProps}></Root>
+      <Root localeSelector={localeSelector} staticProps={staticProps}>
+        {RouteList}
+      </Root>
     </React.StrictMode>
   )
 }

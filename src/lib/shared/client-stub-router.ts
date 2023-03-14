@@ -16,6 +16,8 @@ import {
 import { filterWithoutKeys } from './object-util'
 import { pathJoin } from './path-util'
 import { PageNode } from './render-support'
+import React from 'react'
+import { PageLoadFunc } from '.'
 
 const createPath = (resourceUrl: string, pathFormat: string, option: Record<string, string | number>) => {
   const keys: string[] = []
@@ -38,23 +40,38 @@ export type ViewDescriptor = {
 export type ResourceInfo = { httpPath: string; resource: Resource }
 type ResourceNameToInfo = Map<string, ResourceInfo>
 
+export type PathPageMap = Map<string, PageNode | React.LazyExoticComponent<any>>
+
 export type ClientGenretateRouterCore = {
   host: string
   constructConfig: ConstructConfig
-  viewDescriptor: ViewDescriptor
+  pageLoadFunc: PageLoadFunc
   handlerBuildRunners: HandlerBuildRunner[]
   resourceNameToInfo: ResourceNameToInfo
-  pathToPage: Map<string, PageNode>
+  pathToPage: PathPageMap
+}
+
+export type ClientRouterConfig = {
+  host: string
+  constructConfig: ConstructConfig
+}
+
+export const defaultClientRouterConfig = (): ClientRouterConfig => {
+  return {
+    host: window.location.origin,
+    constructConfig: Actions.defaultConstructConfig(),
+  }
 }
 
 export class ClientGenretateRouter<RS extends NamedResources> implements Router {
   constructor(
-    private viewDescriptor: ViewDescriptor,
+    private config: ClientRouterConfig,
+    private pageLoadFunc: PageLoadFunc,
     private httpPath = '/',
     private core: ClientGenretateRouterCore = {
-      host: window.location.origin, // TODO: pluggable
-      constructConfig: Actions.defaultConstructConfig(), // TODO: pluggable
-      viewDescriptor,
+      host: config.host,
+      constructConfig: config.constructConfig,
+      pageLoadFunc,
       resourceNameToInfo: new Map<string, ResourceInfo>(),
       handlerBuildRunners: [],
       pathToPage: new Map(),
@@ -63,7 +80,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
 
   sub(rpath: string, ..._args: unknown[]): Router {
     // TODO: args and middlewares
-    return new ClientGenretateRouter<RS>(this.viewDescriptor, pathJoin(this.httpPath, rpath), this.core)
+    return new ClientGenretateRouter<RS>(this.config, this.pageLoadFunc, pathJoin(this.httpPath, rpath), this.core)
   }
 
   resources(rpath: string, routeConfig: RouteConfig): void {
@@ -77,7 +94,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
         body,
       })
 
-      if(!ret.ok) {
+      if (!ret.ok) {
         throw new Error(`Response status error: ${ret.status}; ${ret.statusText};`)
       }
 
@@ -90,7 +107,12 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
       return data as unknown
     }
 
-    const createStubMethod = (ad: ActionDescriptor, resourceUrl: string, schema: z.AnyZodObject, method: HttpMethod) => {
+    const createStubMethod = (
+      ad: ActionDescriptor,
+      resourceUrl: string,
+      schema: z.AnyZodObject,
+      method: HttpMethod
+    ) => {
       // TODO: Error handling and throw as Error
 
       if (schema === blankSchema) {
@@ -141,10 +163,21 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
           resource[actionName] = createStubMethod(ad, resourceUrl, schema, method)
 
           const pagePath = pathJoin(httpPath, ad.path)
-          const viewDescriptor = this.core.viewDescriptor[pagePath] // TODO: Can replace import?
-          if (ad.page && viewDescriptor.hydrate) {
-            this.core.pathToPage.set(pagePath, viewDescriptor.Page)
+          console.debug(`pagePath: ${pagePath}`)
+          if (ad.page) {
+            this.core.pathToPage.set(pagePath, this.core.pageLoadFunc(pagePath))
           }
+
+          // if (ad.page) {
+          //   this.core.pathToPage.set(
+          //     pagePath,
+          //     React.lazy(() =>
+          //       import(/*webpackChunkName: "[request]" */ `./pages/${pagePath}`).then(({ Page }) => ({
+          //         default: Page,
+          //       }))
+          //     )
+          //   )
+          // }
         }
       }
       return resource
