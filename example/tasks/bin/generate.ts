@@ -1,7 +1,7 @@
 import path from 'path'
 import { support } from 'bistrio'
 
-import { entries } from '../isomorphic/routes/_entries'
+import { entries } from '../isomorphic/config'
 import { routes as allRoutes } from '../isomorphic/routes/all'
 
 const main = async () => {
