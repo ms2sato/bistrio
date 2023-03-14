@@ -98,14 +98,12 @@ export const useRenderSupport = useRenderSupportT<N2R>
     const ret = `import { entry } from 'bistrio/client'
 
 import { entries } from '${entriesPath}'
-import { views } from './_views'
 import { N2R } from './index'
 import { localeMap } from '${localesPath}'
 
 entry<N2R>({
   entries,
   name: "${name}",
-  views,
   localeMap,
 }).catch((err) => {
   console.error(err)

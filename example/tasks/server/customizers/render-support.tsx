@@ -11,14 +11,16 @@ const { Wrapper } = initBistrioReactView<N2R>()
 
 export const constructView: ConstructViewFunc = (Page, hydrate, options, ctx) => {
   // This is sample impl, changing js for any roles
-  const script = ctx.query['admin'] == 'true' ? ['runtime', 'bistrio', 'admin'] : ['runtime', 'bistrio', 'main']
+  const script = ctx.query['admin'] == 'true' ? ['runtime', 'admin'] : ['runtime', 'main']
 
   const props = { hydrate, script }
   return (
     <Wrapper ctx={ctx}>
       <Layout props={props}>
         <StaticRouter location={ctx.req.url}>
-          <Page></Page>
+          <React.Suspense>
+            <Page></Page>
+          </React.Suspense>
         </StaticRouter>
       </Layout>
     </Wrapper>

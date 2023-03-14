@@ -2,16 +2,16 @@ import { Resource, NamedResources, Router } from 'restrant2/client'
 import { LocaleSelector, Localizer } from './locale'
 import {
   createSuspendedResourcesProxy,
-  PageNode,
   ParamsDictionary,
   RenderSupport,
   StubResources,
   StubSuspendedResources,
   suspense,
 } from './render-support'
-import { ClientGenretateRouter, ClientGenretateRouterCore, ResourceInfo, ViewDescriptor } from './client-stub-router'
+import { ClientGenretateRouter, ClientGenretateRouterCore, ClientRouterConfig, PathPageMap, ResourceInfo, defaultClientRouterConfig } from './client-stub-router'
 import { InvalidState, InvalidStateOrDefaultProps, StaticProps } from './static-props'
 import { nullRouterSupport } from './router-support'
+import { PageLoadFunc } from '.'
 
 export class ClientRenderSupport<RS extends NamedResources> implements RenderSupport<RS> {
   private suspense
@@ -76,14 +76,15 @@ export class ClientRenderSupport<RS extends NamedResources> implements RenderSup
 
 export type Engine<RS extends NamedResources> = {
   createRenderSupport: (localeSelector: LocaleSelector, staticProps: StaticProps) => ClientRenderSupport<RS>
-  pathToPage: () => Map<string, PageNode>
+  pathToPage: () => PathPageMap
 }
 
 export async function setup<RS extends NamedResources>(
   routes: (router: Router, middlewares?: any) => void,
-  views: ViewDescriptor
+  pageLoadFunc: PageLoadFunc,
+  clientRouterConfig: ClientRouterConfig = defaultClientRouterConfig(),
 ): Promise<Engine<RS>> {
-  const cgr = new ClientGenretateRouter<RS>(views)
+  const cgr = new ClientGenretateRouter<RS>(clientRouterConfig, pageLoadFunc)
   routes(cgr, nullRouterSupport)
   await cgr.build()
   const core = cgr.getCore()
