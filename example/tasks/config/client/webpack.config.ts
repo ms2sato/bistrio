@@ -1,6 +1,6 @@
 import path from 'path'
 import webpack from 'webpack'
-import { entries } from '../../isomorphic/routes/_entries'
+import { entries } from '../../isomorphic/config'
 import { generateWebpackCoonfig } from 'bistrio'
 
 const baseDir = path.join(__dirname, '../..')

@@ -6,7 +6,7 @@ import { glob } from 'glob'
 import { EntriesConfig, Middlewares, nullRouterSupport, RouterSupport } from '../../index'
 
 // TODO: to config
-const entriesPath = '../../../isomorphic/routes/_entries'
+const entriesPath = '../../../isomorphic/config'
 const localesPath = '../../../isomorphic/locales'
 const viewPath = 'isomorphic/views'
 
