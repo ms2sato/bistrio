@@ -163,21 +163,9 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
           resource[actionName] = createStubMethod(ad, resourceUrl, schema, method)
 
           const pagePath = pathJoin(httpPath, ad.path)
-          console.debug(`pagePath: ${pagePath}`)
           if (ad.page) {
             this.core.pathToPage.set(pagePath, this.core.pageLoadFunc(pagePath))
           }
-
-          // if (ad.page) {
-          //   this.core.pathToPage.set(
-          //     pagePath,
-          //     React.lazy(() =>
-          //       import(/*webpackChunkName: "[request]" */ `./pages/${pagePath}`).then(({ Page }) => ({
-          //         default: Page,
-          //       }))
-          //     )
-          //   )
-          // }
         }
       }
       return resource
