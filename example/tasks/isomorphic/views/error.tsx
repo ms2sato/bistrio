@@ -1,6 +1,6 @@
 import { HttpError } from 'http-errors'
 import 'react'
-import { Layout } from './_layout'
+import { Layout } from '../components/Layout'
 
 export default function ({ err }: { err: HttpError }) {
   const props = { hydrate: false, script: 'error' }

@@ -5,7 +5,7 @@ import { StaticRouter } from 'react-router-dom/server'
 import { ConstructViewFunc, initBistrioReactView } from 'bistrio'
 
 import { N2R } from '@bistrio/routes/all'
-import { Layout } from '../../isomorphic/views/_layout'
+import { Layout } from '../../isomorphic/components/Layout'
 
 const { Wrapper } = initBistrioReactView<N2R>()
 

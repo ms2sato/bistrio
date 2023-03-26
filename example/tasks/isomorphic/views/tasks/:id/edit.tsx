@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Form } from '../_form'
+import { Form } from '../../../components/tasks/Form'
 import { useRenderSupport } from '@bistrio/routes/main'
 
 function MyForm() {

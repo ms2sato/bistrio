@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Link } from 'react-router-dom'
-import { Form } from './_form'
+import { Form } from '../../components/tasks/Form'
 import { useRenderSupport } from '@bistrio/routes/main'
 
 export function Build() {
