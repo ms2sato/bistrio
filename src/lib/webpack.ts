@@ -1,8 +1,9 @@
 import path from 'path'
+import { existsSync, mkdirSync } from 'fs'
+import { writeFile, chmod } from 'fs/promises'
 import createDebug from 'debug'
 import type { Application } from 'express'
 import webpack, { Configuration } from 'webpack'
-import webpackDevMiddleware from 'webpack-dev-middleware'
 import { TsconfigPathsPlugin } from 'tsconfig-paths-webpack-plugin'
 
 import {
@@ -21,23 +22,14 @@ import {
 
 const debug = createDebug('bistrio:webpack')
 
-export function useWebpackDev(app: Application, webpackConfig: Configuration) {
-  if (process.env.NODE_ENV !== 'production') {
-    const compiler = webpack(webpackConfig)
-
-    app.use(
-      webpackDevMiddleware(compiler, {
-        publicPath: webpackConfig.output?.publicPath,
-      })
-    )
-  }
-}
-
-export type GenereteEntryFunc = (params: GenerateWebpackConfigParams)=> Configuration['entry']
+export type GenereteEntryFunc = (params: GenerateWebpackConfigParams) => Configuration['entry']
 
 export type GenerateWebpackConfigParams = {
   entries: EntriesConfig
   baseDir: string
+  buildDir?: string
+  publicDir?: string
+  publicJsDir?: string
   generateEntry?: GenereteEntryFunc
 }
 
@@ -48,7 +40,50 @@ const defaultGenerateEntry = ({ entries }: GenerateWebpackConfigParams): Configu
   }, {})
 }
 
-export const generateWebpackCoonfig = ({ entries, baseDir, generateEntry = defaultGenerateEntry }: GenerateWebpackConfigParams) => {
+const pluginName = 'URLMapPlugin'
+class URLMapPlugin {
+  constructor(private versionFilePath: string) {}
+
+  apply(compiler: webpack.Compiler) {
+    compiler.hooks.emit.tapAsync(pluginName, (compilation, callback) => {
+      try {
+        const jsMap: Record<string, string> = {}
+
+        compilation.chunks.forEach((chunk) => {
+          chunk.files.forEach((file) => {
+            if (file.endsWith('.js')) {
+              jsMap[chunk.name] = file
+            }
+          })
+        })
+
+        const data = { files: { js: jsMap } }
+        const filename = this.versionFilePath
+        writeFile(filename, JSON.stringify(data, null, 2), { flag: 'w' })
+          .then(() => {
+            return chmod(filename, 0o666)
+          })
+          .then(() => {
+            callback()
+          })
+          .catch((err: false | Error | null | undefined) => {
+            callback(err)
+          })
+      } catch (err) {
+        callback(err as Error)
+      }
+    })
+  }
+}
+
+export const generateWebpackCoonfig = ({
+  entries,
+  baseDir,
+  buildDir = path.resolve(baseDir, '.bistrio'),
+  publicDir = path.resolve(baseDir, 'dist', 'public'),
+  publicJsDir = path.join(publicDir, 'js'),
+  generateEntry = defaultGenerateEntry,
+}: GenerateWebpackConfigParams) => {
   debug('NODE_ENV=%s', process.env.NODE_ENV)
 
   const prod = 'production'
@@ -63,8 +98,16 @@ export const generateWebpackCoonfig = ({ entries, baseDir, generateEntry = defau
 
   const entry = generateEntry({ entries, baseDir })
 
+  if (!existsSync(publicJsDir)) {
+    mkdirSync(publicJsDir, { recursive: true })
+  }
+
   const config: Configuration = {
     entry,
+    output: {
+      path: publicJsDir,
+      filename: '[name].[contenthash].bundle.js',
+    },
     mode: env,
     module: {
       rules: [
@@ -85,24 +128,56 @@ export const generateWebpackCoonfig = ({ entries, baseDir, generateEntry = defau
       extensions: ['.tsx', '.ts', '.js'],
       plugins: [new TsconfigPathsPlugin({ configFile, extensions: ['.tsx', '.ts', '.js'] })],
     },
+    plugins: [new URLMapPlugin(path.resolve(buildDir, 'versions.json'))],
+    optimization: {
+      splitChunks: {
+        chunks: 'initial',
+        maxSize: 150000,
+        cacheGroups: {
+          foundation: {
+            test: /[\\/]node_modules[\\/](react|react-dom|react-router|react-router-dom|zod|@remix-run)[\\/]/,
+            name: 'shared--vendors-foundation',
+            priority: 40,
+            reuseExistingChunk: true,
+            enforce: true,
+          },
+          platform: {
+            test: /[\\/]node_modules[\\/](bistrio|restrant2)[\\/]/,
+            name: 'shared--vendors-platform',
+            priority: 30,
+            reuseExistingChunk: true,
+            enforce: true,
+          },
+          vendors: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'shared--vendors-misc',
+            priority: 20,
+            reuseExistingChunk: true,
+            enforce: true,
+          },
+          commons: {
+            name: 'shared--commons',
+            priority: 10,
+            reuseExistingChunk: true,
+          },
+          default: {
+            name: 'shared--default',
+            priority: 1,
+            reuseExistingChunk: true,
+          },
+        },
+      },
+    },
   }
 
   const devConfig: Configuration = {
     ...config,
     devtool: 'inline-source-map',
-    output: {
-      filename: '[name].js',
-      publicPath: '/',
-    },
     stats: 'normal',
   }
 
   const prodConfig: Configuration = {
     ...config,
-    output: {
-      filename: '[name].js',
-      path: path.resolve(baseDir, 'dist', 'public'),
-    },
   }
 
   return env === dev ? devConfig : prodConfig

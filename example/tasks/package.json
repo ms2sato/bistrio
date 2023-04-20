@@ -9,7 +9,7 @@
     "dev:server": "NODE_ENV=development DEBUG=bistrio:*,restrant2:* dotenv -e .env.development -- node -r ./server/support/tsnode_register ./bin/dev",
     "watch": "npm-watch",
     "copy-assets": "cpx 'public/**' dist/public && cpx 'config/**' dist/config",
-    "build": "npm run copy-assets && npm run build:server && npm run build:client",
+    "build": "npm run copy-assets && npm run bistrio:gen && npm run build:client && npm run build:server",
     "clean": "rimraf dist",
     "console": "ts-node --project ./config/tsconfig.console.json -r ./server/support/console.ts",
     "lint": "npm run eslint && npm run check-types",
@@ -40,12 +40,14 @@
     "bistrio:gen": {
       "patterns": [
         "isomorphic"
-      ]
+      ],
+      "extensions": "ts,tsx"
     },
-    "build:isomorphic": {
+    "build:client": {
       "patterns": [
         ".bistrio"
       ],
+      "initial": false,
       "delay": 2500,
       "extensions": "ts,tsx"
     }

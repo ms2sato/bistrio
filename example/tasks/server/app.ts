@@ -7,15 +7,13 @@ import createDebug from 'debug'
 import methodOverride from 'method-override'
 import session from 'express-session'
 
-import { localeMiddleware, useExpressRouter, useWebpackDev } from 'bistrio'
+import { localeMiddleware, useExpressRouter } from 'bistrio'
 import { checkAdmin, checkLoggedIn } from './middlewares'
 import { localeMap } from '@isomorphic/locales/index'
 import { constructView } from './customizers/render-support'
 import { routes } from '@isomorphic/routes/all'
 import { Middlewares } from '@/isomorphic/routes/middlewares'
 import { config } from './config/server'
-
-import webpackConfig from '../config/client/webpack.config'
 
 if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = 'development'
@@ -94,7 +92,18 @@ export async function setup() {
   }
 
   if (process.env.NODE_ENV == 'development') {
-    useWebpackDev(app, webpackConfig)
+    // useWebpackDev(app, webpackConfig)
+    // TODO:
+    const staticPathDev = path.join(__dirname, '../dist/public')
+    console.log({ staticPathDev })
+    app.use(express.static(staticPathDev))
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+    app._router.stack.forEach((layer: { name: string; handle: any }) => {
+      if (layer.name === 'serveStatic') {
+        console.log(layer.handle);
+      }
+    });
   }
 
   await useExpressRouter({ app, baseDir: __dirname, middlewares, routes, constructView, serverRouterConfig: config() })
