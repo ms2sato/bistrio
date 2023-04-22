@@ -24,15 +24,15 @@ export type EntriesConfig = {
 }
 
 export async function entry<R extends NamedResources>({
-  entries,
+  entriesConfig,
   name,
   localeMap,
 }: {
-  entries: EntriesConfig
+  entriesConfig: EntriesConfig
   name: string
   localeMap: Record<string, LocaleDictionary>
 }) {
-  const entryItem = entries[name]
+  const entryItem = entriesConfig[name]
   if (entryItem === undefined) {
     throw new Error(`entry config "${name}" not found in routes/_entries.ts`)
   }
