@@ -115,11 +115,11 @@ entry<N2R>({
 
 export async function generate<M extends Middlewares>({
   projectRoot = path.resolve(__dirname, '..'),
-  entries,
+  entriesConfig,
   allRoutes,
 }: {
   projectRoot: string
-  entries: EntriesConfig
+  entriesConfig: EntriesConfig
   allRoutes: (router: Router, support: RouterSupport<M>) => void
 }) {
   console.log('Generating...')
@@ -135,7 +135,7 @@ export async function generate<M extends Middlewares>({
   }
 
   await Promise.all(
-    Object.entries(entries).map(([name, { routes }]) => {
+    Object.entries(entriesConfig).map(([name, { routes }]) => {
       return generateForEntry(bistrioGenRoot, name, routes)
     })
   )

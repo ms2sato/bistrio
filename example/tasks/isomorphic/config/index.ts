@@ -28,7 +28,7 @@ const pageLoadFunc = (pagePath: string) => {
   )
 }
 
-export const entries: EntriesConfig = {
+export const entriesConfig: EntriesConfig = {
   main: { routes: mainRoutes, getContainerElement, pageLoadFunc },
   admin: { routes: adminRoutes, getContainerElement, pageLoadFunc },
 }
