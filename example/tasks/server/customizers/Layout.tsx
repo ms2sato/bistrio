@@ -21,16 +21,9 @@ function Scripts({ props }: { props: GlobalProps }) {
   const sharedScripts = sharedScriptEntries.map((entries) => entries[1])
 
   const jsRoot = '/js' // TODO: shared
-  let scripts: string[]
-  // if (process.env.NODE_ENV === 'development') {
-  //   scripts = Array.isArray(props.script)
-  //     ? props.script.map((js) => path.resolve(jsRoot, `${js}.js`))
-  //     : [path.resolve(jsRoot, props.script)]
-  // } else {
-    scripts = Array.isArray(props.script)
-      ? props.script.map(js => props.versions.files.js[js])
-      : [props.versions.files.js[props.script]]
-  // }
+  let scripts = Array.isArray(props.script)
+    ? props.script.map((js) => props.versions.files.js[js])
+    : [props.versions.files.js[props.script]]
 
   scripts = [...sharedScripts, ...scripts]
   return <>{props.hydrate && scripts.map((js) => <script key={js} src={path.resolve(jsRoot, js)} defer></script>)}</>
