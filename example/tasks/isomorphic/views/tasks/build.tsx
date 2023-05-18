@@ -23,5 +23,4 @@ export function Build() {
   )
 }
 
-const hydrate = true
-export { Build as Page, hydrate }
+export { Build as Page }

@@ -40,7 +40,6 @@ export type ConstructViewFunc = (
 
 type PageMaterial = {
   Page: Node
-  hydrate: boolean
 }
 
 export const importPage = async (filePath: string): Promise<PageMaterial> => {
