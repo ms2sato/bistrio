@@ -57,5 +57,4 @@ const TaskTable = () => {
   )
 }
 
-const hydrate = true
-export { Index as Page, hydrate }
+export { Index as Page }

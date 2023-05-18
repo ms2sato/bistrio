@@ -34,10 +34,6 @@ const createPath = (resourceUrl: string, pathFormat: string, option: Record<stri
   return { httpPath: pathJoin(resourceUrl, apath), keys }
 }
 
-export type ViewDescriptor = {
-  [key: string]: { Page: PageNode; hydrate: boolean }
-}
-
 export type ResourceInfo = { httpPath: string; resource: Resource }
 type ResourceNameToInfo = Map<string, ResourceInfo>
 
