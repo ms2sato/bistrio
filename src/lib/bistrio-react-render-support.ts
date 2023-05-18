@@ -89,13 +89,12 @@ export function createRenderFunc(constructView: ConstructViewFunc, viewRoot: str
   ): void {
     const viewPath = path.join(viewRoot, view)
     importPage(viewPath)
-      .then(({ Page, hydrate }) => {
-        // debug('Page: %s', Page.toString())
-
+      .then(({ Page }) => {
         if (Page === undefined) {
           throw new Error(`Page is undefined, Must export { Page } on ${viewPath}`)
         }
 
+        const hydrate: boolean = this.descriptor.hydrate ?? false
         return constructView(Page, hydrate, options, this)
       })
       .then((node) => {
