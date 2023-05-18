@@ -10,7 +10,8 @@ export function routes(router: Router, support: RouterSupport<Middlewares>) {
     actions: Actions.standard({ only: ['index'] }),
   })
 
-  router.resources('/tasks', {
+  const mainRouter = router.sub('/')
+  mainRouter.options({ hydrate: true }).resources('/tasks', {
     construct: {
       create: { schema: taskCreateSchema },
       update: { schema: taskUpdateSchema },

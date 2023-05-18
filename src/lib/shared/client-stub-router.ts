@@ -12,6 +12,7 @@ import {
   z,
   ActionDescriptor,
   HttpMethod,
+  RouterOptions,
 } from 'restrant2/client'
 import { filterWithoutKeys } from './object-util'
 import { pathJoin } from './path-util'
@@ -81,6 +82,10 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
   sub(rpath: string, ..._args: unknown[]): Router {
     // TODO: args and middlewares
     return new ClientGenretateRouter<RS>(this.config, this.pageLoadFunc, pathJoin(this.httpPath, rpath), this.core)
+  }
+
+  options(_value: RouterOptions) {
+    return this;
   }
 
   resources(rpath: string, routeConfig: RouteConfig): void {

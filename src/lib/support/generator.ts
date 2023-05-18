@@ -1,6 +1,6 @@
 import path from 'path'
 import fs from 'fs'
-import { RouteConfig, Router } from 'restrant2/client'
+import { RouteConfig, Router, RouterOptions } from 'restrant2/client'
 
 import { glob } from 'glob'
 import { EntriesConfig, Middlewares, nullRouterSupport, RouterSupport } from '../../index'
@@ -15,6 +15,10 @@ class NameToPathRouter implements Router {
 
   sub(rpath: string, ..._args: unknown[]): Router {
     return new NameToPathRouter(path.join(this.httpPath, rpath), this.nameToPath)
+  }
+
+  options(_value: RouterOptions) {
+    return this
   }
 
   resources(rpath: string, config: RouteConfig): void {
