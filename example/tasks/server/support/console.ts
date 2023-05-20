@@ -1,13 +1,32 @@
 // for bin/console
 // add modules for REPL
 import { routes } from '../../isomorphic/routes/all'
-import path from 'path'
-import { getRouterFactory, nullRouterSupport, RouterSupport } from 'bistrio'
+import {
+  nullRouterSupport,
+  Resource,
+  ResourceHolderCreateRouter,
+  Router,
+  RouterSupport,
+  ServerRouterConfigCustom,
+} from 'bistrio'
 import { config } from '../config/server'
 import { Middlewares } from '../../isomorphic/routes/middlewares'
 
-const router = getRouterFactory(config()).getResourceHolderCreateRouter(global, path.join(__dirname, '..'))
-routes(router, nullRouterSupport as RouterSupport<Middlewares>)
-router.build().catch((err: Error) => {
+const main = async (
+  serverRouterConfig: ServerRouterConfigCustom,
+  routes: (router: Router, support: RouterSupport<Middlewares>) => void
+) => {
+  const resources = {} as Record<string, Resource>
+
+  // TODO: fix any
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  ;(global as any).resources = resources
+
+  const router = new ResourceHolderCreateRouter(resources, serverRouterConfig, '/')
+  routes(router, nullRouterSupport as RouterSupport<Middlewares>)
+  await router.build()
+}
+
+main(config(), routes).catch((err: Error) => {
   console.error(`console error: ${err.message}`)
 })

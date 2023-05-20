@@ -14,10 +14,9 @@ import {
   Middlewares,
   Router,
   RouterSupport,
-  ServerRouterConfig,
   ServerRouter,
-  getRouterFactory,
   NormalRouterSupport,
+  ServerRouterConfigCustom,
 } from '../'
 
 const debug = createDebug('bistrio:webpack')
@@ -189,30 +188,29 @@ export type ExpressRouterConfig<M extends Middlewares> = {
   middlewares: M
   constructView: ConstructViewFunc
   routes: (router: Router, support: RouterSupport<M>) => void
-  serverRouterConfig?: Partial<ServerRouterConfig>
+  serverRouterConfig: ServerRouterConfigCustom
 }
 
 export const useExpressRouter = async <M extends Middlewares>({
   app,
-  baseDir,
   middlewares,
   constructView,
   routes,
-  serverRouterConfig = {},
+  serverRouterConfig,
 }: ExpressRouterConfig<M>) => {
   let viewRoot
   if (process.env.NODE_ENV == 'development') {
     // TODO: customizable
-    viewRoot = path.join(baseDir, '../dist/isomorphic/views')
+    viewRoot = path.join(serverRouterConfig.baseDir, '../dist/isomorphic/views')
   } else {
     // TODO: customizable
-    viewRoot = path.join(baseDir, '../isomorphic/views')
+    viewRoot = path.join(serverRouterConfig.baseDir, '../isomorphic/views')
   }
 
   const createActionContext: ActionContextCreator = buildActionContextCreator(viewRoot, constructView, '')
-  const serverConfig: Partial<ServerRouterConfig> = { createActionContext, ...serverRouterConfig }
+  const serverConfig: ServerRouterConfigCustom = { createActionContext, ...serverRouterConfig }
 
-  const router: ServerRouter = getRouterFactory(serverConfig).getServerRouter(baseDir)
+  const router: ServerRouter = new ServerRouter(serverConfig)
   const routerSupport = new NormalRouterSupport<M>(middlewares)
   routes(router, routerSupport)
   app.use(router.router)

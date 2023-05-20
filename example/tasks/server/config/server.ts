@@ -1,7 +1,8 @@
-import { ServerRouterConfig } from 'bistrio'
+import path from 'path'
+import { ServerRouterConfigCustom } from 'bistrio'
 import { createActionOptions } from '../customizers/index'
 
 // config for Routers in server
-export function config(): Partial<ServerRouterConfig> {
-  return { createActionOptions }
+export function config(): ServerRouterConfigCustom {
+  return { baseDir: path.resolve(__dirname, '../'), createActionOptions }
 }
