@@ -1,4 +1,4 @@
-import { ValidationError } from 'restrant2/client'
+import { ValidationError } from '../../client'
 
 export type InvalidState<S = unknown> = {
   error: ValidationError

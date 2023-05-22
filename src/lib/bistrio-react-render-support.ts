@@ -11,7 +11,7 @@ import {
   ServerRouter,
   ActionDescriptor,
   ValidationError,
-} from 'restrant2'
+} from '..'
 import { safeImport } from './safe-import'
 import { Localizer } from './shared/locale'
 import {

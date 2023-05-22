@@ -1,5 +1,5 @@
 import { useContext } from 'react'
-import { NamedResources } from 'restrant2/client'
+import { NamedResources } from '../..'
 import { RenderSupport } from './'
 
 let RSC: React.Context<RenderSupport<any>>

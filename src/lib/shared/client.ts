@@ -1,4 +1,4 @@
-import { Resource, NamedResources, Router } from 'restrant2/client'
+import { Resource, NamedResources, Router } from '../../client'
 import { LocaleSelector, Localizer } from './locale'
 import {
   createSuspendedResourcesProxy,

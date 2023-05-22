@@ -1,4 +1,4 @@
-import { NamedResources, opt, Resource, ResourceMethod } from 'restrant2/client'
+import { NamedResources, opt, Resource, ResourceMethod } from '../../client'
 import { Localizer } from '../shared/locale'
 import { InvalidStateOrDefaultProps, InvalidState } from './static-props'
 
