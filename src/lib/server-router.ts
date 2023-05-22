@@ -30,7 +30,6 @@ import {
   ValidationError,
   ResourceMethod,
   MutableActionContext,
-  isImportError,
   NamedResources,
   choiceSchema,
   choiseSources,
@@ -343,22 +342,44 @@ export function renderDefault(ctx: ActionContext, options: unknown = undefined) 
   ctx.render(viewPath, options as object)
 }
 
-export const importAndSetup = <S, R>(fileRoot: string, modulePath: string, support: S, config: RouteConfig): R => {
-  const fullPath = path.join(fileRoot, modulePath)
+export const importAndSetup = async <S, R>(
+  fileRoot: string,
+  modulePath: string,
+  support: S,
+  config: RouteConfig
+): Promise<R> => {
+  let fullPath = path.join(fileRoot, modulePath)
 
-  // for ts-node dynamic import
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const ret = require(fullPath) as { default: EndpointFunc<S, R> }
-
-  try {
-    return ret.default(support, config)
-  } catch (err) {
-    if (err instanceof Error) {
-      throw new RouterError(`Error occured "${err.message}" on calling default function in "${modulePath}"`, {
-        cause: err,
-      })
-    } else {
-      throw new TypeError(`Unexpected Error Object: ${err as string}`)
+  if (process.env.NODE_ENV == 'development') {
+    // for ts-node dynamic import
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const ret = require(fullPath) as { default: EndpointFunc<S, R> }
+    try {
+      return ret.default(support, config)
+    } catch (err) {
+      if (err instanceof Error) {
+        throw new RouterError(`Error occured "${err.message}" on calling default function in "${modulePath}"`, {
+          cause: err,
+        })
+      } else {
+        throw new TypeError(`Unexpected Error Object: ${err as string}`)
+      }
+    }
+  } else {
+    if (!fullPath.endsWith('.js')) {
+      fullPath = `${fullPath}.js`
+    }
+    const ret = (await import(fullPath)) as { default: { default: EndpointFunc<S, R> } }
+    try {
+      return ret.default.default(support, config)
+    } catch (err) {
+      if (err instanceof Error) {
+        throw new RouterError(`Error occured "${err.message}" on calling default function in "${modulePath}"`, {
+          cause: err,
+        })
+      } else {
+        throw new TypeError(`Unexpected Error Object: ${err as string}`)
+      }
     }
   }
 }
@@ -602,7 +623,7 @@ export class ServerRouter extends BasicRouter {
       handlerLog('buildHandler: %s', path.join(this.httpPath, rpath))
 
       const resourcePath = this.getResourcePath(rpath)
-      const resource = importAndSetup<ResourceSupport, Resource>(
+      const resource = await importAndSetup<ResourceSupport, Resource>(
         fileRoot,
         resourcePath,
         new ResourceSupport(fileRoot),
@@ -624,13 +645,14 @@ export class ServerRouter extends BasicRouter {
       let adapter: Adapter
 
       try {
-        adapter = importAndSetup<ActionSupport, Adapter>(
+        adapter = await importAndSetup<ActionSupport, Adapter>(
           fileRoot,
           adapterPath,
           new ActionSupport(fileRoot),
           routeConfig
         )
       } catch (err) {
+        handlerLog('adapter load error: %o', err)
         adapter = {}
       }
 

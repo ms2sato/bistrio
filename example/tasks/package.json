@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/server",
+    "dev:start": "NODE_ENV=production dotenv -e .env.development -- npm start",
     "prepare": "npm run bistrio:gen",
     "dev": "concurrently --raw \"npm run dev:server\" \"npm run build:isomorphic && npm run watch\"",
     "dev:server": "NODE_ENV=development DEBUG=bistrio:*,restrant2:* dotenv -e .env.development -- node -r ./server/support/tsnode_register ./bin/dev",
