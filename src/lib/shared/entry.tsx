@@ -3,7 +3,7 @@ import { useState } from 'react'
 
 import { BrowserRouter, Routes, Route, useParams } from 'react-router-dom'
 import { hydrateRoot } from 'react-dom/client'
-import { NamedResources, Router } from 'restrant2/client'
+import { NamedResources, Router } from '../..'
 
 import { LocaleSelector } from './locale'
 import { initLocale, LocaleDictionary } from './localizer'

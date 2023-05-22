@@ -9,14 +9,14 @@ import {
   ConstructConfig,
   Actions,
   blankSchema,
-  z,
   ActionDescriptor,
   HttpMethod,
   RouterOptions,
-} from 'restrant2/client'
+} from '../../client'
 import { filterWithoutKeys } from './object-util'
 import { pathJoin } from './path-util'
 import { PageNode } from './render-support'
+import { z } from 'zod'
 import React from 'react'
 import { PageLoadFunc } from '.'
 
@@ -81,7 +81,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
   }
 
   options(_value: RouterOptions) {
-    return this;
+    return this
   }
 
   resources(rpath: string, routeConfig: RouteConfig): void {

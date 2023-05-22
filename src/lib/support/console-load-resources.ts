@@ -21,13 +21,15 @@ const log = debug('bistrio')
 const debugLog = log.extend('console')
 
 class ResourceHolderCreateRouter extends BasicRouter {
-  private nameToPath: Record<string, string> = {}
-
   constructor(
     private resourcesHolder: Record<string, Resource>,
     serverRouterConfig: ServerRouterConfigCustom,
     httpPath = '/',
-    protected readonly routerCore: RouterCore = { handlerBuildRunners: [], nameToResource: new Map() },
+    protected readonly routerCore: RouterCore = {
+      handlerBuildRunners: [],
+      nameToResource: new Map(),
+      nameToPath: new Map(),
+    },
     private routerOptions: RouterOptions = { hydrate: false }
   ) {
     super(serverRouterConfig, httpPath, routerCore)
@@ -66,11 +68,15 @@ class ResourceHolderCreateRouter extends BasicRouter {
       const resourceProxy = createLocalResourceProxy(routeConfig, resource)
       const name = routeConfig.name
       if (this.resourcesHolder[name]) {
-        throw new Error(`Duplicated Resource name: ${name}; path: ${resourcePath}, with: ${this.nameToPath[name]}`)
+        throw new Error(
+          `Duplicated Resource name: ${name}; path: ${resourcePath}, with: ${
+            this.routerCore.nameToPath.get(name) || 'unknown'
+          }`
+        )
       }
 
       this.resourcesHolder[name] = resourceProxy
-      this.nameToPath[name] = resourcePath
+      this.routerCore.nameToPath.set(name, resourcePath)
     }
   }
 }

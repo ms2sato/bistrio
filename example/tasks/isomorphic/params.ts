@@ -1,4 +1,4 @@
-import { z } from 'bistrio/client'
+import { z } from 'zod'
 
 const taskCoreProps = {
   title: z.string().min(3).max(255),

@@ -1,6 +1,5 @@
 import { createContext, ReactNode, useState } from 'react'
-import { ActionContext, NamedResources } from 'restrant2'
-import { RenderSupport } from '../index'
+import { RenderSupport, ActionContext, NamedResources } from '..'
 import { createRenderSupport, ServerRenderSupport } from './bistrio-react-render-support'
 import { setRenderSupportContext } from './shared/render-support-context'
 

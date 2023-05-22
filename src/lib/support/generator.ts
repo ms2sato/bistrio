@@ -1,9 +1,8 @@
 import path from 'path'
 import fs from 'fs'
-import { RouteConfig, Router, RouterOptions } from 'restrant2/client'
-
 import { glob } from 'glob'
-import { EntriesConfig, Middlewares, nullRouterSupport, RouterSupport } from '../../index'
+import { RouteConfig, Router, RouterOptions } from '../../client'
+import { EntriesConfig, Middlewares, nullRouterSupport, RouterSupport } from '../..'
 
 // TODO: to config
 const entriesPath = '../../../isomorphic/config'

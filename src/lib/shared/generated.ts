@@ -1,4 +1,4 @@
-import { type Resource } from 'restrant2/client'
+import { type Resource } from '../../client'
 
 export type PathToResources = {
   [path: string]: Resource
