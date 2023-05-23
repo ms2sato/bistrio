@@ -2,6 +2,7 @@ import { useContext } from 'react'
 import { NamedResources } from '../..'
 import { RenderSupport } from './'
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let RSC: React.Context<RenderSupport<any>>
 
 export const setRenderSupportContext = <RS extends NamedResources>(rsc: React.Context<RenderSupport<RS>>) => {

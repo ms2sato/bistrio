@@ -37,6 +37,7 @@ const createPath = (resourceUrl: string, pathFormat: string, option: Record<stri
 export type ResourceInfo = { httpPath: string; resource: Resource }
 type ResourceNameToInfo = Map<string, ResourceInfo>
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type PathPageMap = Map<string, PageNode | React.LazyExoticComponent<any>>
 
 export type ClientGenretateRouterCore = {

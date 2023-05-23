@@ -81,15 +81,18 @@ class ResourceHolderCreateRouter extends BasicRouter {
   }
 }
 
+declare global {
+  // eslint-disable-next-line no-var
+  var resources: Record<string, Resource>;
+}
+
 export async function loadResources<M extends Middlewares>(
   serverRouterConfig: ServerRouterConfigCustom,
   routes: (router: Router, support: RouterSupport<M>) => void
 ) {
   const resources = {} as Record<string, Resource>
 
-  // TODO: fix any
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  ;(global as any).resources = resources
+  global.resources = resources
 
   const router = new ResourceHolderCreateRouter(resources, serverRouterConfig, '/')
   routes(router, nullRouterSupport as RouterSupport<M>)

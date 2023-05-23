@@ -32,8 +32,8 @@ export type GenerateWebpackConfigParams = {
   generateEntry?: GenereteEntryFunc
 }
 
-const defaultGenerateEntry = ({ entriesConfig: entries }: GenerateWebpackConfigParams): Configuration['entry'] => {
-  return Object.keys(entries).reduce<Record<string, string>>((obj, name) => {
+const defaultGenerateEntry = ({ entriesConfig }: GenerateWebpackConfigParams): Configuration['entry'] => {
+  return Object.keys(entriesConfig).reduce<Record<string, string>>((obj, name) => {
     obj[name] = `./.bistrio/routes/${name}/_entry.ts`
     return obj
   }, {})
@@ -76,7 +76,7 @@ class URLMapPlugin {
 }
 
 export const generateWebpackConfig = ({
-  entriesConfig: entries,
+  entriesConfig,
   baseDir,
   buildDir = path.resolve(baseDir, '.bistrio'),
   publicDir = path.resolve(baseDir, 'dist', 'public'),
@@ -95,7 +95,7 @@ export const generateWebpackConfig = ({
     debug('tsconfig: %s', configFile)
   }
 
-  const entry = generateEntry({ entriesConfig: entries, baseDir })
+  const entry = generateEntry({ entriesConfig, baseDir })
 
   if (!existsSync(publicJsDir)) {
     mkdirSync(publicJsDir, { recursive: true })

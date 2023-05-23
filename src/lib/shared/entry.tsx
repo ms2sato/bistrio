@@ -3,7 +3,7 @@ import { useState } from 'react'
 
 import { BrowserRouter, Routes, Route, useParams } from 'react-router-dom'
 import { hydrateRoot } from 'react-dom/client'
-import { NamedResources, Router } from '../..'
+import { NamedResources, Router, RouterSupport } from '../..'
 
 import { LocaleSelector } from './locale'
 import { initLocale, LocaleDictionary } from './localizer'
@@ -13,11 +13,13 @@ import { setup, Engine } from './client'
 import { StaticProps } from './static-props'
 import { setRenderSupportContext, useRenderSupport } from './render-support-context'
 
-export type PageLoadFunc = (pagePath: string) => PageNode | React.LazyExoticComponent<any> // TODO: generics?
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type PageLoadFunc = (pagePath: string) => PageNode | React.LazyExoticComponent<any>
 
 export type EntriesConfig = {
   [key: string]: {
-    routes: (router: Router, middlewares?: any) => void
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    routes: (router: Router, routerSupport: RouterSupport<any>) => void
     getContainerElement: () => HTMLElement
     pageLoadFunc: PageLoadFunc
   }
