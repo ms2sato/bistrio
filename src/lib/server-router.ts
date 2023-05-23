@@ -684,7 +684,7 @@ export class ServerRouter extends BasicRouter {
       const actionDescriptors: readonly ActionDescriptor[] = routeConfig.actions || this.serverRouterConfig.actions
 
       for (const actionDescriptor of actionDescriptors) {
-        if (actionDescriptor.hydrate === undefined) {
+        if (actionDescriptor.page && actionDescriptor.hydrate === undefined) {
           actionDescriptor.hydrate = this.routerOptions.hydrate
         }
 
@@ -793,13 +793,14 @@ export class ServerRouter extends BasicRouter {
 
         const urlPath = path.join(rpath, actionDescriptor.path)
         routeLog(
-          '%s %s\t%s\t{actionOverride:%s, resourceMethod:%s, descriptor: %s}',
+          '%s %s\t%s\t{actionOverride:%s, resourceMethod:%s, page: %s, hydrate: %s}',
           actionDescriptor.method instanceof Array ? actionDescriptor.method.join(',') : actionDescriptor.method,
           path.join(this.httpPath, urlPath),
           actionName,
           actionOverride,
           !!resourceMethod,
-          actionDescriptor
+          actionDescriptor.page,
+          actionDescriptor.hydrate
         )
 
         const urlPathWithExt = `${urlPath.replace(/\/$/, '')}.:format?`
