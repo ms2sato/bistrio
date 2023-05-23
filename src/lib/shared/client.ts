@@ -8,9 +8,16 @@ import {
   StubSuspendedResources,
   suspense,
 } from './render-support'
-import { ClientGenretateRouter, ClientGenretateRouterCore, ClientRouterConfig, PathPageMap, ResourceInfo, defaultClientRouterConfig } from './client-stub-router'
+import {
+  ClientGenretateRouter,
+  ClientGenretateRouterCore,
+  ClientRouterConfig,
+  PathPageMap,
+  ResourceInfo,
+  defaultClientRouterConfig,
+} from './client-stub-router'
 import { InvalidState, InvalidStateOrDefaultProps, StaticProps } from './static-props'
-import { nullRouterSupport } from './router-support'
+import { RouterSupport, nullRouterSupport } from './router-support'
 import { PageLoadFunc } from '.'
 
 export class ClientRenderSupport<RS extends NamedResources> implements RenderSupport<RS> {
@@ -80,12 +87,12 @@ export type Engine<RS extends NamedResources> = {
 }
 
 export async function setup<RS extends NamedResources>(
-  routes: (router: Router, middlewares?: any) => void,
+  routes: (router: Router, routerSupport: RouterSupport) => void,
   pageLoadFunc: PageLoadFunc,
-  clientRouterConfig: ClientRouterConfig = defaultClientRouterConfig(),
+  clientRouterConfig: ClientRouterConfig = defaultClientRouterConfig()
 ): Promise<Engine<RS>> {
   const cgr = new ClientGenretateRouter<RS>(clientRouterConfig, pageLoadFunc)
-  routes(cgr, nullRouterSupport)
+  routes(cgr, nullRouterSupport) // routerSupport and Middleware is not working on client side
   await cgr.build()
   const core = cgr.getCore()
 

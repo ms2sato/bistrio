@@ -4,7 +4,7 @@ import { nullMiddlewares } from './null-middlewares'
 type Callback = express.RequestHandler | (() => void)
 
 export type Middlewares = {
-  [name: string]: (...args: any[]) => Callback
+  [name: string]: (...args: unknown[]) => Callback
 }
 
 export type RouterSupport<M extends Middlewares = Middlewares> = {
