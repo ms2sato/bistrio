@@ -30,6 +30,11 @@ export async function setup() {
   app.use(cookieParser())
   app.use(express.static(path.join(__dirname, '../public')))
 
+  if (process.env.NODE_ENV == 'development') {
+    const staticPathDev = path.join(__dirname, '../dist/public')
+    app.use(express.static(staticPathDev))
+  }
+
   // TODO: can configure
   app.use(
     session({
@@ -89,21 +94,6 @@ export async function setup() {
   const middlewares: Middlewares = {
     checkAdmin,
     checkLoggedIn,
-  }
-
-  if (process.env.NODE_ENV == 'development') {
-    // useWebpackDev(app, webpackConfig)
-    // TODO:
-    const staticPathDev = path.join(__dirname, '../dist/public')
-    console.log({ staticPathDev })
-    app.use(express.static(staticPathDev))
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-    app._router.stack.forEach((layer: { name: string; handle: any }) => {
-      if (layer.name === 'serveStatic') {
-        console.log(layer.handle);
-      }
-    });
   }
 
   await useExpressRouter({ app, baseDir: __dirname, middlewares, routes, constructView, serverRouterConfig: config() })
