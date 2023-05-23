@@ -249,7 +249,7 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
         handlerLog('%s#%s.fatal', adapterPath, actionName)
         await responder.fatal?.apply(adapter, [ctx, err, option])
       } catch (er) {
-        console.log('Unexpected Error on responder.fatal, dispatch to default responder', er)
+        console.error('Unexpected Error on responder.fatal, dispatch to default responder', er)
         await defaultResponder.fatal(ctx, err)
       }
     } else {

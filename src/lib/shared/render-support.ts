@@ -138,7 +138,6 @@ export function createSuspendedResourcesProxy<RS extends NamedResources>(rs: Ren
           methodArgs = args
         }
 
-        console.log(`${resourceName}/${methodName}`)
         const method = resource[methodName]
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return rs.suspend(async () => await method(...methodArgs), methodKey)
