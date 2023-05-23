@@ -1,5 +1,6 @@
 import express, { NextFunction, RequestHandler } from 'express'
 import path from 'path'
+import fs from 'fs'
 import { z } from 'zod'
 import debug from 'debug'
 import {
@@ -342,6 +343,8 @@ export function renderDefault(ctx: ActionContext, options: unknown = undefined) 
   ctx.render(viewPath, options as object)
 }
 
+class FileNotFoundError extends Error {}
+
 export const importAndSetup = async <S, R>(
   fileRoot: string,
   modulePath: string,
@@ -351,9 +354,23 @@ export const importAndSetup = async <S, R>(
   let fullPath = path.join(fileRoot, modulePath)
 
   if (process.env.NODE_ENV == 'development') {
-    // for ts-node dynamic import
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const ret = require(fullPath) as { default: EndpointFunc<S, R> }
+    let ret
+    try {
+      // for ts-node dynamic import
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      ret = require(fullPath) as { default: EndpointFunc<S, R> }
+    } catch (err) {
+      if (
+        !fs.existsSync(fullPath) &&
+        !fs.existsSync(`${fullPath}.ts`) &&
+        !fs.existsSync(`${fullPath}.tsx`) &&
+        !fs.existsSync(`${fullPath}.js`)
+      ) {
+        throw new FileNotFoundError(`module: '${fullPath}' is not found`)
+      }
+      throw err
+    }
+
     try {
       return ret.default(support, config)
     } catch (err) {
@@ -362,13 +379,18 @@ export const importAndSetup = async <S, R>(
           cause: err,
         })
       } else {
-        throw new TypeError(`Unexpected Error Object: ${err as string}`)
+        throw new TypeError(`Unexpected Error Object: ${err as string}`, { cause: err })
       }
     }
   } else {
     if (!fullPath.endsWith('.js')) {
       fullPath = `${fullPath}.js`
     }
+
+    if (!fs.existsSync(fullPath)) {
+      throw new FileNotFoundError(`module: '${fullPath}' is not found`)
+    }
+
     const ret = (await import(fullPath)) as { default: { default: EndpointFunc<S, R> } }
     try {
       return ret.default.default(support, config)
@@ -652,8 +674,11 @@ export class ServerRouter extends BasicRouter {
           routeConfig
         )
       } catch (err) {
-        handlerLog('adapter load error: %o', err)
-        adapter = {}
+        if (err instanceof FileNotFoundError) {
+          adapter = {}
+        } else {
+          throw err
+        }
       }
 
       const actionDescriptors: readonly ActionDescriptor[] = routeConfig.actions || this.serverRouterConfig.actions
