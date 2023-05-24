@@ -36,6 +36,8 @@ import {
   choiseSources,
   blankSchema,
   PartialWithRequired,
+  StandardJsonFormatter,
+  JsonFormatter,
 } from '..'
 import { HttpMethod, RouterOptions, opt } from './shared'
 
@@ -132,33 +134,33 @@ function isContextHolder(obj: unknown): obj is ContextHolder {
 
 // FIXME: @see https://google.github.io/styleguide/jsoncstyleguide.xml
 class StandardJsonResponder<Opt = undefined, Out = unknown, Src = unknown> implements Responder<Opt, Out, Src> {
+  constructor(private jsonFormatter: JsonFormatter = new StandardJsonFormatter()) {}
+
   success(ctx: ActionContext, output: Out): void | Promise<void> {
+    let ret
     if (isContextHolder(output)) {
       const data = { ...output }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { ctx, ...dataWithoutCtx } = data
-      ctx.res.json({ status: 'success', data: dataWithoutCtx })
+      ret = this.jsonFormatter.success(dataWithoutCtx)
     } else {
-      ctx.res.json({ status: 'success', data: output })
+      ret = this.jsonFormatter.success(output)
     }
+    ctx.res.status(ret.status)
+    ctx.res.json(ret.json)
   }
 
   invalid(ctx: ActionContext, validationError: ValidationError, _source: Src): void | Promise<void> {
-    ctx.res.status(422)
-    ctx.res.json({
-      status: 'error',
-      errors: validationError.errors,
-      message: validationError.message,
-    })
+    const ret = this.jsonFormatter.invalid(validationError)
+    ctx.res.status(ret.status)
+    ctx.res.json(ret.json)
   }
 
   fatal(ctx: ActionContext, err: Error): void | Promise<void> {
-    // FIXME: dispatch Error class
-    ctx.res.status(500)
-
     if (process.env.NODE_ENV === 'production') {
-      ctx.res.json({
-        status: 'fatal',
-      })
+      const ret = this.jsonFormatter.fatal(err)
+      ctx.res.status(ret.status)
+      ctx.res.json(ret.json)
     } else {
       throw err
     }
