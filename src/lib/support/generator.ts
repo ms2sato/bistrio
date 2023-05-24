@@ -100,7 +100,7 @@ export const useRenderSupport = useRenderSupportT<N2R>
   createEntry({ out, name }: { out: string; name: string }) {
     const ret = `import { entry } from 'bistrio/client'
 
-import { entriesConfig } from '${entriesPath}'
+import { entriesConfig, clientConfig } from '${entriesPath}'
 import { N2R } from './index'
 import { localeMap } from '${localesPath}'
 
@@ -108,6 +108,7 @@ entry<N2R>({
   entriesConfig,
   name: "${name}",
   localeMap,
+  clientConfig
 }).catch((err) => {
   console.error(err)
 })

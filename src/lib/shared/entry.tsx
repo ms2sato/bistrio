@@ -3,7 +3,7 @@ import { useState } from 'react'
 
 import { BrowserRouter, Routes, Route, useParams } from 'react-router-dom'
 import { hydrateRoot } from 'react-dom/client'
-import { NamedResources, Router, RouterSupport } from '../..'
+import { ClientConfig, NamedResources, Router, RouterSupport } from '../..'
 
 import { LocaleSelector } from './locale'
 import { initLocale, LocaleDictionary } from './localizer'
@@ -29,10 +29,12 @@ export async function entry<R extends NamedResources>({
   entriesConfig,
   name,
   localeMap,
+  clientConfig,
 }: {
   entriesConfig: EntriesConfig
   name: string
   localeMap: Record<string, LocaleDictionary>
+  clientConfig: ClientConfig
 }) {
   const entryItem = entriesConfig[name]
   if (entryItem === undefined) {
@@ -84,7 +86,7 @@ export async function entry<R extends NamedResources>({
   }
 
   const routes = entryItem.routes
-  const engine: Engine<R> = await setup<R>(routes, entryItem.pageLoadFunc)
+  const engine: Engine<R> = await setup<R>(routes, entryItem.pageLoadFunc, clientConfig)
 
   const RouteList = await Promise.all(
     Array.from(engine.pathToPage(), ([path, Page]) => {

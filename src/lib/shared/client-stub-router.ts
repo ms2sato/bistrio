@@ -14,6 +14,7 @@ import {
   RouterOptions,
   PageLoadFunc,
   ValidationError,
+  createValidationError,
 } from '../../client'
 import { filterWithoutKeys } from './object-util'
 import { pathJoin } from './path-util'
@@ -50,9 +51,10 @@ export type ClientGenretateRouterCore = {
   pathToPage: PathPageMap
 }
 
-export type ClientRouterConfig = {
+export type ClientConfig = {
   host: string
   constructConfig: ConstructConfig
+  createFetcher: CreateFetcherFunc
 }
 
 interface JsonResponse<D> {
@@ -73,7 +75,7 @@ class ResponseJsonParser {
 
     if (res.status === 422) {
       const ret = json as StandardJsonInvalid
-      throw new Error(ret.message) // TOOD: ValidationError
+      throw createValidationError(ret.errors)
     }
 
     if (500 <= res.status && res.status < 600) {
@@ -124,16 +126,40 @@ export class StandardJsonFormatter
   }
 }
 
-export const defaultClientRouterConfig = (): ClientRouterConfig => {
+type Fetcher = {
+  fetch(url: string, method: HttpMethod, body?: BodyInit | null): Promise<unknown>
+}
+
+type CreateFetcherFunc = () => Fetcher
+
+const createFetcher: CreateFetcherFunc = (): Fetcher => {
   return {
-    host: window.location.origin,
+    async fetch(url: string, method: HttpMethod, body?: BodyInit | null) {
+      const res = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body,
+      })
+
+      const parser = new ResponseJsonParser()
+      return parser.parse(res)
+    },
+  }
+}
+
+export const defaultClientConfig = (): ClientConfig => {
+  return {
+    get host() { return window.location.origin } ,
     constructConfig: Actions.defaultConstructConfig(),
+    createFetcher,
   }
 }
 
 export class ClientGenretateRouter<RS extends NamedResources> implements Router {
   constructor(
-    private config: ClientRouterConfig,
+    private config: ClientConfig,
     private pageLoadFunc: PageLoadFunc,
     private httpPath = '/',
     private core: ClientGenretateRouterCore = {
@@ -156,19 +182,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
   }
 
   resources(rpath: string, routeConfig: RouteConfig): void {
-    const fetchJson = async (url: string, method: HttpMethod, body?: BodyInit | null): Promise<unknown> => {
-      // TODO: pluggable
-      const res = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body,
-      })
-
-      const parser = new ResponseJsonParser() // TODO: from config
-      return parser.parse(res)
-    }
+    const fetcher = this.config.createFetcher()
 
     const createStubMethod = (
       ad: ActionDescriptor,
@@ -176,13 +190,11 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
       schema: z.AnyZodObject,
       method: HttpMethod
     ) => {
-      // TODO: Error handling and throw as Error
-
       if (schema === blankSchema) {
         return async function (...options: unknown[]) {
           const option = options.length > 0 ? (options[0] as Record<string, string | number>) : {}
           const { httpPath } = createPath(resourceUrl, ad.path, option)
-          return fetchJson(httpPath, method)
+          return fetcher.fetch(httpPath, method)
         }
       } else {
         return async function (input: unknown, ..._options: unknown[]) {
@@ -191,12 +203,11 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
 
           const { httpPath, keys } = createPath(resourceUrl, ad.path, input as Record<string, string | number>)
 
-          // TODO: pluggable
           const body = filterWithoutKeys(parsedInput, keys)
           if (Object.keys(body).length > 0) {
-            return fetchJson(httpPath, method, body as unknown as BodyInit)
+            return fetcher.fetch(httpPath, method, body as unknown as BodyInit)
           } else {
-            return fetchJson(httpPath, method)
+            return fetcher.fetch(httpPath, method)
           }
         }
       }

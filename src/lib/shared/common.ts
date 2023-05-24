@@ -14,6 +14,7 @@ export type NamedResources = {
 }
 
 export type ValidationError = z.ZodError
+export type ValidationIssue = z.ZodIssue
 
 export type ConstructSource = 'body' | 'query' | 'params' | 'files'
 export type HttpMethod = 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head' | 'option'
@@ -54,6 +55,10 @@ export interface Router {
 export class RouterError extends Error {}
 
 export type HandlerBuildRunner = () => Promise<void> | void
+
+export function createValidationError(issues: ValidationIssue[]) {
+  return new z.ZodError(issues)
+}
 
 export const choiceSchema = (
   defaultConstructConfig: ConstructConfig,

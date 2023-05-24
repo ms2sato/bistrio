@@ -11,10 +11,10 @@ import {
 import {
   ClientGenretateRouter,
   ClientGenretateRouterCore,
-  ClientRouterConfig,
+  ClientConfig,
   PathPageMap,
   ResourceInfo,
-  defaultClientRouterConfig,
+  defaultClientConfig,
 } from './client-stub-router'
 import { InvalidState, InvalidStateOrDefaultProps, StaticProps } from './static-props'
 import { RouterSupport, nullRouterSupport } from './router-support'
@@ -89,9 +89,9 @@ export type Engine<RS extends NamedResources> = {
 export async function setup<RS extends NamedResources>(
   routes: (router: Router, routerSupport: RouterSupport) => void,
   pageLoadFunc: PageLoadFunc,
-  clientRouterConfig: ClientRouterConfig = defaultClientRouterConfig()
+  clientConfig: ClientConfig = defaultClientConfig()
 ): Promise<Engine<RS>> {
-  const cgr = new ClientGenretateRouter<RS>(clientRouterConfig, pageLoadFunc)
+  const cgr = new ClientGenretateRouter<RS>(clientConfig, pageLoadFunc)
   routes(cgr, nullRouterSupport) // routerSupport and Middleware is not working on client side
   await cgr.build()
   const core = cgr.getCore()
