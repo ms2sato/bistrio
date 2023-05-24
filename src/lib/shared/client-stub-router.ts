@@ -12,13 +12,14 @@ import {
   ActionDescriptor,
   HttpMethod,
   RouterOptions,
+  PageLoadFunc,
+  ValidationError,
 } from '../../client'
 import { filterWithoutKeys } from './object-util'
 import { pathJoin } from './path-util'
 import { PageNode } from './render-support'
 import { z } from 'zod'
 import React from 'react'
-import { PageLoadFunc } from '.'
 
 const createPath = (resourceUrl: string, pathFormat: string, option: Record<string, string | number>) => {
   const keys: string[] = []
@@ -52,6 +53,75 @@ export type ClientGenretateRouterCore = {
 export type ClientRouterConfig = {
   host: string
   constructConfig: ConstructConfig
+}
+
+interface JsonResponse<D> {
+  json: D
+  status: number
+}
+
+export interface JsonFormatter<S = unknown, I = unknown, F = unknown> {
+  success(data: unknown): JsonResponse<S>
+  invalid(validationError: ValidationError): JsonResponse<I>
+  fatal(_err: Error): JsonResponse<F>
+}
+
+class ResponseJsonParser {
+  async parse(res: Response): Promise<unknown> {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const json = await res.json()
+
+    if (res.status === 422) {
+      const ret = json as StandardJsonInvalid
+      throw new Error(ret.message) // TOOD: ValidationError
+    }
+
+    if (500 <= res.status && res.status < 600) {
+      throw new Error(`Fatal Error on Server`) // TODO: ServerSideError
+    }
+
+    const data = (json as StandardJsonSuccess).data
+    if (data === undefined) {
+      throw new Error('Response json has no data')
+    }
+    return data
+  }
+}
+
+type StandardJsonSuccess = {
+  status: 'success'
+  data: unknown
+}
+
+type StandardJsonInvalid = {
+  status: 'error'
+  errors: ValidationError['errors']
+  message: ValidationError['message']
+}
+
+type StandardJsonFatal = {
+  status: 'fatal'
+}
+
+type StandardJsonType = StandardJsonSuccess | StandardJsonInvalid | StandardJsonFatal
+
+export class StandardJsonFormatter
+  implements JsonFormatter<StandardJsonSuccess, StandardJsonInvalid, StandardJsonFatal>
+{
+  success(data: unknown) {
+    const json: StandardJsonType = { status: 'success', data }
+    return { json, status: 200 }
+  }
+
+  invalid(validationError: ValidationError) {
+    const json: StandardJsonType = { status: 'error', errors: validationError.errors, message: validationError.message }
+    return { json, status: 422 }
+  }
+
+  fatal(_err: Error) {
+    const json: StandardJsonType = { status: 'fatal' }
+    return { json, status: 500 }
+  }
 }
 
 export const defaultClientRouterConfig = (): ClientRouterConfig => {
@@ -88,7 +158,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
   resources(rpath: string, routeConfig: RouteConfig): void {
     const fetchJson = async (url: string, method: HttpMethod, body?: BodyInit | null): Promise<unknown> => {
       // TODO: pluggable
-      const ret = await fetch(url, {
+      const res = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
@@ -96,17 +166,8 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
         body,
       })
 
-      if (!ret.ok) {
-        throw new Error(`Response status error: ${ret.status}; ${ret.statusText};`)
-      }
-
-      // TODO: from ServerResponcePolicy
-      const json = await ret.json()
-      const data = json.data
-      if (data === undefined) {
-        throw new Error('Response json has no data')
-      }
-      return data as unknown
+      const parser = new ResponseJsonParser() // TODO: from config
+      return parser.parse(res)
     }
 
     const createStubMethod = (
