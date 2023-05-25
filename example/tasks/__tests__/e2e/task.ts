@@ -54,7 +54,8 @@ describe('senario /tasks', () => {
     await expect(page.content()).resolves.toMatch('TestDescription')
 
     await page.$eval('input[name=title]', (el) => ((el as HTMLInputElement).value = 'll'))
-    await page.$eval('textarea[name=description]', (el) => ((el as HTMLInputElement).value = ''))
+    await page.waitForSelector('textarea[name=description]')
+    await page.$eval('textarea[name=description]', (el) => ((el as HTMLTextAreaElement).value = ''))
     req.clear()
     await page.click('input[type="submit"]') // Update(validation error redirect) SSR
 
@@ -64,7 +65,8 @@ describe('senario /tasks', () => {
     await expect(page.content()).resolves.toMatch('ll')
 
     await page.$eval('input[name=title]', (el) => ((el as HTMLInputElement).value = 'NewTitle'))
-    await page.$eval('textarea[name=description]', (el) => ((el as HTMLInputElement).value = 'NewDescription'))
+    await page.waitForSelector('textarea[name=description]')
+    await page.$eval('textarea[name=description]', (el) => ((el as HTMLTextAreaElement).value = 'NewDescription'))
     req.clear()
     await page.click('input[type="submit"]') // Update SSR + Ajax
     await page.waitForSelector('table')
