@@ -16,13 +16,23 @@ import { setRenderSupportContext, useRenderSupport } from './render-support-cont
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type PageLoadFunc = (pagePath: string) => PageNode | React.LazyExoticComponent<any>
 
+type EntryConfig = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  routes: (router: Router, routerSupport: RouterSupport<any>) => void
+  pageLoadFunc: PageLoadFunc
+  el: (() => HTMLElement) | string
+}
+
 export type EntriesConfig = {
-  [key: string]: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    routes: (router: Router, routerSupport: RouterSupport<any>) => void
-    getContainerElement: () => HTMLElement
-    pageLoadFunc: PageLoadFunc
+  [key: string]: EntryConfig
+}
+
+const getContainerElement = (id = 'app'): HTMLElement => {
+  const el = document.getElementById(id)
+  if (!el) {
+    throw new Error('Container element not found')
   }
+  return el
 }
 
 export async function entry<R extends NamedResources>({
@@ -80,7 +90,13 @@ export async function entry<R extends NamedResources>({
     staticProps = JSON.parse(decodeHtml(staticPropsJson)) as StaticProps
   }
 
-  const container = entryItem.getContainerElement()
+  let container: HTMLElement
+  if (typeof entryItem.el === 'string') {
+    container = getContainerElement(entryItem.el)
+  } else {
+    container = entryItem.el()
+  }
+
   if (!container) {
     throw new Error('container not found')
   }
