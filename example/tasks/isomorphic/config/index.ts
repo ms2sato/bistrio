@@ -11,9 +11,11 @@ const pageLoadFunc = (pagePath: string) => {
   )
 }
 
+const el = 'app'
+
 export const entriesConfig: EntriesConfig = {
-  main: { routes: mainRoutes, el: 'app', pageLoadFunc },
-  admin: { routes: adminRoutes, el: 'app', pageLoadFunc },
+  main: { routes: mainRoutes, el, pageLoadFunc },
+  admin: { routes: adminRoutes, el, pageLoadFunc },
 }
 
 export const clientConfig = defaultClientConfig()

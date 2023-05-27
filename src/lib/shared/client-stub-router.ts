@@ -55,6 +55,8 @@ export type ClientConfig = {
   host: () => string
   constructConfig: ConstructConfig
   createFetcher: CreateFetcherFunc
+  sharedBundlePrefix: string
+  jsRoot: string
 }
 
 export type ClientConfigCustom = Partial<ClientConfig>
@@ -156,6 +158,8 @@ export const defaultClientConfig = (): ClientConfig => {
     host: () => global.location.origin,
     constructConfig: Actions.defaultConstructConfig(),
     createFetcher,
+    sharedBundlePrefix: 'shared--',
+    jsRoot: 'js',
   }
 }
 

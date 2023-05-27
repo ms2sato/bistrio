@@ -7,18 +7,20 @@ import createDebug from 'debug'
 import methodOverride from 'method-override'
 import session from 'express-session'
 
-import { localeMiddleware, useExpressRouter } from 'bistrio'
+import { fillConfig, localeMiddleware, useExpressRouter } from 'bistrio'
 import { checkAdmin, checkLoggedIn } from './middlewares'
 import { localeMap } from '@isomorphic/locales/index'
 import { constructView } from './customizers/render-support'
 import { routes } from '@isomorphic/routes/all'
 import { Middlewares } from '@/isomorphic/routes/middlewares'
 import { config } from './config/server'
+import { config as configCustom } from '../config'
 
 if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = 'development'
 }
 
+fillConfig(configCustom)
 const debug = createDebug('bistrio:params')
 
 export async function setup() {
