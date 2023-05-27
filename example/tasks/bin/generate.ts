@@ -1,12 +1,10 @@
-import path from 'path'
 import { support } from 'bistrio'
 
-import { entriesConfig } from '../isomorphic/config'
+import { config } from '../config'
 import { routes as allRoutes } from '../isomorphic/routes/all'
 
 const main = async () => {
-  const projectRoot = path.resolve(__dirname, '..')
-  await support.generate({ projectRoot, entriesConfig, allRoutes })
+  await support.generate({ config, allRoutes })
 }
 
 main().catch((err) => {
