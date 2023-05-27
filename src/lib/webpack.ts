@@ -2,39 +2,23 @@ import path from 'path'
 import { existsSync, mkdirSync } from 'fs'
 import { writeFile, chmod } from 'fs/promises'
 import createDebug from 'debug'
-import type { Application } from 'express'
 import webpack, { Configuration } from 'webpack'
 import { TsconfigPathsPlugin } from 'tsconfig-paths-webpack-plugin'
 
-import {
-  EntriesConfig,
-  ActionContextCreator,
-  buildActionContextCreator,
-  ConstructViewFunc,
-  Middlewares,
-  Router,
-  RouterSupport,
-  ServerRouter,
-  NormalRouterSupport,
-  ServerRouterConfigCustom,
-} from '../'
+import { ConfigCustom, fillConfig } from '../'
 
 const debug = createDebug('bistrio:webpack')
 
 export type GenereteEntryFunc = (params: GenerateWebpackConfigParams) => Configuration['entry']
 
 export type GenerateWebpackConfigParams = {
-  entriesConfig: EntriesConfig
-  baseDir: string
-  buildDir?: string
-  publicDir?: string
-  publicJsDir?: string
-  generateEntry?: GenereteEntryFunc,
+  config: ConfigCustom
+  generateEntry?: GenereteEntryFunc
   sharedBundlePrefix?: string
 }
 
-const defaultGenerateEntry = ({ entriesConfig }: GenerateWebpackConfigParams): Configuration['entry'] => {
-  return Object.keys(entriesConfig).reduce<Record<string, string>>((obj, name) => {
+const defaultGenerateEntry = ({ config }: GenerateWebpackConfigParams): Configuration['entry'] => {
+  return Object.keys(config.entries).reduce<Record<string, string>>((obj, name) => {
     obj[name] = `./.bistrio/routes/${name}/_entry.ts`
     return obj
   }, {})
@@ -77,36 +61,34 @@ class URLMapPlugin {
 }
 
 export const generateWebpackConfig = ({
-  entriesConfig,
-  baseDir,
-  buildDir = path.resolve(baseDir, '.bistrio'),
-  publicDir = path.resolve(baseDir, 'dist', 'public'),
-  publicJsDir = path.join(publicDir, 'js'),
+  config: custom,
   generateEntry = defaultGenerateEntry,
-  sharedBundlePrefix = '${sharedBundlePrefix}'
+  sharedBundlePrefix = 'shared--',
 }: GenerateWebpackConfigParams) => {
   debug('NODE_ENV=%s', process.env.NODE_ENV)
 
+  const config = fillConfig(custom)
   const prod = 'production'
   const dev = 'development'
   const env = process.env.NODE_ENV === dev ? dev : prod
+  const structureConfig = config.structure
 
-  const configFile = path.join(baseDir, 'config', 'client', `tsconfig.client.${env}.json`)
+  const configFile = path.resolve(structureConfig.configDir, 'client', `tsconfig.client.${env}.json`)
   if (env === 'development') {
     debug('Webpack is running in development mode...')
     debug('tsconfig: %s', configFile)
   }
 
-  const entry = generateEntry({ entriesConfig, baseDir })
+  const entry = generateEntry({ config })
 
-  if (!existsSync(publicJsDir)) {
-    mkdirSync(publicJsDir, { recursive: true })
+  if (!existsSync(structureConfig.publicJsDir)) {
+    mkdirSync(structureConfig.publicJsDir, { recursive: true })
   }
 
-  const config: Configuration = {
+  const webpackConfig: Configuration = {
     entry,
     output: {
-      path: publicJsDir,
+      path: structureConfig.publicJsDir,
       filename: '[name].[contenthash].bundle.js',
     },
     mode: env,
@@ -129,7 +111,7 @@ export const generateWebpackConfig = ({
       extensions: ['.tsx', '.ts', '.js'],
       plugins: [new TsconfigPathsPlugin({ configFile, extensions: ['.tsx', '.ts', '.js'] })],
     },
-    plugins: [new URLMapPlugin(path.resolve(buildDir, 'versions.json'))],
+    plugins: [new URLMapPlugin(path.resolve(structureConfig.buildDir, 'versions.json'))],
     optimization: {
       splitChunks: {
         chunks: 'initial',
@@ -172,49 +154,14 @@ export const generateWebpackConfig = ({
   }
 
   const devConfig: Configuration = {
-    ...config,
+    ...webpackConfig,
     devtool: 'inline-source-map',
     stats: 'normal',
   }
 
   const prodConfig: Configuration = {
-    ...config,
+    ...webpackConfig,
   }
 
   return env === dev ? devConfig : prodConfig
-}
-
-export type ExpressRouterConfig<M extends Middlewares> = {
-  app: Application
-  baseDir: string
-  middlewares: M
-  constructView: ConstructViewFunc
-  routes: (router: Router, support: RouterSupport<M>) => void
-  serverRouterConfig: ServerRouterConfigCustom
-}
-
-export const useExpressRouter = async <M extends Middlewares>({
-  app,
-  middlewares,
-  constructView,
-  routes,
-  serverRouterConfig,
-}: ExpressRouterConfig<M>) => {
-  let viewRoot
-  if (process.env.NODE_ENV == 'development') {
-    // TODO: customizable
-    viewRoot = path.join(serverRouterConfig.baseDir, '../dist/isomorphic/views')
-  } else {
-    // TODO: customizable
-    viewRoot = path.join(serverRouterConfig.baseDir, '../isomorphic/views')
-  }
-
-  const createActionContext: ActionContextCreator = buildActionContextCreator(viewRoot, constructView, '')
-  const serverConfig: ServerRouterConfigCustom = { createActionContext, ...serverRouterConfig }
-
-  const router: ServerRouter = new ServerRouter(serverConfig)
-  const routerSupport = new NormalRouterSupport<M>(middlewares)
-  routes(router, routerSupport)
-  app.use(router.router)
-  await router.build()
 }

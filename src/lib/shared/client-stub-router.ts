@@ -52,10 +52,12 @@ export type ClientGenretateRouterCore = {
 }
 
 export type ClientConfig = {
-  host: string
+  host: () => string
   constructConfig: ConstructConfig
   createFetcher: CreateFetcherFunc
 }
+
+export type ClientConfigCustom = Partial<ClientConfig>
 
 interface JsonResponse<D> {
   json: D
@@ -151,10 +153,14 @@ const createFetcher: CreateFetcherFunc = (): Fetcher => {
 
 export const defaultClientConfig = (): ClientConfig => {
   return {
-    get host() { return window.location.origin } ,
+    host: () => global.location.origin,
     constructConfig: Actions.defaultConstructConfig(),
     createFetcher,
   }
+}
+
+export const fillClientClonfig = (config: ClientConfigCustom) => {
+  return { ...config, ...defaultClientConfig() }
 }
 
 export class ClientGenretateRouter<RS extends NamedResources> implements Router {
@@ -163,7 +169,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
     private pageLoadFunc: PageLoadFunc,
     private httpPath = '/',
     private core: ClientGenretateRouterCore = {
-      host: config.host,
+      host: config.host(),
       constructConfig: config.constructConfig,
       pageLoadFunc,
       resourceNameToInfo: new Map<string, ResourceInfo>(),
