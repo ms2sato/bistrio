@@ -2,22 +2,9 @@ import path from 'path'
 import { ClientConfig, ClientConfigCustom, EntriesConfig, fillClientClonfig } from './shared'
 import { PartialWithRequired } from './type-util'
 
-// for webpack
-// baseDir,
-// buildDir = path.resolve(baseDir, '.bistrio'),
-// publicDir = path.resolve(baseDir, 'dist', 'public'),
-// publicJsDir = path.join(publicDir, 'js'),
-
-// for generator
-// const entriesPath = '../../../isomorphic/config'
-// const localesPath = '../../../isomorphic/locales'
-// const viewPath = 'isomorphic/views'
-// const serverPath
-// const distPath
-
 export type StructureConfig = {
   baseDir: string
-  buildDir: string
+  generatedDir: string
   publicDir: string
   distDir: string
   publicJsDir: string
@@ -42,7 +29,7 @@ export type ConfigCustom = {
 
 export function fillStrucrureConfig(strucrureConfig: StructureConfigCustom): StructureConfig {
   const baseDir = strucrureConfig.baseDir
-  const buildDir = path.resolve(baseDir, '.bistrio')
+  const generatedDir = path.resolve(baseDir, '.bistrio')
   const publicDir = path.resolve(baseDir, 'dist', 'public')
   const publicJsDir = path.resolve(publicDir, 'js')
   const distDir = path.resolve(baseDir, 'dist')
@@ -50,7 +37,7 @@ export function fillStrucrureConfig(strucrureConfig: StructureConfigCustom): Str
   const serverDir = path.resolve(baseDir, 'server')
 
   return {
-    buildDir,
+    generatedDir,
     publicDir,
     publicJsDir,
     distDir,
