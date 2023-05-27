@@ -1,12 +1,8 @@
-import path from 'path'
-import { entriesConfig } from '../../isomorphic/config'
+import { config } from '../../config'
 import { generateWebpackConfig } from 'bistrio'
 
-const baseDir = path.resolve(__dirname, '../..')
-
 const webpackConfig = generateWebpackConfig({
-  entriesConfig,
-  baseDir,
+  config,
 })
 
 export default webpackConfig
