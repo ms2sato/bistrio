@@ -29,7 +29,8 @@ export type GenerateWebpackConfigParams = {
   buildDir?: string
   publicDir?: string
   publicJsDir?: string
-  generateEntry?: GenereteEntryFunc
+  generateEntry?: GenereteEntryFunc,
+  sharedBundlePrefix?: string
 }
 
 const defaultGenerateEntry = ({ entriesConfig }: GenerateWebpackConfigParams): Configuration['entry'] => {
@@ -82,6 +83,7 @@ export const generateWebpackConfig = ({
   publicDir = path.resolve(baseDir, 'dist', 'public'),
   publicJsDir = path.join(publicDir, 'js'),
   generateEntry = defaultGenerateEntry,
+  sharedBundlePrefix = '${sharedBundlePrefix}'
 }: GenerateWebpackConfigParams) => {
   debug('NODE_ENV=%s', process.env.NODE_ENV)
 
@@ -135,32 +137,32 @@ export const generateWebpackConfig = ({
         cacheGroups: {
           foundation: {
             test: /[\\/]node_modules[\\/](react|react-dom|react-router|react-router-dom|zod|@remix-run)[\\/]/,
-            name: 'shared--vendors-foundation',
+            name: `${sharedBundlePrefix}vendors-foundation`,
             priority: 40,
             reuseExistingChunk: true,
             enforce: true,
           },
           platform: {
             test: /[\\/]node_modules[\\/](bistrio|restrant2)[\\/]/,
-            name: 'shared--vendors-platform',
+            name: `${sharedBundlePrefix}vendors-platform`,
             priority: 30,
             reuseExistingChunk: true,
             enforce: true,
           },
           vendors: {
             test: /[\\/]node_modules[\\/]/,
-            name: 'shared--vendors-misc',
+            name: `${sharedBundlePrefix}vendors-misc`,
             priority: 20,
             reuseExistingChunk: true,
             enforce: true,
           },
           commons: {
-            name: 'shared--commons',
+            name: `${sharedBundlePrefix}commons`,
             priority: 10,
             reuseExistingChunk: true,
           },
           default: {
-            name: 'shared--default',
+            name: `${sharedBundlePrefix}default`,
             priority: 1,
             reuseExistingChunk: true,
           },

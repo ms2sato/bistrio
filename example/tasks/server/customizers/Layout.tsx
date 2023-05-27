@@ -7,13 +7,13 @@ type Versions = {
   }
 }
 
-type GlobalProps = {
+export type ScriptProps = {
   hydrate: boolean
   script: string | string[]
   versions: Versions
 }
 
-function Scripts({ props }: { props: GlobalProps }) {
+function Scripts(props: ScriptProps) {
   const sharedPrefix = 'shared--'
   const sharedScriptEntries = Object.entries(props.versions.files.js).filter(([key, _value]) =>
     key.startsWith(sharedPrefix)
@@ -29,13 +29,13 @@ function Scripts({ props }: { props: GlobalProps }) {
   return <>{props.hydrate && scripts.map((js) => <script key={js} src={path.resolve(jsRoot, js)} defer></script>)}</>
 }
 
-export function Layout({ children, props }: { children: ReactNode; props: GlobalProps }) {
+export function Layout({ children, ...props }: { children: ReactNode } & ScriptProps) {
   return (
     <html>
       <head>
         <title>Tasks</title>
         <link type="text/css" rel="stylesheet" href="/stylesheets/style.css"></link>
-        <Scripts props={props}></Scripts>
+        <Scripts {...props}></Scripts>
       </head>
       <body>
         <div id="app">{children}</div>
