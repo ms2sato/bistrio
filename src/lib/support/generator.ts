@@ -1,13 +1,7 @@
 import path from 'path'
 import fs from 'fs'
-import { glob } from 'glob'
 import { RouteConfig, Router, RouterOptions } from '../../client'
-import { EntriesConfig, Middlewares, nullRouterSupport, RouterSupport } from '../..'
-
-// TODO: to config
-const entriesPath = '../../../isomorphic/config'
-const localesPath = '../../../isomorphic/locales'
-const viewPath = 'isomorphic/views'
+import { Config, ConfigCustom, fillConfig, Middlewares, nullRouterSupport, RouterSupport } from '../..'
 
 class NameToPathRouter implements Router {
   constructor(private httpPath: string = '/', readonly nameToPath: { [path: string]: string } = {}) {}
@@ -52,39 +46,6 @@ export type Resources = {
     fs.writeFileSync(out, ret)
   }
 
-  async createViews({ out, viewPath }: { out: string; viewPath: string }) {
-    const files = await new Promise<string[]>((resolve, reject) => {
-      glob(path.join(viewPath, '**/*.tsx'), { ignore: [path.join(viewPath, '**/_*.tsx')] }, (err, files) => {
-        if (err) {
-          return reject(err)
-        }
-        resolve(files)
-      })
-    })
-
-    const targets = files.filter((file) =>
-      Object.values(this.nameToPath).some((path) => file.replace(viewPath, '').startsWith(path))
-    )
-
-    const ret = `${targets
-      .map((vpath, index) => `import * as __page${index} from '../../../${vpath.replace(/\.tsx$/, '')}'`)
-      .join('\n')}
-
-export const views = {
-  ${targets
-    .map(
-      (vpath, index) =>
-        `"${vpath
-          .replace(viewPath, '')
-          .replace(/index\.tsx$/, '')
-          .replace(/\.tsx$/, '')}": __page${index}`
-    )
-    .join(',\n  ')}
-}
-`
-    fs.writeFileSync(out, ret)
-  }
-
   createTypes({ out }: { out: string }) {
     const ret = `import { useRenderSupport as useRenderSupportT, RenderSupport as RenderSupportT, NameToResource } from 'bistrio/client'
 import { type NameToPath } from './_name_to_path'
@@ -97,10 +58,13 @@ export const useRenderSupport = useRenderSupportT<N2R>
     fs.writeFileSync(out, ret)
   }
 
-  createEntry({ out, name }: { out: string; name: string }) {
+  createEntry({ out, name, config }: { out: string; name: string; config: Config }) {
+    const outDir = path.dirname(out)
+    const isomorphicConfigPath = path.relative(outDir, path.resolve(config.structure.isomorphicDir, 'config'))
+    const localesPath = path.relative(outDir, path.resolve(config.structure.isomorphicDir, 'locales'))
     const ret = `import { entry } from 'bistrio/client'
 
-import { entriesConfig, clientConfig } from '${entriesPath}'
+import { entriesConfig, clientConfig } from '${isomorphicConfigPath}'
 import { N2R } from './index'
 import { localeMap } from '${localesPath}'
 
@@ -118,17 +82,18 @@ entry<N2R>({
 }
 
 export async function generate<M extends Middlewares>({
-  projectRoot = path.resolve(__dirname, '..'),
-  entriesConfig,
+  config: configCustom,
   allRoutes,
 }: {
-  projectRoot: string
-  entriesConfig: EntriesConfig
+  config: ConfigCustom
   allRoutes: (router: Router, support: RouterSupport<M>) => void
 }) {
   console.log('Generating...')
 
-  const bistrioRoot = path.join(projectRoot, '.bistrio')
+  const config = fillConfig(configCustom)
+  const entriesConfig = config.entries
+
+  const bistrioRoot = config.structure.buildDir
   if (!fs.existsSync(bistrioRoot)) {
     fs.mkdirSync(bistrioRoot)
   }
@@ -140,7 +105,7 @@ export async function generate<M extends Middlewares>({
 
   await Promise.all(
     Object.entries(entriesConfig).map(([name, { routes }]) => {
-      return generateForEntry(bistrioGenRoot, name, routes)
+      return generateForEntry(bistrioGenRoot, name, routes, config)
     })
   )
 
@@ -150,10 +115,11 @@ export async function generate<M extends Middlewares>({
 }
 
 const router = new NameToPathRouter()
-async function generateForEntry<M extends Middlewares>(
+function generateForEntry<M extends Middlewares>(
   bistrioGenRoot: string,
   name: string,
-  routes: (router: Router, support: RouterSupport<M>) => void
+  routes: (router: Router, support: RouterSupport<M>) => void,
+  config: Config
 ) {
   routes(router, nullRouterSupport as RouterSupport<M>)
 
@@ -163,10 +129,9 @@ async function generateForEntry<M extends Middlewares>(
   }
 
   router.createNameToPath({ out: path.join(genRoot, '_name_to_path.ts') })
-  await router.createViews({ out: path.join(genRoot, '_views.ts'), viewPath: viewPath })
   router.createResources({ out: path.join(genRoot, '_resources.ts') })
   router.createTypes({ out: path.join(genRoot, 'index.ts') })
-  router.createEntry({ out: path.join(genRoot, '_entry.ts'), name })
+  router.createEntry({ out: path.join(genRoot, '_entry.ts'), name, config })
 }
 
 function generateForAll<M extends Middlewares>(
