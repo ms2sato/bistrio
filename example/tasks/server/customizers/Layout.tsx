@@ -32,9 +32,7 @@ function Scripts(props: ScriptProps) {
     <>
       {props.hydrate &&
         scripts.map((js) => {
-          console.log('jsRoot', jsRoot)
           const jsPath = path.join(jsRoot, js)
-          console.log(jsPath)
           return <script key={js} src={jsPath} defer></script>
         })}
     </>
