@@ -5,21 +5,20 @@ import createDebug from 'debug'
 import webpack, { Configuration } from 'webpack'
 import { TsconfigPathsPlugin } from 'tsconfig-paths-webpack-plugin'
 
-import { ConfigCustom, fillConfig } from '../'
+import { Config, ConfigCustom, fillConfig } from '../'
 
 const debug = createDebug('bistrio:webpack')
 
-export type GenereteEntryFunc = (params: GenerateWebpackConfigParams) => Configuration['entry']
+export type GenereteEntryFunc = (params: { config: Config }) => Configuration['entry']
 
 export type GenerateWebpackConfigParams = {
   config: ConfigCustom
   generateEntry?: GenereteEntryFunc
-  sharedBundlePrefix?: string
 }
 
-const defaultGenerateEntry = ({ config }: GenerateWebpackConfigParams): Configuration['entry'] => {
+const defaultGenerateEntry = ({ config }: { config: Config }): Configuration['entry'] => {
   return Object.keys(config.entries).reduce<Record<string, string>>((obj, name) => {
-    obj[name] = `./.bistrio/routes/${name}/_entry.ts`
+    obj[name] = path.resolve(config.structure.generatedDir, `routes/${name}/_entry.ts`)
     return obj
   }, {})
 }
@@ -63,7 +62,6 @@ class URLMapPlugin {
 export const generateWebpackConfig = ({
   config: custom,
   generateEntry = defaultGenerateEntry,
-  sharedBundlePrefix = 'shared--',
 }: GenerateWebpackConfigParams) => {
   debug('NODE_ENV=%s', process.env.NODE_ENV)
 
@@ -80,15 +78,18 @@ export const generateWebpackConfig = ({
   }
 
   const entry = generateEntry({ config })
+  const publicJsDir = path.resolve(structureConfig.publicDir, config.client.jsRoot)
 
-  if (!existsSync(structureConfig.publicJsDir)) {
-    mkdirSync(structureConfig.publicJsDir, { recursive: true })
+  if (!existsSync(publicJsDir)) {
+    mkdirSync(publicJsDir, { recursive: true })
   }
+
+  const sharedBundlePrefix = config.client.sharedBundlePrefix
 
   const webpackConfig: Configuration = {
     entry,
     output: {
-      path: structureConfig.publicJsDir,
+      path: publicJsDir,
       filename: '[name].[contenthash].bundle.js',
     },
     mode: env,

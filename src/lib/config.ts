@@ -7,13 +7,12 @@ export type StructureConfig = {
   generatedDir: string
   publicDir: string
   distDir: string
-  publicJsDir: string
   isomorphicDir: string
   serverDir: string
   configDir: string
 }
 
-export type StructureConfigCustom = PartialWithRequired<StructureConfig, 'baseDir' | 'configDir'>
+export type StructureConfigCustom = PartialWithRequired<StructureConfig, 'configDir'>
 
 export type Config = {
   client: ClientConfig
@@ -28,10 +27,9 @@ export type ConfigCustom = {
 }
 
 export function fillStrucrureConfig(strucrureConfig: StructureConfigCustom): StructureConfig {
-  const baseDir = strucrureConfig.baseDir
+  const baseDir = strucrureConfig.baseDir || path.join(strucrureConfig.configDir, '../')
   const generatedDir = path.resolve(baseDir, '.bistrio')
   const publicDir = path.resolve(baseDir, 'dist', 'public')
-  const publicJsDir = path.resolve(publicDir, 'js')
   const distDir = path.resolve(baseDir, 'dist')
   const isomorphicDir = path.resolve(baseDir, 'isomorphic')
   const serverDir = path.resolve(baseDir, 'server')
@@ -39,11 +37,11 @@ export function fillStrucrureConfig(strucrureConfig: StructureConfigCustom): Str
   return {
     generatedDir,
     publicDir,
-    publicJsDir,
     distDir,
     isomorphicDir,
     serverDir,
     ...strucrureConfig,
+    baseDir,
   }
 }
 
