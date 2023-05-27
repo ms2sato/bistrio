@@ -93,7 +93,7 @@ export async function generate<M extends Middlewares>({
   const config = fillConfig(configCustom)
   const entriesConfig = config.entries
 
-  const bistrioRoot = config.structure.buildDir
+  const bistrioRoot = config.structure.generatedDir
   if (!fs.existsSync(bistrioRoot)) {
     fs.mkdirSync(bistrioRoot)
   }

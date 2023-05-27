@@ -111,7 +111,7 @@ export const generateWebpackConfig = ({
       extensions: ['.tsx', '.ts', '.js'],
       plugins: [new TsconfigPathsPlugin({ configFile, extensions: ['.tsx', '.ts', '.js'] })],
     },
-    plugins: [new URLMapPlugin(path.resolve(structureConfig.buildDir, 'versions.json'))],
+    plugins: [new URLMapPlugin(path.resolve(structureConfig.generatedDir, 'versions.json'))],
     optimization: {
       splitChunks: {
         chunks: 'initial',
