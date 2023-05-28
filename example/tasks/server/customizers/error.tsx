@@ -1,10 +1,10 @@
 import { HttpError } from 'http-errors'
 import 'react'
 import { Layout } from './Layout'
-import versions from '@bistrio/versions.json'
+import filemap from '@bistrio/filemap.json'
 
 export default function ({ err }: { err: HttpError }) {
-  const props = { hydrate: false, script: 'error', versions }
+  const props = { hydrate: false, script: 'error', filemap }
   return (
     <Layout {...props}>
       <h1>{err.message}</h1>
