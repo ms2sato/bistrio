@@ -2,18 +2,19 @@ import React from 'react'
 
 import { StaticRouter } from 'react-router-dom/server'
 
-import { ConstructViewFunc, initBistrioReactView } from 'bistrio'
+import { ConstructViewFunc, ScriptProps, initBistrioReactView } from 'bistrio'
 
 import { N2R } from '@bistrio/routes/all'
 import { Layout } from './Layout'
-import versions from '@bistrio/versions.json'
+import filemap from '@bistrio/filemap.json'
 
 const { Wrapper } = initBistrioReactView<N2R>()
 
 export const constructView: ConstructViewFunc = (Page, hydrate, options, ctx) => {
   // This is sample impl, changing js for any roles
   const script = ctx.query['admin'] == 'true' ? ['admin'] : ['main']
-  const scriptProps = { hydrate, script, versions }
+
+  const scriptProps: ScriptProps = { hydrate, script, filemap }
   return (
     <Wrapper ctx={ctx}>
       <Layout {...scriptProps}>
