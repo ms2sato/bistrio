@@ -181,16 +181,20 @@ export type GenerateScriptsProps = {
 }
 
 export const generateScripts = (props: ScriptProps): string[] => {
+  const joinJsPath = (filePath: string) => {
+    return path.join('/', jsRoot, filePath)
+  }
+
   const clientConfig = config().client
   const sharedPrefix = clientConfig.sharedBundlePrefix
   const sharedScriptEntries = Object.entries(props.filemap.js).filter(([key, _value]) => key.startsWith(sharedPrefix))
 
   const jsRoot = clientConfig.jsRoot
-  const sharedScripts = sharedScriptEntries.map((entries) => path.join(jsRoot, entries[1]))
+  const sharedScripts = sharedScriptEntries.map((entries) => joinJsPath(entries[1]))
 
   const scripts = Array.isArray(props.script)
-    ? props.script.map((js) => path.join(jsRoot, props.filemap.js[js]))
-    : [path.join(jsRoot, props.filemap.js[props.script])]
+    ? props.script.map((js) => joinJsPath(props.filemap.js[js]))
+    : [joinJsPath(props.filemap.js[props.script])]
 
   return [...sharedScripts, ...scripts]
 }
