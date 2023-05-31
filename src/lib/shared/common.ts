@@ -60,6 +60,13 @@ export function createValidationError(issues: ValidationIssue[]) {
   return new z.ZodError(issues)
 }
 
+export function isValidationError(err: unknown): err is ValidationError {
+  if(err instanceof z.ZodError) { return true }
+
+  const ze = err as Error
+  return 'name' in ze && ze.name === 'ZodError'
+}
+
 export const choiceSchema = (
   defaultConstructConfig: ConstructConfig,
   constructDescriptor: ConstructDescriptor | undefined,

@@ -215,7 +215,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
 
           const body = filterWithoutKeys(parsedInput, keys)
           if (Object.keys(body).length > 0) {
-            return fetcher.fetch(httpPath, method, body as unknown as BodyInit)
+            return fetcher.fetch(httpPath, method, JSON.stringify(body))
           } else {
             return fetcher.fetch(httpPath, method)
           }
