@@ -23,7 +23,11 @@ export function routes(router: Router, support: RouterSupport<Middlewares>) {
 
   const apiRouter = router.sub('/api')
   apiRouter.resources('/tasks', {
+    construct: {
+      create: { schema: taskCreateSchema },
+      update: { schema: taskUpdateSchema },
+    },
     name: 'api_task',
-    actions: Actions.api({ only: ['index', 'show'] }),
+    actions: Actions.api({ only: ['index', 'show', 'update', 'create', 'destroy'] }),
   })
 }
