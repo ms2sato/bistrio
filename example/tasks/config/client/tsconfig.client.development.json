@@ -2,6 +2,7 @@
   "extends": "./tsconfig.client.production.json",
   "compilerOptions": {
     "sourceMap": true,
-    "target": "es2022"
+    "target": "es2022",
+    "jsx": "react-jsxdev",
   }
 }

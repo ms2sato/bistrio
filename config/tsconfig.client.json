@@ -3,9 +3,9 @@
     "noImplicitAny": true,
     "module": "node16",
     "target": "es5",
-    "jsx": "react",
     "lib": ["dom", "dom.iterable", "es2020"],
     "allowJs": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "jsx": "react-jsx"
   }
 }
