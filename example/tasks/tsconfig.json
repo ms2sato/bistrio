@@ -2,7 +2,8 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "module": "CommonJS",
-    "moduleResolution": "node16"
+    "moduleResolution": "node16",
+    "jsx": "react-jsx",
   },
   "include": ["server/**/*", "isomorphic/**/*"],
 }
