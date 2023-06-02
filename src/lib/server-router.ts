@@ -138,7 +138,9 @@ class StandardJsonResponder<Opt = undefined, Out = unknown, Src = unknown> imple
 
   success(ctx: ActionContext, output: Out): void | Promise<void> {
     let ret
-    if (isContextHolder(output)) {
+    if (output === undefined || output === null){
+      ret = this.jsonFormatter.success(output)
+    } else if (isContextHolder(output)) {
       const data = { ...output }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { ctx, ...dataWithoutCtx } = data

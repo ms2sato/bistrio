@@ -1,7 +1,9 @@
-import * as React from 'react'
-import { Suspense } from 'react'
+import { Suspense, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useUIEvent } from 'bistrio/client'
+
 import { useRenderSupport } from '@bistrio/routes/main'
+import { Task } from '@prisma/client'
 
 export function Index() {
   const rs = useRenderSupport()
@@ -22,6 +24,7 @@ const TaskTable = () => {
   const l = rs.getLocalizer()
 
   const tasks = rs.suspendedResources().api_task.index()
+
   return (
     <table>
       <thead>
@@ -35,25 +38,49 @@ const TaskTable = () => {
       </thead>
       <tbody>
         {tasks.map((task) => (
-          <tr key={task.id}>
-            <td>{task.id}</td>
-            <td>
-              {task.done ? (
-                l.o('models.tasks.getStatus', task.done)
-              ) : (
-                <a href={`/tasks/${task.id}/done?_method=post`}>{l.o('models.tasks.getStatus', task.done)}</a>
-              )}
-            </td>
-            <td>{task.title}</td>
-            <td>{task.description}</td>
-            <td>
-              <a href={`/tasks/${task.id}/edit`}>{l.t`Edit`}</a>&nbsp;|&nbsp;
-              <a href={`/tasks/${task.id}?_method=delete`}>{l.t`Delete`}</a>
-            </td>
-          </tr>
+          <TaskRecord key={task.id} task={task} />
         ))}
       </tbody>
     </table>
+  )
+}
+
+const TaskRecord = ({ task: src }: { task: Task }) => {
+  const [task, setTask] = useState(src)
+  const rs = useRenderSupport()
+  const l = rs.getLocalizer()
+
+  const { handleEvent: handleDoneClick, pending: donePending } = useUIEvent({
+    modifier: () => rs.resources().api_task.done(task),
+    onSuccess: () => setTask({ ...task, done: true }),
+  })
+
+  const { handleEvent: handleDeleteClick, pending: deletePending } = useUIEvent({
+    modifier: () => rs.resources().api_task.destroy(task),
+    onSuccess: () => (location.href = '/tasks'),
+  })
+
+  return (
+    <tr>
+      <td>{task.id}</td>
+      <td>
+        {donePending ? (
+          '...'
+        ) : task.done ? (
+          l.o('models.tasks.getStatus', task.done)
+        ) : (
+          <a href="#" onClick={handleDoneClick}>
+            {l.o('models.tasks.getStatus', task.done)}
+          </a>
+        )}
+      </td>
+      <td>{task.title}</td>
+      <td>{task.description}</td>
+      <td>
+        <a href={`/tasks/${task.id}/edit`}>{l.t`Edit`}</a>&nbsp;|&nbsp;
+        {deletePending ? '...' : <a href="#" onClick={handleDeleteClick}>{l.t`Delete`}</a>}
+      </td>
+    </tr>
   )
 }
 

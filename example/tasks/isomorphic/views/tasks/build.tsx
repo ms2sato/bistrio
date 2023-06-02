@@ -1,22 +1,29 @@
-import * as React from 'react'
 import { Link } from 'react-router-dom'
-import { Form } from '../../components/tasks/Form'
+import { Form, UseSubmitProps, formSchema } from '../../components/tasks/Form'
 import { useRenderSupport } from '@bistrio/routes/main'
 
 export function Build() {
   const rs = useRenderSupport()
+
+  const props: UseSubmitProps = {
+    source: { title: '', description: '' },
+    action: {
+      modifier: (params) => rs.resources().api_task.create(params),
+      onSuccess: () => (location.href = `/tasks`),
+    },
+    schema: formSchema,
+  }
+
   const handleClick = () => {
     alert('Test!')
   }
 
   const l = rs.getLocalizer()
 
-  const { source, error } = rs.invalidStateOr({ title: '', description: '' })
-
   return (
     <div>
       <h2>{l.t`Create new task`}</h2>
-      <Form action="/tasks/" method="post" task={source} err={error}></Form>
+      <Form {...props}></Form>
       <button onClick={handleClick}>This is test button</button>
       <Link to="/tasks">To Top</Link>
     </div>

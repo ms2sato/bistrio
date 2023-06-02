@@ -12,7 +12,7 @@ export type TaskCreateParams = z.infer<typeof taskCreateSchema>
 export const taskUpdateSchema = z.object({
   id: z.number(),
   ...taskCoreProps,
-  done: z.boolean().default(false),
+  done: z.coerce.boolean().default(false), // from view's value is string, change to boolean
 })
 
 export type TaskUpdateParams = z.infer<typeof taskUpdateSchema>

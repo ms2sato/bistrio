@@ -12,13 +12,8 @@ export function routes(router: Router, support: RouterSupport<Middlewares>) {
 
   const mainRouter = router.sub('/')
   mainRouter.options({ hydrate: true }).resources('/tasks', {
-    construct: {
-      create: { schema: taskCreateSchema },
-      update: { schema: taskUpdateSchema },
-      done: { schema: idNumberSchema },
-    },
     name: 'task',
-    actions: [...Actions.standard({ except: ['show'] }), { action: 'done', path: '/:id/done', method: 'post' }],
+    actions: Actions.standard({ only: ['index', 'build', 'edit'] }),
   })
 
   const apiRouter = router.sub('/api')
@@ -26,8 +21,9 @@ export function routes(router: Router, support: RouterSupport<Middlewares>) {
     construct: {
       create: { schema: taskCreateSchema },
       update: { schema: taskUpdateSchema },
+      done: { schema: idNumberSchema },
     },
     name: 'api_task',
-    actions: Actions.api({ only: ['index', 'show', 'update', 'create', 'destroy'] }),
+    actions: [...Actions.api(), { action: 'done', path: '/:id/done', method: 'post' }],
   })
 }
