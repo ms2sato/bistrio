@@ -4,7 +4,6 @@ import path from 'path'
 import cookieParser from 'cookie-parser'
 import logger from 'morgan'
 import createDebug from 'debug'
-import methodOverride from 'method-override'
 import session from 'express-session'
 
 import { fillConfig, localeMiddleware, useExpressRouter } from 'bistrio'
@@ -49,31 +48,6 @@ export async function setup() {
       },
     })
   )
-
-  // @see http://expressjs.com/en/resources/middleware/method-override.html
-  type BodyType = {
-    _method?: string
-  }
-
-  const methodName = '_method'
-
-  // @see http://expressjs.com/en/resources/middleware/method-override.html
-  app.use(
-    methodOverride(function (req, _res) {
-      if (req.body && typeof req.body === 'object' && methodName in req.body) {
-        const body = req.body as BodyType
-        const method = body[methodName]
-        if (!method) {
-          throw new Error('Unreachable')
-        }
-        // look in urlencoded POST bodies and delete it
-        delete body[methodName]
-        return method
-      }
-      return req.method
-    })
-  )
-  app.use(methodOverride(methodName, { methods: ['GET', 'POST'] })) // for GET Parameter
 
   app.use(
     localeMiddleware({
