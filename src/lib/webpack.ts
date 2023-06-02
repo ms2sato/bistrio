@@ -70,9 +70,8 @@ export const generateWebpackConfig = ({
   debug('NODE_ENV=%s', process.env.NODE_ENV)
 
   const config = fillConfig(custom)
-  const prod = 'production'
   const dev = 'development'
-  const env = process.env.NODE_ENV === dev ? dev : prod
+  const env = !process.env.NODE_ENV || process.env.NODE_ENV === dev ? dev : 'production'
   const structureConfig = config.structure
 
   const configFile = path.resolve(structureConfig.configDir, 'client', `tsconfig.client.${env}.json`)

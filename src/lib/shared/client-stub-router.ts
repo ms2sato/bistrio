@@ -86,17 +86,13 @@ class ResponseJsonParser {
       throw new Error(`Fatal Error on Server`) // TODO: ServerSideError
     }
 
-    const data = (json as StandardJsonSuccess).data
-    if (data === undefined) {
-      throw new Error('Response json has no data')
-    }
-    return data
+    return (json as StandardJsonSuccess).data
   }
 }
 
 type StandardJsonSuccess = {
   status: 'success'
-  data: unknown
+  data?: unknown
 }
 
 type StandardJsonInvalid = {
@@ -109,24 +105,31 @@ type StandardJsonFatal = {
   status: 'fatal'
 }
 
-type StandardJsonType = StandardJsonSuccess | StandardJsonInvalid | StandardJsonFatal
-
 export class StandardJsonFormatter
   implements JsonFormatter<StandardJsonSuccess, StandardJsonInvalid, StandardJsonFatal>
 {
   success(data: unknown) {
-    const json: StandardJsonType = { status: 'success', data }
-    return { json, status: 200 }
+    if (data === undefined || data === null) {
+      const json: StandardJsonSuccess = { status: 'success' }
+      return { json, status: 200 }
+    } else {
+      const json: StandardJsonSuccess = { status: 'success', data }
+      return { json, status: 200 }
+    }
   }
 
   invalid(validationError: ValidationError) {
-    const json: StandardJsonType = { status: 'error', errors: validationError.errors, message: validationError.message }
+    const json: StandardJsonInvalid = {
+      status: 'error',
+      errors: validationError.errors,
+      message: validationError.message,
+    }
     return { json, status: 422 }
   }
 
   fatal(_err: Error) {
-    const json: StandardJsonType = { status: 'fatal' }
-    return { json, status: 500 }
+    const json: StandardJsonFatal = { status: 'fatal' }
+    return { json: json, status: 500 }
   }
 }
 

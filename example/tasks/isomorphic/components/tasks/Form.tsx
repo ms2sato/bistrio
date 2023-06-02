@@ -1,53 +1,40 @@
-import * as React from 'react'
-import { ValidationError } from 'bistrio/client'
-import { TaskCreateParams, TaskUpdateParams } from '@isomorphic/params'
+import z from 'zod'
+import { UseSubmitProps as TUseSubmitProps, useSubmit } from 'bistrio/client'
 
-function ErrorPanel({ err }: { err: ValidationError }) {
-  console.log(err)
+import { taskCreateSchema } from '@/isomorphic/params'
+import { Task } from '@prisma/client'
+import { ErrorPanel } from '../ErrorPanel'
+
+export const formSchema = taskCreateSchema.extend({
+  done: z.coerce.boolean().optional(),
+})
+
+export type FormAttrs = typeof formSchema
+
+export type UseSubmitProps = TUseSubmitProps<FormAttrs, Task>
+
+export function Form(props: UseSubmitProps) {
+  const { handleSubmit, params, invalid, pending } = useSubmit<FormAttrs, Task>(props)
+
   return (
     <>
-      <div>error</div>
-      <ul>
-        {err.issues.map((er, i) => (
-          <li key={i}>
-            {er.path.join('.')}: {er.message}
-          </li>
-        ))}
-      </ul>
-    </>
-  )
-}
+      {invalid && <ErrorPanel err={invalid}></ErrorPanel>}
+      <form onSubmit={handleSubmit}>
+        <fieldset disabled={pending}>
+          {'done' in params && (
+            <div>
+              <input name="done" type="checkbox" value="true" defaultChecked={params.done || false}></input>
+            </div>
+          )}
 
-export function Form({
-  action,
-  method,
-  task,
-  err,
-}: {
-  action: string
-  method: string
-  task: TaskCreateParams | TaskUpdateParams
-  err?: ValidationError
-}) {
-  return (
-    <>
-      {err && <ErrorPanel err={err}></ErrorPanel>}
-      <form action={action} method="post">
-        {/* TODO: CSRF */}
-        <input type="hidden" name="_method" value={method}></input>
-        {'done' in task && (
           <div>
-            <input name="done" type="checkbox" value="true" defaultChecked={task.done || false}></input>
+            <input name="title" defaultValue={params.title}></input>
           </div>
-        )}
-
-        <div>
-          <input name="title" defaultValue={task.title}></input>
-        </div>
-        <div>
-          <textarea name="description" defaultValue={task.description}></textarea>
-        </div>
-        <input type="submit"></input>
+          <div>
+            <textarea name="description" defaultValue={params.description}></textarea>
+          </div>
+          <input type="submit"></input>
+        </fieldset>
       </form>
     </>
   )
