@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { z } from 'zod'
 import { ValidationError, isValidationError } from '.'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface UseSubmitProps<
   ZS extends z.AnyZodObject,
   R,
@@ -27,7 +26,6 @@ export interface UseSubmitResult<S, R, E extends ValidationError = ValidationErr
   pending: boolean
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function useSubmit<ZS extends z.AnyZodObject, R, E extends ValidationError = ValidationError, S = z.infer<ZS>>({
   source,
   action: { modifier, onSuccess, onInvalid, onFatal },
