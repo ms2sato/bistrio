@@ -120,7 +120,7 @@ export function createSuspendedResourcesProxy<RS extends NamedResources>(rs: Ren
       // 4. input, options
       proxy[resourceName][methodName] = function (...args: any[]) {
         let methodArgs: unknown[]
-        let methodKey = `${resourceName}_${methodName}`
+        let methodKey = `${resourceName}#${methodName}?${JSON.stringify(args)}`
         if (args.length === 1) {
           if (args[0] instanceof ResourceMethodOptions) {
             methodArgs = [rs.isServer ? args[0].server?.options : args[0].client?.options]
