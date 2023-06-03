@@ -1,5 +1,5 @@
 import path from 'path'
-import { existsSync, mkdirSync } from 'fs'
+import { existsSync, mkdirSync, readFileSync } from 'fs'
 import { writeFile, chmod } from 'fs/promises'
 import createDebug from 'debug'
 import webpack, { Configuration } from 'webpack'
@@ -177,24 +177,50 @@ export type ScriptProps = GenerateScriptsProps & {
 
 export type GenerateScriptsProps = {
   script: string | string[]
-  filemap: Filemap
+  filemap?: Filemap
+}
+
+class FilemapLoader {
+  private _filemap?: Filemap
+
+  constructor(private filemapPath: string) {}
+
+  load(): Filemap {
+    if (process.env.NODE_ENV !== 'development' && this._filemap) {
+      return this._filemap
+    }
+    const rawdata = readFileSync(this.filemapPath)
+    this._filemap = JSON.parse(rawdata.toString()) as Filemap
+    return this._filemap
+  }
+}
+
+let filemapLoader: FilemapLoader
+
+const getFilemapLoader = () => {
+  if (!filemapLoader) {
+    filemapLoader = new FilemapLoader(path.resolve(config().structure.generatedDir, 'filemap.json'))
+  }
+  return filemapLoader
 }
 
 export const generateScripts = (props: ScriptProps): string[] => {
+  const filemap = props.filemap || getFilemapLoader().load()
+
   const joinJsPath = (filePath: string) => {
     return path.join('/', jsRoot, filePath)
   }
 
   const clientConfig = config().client
   const sharedPrefix = clientConfig.sharedBundlePrefix
-  const sharedScriptEntries = Object.entries(props.filemap.js).filter(([key, _value]) => key.startsWith(sharedPrefix))
+  const sharedScriptEntries = Object.entries(filemap.js).filter(([key, _value]) => key.startsWith(sharedPrefix))
 
   const jsRoot = clientConfig.jsRoot
   const sharedScripts = sharedScriptEntries.map((entries) => joinJsPath(entries[1]))
 
   const scripts = Array.isArray(props.script)
-    ? props.script.map((js) => joinJsPath(props.filemap.js[js]))
-    : [joinJsPath(props.filemap.js[props.script])]
+    ? props.script.map((js) => joinJsPath(filemap.js[js]))
+    : [joinJsPath(filemap.js[props.script])]
 
   return [...sharedScripts, ...scripts]
 }
