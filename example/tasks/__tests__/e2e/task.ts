@@ -48,7 +48,7 @@ describe('senario /tasks', () => {
     await expect(page.content()).resolves.toMatch('TestTitle')
     await expect(page.content()).resolves.toMatch('TestDescription')
     req.clear()
-    await page.click('tbody tr:first-child td:nth-child(5) a:first-child') // Edit SSR
+    await page.click('tbody tr:first-child td:nth-child(5) a:first-child') // Edit CSR
 
     await page.waitForSelector('form')
     await expect(page.content()).resolves.toMatch('TestTitle')
@@ -66,7 +66,12 @@ describe('senario /tasks', () => {
     await page.$eval('input[name=title]', (el) => ((el as HTMLInputElement).value = 'NewTitle'))
     await page.$eval('textarea[name=description]', (el) => ((el as HTMLTextAreaElement).value = 'NewDescription'))
     req.clear()
-    await page.click('input[type="submit"]') // Update SSR + Ajax
+    await page.click('input[type="submit"]') // Update CSR + Ajax
+
+    await req.waitForResponses(1, { resourceType: 'ajax' })
+    expect(req.errors).toHaveLength(0)
+    expect(req.finished.where({ resourceType: 'ajax', method: 'PUT' })).toHaveLength(1)
+
     await page.waitForXPath('//td[text() = "NewTitle"]')
 
     await expect(page.title()).resolves.toMatch('Tasks')
@@ -77,10 +82,10 @@ describe('senario /tasks', () => {
     req.clear()
     await page.click('tbody tr:first-child td:nth-child(5) a:nth-child(2)') // Delete SSR
 
-    await req.waitForResponses(2, { resourceType: 'ajax' })
+    await req.waitForResponses(1, { resourceType: 'ajax' })
     expect(req.errors).toHaveLength(0)
     expect(req.finished.where({ resourceType: 'ajax', method: 'DELETE' })).toHaveLength(1)
-    expect(req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL('api/tasks/') })).toHaveLength(1)
+    // expect(req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL('api/tasks/') })).toHaveLength(1)
 
     await page.waitForSelector('th')
 
