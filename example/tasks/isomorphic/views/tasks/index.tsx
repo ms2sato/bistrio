@@ -77,7 +77,7 @@ const TaskRecord = ({ task: src }: { task: Task }) => {
       <td>{task.title}</td>
       <td>{task.description}</td>
       <td>
-        <a href={`/tasks/${task.id}/edit`}>{l.t`Edit`}</a>&nbsp;|&nbsp;
+        <Link to={`/tasks/${task.id}/edit`}>{l.t`Edit`}</Link>&nbsp;|&nbsp;
         {deletePending ? '...' : <a href="#" onClick={handleDeleteClick}>{l.t`Delete`}</a>}
       </td>
     </tr>
