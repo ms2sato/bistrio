@@ -1,9 +1,11 @@
 import { Suspense } from 'react'
 
+import { useNavigate } from 'bistrio/client'
 import { useRenderSupport } from '@bistrio/routes/main'
 import { Form, UseSubmitProps, formSchema } from '@/isomorphic/components/tasks/Form'
 
 function MyForm() {
+  const navigate = useNavigate()
   const rs = useRenderSupport()
   const id = Number(rs.params.id)
   const source = rs.suspendedResources().api_task.show({ id })
@@ -12,7 +14,7 @@ function MyForm() {
     source,
     action: {
       modifier: (params) => rs.resources().api_task.update({ done: false, ...params, id }),
-      onSuccess: () => (location.href = `/tasks`),
+      onSuccess: () => navigate('/tasks', { purge: true }),
     },
     schema: formSchema,
   }

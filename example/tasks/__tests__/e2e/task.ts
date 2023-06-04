@@ -16,14 +16,16 @@ describe('senario /tasks', () => {
     await expect(page.title()).resolves.toMatch('Tasks')
     await expect(page.content()).resolves.toMatch('Task list')
     req.clear()
-    await page.click('a[href="/tasks/build"]') // Build CSR(not for wait)
+    await page.click('a[href="/tasks/build"]') // Build CSR(wait for loading view)
+
+    await page.waitForSelector('textarea[name=description]')
 
     await expect(page.title()).resolves.toMatch('Tasks')
     await expect(page.content()).resolves.toMatch('Create new task')
     await page.$eval('input[name=title]', (el) => ((el as HTMLInputElement).value = 'TestTitle'))
     await page.$eval('textarea[name=description]', (el) => ((el as HTMLInputElement).value = 'TestDescription'))
     req.clear()
-    await page.click('input[type="submit"]') // Create SSR + Ajax
+    await page.click('input[type="submit"]') // Create Ajax
 
     await req.waitForResponses(2, { resourceType: 'ajax' })
     expect(req.errors).toHaveLength(0)
@@ -36,7 +38,7 @@ describe('senario /tasks', () => {
     await expect(page.content()).resolves.toMatch('TestTitle')
     await expect(page.content()).resolves.toMatch('TestDescription')
     req.clear()
-    await page.click('tbody tr:first-child td:nth-child(2) a') // Done SSR + Ajax
+    await page.click('tbody tr:first-child td:nth-child(2) a') // Done Ajax
 
     await req.waitForResponses(1, { resourceType: 'ajax' })
     expect(req.errors).toHaveLength(0)
@@ -50,7 +52,7 @@ describe('senario /tasks', () => {
     req.clear()
     await page.click('tbody tr:first-child td:nth-child(5) a:first-child') // Edit CSR
 
-    await page.waitForSelector('form')
+    await page.waitForSelector('textarea[name=description]')
     await expect(page.content()).resolves.toMatch('TestTitle')
     await expect(page.content()).resolves.toMatch('TestDescription')
 
