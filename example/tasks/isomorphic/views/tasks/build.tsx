@@ -1,15 +1,17 @@
 import { Link } from 'react-router-dom'
+import { useNavigate } from 'bistrio/client'
 import { Form, UseSubmitProps, formSchema } from '../../components/tasks/Form'
 import { useRenderSupport } from '@bistrio/routes/main'
 
 export function Build() {
+  const navigate = useNavigate()
   const rs = useRenderSupport()
 
   const props: UseSubmitProps = {
     source: { title: '', description: '' },
     action: {
       modifier: (params) => rs.resources().api_task.create(params),
-      onSuccess: () => (location.href = `/tasks`),
+      onSuccess: () => navigate(`/tasks`, { purge: true }),
     },
     schema: formSchema,
   }
