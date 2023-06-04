@@ -8,25 +8,37 @@ export type SuspendedNamedResources = {
   [name: string]: SuspendedResource
 }
 
-export type Reader<T> = () => T
+export type SuspendedReader<T> = {
+  read(): T
+  readonly error?: unknown
+  readonly result?: T
+  readonly suspender: Promise<unknown>
+}
 
 // @see https://blog.logrocket.com/react-suspense-data-fetching/#data-fetching-approaches
-export function suspendable<T>(promise: Promise<T>): Reader<T> {
-  let result: T
-  let err: Error
-  const suspender = promise.then(
+export function suspendable<T>(promise: Promise<T>): SuspendedReader<T> {
+  let result: T | undefined
+  let error: unknown
+  const suspender: Promise<void> = promise.then(
     (ret) => {
       if (ret === undefined) {
         throw new Error('suspendable: promise resolved with undefined')
       }
       result = ret
     },
-    (e: Error) => (err = e)
+    (err: unknown) => {
+      error = err
+    }
   )
-  return () => {
-    if (result) return result
-    if (err) throw err
-    throw suspender
+  return {
+    read: () => {
+      if (result) return result
+      if (error) throw error
+      throw suspender
+    },
+    result,
+    error,
+    suspender,
   }
 }
 
@@ -50,7 +62,7 @@ export type StubResources<RS extends NamedResources> = {
 
 export type StubSuspendedResource<R extends Resource> = {
   [MN in keyof R]: (...args: StubMethodArguments<R[MN]>) => Awaited<ReturnType<R[MN]>>
-}
+} & { $purge: () => void }
 
 export type StubSuspendedResources<RS extends NamedResources> = {
   [RN in keyof RS]: StubSuspendedResource<RS[RN]>
@@ -58,9 +70,9 @@ export type StubSuspendedResources<RS extends NamedResources> = {
 
 export type RenderSupport<RS extends NamedResources> = {
   getLocalizer: () => Localizer
-  fetchJson: <T>(url: string, key?: string) => T
   resources: () => StubResources<RS>
   suspendedResources: () => StubSuspendedResources<RS>
+  readonly suspense: Suspense
   suspend: <T>(asyncProcess: () => Promise<T>, key: string) => T
   params: Readonly<ParamsDictionary>
   // TODO: query
@@ -72,30 +84,65 @@ export type RenderSupport<RS extends NamedResources> = {
 
 export type PageNode = React.FC
 
-type ReaderMap = Map<string, Reader<unknown>>
+export type ReaderMap = { [key: string]: SuspendedReader<unknown> }
 
-export const suspense = () => {
-  const readerMap: ReaderMap = new Map()
+export type SuspensePurgeOptions = { startsWith: string } | { only: string | string[] } | { except: string | string[] }
 
-  const suspend = <T>(asyncProcess: () => Promise<T>, key: string): T => {
-    let reader: Reader<unknown> | undefined = readerMap.get(key)
+export class Suspense {
+  readonly readers: ReaderMap = {}
+  suspend<T>(asyncProcess: () => Promise<T>, key: string): T {
+    let reader: SuspendedReader<unknown> | undefined = this.readers[key]
     if (!reader) {
       reader = suspendable(asyncProcess())
-      readerMap.set(key, reader)
+      this.readers[key] = reader
     }
 
-    return (reader as Reader<T>)()
+    return (reader as SuspendedReader<T>).read()
   }
 
-  return {
-    suspend,
-    fetchJson<T>(url: string, key: string = url): T {
-      return suspend<T>(async () => {
-        const ret = await fetch(url)
-        return (await ret.json()) as T
-      }, key)
-    },
+  fetchJson<T>(url: string, key: string = url): T {
+    return this.suspend<T>(async () => {
+      const ret = await fetch(url)
+      return (await ret.json()) as T
+    }, key)
   }
+
+  purge(options?: SuspensePurgeOptions) {
+    if (!options) {
+      return Object.keys(this.readers).forEach((key) => delete this.readers[key])
+    }
+
+    if ('startsWith' in options) {
+      for (const key of Object.keys(this.readers)) {
+        if (key.startsWith(options.startsWith)) {
+          delete this.readers[key]
+        }
+      }
+      return
+    }
+
+    if ('only' in options) {
+      const keys = typeof options.only === 'string' ? [options.only] : options.only
+      for (const key of Object.keys(this.readers)) {
+        if (keys.includes(key)) {
+          delete this.readers[key]
+        }
+      }
+    }
+
+    if ('except' in options) {
+      const keys = typeof options.except === 'string' ? [options.except] : options.except
+      for (const key of Object.keys(this.readers)) {
+        if (!keys.includes(key)) {
+          delete this.readers[key]
+        }
+      }
+    }
+  }
+}
+
+export const suspense = (): Suspense => {
+  return new Suspense()
 }
 
 export class ResourceMethodOptions<SO = unknown, CO = RequestInit> {
@@ -108,11 +155,22 @@ export class ResourceMethodOptions<SO = unknown, CO = RequestInit> {
   }
 }
 
-export function createSuspendedResourcesProxy<RS extends NamedResources>(rs: RenderSupport<RS>) {
-  const proxy: { [key: string]: { [methodName: string]: any } } = {}
+type ProxyResource = { [methodName: string]: any } & { $purge: () => void }
+
+type ProxyResources = {
+  [key: string]: ProxyResource
+}
+
+export function createSuspendedResourcesProxy<RS extends NamedResources>(rs: RenderSupport<RS>): ProxyResources {
+  const proxy: ProxyResources = {}
   const namedResources = rs.resources()
   for (const [resourceName, resource] of Object.entries<Resource>(namedResources)) {
-    proxy[resourceName] = {}
+    proxy[resourceName] = {
+      $purge() {
+        rs.suspense.purge({ startsWith: `${resourceName}#` })
+      },
+    }
+
     for (const [methodName] of Object.entries(resource)) {
       // 1. no args
       // 2. input

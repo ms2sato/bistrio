@@ -179,7 +179,7 @@ export function createRenderSupport<RS extends NamedResources>(
 }
 
 export class ServerRenderSupport<RS extends NamedResources> implements RenderSupport<RS> {
-  private suspense
+  readonly suspense
   private session
 
   readonly isClient: boolean = false
@@ -196,10 +196,6 @@ export class ServerRenderSupport<RS extends NamedResources> implements RenderSup
       throw new Error('Unexpected call getLocalizer: Must use localeMiddleware')
     }
     return localizer
-  }
-
-  fetchJson<T>(url: string, key: string = url): T {
-    return this.suspense.fetchJson(url, key)
   }
 
   suspend<T>(asyncProcess: () => Promise<T>, key: string): T {

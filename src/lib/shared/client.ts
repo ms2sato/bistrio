@@ -6,6 +6,7 @@ import {
   RenderSupport,
   StubResources,
   StubSuspendedResources,
+  Suspense,
   suspense,
 } from './render-support'
 import {
@@ -21,7 +22,7 @@ import { RouterSupport, nullRouterSupport } from './router-support'
 import { PageLoadFunc } from '.'
 
 export class ClientRenderSupport<RS extends NamedResources> implements RenderSupport<RS> {
-  private suspense
+  readonly suspense: Suspense
   params: ParamsDictionary = {} as const
 
   readonly isClient: boolean = true
@@ -37,10 +38,6 @@ export class ClientRenderSupport<RS extends NamedResources> implements RenderSup
 
   getLocalizer(): Localizer {
     return this.localeSelector.select(navigator.language)
-  }
-
-  fetchJson<T>(url: string, key?: string): T {
-    return this.suspense.fetchJson(url, key)
   }
 
   resourceOf(name: string): Resource {
