@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { z } from 'zod'
 import { ValidationError, isValidationError } from '.'
+import { parseFormBody } from '../parse-form-body'
+import { createZodTraverseArrangerCreator } from '../create-zod-traverse-arranger-creator'
 
 export interface UseSubmitProps<
   ZS extends z.AnyZodObject,
@@ -46,7 +48,7 @@ export function useSubmit<ZS extends z.AnyZodObject, R, E extends ValidationErro
     const formParams = Object.fromEntries(formData.entries())
 
     ;(async () => {
-      const newParams = schema.parse(formParams) as S
+      const newParams = parseFormBody(formParams, createZodTraverseArrangerCreator(schema)) as S
 
       setInvalid(null)
       setResult(undefined)
