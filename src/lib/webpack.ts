@@ -63,17 +63,34 @@ class URLMapPlugin {
   }
 }
 
+const dev = 'development'
+const prod = 'production'
+type Mode = 'development' | 'production'
+
+function isWebpackMode(webpackMode: string | undefined): webpackMode is Mode {
+  return webpackMode !== undefined && [prod, dev].includes(webpackMode)
+}
+
 export const generateWebpackConfig = ({
   config: custom,
   generateEntry = defaultGenerateEntry,
 }: GenerateWebpackConfigParams) => {
   debug('NODE_ENV=%s', process.env.NODE_ENV)
+  debug('WEBPACK_MODE=%s', process.env.WEBPACK_MODE)
 
   const config = fillConfig(custom)
-  const dev = 'development'
-  const env = !process.env.NODE_ENV || process.env.NODE_ENV === dev ? dev : 'production'
-  const structureConfig = config.structure
 
+  let env: Mode
+  const webpackMode = process.env.WEBPACK_MODE
+  if (isWebpackMode(webpackMode)) {
+    env = webpackMode
+  } else {
+    env = !process.env.NODE_ENV || process.env.NODE_ENV === dev ? dev : prod
+  }
+
+  debug('mode=%s', env)
+
+  const structureConfig = config.structure
   const configFile = path.resolve(structureConfig.configDir, 'client', `tsconfig.client.${env}.json`)
   if (env === 'development') {
     debug('Webpack is running in development mode...')
