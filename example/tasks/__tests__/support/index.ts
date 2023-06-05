@@ -59,7 +59,13 @@ export class RequestMap {
   }
 
   asArray() {
-    return Array.from(this.map.values())
+    return Array.from(
+      Array.from(this.map.values()).map((req) => ({
+        url: req.url(),
+        method: req.method(),
+        resourceType: req.resourceType(),
+      }))
+    )
   }
 
   where(criteria: Criteria) {

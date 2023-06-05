@@ -1,4 +1,8 @@
+import { Task } from '@prisma/client'
+import { getPrismaCilent } from '../../server/lib/prisma-util'
 import { asURL, extend, RequestHolder } from '../support'
+
+const prisma = getPrismaCilent()
 
 describe('senario /tasks', () => {
   let req: RequestHolder
@@ -97,32 +101,110 @@ describe('senario /tasks', () => {
   })
 })
 
-// describe('/tasks', () => {
-//   let req: RequestHolder
+describe('/tasks', () => {
+  let req: RequestHolder
 
-//   beforeAll(async () => {
-//     req = extend(page)
-//     await page.goto(asURL('tasks'))
-//   })
+  beforeAll(async () => {
+    await prisma.task.createMany({
+      data: [
+        { title: 'Test1', description: 'Description1', done: false },
+        { title: 'Test2', description: 'Description2', done: false },
+        { title: 'Test3', description: 'Description3', done: false },
+      ],
+    })
 
-//   it('should be titled "Tasks"', async () => {
-//     await page.waitForSelector('table') // wait for suspense
-//     expect(req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL('api/tasks/') })).toHaveLength(1)
-//     await expect(page.title()).resolves.toMatch('Tasks')
-//   })
-// })
+    req = extend(page)
+    await page.goto(asURL('tasks'))
+  })
 
-// describe('/tasks/build', () => {
-//   let req: RequestHolder
+  afterAll(async () => {
+    await prisma.task.deleteMany()
+  })
 
-//   beforeAll(async () => {
-//     req = extend(page)
-//     await page.goto(asURL('tasks/build'))
-//   })
+  it('returns task table', async () => {
+    // SSR
+    await page.waitForXPath('//td[text() = "Description3"]')
+    await expect(page.title()).resolves.toMatch('Tasks')
 
-//   it('should be titled "Tasks"', async () => {
-//     await page.waitForSelector('body')
-//     expect(req.requested.where({ resourceType: 'ajax'})).toHaveLength(0)
-//     await expect(page.title()).resolves.toMatch('Tasks')
-//   })
-// })
+    // Hydration
+    await req.waitForResponses(1, { resourceType: 'ajax' })
+    expect(req.errors).toHaveLength(0)
+    expect(req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL('api/tasks/') })).toHaveLength(1)
+  })
+})
+
+describe('/tasks/build', () => {
+  let req: RequestHolder
+
+  beforeAll(async () => {
+    req = extend(page)
+    await page.goto(asURL('tasks/build'))
+  })
+
+  it('should be titled "Tasks"', async () => {
+    await page.waitForSelector('body')
+    expect(req.requested.where({ resourceType: 'ajax' })).toHaveLength(0)
+    await expect(page.title()).resolves.toMatch('Tasks')
+  })
+})
+
+describe('/tasks/edit', () => {
+  let req: RequestHolder
+  let task: Task
+
+  beforeAll(async () => {
+    task = await prisma.task.create({ data: { title: 'Test1', description: 'Description1', done: false } })
+    req = extend(page)
+  })
+
+  afterAll(async () => {
+    await prisma.task.deleteMany()
+  })
+
+  beforeEach(async () => {
+    await page.goto(asURL(`tasks/${task.id}/edit`))
+  })
+
+  afterEach(() => {
+    req.clear()
+  })
+
+  it('returns Task edit view', async () => {
+    // SSR
+    await page.waitForSelector('textarea[name=description]')
+    await expect(page.title()).resolves.toMatch('Tasks')
+
+    // Hydration
+    await req.waitForResponses(1, { resourceType: 'ajax' })
+    expect(req.errors).toHaveLength(0)
+    expect(req.requested.where({ resourceType: 'ajax', url: asURL(`api/tasks/${task.id}`) })).toHaveLength(1)
+
+    await expect(page.content()).resolves.toMatch('Test1')
+    await expect(page.content()).resolves.toMatch('Description1')
+  })
+
+  it('updates done status', async () => {
+    // show edit view
+    await req.waitForResponses(1, { resourceType: 'ajax' })
+    await page.waitForSelector('input[name=done]')
+
+    const checked = await page.$eval('input[name=done]', (el) => (el as HTMLInputElement).checked)
+    expect(checked).toBeFalsy()
+
+    // input new data and submit
+    await page.$eval('input[name=done]', (el) => ((el as HTMLInputElement).checked = true))
+    await page.$eval('input[name=title]', (el) => ((el as HTMLInputElement).value = 'NewTitle'))
+    req.clear()
+    await page.$eval('input[type=submit]', (el) => (el as HTMLInputElement).click())
+
+    // show index view
+    await req.waitForResponses(2, { resourceType: 'ajax' })
+    expect(req.errors).toHaveLength(0)
+    expect(req.finished.where({ resourceType: 'ajax', method: 'PUT' })).toHaveLength(1)
+    expect(req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL('api/tasks/') })).toHaveLength(1)
+
+    // check updated values
+    await page.waitForXPath('//td[text() = "Done"]')
+    await expect(page.content()).resolves.toMatch('NewTitle')
+  })
+})
