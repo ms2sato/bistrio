@@ -21,6 +21,7 @@ type EntryConfig = {
   routes: (router: Router, routerSupport: RouterSupport<any>) => void
   pageLoadFunc: PageLoadFunc
   el: (() => HTMLElement) | string
+  RoutesWrapper: (props: { children: React.ReactNode }) => JSX.Element
 }
 
 export type EntriesConfig = {
@@ -61,7 +62,7 @@ export async function entry<R extends NamedResources>({
   const RenderSupportContext = React.createContext({} as RenderSupport<R>)
   setRenderSupportContext(RenderSupportContext)
 
-  const Root = ({
+  const RenderSupportable = ({
     localeSelector,
     staticProps,
     children,
@@ -71,14 +72,18 @@ export async function entry<R extends NamedResources>({
     staticProps: StaticProps
   }) => {
     const [renderSupport] = useState(engine.createRenderSupport(localeSelector, staticProps))
+    return <RenderSupportContext.Provider value={renderSupport}>{children}</RenderSupportContext.Provider>
+  }
+
+  const RoutesWrapper = entryItem.RoutesWrapper
+
+  const Root = ({ children }: { children: React.ReactNode }) => {
     return (
-      <RenderSupportContext.Provider value={renderSupport}>
-        <BrowserRouter>
-          <React.Suspense>
-            <Routes>{children}</Routes>
-          </React.Suspense>
-        </BrowserRouter>
-      </RenderSupportContext.Provider>
+      <BrowserRouter>
+        <RoutesWrapper>
+          <Routes>{children}</Routes>
+        </RoutesWrapper>
+      </BrowserRouter>
     )
   }
 
@@ -114,9 +119,9 @@ export async function entry<R extends NamedResources>({
   hydrateRoot(
     container,
     <React.StrictMode>
-      <Root localeSelector={localeSelector} staticProps={staticProps}>
-        {RouteList}
-      </Root>
+      <RenderSupportable localeSelector={localeSelector} staticProps={staticProps}>
+        <Root>{RouteList}</Root>
+      </RenderSupportable>
     </React.StrictMode>
   )
 }
