@@ -11,7 +11,6 @@ export type InvalidStateOrDefaultProps<S = unknown> = {
 }
 
 export type StaticProps = {
-  invalidState?: InvalidState
   custom?: Record<string, unknown>
 }
 

@@ -17,7 +17,7 @@ import {
   ResourceInfo,
   defaultClientConfig,
 } from './client-stub-router'
-import { InvalidState, InvalidStateOrDefaultProps, StaticProps } from './static-props'
+import { StaticProps } from './static-props'
 import { RouterSupport, nullRouterSupport } from './router-support'
 import { PageLoadFunc } from '.'
 
@@ -62,19 +62,6 @@ export class ClientRenderSupport<RS extends NamedResources> implements RenderSup
 
   suspend<T>(asyncProcess: () => Promise<T>, key: string): T {
     return this.suspense.suspend(asyncProcess, key)
-  }
-
-  get invalidState(): InvalidState | undefined {
-    return this.staticProps.invalidState
-  }
-
-  invalidStateOr<S>(source: S | (() => S)): InvalidStateOrDefaultProps<S> {
-    const inv = this.invalidState
-    if (inv) {
-      return { error: inv.error, source: inv.source as S }
-    }
-
-    return source instanceof Function ? { source: source() } : { source }
   }
 }
 
