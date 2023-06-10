@@ -1,11 +1,11 @@
-import React from 'react'
+import { lazy } from 'react'
 import { EntriesConfig, defaultClientConfig } from 'bistrio/client'
 import { RoutesWrapper } from '../components/RoutesWrapper'
 import { routes as mainRoutes } from '../routes/main'
 import { routes as adminRoutes } from '../routes/admin'
 
 const pageLoadFunc = (pagePath: string) => {
-  return React.lazy(() =>
+  return lazy(() =>
     import(/*webpackChunkName: "[request]" */ `../views${pagePath}`).then(({ Page }) => ({
       default: Page,
     }))
