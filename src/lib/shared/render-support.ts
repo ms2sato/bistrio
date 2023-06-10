@@ -1,6 +1,5 @@
 import { NamedResources, opt, Resource, ResourceMethod } from '../../client'
 import { Localizer } from '../shared/locale'
-import { InvalidStateOrDefaultProps, InvalidState } from './static-props'
 
 export type SuspendedResourceMethod = (input?: any, ...args: any[]) => any
 export type SuspendedResource = Record<string, SuspendedResourceMethod>
@@ -78,8 +77,6 @@ export type RenderSupport<RS extends NamedResources> = {
   // TODO: query
   readonly isClient: boolean
   readonly isServer: boolean
-  readonly invalidState: InvalidState | undefined
-  invalidStateOr: <T>(source: T | (() => T)) => InvalidStateOrDefaultProps<T>
 }
 
 export type PageNode = React.FC

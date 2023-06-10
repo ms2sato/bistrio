@@ -8,9 +8,6 @@ import {
   ActionContext,
   NullActionContext,
   NamedResources,
-  ServerRouter,
-  ActionDescriptor,
-  ValidationError,
 } from '..'
 import { safeImport } from './safe-import'
 import { Localizer } from './shared/locale'
@@ -137,31 +134,13 @@ export type BuildActionContextCreator = (
   failText: string
 ) => ActionContextCreator
 
-class BistrioActionContext extends ActionContextImpl {
-  constructor(
-    router: ServerRouter,
-    req: express.Request,
-    res: express.Response,
-    descriptor: ActionDescriptor,
-    httpPath: string
-  ) {
-    super(router, req, res, descriptor, httpPath)
-  }
-
-  responseInvalid(path: string, error: ValidationError, source: unknown): void {
-    const staticProps = safeStaticProps(this.req.session)
-    staticProps.invalidState = { error, source }
-    this.redirect(path)
-  }
-}
-
 export function buildActionContextCreator(
   viewRoot: string,
   constructView: ConstructViewFunc,
   failText = ''
 ): ActionContextCreator {
   return (props) => {
-    const ctx = new BistrioActionContext(props.router, props.req, props.res, props.descriptor, props.httpPath)
+    const ctx = new ActionContextImpl(props.router, props.req, props.res, props.descriptor, props.httpPath)
     ctx.render = createRenderFunc(constructView, viewRoot, failText)
     return ctx
   }
@@ -214,19 +193,6 @@ export class ServerRenderSupport<RS extends NamedResources> implements RenderSup
 
   get params() {
     return this.ctx.params
-  }
-
-  get invalidState() {
-    return this.getStaticProps().invalidState
-  }
-
-  invalidStateOr<S>(source: S | (() => S)) {
-    const inv = this.invalidState
-    if (inv) {
-      return { error: inv.error, source: inv.source as S }
-    }
-
-    return source instanceof Function ? { source: source() } : { source }
   }
 
   getStaticProps(): StaticProps {
