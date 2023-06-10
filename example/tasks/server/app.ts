@@ -72,7 +72,7 @@ export async function setup() {
     checkLoggedIn,
   }
 
-  await useExpressRouter({ app, baseDir: __dirname, middlewares, routes, constructView, serverRouterConfig: config() })
+  await useExpressRouter({ app, middlewares, routes, constructView, serverRouterConfig: config() })
 
   // error handler
   app.use(function (err: unknown, req, res, _next) {
