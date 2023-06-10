@@ -47,8 +47,8 @@ export async function entry<R extends NamedResources>({
   localeMap: Record<string, LocaleDictionary>
   clientConfig: ClientConfig
 }) {
-  const entryItem = entriesConfig[name]
-  if (entryItem === undefined) {
+  const entryConfig = entriesConfig[name]
+  if (entryConfig === undefined) {
     throw new Error(`entry config "${name}" not found in routes/_entries.ts`)
   }
 
@@ -75,7 +75,7 @@ export async function entry<R extends NamedResources>({
     return <RenderSupportContext.Provider value={renderSupport}>{children}</RenderSupportContext.Provider>
   }
 
-  const RoutesWrapper = entryItem.RoutesWrapper
+  const RoutesWrapper = entryConfig.RoutesWrapper
 
   const Root = ({ children }: { children: React.ReactNode }) => {
     return (
@@ -96,18 +96,18 @@ export async function entry<R extends NamedResources>({
   }
 
   let container: HTMLElement
-  if (typeof entryItem.el === 'string') {
-    container = getContainerElement(entryItem.el)
+  if (typeof entryConfig.el === 'string') {
+    container = getContainerElement(entryConfig.el)
   } else {
-    container = entryItem.el()
+    container = entryConfig.el()
   }
 
   if (!container) {
     throw new Error('container not found')
   }
 
-  const routes = entryItem.routes
-  const engine: Engine<R> = await setup<R>(routes, entryItem.pageLoadFunc, clientConfig)
+  const routes = entryConfig.routes
+  const engine: Engine<R> = await setup<R>(routes, entryConfig.pageLoadFunc, clientConfig)
 
   const RouteList = await Promise.all(
     Array.from(engine.pathToPage(), ([path, Page]) => {
