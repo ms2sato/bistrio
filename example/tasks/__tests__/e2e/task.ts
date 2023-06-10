@@ -122,14 +122,13 @@ describe('/tasks', () => {
   })
 
   it('returns task table', async () => {
-    // SSR
-    await page.waitForXPath('//td[text() = "Description3"]')
-    await expect(page.title()).resolves.toMatch('Tasks')
-
     // Hydration
     await req.waitForResponses(1, { resourceType: 'ajax' })
     expect(req.errors).toHaveLength(0)
     expect(req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL('api/tasks/') })).toHaveLength(1)
+
+    await page.waitForXPath('//td[text() = "Description3"]')
+    await expect(page.title()).resolves.toMatch('Tasks')
   })
 })
 
@@ -170,14 +169,13 @@ describe('/tasks/edit', () => {
   })
 
   it('returns Task edit view', async () => {
-    // SSR
-    await page.waitForSelector('textarea[name=description]')
-    await expect(page.title()).resolves.toMatch('Tasks')
-
     // Hydration
     await req.waitForResponses(1, { resourceType: 'ajax' })
     expect(req.errors).toHaveLength(0)
     expect(req.requested.where({ resourceType: 'ajax', url: asURL(`api/tasks/${task.id}`) })).toHaveLength(1)
+
+    await page.waitForSelector('textarea[name=description]')
+    await expect(page.title()).resolves.toMatch('Tasks')
 
     await expect(page.content()).resolves.toMatch('Test1')
     await expect(page.content()).resolves.toMatch('Description1')
