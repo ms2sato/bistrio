@@ -14,7 +14,6 @@ import { Application } from 'express'
 
 export type ExpressRouterConfig<M extends Middlewares> = {
   app: Application
-  baseDir: string
   middlewares: M
   constructView: ConstructViewFunc
   routes: (router: Router, support: RouterSupport<M>) => void
