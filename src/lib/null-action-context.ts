@@ -46,7 +46,4 @@ export class NullActionContext implements ActionContext {
   resources(): NamedResources {
     throw new Error(this.errorMessage)
   }
-  responseInvalid(_path: string, _error: ValidationError, _source: unknown): void {
-    throw new Error('Unimplemented')
-  }
 }
