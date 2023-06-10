@@ -48,7 +48,7 @@ export async function entry<R extends NamedResources>({
   clientConfig: ClientConfig
 }) {
   const entryConfig = entriesConfig[name]
-  if (entryConfig === undefined) {
+  if (!entryConfig) {
     throw new Error(`entry config "${name}" not found in routes/_entries.ts`)
   }
 
@@ -98,8 +98,10 @@ export async function entry<R extends NamedResources>({
   let container: HTMLElement
   if (typeof entryConfig.el === 'string') {
     container = getContainerElement(entryConfig.el)
-  } else {
+  } else if (typeof entryConfig.el === 'function') {
     container = entryConfig.el()
+  } else {
+    throw new Error(`entry config ${name}: el must be string or Function`)
   }
 
   if (!container) {
