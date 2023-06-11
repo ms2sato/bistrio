@@ -2,13 +2,7 @@ import path from 'path'
 import express from 'express'
 import React from 'react'
 import { renderToPipeableStream } from 'react-dom/server'
-import {
-  ActionContextImpl,
-  ActionContextCreator,
-  ActionContext,
-  NullActionContext,
-  NamedResources,
-} from '..'
+import { ActionContextImpl, ActionContextCreator, ActionContext, NullActionContext, NamedResources } from '..'
 import { safeImport } from './safe-import'
 import { Localizer } from './shared/locale'
 import {
@@ -57,12 +51,13 @@ export function renderReactViewStream(res: express.Response, node: React.ReactNo
 
       res.statusCode = 500
       res.setHeader('Content-type', 'text/html; charset=UTF-8')
-      res.send(failText)
+      res.send(`<h1>Error on server(Status: 500)</h1><p>${failText}</p>`)
     },
     onAllReady() {
-      // nop
+      // TODO: for crawlers and static generation
     },
     onError(err) {
+      // TODO: injectable for logging
       didError = true
       console.error(err)
     },
