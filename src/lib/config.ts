@@ -1,5 +1,5 @@
 import path from 'path'
-import { ClientConfig, ClientConfigCustom, EntriesConfig, fillClientClonfig } from './shared'
+import { ClientConfig, ClientConfigCustom, EntriesConfig, fillClientConfig } from './shared'
 import { PartialWithRequired } from './type-util'
 
 export type StructureConfig = {
@@ -48,7 +48,7 @@ export function fillStrucrureConfig(strucrureConfig: StructureConfigCustom): Str
 let filledConfig: Config | undefined = undefined
 export const fillConfig = (config: ConfigCustom): Config => {
   filledConfig = {
-    client: fillClientClonfig(config.client || {}),
+    client: fillClientConfig(config.client || {}),
     structure: fillStrucrureConfig(config.structure),
     entries: config.entries,
   }

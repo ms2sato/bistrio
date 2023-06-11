@@ -166,7 +166,7 @@ export const defaultClientConfig = (): ClientConfig => {
   }
 }
 
-export const fillClientClonfig = (config: ClientConfigCustom) => {
+export const fillClientConfig = (config: ClientConfigCustom) => {
   return { ...config, ...defaultClientConfig() }
 }
 
