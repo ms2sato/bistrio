@@ -33,7 +33,8 @@
     "prepare": "npm run build",
     "test": "jest && npm run --prefix example/tasks db:migrate:test && npm run --prefix example/tasks test",
     "build-all": "WEBPACK_MODE=production npm --prefix example/tasks run build",
-    "ci-all": "npm ci && npm run package && npm --prefix example/tasks update bistrio && npm --prefix example/tasks i"
+    "ci-all": "npm ci && npm run package && npm --prefix example/tasks update bistrio && npm --prefix example/tasks i",
+    "renew": "npm run package && npm --prefix example/tasks uninstall bistrio && npm --prefix example/tasks install file:./bistrio-$npm_package_version.tgz"
   },
   "dependencies": {
     "debug": "~4.3.4",
