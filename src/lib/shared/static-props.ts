@@ -1,15 +1,3 @@
-import { ValidationError } from '../../client'
-
-export type InvalidState<S = unknown> = {
-  error: ValidationError
-  source: S
-}
-
-export type InvalidStateOrDefaultProps<S = unknown> = {
-  error?: ValidationError
-  source: S
-}
-
 export type StaticProps = {
   custom?: Record<string, unknown>
 }
