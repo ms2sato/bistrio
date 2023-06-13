@@ -62,7 +62,7 @@ class ScriptInserter<RS extends NamedResources> extends Transform {
             .map(([key, reader]) => {
               this.sentKeys.push(key)
               const record = { key, data: reader.result }
-              return `<script>window.bistrio.addCache(${JSON.stringify(record)})</script>`
+              return `<script>window.BISTRIO.addCache(${JSON.stringify(record)})</script>`
             })
             .join('')
           this.push(chnkStr + scripts)

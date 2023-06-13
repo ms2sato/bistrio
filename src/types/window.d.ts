@@ -1,10 +1,10 @@
-import { CacheRecord } from "../client"
+import { CacheRecord } from '../client'
 
 export {}
 
 declare global {
   interface Window {
-    bistrio: {
+    BISTRIO: {
       addCache(record: CacheRecord): void
     }
   }
