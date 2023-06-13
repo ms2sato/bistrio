@@ -2,8 +2,8 @@ import { ScriptProps, generateScripts } from '..'
 
 const cacheScripts = `
 const isClient = typeof window !== 'undefined'
-if (isClient && !window.bistrio) {
-  window.bistrio = {
+if (isClient && !window.BISTRIO) {
+  window.BISTRIO = {
     cache: {},
     addCache(record) {
       this.cache[record.key] = record.data
