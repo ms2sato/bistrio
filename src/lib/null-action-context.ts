@@ -1,5 +1,5 @@
 import express from 'express'
-import { NamedResources, ActionContext, ActionDescriptor, ValidationError } from '..'
+import { NamedResources, ActionContext, ActionDescriptor } from '..'
 
 export class NullActionContext implements ActionContext {
   private errorMessage = 'Cannot access this ActionContext(May not request context)'

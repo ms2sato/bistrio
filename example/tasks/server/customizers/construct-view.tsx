@@ -7,14 +7,14 @@ import { Layout } from './Layout'
 
 const { Wrapper } = initBistrioReactView<N2R>()
 
-export const constructView: ConstructViewFunc = (Page, hydrate, options, ctx) => {
+export const constructView: ConstructViewFunc = ({node: Page, hydrate, ctx, rs}) => {
   // This is sample impl, changing js for any roles
   const script = ctx.query['admin'] == 'true' ? ['admin'] : ['main']
 
   const scriptProps: ScriptProps = { hydrate, script }
 
   return (
-    <Wrapper ctx={ctx}>
+    <Wrapper rs={rs}>
       <Layout {...scriptProps}>
         <StaticRouter location={ctx.req.url}>
           <React.Suspense>

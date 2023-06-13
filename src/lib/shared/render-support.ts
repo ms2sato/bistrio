@@ -16,27 +16,27 @@ export type SuspendedReader<T> = {
 
 // @see https://blog.logrocket.com/react-suspense-data-fetching/#data-fetching-approaches
 export function suspendable<T>(promise: Promise<T>): SuspendedReader<T> {
-  let result: T | undefined
-  let error: unknown
+  let _result: T | undefined
+  let _error: unknown
   const suspender: Promise<void> = promise.then(
     (ret) => {
       if (ret === undefined) {
         throw new Error('suspendable: promise resolved with undefined')
       }
-      result = ret
+      _result = ret
     },
     (err: unknown) => {
-      error = err
+      _error = err
     }
   )
   return {
     read: () => {
-      if (result) return result
-      if (error) throw error
+      if (_result) return _result
+      if (_error) throw _error
       throw suspender
     },
-    result,
-    error,
+    get result() { return _result },
+    get error() { return _error},
     suspender,
   }
 }
