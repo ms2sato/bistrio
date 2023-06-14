@@ -3,14 +3,14 @@ import { useState } from 'react'
 
 import { BrowserRouter, Routes, Route, useParams } from 'react-router-dom'
 import { hydrateRoot } from 'react-dom/client'
-import { ClientConfig, NamedResources, Router, RouterSupport } from '../..'
+import { ClientConfig, NamedResources, RenderSupportContext, Router, RouterSupport } from './index'
 
 import { LocaleSelector } from './locale'
 import { initLocale, LocaleDictionary } from './localizer'
-import { PageNode, RenderSupport } from './render-support'
+import { PageNode } from './render-support'
 import { setup, Engine } from './client'
 
-import { setRenderSupportContext, useRenderSupport } from './render-support-context'
+import { useRenderSupport } from './render-support-context'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type PageLoadFunc = (pagePath: string) => PageNode | React.LazyExoticComponent<any>
@@ -58,9 +58,6 @@ export async function entry<R extends NamedResources>({
     return <Page />
   }
 
-  const RenderSupportContext = React.createContext({} as RenderSupport<R>)
-  setRenderSupportContext(RenderSupportContext)
-
   const RenderSupportable = ({
     localeSelector,
     children,
@@ -68,8 +65,8 @@ export async function entry<R extends NamedResources>({
     children: React.ReactNode
     localeSelector: LocaleSelector
   }) => {
-    const [renderSupport] = useState(engine.createRenderSupport(localeSelector))
-    return <RenderSupportContext.Provider value={renderSupport}>{children}</RenderSupportContext.Provider>
+    const rs = engine.createRenderSupport(localeSelector)
+    return <RenderSupportContext.Provider value={rs}>{children}</RenderSupportContext.Provider>
   }
 
   const RoutesWrapper = entryConfig.RoutesWrapper

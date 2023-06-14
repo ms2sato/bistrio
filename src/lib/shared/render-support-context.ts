@@ -1,14 +1,12 @@
-import { useContext } from 'react'
+import { createContext, useContext } from 'react'
 import { NamedResources } from '../..'
 import { RenderSupport } from './'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-let RSC: React.Context<RenderSupport<any>>
-
-export const setRenderSupportContext = <RS extends NamedResources>(rsc: React.Context<RenderSupport<RS>>) => {
-  RSC = rsc
-}
+export const RenderSupportContext: React.Context<RenderSupport<any>> = createContext<RenderSupport<any>>(
+  {} as RenderSupport<any>
+)
 
 export const useRenderSupport = <RS extends NamedResources>() => {
-  return useContext<RenderSupport<RS>>(RSC as React.Context<RenderSupport<RS>>)
+  return useContext<RenderSupport<RS>>(RenderSupportContext as React.Context<RenderSupport<RS>>)
 }
