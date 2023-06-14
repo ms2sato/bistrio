@@ -87,7 +87,6 @@ describe('senario /tasks', () => {
     await req.waitForResponses(1, { resourceType: 'ajax' })
     expect(req.errors).toHaveLength(0)
     expect(req.finished.where({ resourceType: 'ajax', method: 'DELETE' })).toHaveLength(1)
-    // expect(req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL('api/tasks/') })).toHaveLength(1)
 
     await page.waitForSelector('th')
 
