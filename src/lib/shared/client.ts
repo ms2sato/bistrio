@@ -3,11 +3,13 @@ import { LocaleSelector, Localizer } from './locale'
 import {
   createSuspendedResourcesProxy,
   ParamsDictionary,
+  ReaderMap,
   RenderSupport,
   StubResources,
   StubSuspendedResources,
-  Suspense,
+  Suspendable,
   suspense,
+  SuspensePurgeOptions,
 } from './render-support'
 import {
   ClientGenretateRouter,
@@ -21,8 +23,38 @@ import { StaticProps } from './static-props'
 import { RouterSupport, nullRouterSupport } from './router-support'
 import { PageLoadFunc } from '.'
 
+class CacheReadableSuspenseDecorator implements Suspendable {
+  constructor(private body: Suspendable) {}
+
+  get readers() {
+    return this.body.readers
+  }
+
+  suspend<T>(asyncProcess: () => Promise<T>, key: string): T {
+    const data = window.BISTRIO.cache[key] // TODO: type checking by zod?
+    if (data) {
+      return this.body.suspend(
+        () =>
+          Promise.resolve<T>(data as T).then((ret) => {
+            delete window.BISTRIO.cache[key]
+            return ret
+          }),
+        key
+      )
+    }
+
+    return this.body.suspend(asyncProcess, key)
+  }
+  fetchJson<T>(url: string, key: string): T {
+    return this.body.fetchJson(url, key)
+  }
+  purge(options?: SuspensePurgeOptions | undefined): void {
+    return this.body.purge(options)
+  }
+}
+
 export class ClientRenderSupport<RS extends NamedResources> implements RenderSupport<RS> {
-  readonly suspense: Suspense
+  readonly suspense: Suspendable
   params: ParamsDictionary = {} as const
 
   readonly isClient: boolean = true
@@ -33,7 +65,7 @@ export class ClientRenderSupport<RS extends NamedResources> implements RenderSup
     private localeSelector: LocaleSelector,
     private staticProps: StaticProps
   ) {
-    this.suspense = suspense()
+    this.suspense = new CacheReadableSuspenseDecorator(suspense())
   }
 
   getLocalizer(): Localizer {
