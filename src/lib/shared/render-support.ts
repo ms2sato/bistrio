@@ -15,13 +15,13 @@ export type SuspendedReader<T> = {
 }
 
 // @see https://blog.logrocket.com/react-suspense-data-fetching/#data-fetching-approaches
-export function suspendable<T>(promise: Promise<T>): SuspendedReader<T> {
+export function readable<T>(promise: Promise<T>): SuspendedReader<T> {
   let _result: T | undefined
   let _error: unknown
   const suspender: Promise<void> = promise.then(
     (ret) => {
       if (ret === undefined) {
-        throw new Error('suspendable: promise resolved with undefined')
+        throw new Error('readable: promise resolved with undefined')
       }
       _result = ret
     },
@@ -35,8 +35,12 @@ export function suspendable<T>(promise: Promise<T>): SuspendedReader<T> {
       if (_error) throw _error
       throw suspender
     },
-    get result() { return _result },
-    get error() { return _error},
+    get result() {
+      return _result
+    },
+    get error() {
+      return _error
+    },
     suspender,
   }
 }
@@ -71,7 +75,7 @@ export type RenderSupport<RS extends NamedResources> = {
   getLocalizer: () => Localizer
   resources: () => StubResources<RS>
   suspendedResources: () => StubSuspendedResources<RS>
-  readonly suspense: Suspense
+  readonly suspense: Suspendable
   suspend: <T>(asyncProcess: () => Promise<T>, key: string) => T
   params: Readonly<ParamsDictionary>
   // TODO: query
@@ -85,12 +89,19 @@ export type ReaderMap = { [key: string]: SuspendedReader<unknown> }
 
 export type SuspensePurgeOptions = { startsWith: string } | { only: string | string[] } | { except: string | string[] }
 
-export class Suspense {
+export interface Suspendable {
+  readonly readers: ReaderMap
+  suspend<T>(asyncProcess: () => Promise<T>, key: string): T
+  fetchJson<T>(url: string, key: string): T
+  purge(options?: SuspensePurgeOptions): void
+}
+
+export class SuspenseImpl implements Suspendable {
   readonly readers: ReaderMap = {}
   suspend<T>(asyncProcess: () => Promise<T>, key: string): T {
     let reader: SuspendedReader<unknown> | undefined = this.readers[key]
     if (!reader) {
-      reader = suspendable(asyncProcess())
+      reader = readable(asyncProcess())
       this.readers[key] = reader
     }
 
@@ -138,8 +149,8 @@ export class Suspense {
   }
 }
 
-export const suspense = (): Suspense => {
-  return new Suspense()
+export const suspense = (): Suspendable => {
+  return new SuspenseImpl()
 }
 
 export class ResourceMethodOptions<SO = unknown, CO = RequestInit> {
