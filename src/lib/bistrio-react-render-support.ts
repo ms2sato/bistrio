@@ -13,8 +13,6 @@ import {
   StubResources,
   StubSuspendedResources,
 } from './shared/render-support'
-import { StaticProps } from '../client'
-import { SessionData } from 'express-session'
 import { isError, isErrorWithCode } from './is-error'
 import internal, { Transform, TransformCallback } from 'stream'
 
@@ -156,16 +154,6 @@ export function createRenderFunc(constructView: ConstructViewFunc, viewRoot: str
   return render
 }
 
-const safeStaticProps = (session: Partial<SessionData>): StaticProps => {
-  const sessionProps = session.bistrio
-  if (!sessionProps) {
-    const sessionProps = { __once: {} }
-    session.bistrio = sessionProps
-    return sessionProps.__once
-  }
-  return sessionProps.__once
-}
-
 export type BuildActionContextCreator = (
   viewRoot: string,
   arrange: ConstructViewFunc,
@@ -185,24 +173,17 @@ export function buildActionContextCreator(
 }
 
 function createRenderSupport<RS extends NamedResources>(ctx: ActionContext): ServerRenderSupport<RS> {
-  const rs = new ServerRenderSupport<RS>(ctx)
-  const bistrioSession = ctx.req.session.bistrio
-  if (bistrioSession) {
-    bistrioSession.__once = {}
-  }
-  return rs
+  return new ServerRenderSupport<RS>(ctx)
 }
 
 export class ServerRenderSupport<RS extends NamedResources> implements RenderSupport<RS> {
   readonly suspense
-  private session
 
   readonly isClient: boolean = false
   readonly isServer: boolean = true
 
   constructor(private ctx: ActionContext) {
     this.suspense = suspense()
-    this.session = { ...this.ctx.req.session, bistrio: { ...(this.ctx.req.session.bistrio || { __once: {} }) } } // for session.destroy() on streaming
   }
 
   getLocalizer(): Localizer {
@@ -229,9 +210,5 @@ export class ServerRenderSupport<RS extends NamedResources> implements RenderSup
 
   get params() {
     return this.ctx.params
-  }
-
-  getStaticProps(): StaticProps {
-    return safeStaticProps(this.session)
   }
 }

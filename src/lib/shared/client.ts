@@ -3,7 +3,6 @@ import { LocaleSelector, Localizer } from './locale'
 import {
   createSuspendedResourcesProxy,
   ParamsDictionary,
-  ReaderMap,
   RenderSupport,
   StubResources,
   StubSuspendedResources,
@@ -19,7 +18,6 @@ import {
   ResourceInfo,
   defaultClientConfig,
 } from './client-stub-router'
-import { StaticProps } from './static-props'
 import { RouterSupport, nullRouterSupport } from './router-support'
 import { PageLoadFunc } from '.'
 
@@ -62,8 +60,7 @@ export class ClientRenderSupport<RS extends NamedResources> implements RenderSup
 
   constructor(
     private core: ClientGenretateRouterCore,
-    private localeSelector: LocaleSelector,
-    private staticProps: StaticProps
+    private localeSelector: LocaleSelector
   ) {
     this.suspense = new CacheReadableSuspenseDecorator(suspense())
   }
@@ -98,7 +95,7 @@ export class ClientRenderSupport<RS extends NamedResources> implements RenderSup
 }
 
 export type Engine<RS extends NamedResources> = {
-  createRenderSupport: (localeSelector: LocaleSelector, staticProps: StaticProps) => ClientRenderSupport<RS>
+  createRenderSupport: (localeSelector: LocaleSelector) => ClientRenderSupport<RS>
   pathToPage: () => PathPageMap
 }
 
@@ -113,8 +110,8 @@ export async function setup<RS extends NamedResources>(
   const core = cgr.getCore()
 
   return {
-    createRenderSupport(localeSelector: LocaleSelector, staticProps: StaticProps): ClientRenderSupport<RS> {
-      return new ClientRenderSupport<RS>(core, localeSelector, staticProps)
+    createRenderSupport(localeSelector: LocaleSelector): ClientRenderSupport<RS> {
+      return new ClientRenderSupport<RS>(core, localeSelector)
     },
 
     pathToPage() {
