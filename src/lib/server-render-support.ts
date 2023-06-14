@@ -1,4 +1,5 @@
 import path from 'path'
+import internal, { Transform, TransformCallback } from 'stream'
 import express from 'express'
 import React from 'react'
 import { renderToPipeableStream } from 'react-dom/server'
@@ -14,7 +15,6 @@ import {
   StubSuspendedResources,
 } from './shared/render-support'
 import { isError, isErrorWithCode } from './is-error'
-import internal, { Transform, TransformCallback } from 'stream'
 
 // import createDebug from 'debug'
 // const debug = createDebug('bistrio:react-render-support')
@@ -108,7 +108,7 @@ function renderReactViewStream<RS extends NamedResources>(
   })
 }
 
-export function createRenderFunc(constructView: ConstructViewFunc, viewRoot: string, failText = '') {
+function createRenderFunc(constructView: ConstructViewFunc, viewRoot: string, failText = '') {
   function render(
     this: ActionContextImpl,
     view: string,

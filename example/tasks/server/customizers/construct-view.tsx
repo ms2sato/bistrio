@@ -1,20 +1,17 @@
 import React from 'react'
 
 import { StaticRouter } from 'react-router-dom/server'
-import { ConstructViewFunc, ScriptProps, initBistrioReactView } from 'bistrio'
-import { N2R } from '@bistrio/routes/all'
+import { ConstructViewFunc, RenderSupportContext, ScriptProps } from 'bistrio'
 import { Layout } from './Layout'
 
-const { Wrapper } = initBistrioReactView<N2R>()
-
-export const constructView: ConstructViewFunc = ({node: Page, hydrate, ctx, rs}) => {
+export const constructView: ConstructViewFunc = ({ node: Page, hydrate, ctx, rs }) => {
   // This is sample impl, changing js for any roles
   const script = ctx.query['admin'] == 'true' ? ['admin'] : ['main']
 
   const scriptProps: ScriptProps = { hydrate, script }
 
   return (
-    <Wrapper rs={rs}>
+    <RenderSupportContext.Provider value={rs}>
       <Layout {...scriptProps}>
         <StaticRouter location={ctx.req.url}>
           <React.Suspense>
@@ -22,6 +19,6 @@ export const constructView: ConstructViewFunc = ({node: Page, hydrate, ctx, rs})
           </React.Suspense>
         </StaticRouter>
       </Layout>
-    </Wrapper>
+    </RenderSupportContext.Provider>
   )
 }
