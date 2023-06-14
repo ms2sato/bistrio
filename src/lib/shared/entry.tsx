@@ -10,7 +10,6 @@ import { initLocale, LocaleDictionary } from './localizer'
 import { PageNode, RenderSupport } from './render-support'
 import { setup, Engine } from './client'
 
-import { StaticProps } from './static-props'
 import { setRenderSupportContext, useRenderSupport } from './render-support-context'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -64,14 +63,12 @@ export async function entry<R extends NamedResources>({
 
   const RenderSupportable = ({
     localeSelector,
-    staticProps,
     children,
   }: {
     children: React.ReactNode
     localeSelector: LocaleSelector
-    staticProps: StaticProps
   }) => {
-    const [renderSupport] = useState(engine.createRenderSupport(localeSelector, staticProps))
+    const [renderSupport] = useState(engine.createRenderSupport(localeSelector))
     return <RenderSupportContext.Provider value={renderSupport}>{children}</RenderSupportContext.Provider>
   }
 
@@ -85,14 +82,6 @@ export async function entry<R extends NamedResources>({
         </RoutesWrapper>
       </BrowserRouter>
     )
-  }
-
-  const staticPropsJsonElement = document.querySelector('script[type="application/static-props.bistrio+json"]')
-  const staticPropsJson = staticPropsJsonElement?.innerHTML
-  let staticProps: StaticProps = {}
-  if (staticPropsJson) {
-    // TODO: validation?
-    staticProps = JSON.parse(decodeHtml(staticPropsJson)) as StaticProps
   }
 
   let container: HTMLElement
@@ -121,15 +110,9 @@ export async function entry<R extends NamedResources>({
   hydrateRoot(
     container,
     <React.StrictMode>
-      <RenderSupportable localeSelector={localeSelector} staticProps={staticProps}>
+      <RenderSupportable localeSelector={localeSelector}>
         <Root>{RouteList}</Root>
       </RenderSupportable>
     </React.StrictMode>
   )
-}
-
-function decodeHtml(html: string) {
-  const txt = document.createElement('textarea')
-  txt.innerHTML = html
-  return txt.value
 }
