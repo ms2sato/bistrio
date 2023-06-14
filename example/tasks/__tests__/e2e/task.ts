@@ -9,14 +9,10 @@ describe('senario /tasks', () => {
 
   beforeAll(async () => {
     req = extend(page)
-    await page.goto(asURL('tasks')) // Index SSR + Ajax
+    await page.goto(asURL('tasks')) // Index
   })
 
   test('senario', async () => {
-    await req.waitForResponses(1, { resourceType: 'ajax' })
-    expect(req.errors).toHaveLength(0)
-    expect(req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL('api/tasks/') })).toHaveLength(1)
-
     await expect(page.title()).resolves.toMatch('Tasks')
     await expect(page.content()).resolves.toMatch('Task list')
     req.clear()
@@ -86,7 +82,7 @@ describe('senario /tasks', () => {
     await expect(page.content()).resolves.toMatch('NewTitle')
     await expect(page.content()).resolves.toMatch('NewDescription')
     req.clear()
-    await page.click('tbody tr:first-child td:nth-child(5) a:nth-child(2)') // Delete SSR
+    await page.click('tbody tr:first-child td:nth-child(5) a:nth-child(2)') // Delete
 
     await req.waitForResponses(1, { resourceType: 'ajax' })
     expect(req.errors).toHaveLength(0)
@@ -102,8 +98,6 @@ describe('senario /tasks', () => {
 })
 
 describe('/tasks', () => {
-  let req: RequestHolder
-
   beforeAll(async () => {
     await prisma.task.createMany({
       data: [
@@ -113,7 +107,6 @@ describe('/tasks', () => {
       ],
     })
 
-    req = extend(page)
     await page.goto(asURL('tasks'))
   })
 
@@ -122,11 +115,6 @@ describe('/tasks', () => {
   })
 
   it('returns task table', async () => {
-    // Hydration
-    await req.waitForResponses(1, { resourceType: 'ajax' })
-    expect(req.errors).toHaveLength(0)
-    expect(req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL('api/tasks/') })).toHaveLength(1)
-
     await page.waitForXPath('//td[text() = "Description3"]')
     await expect(page.title()).resolves.toMatch('Tasks')
   })
@@ -169,11 +157,6 @@ describe('/tasks/edit', () => {
   })
 
   it('returns Task edit view', async () => {
-    // Hydration
-    await req.waitForResponses(1, { resourceType: 'ajax' })
-    expect(req.errors).toHaveLength(0)
-    expect(req.requested.where({ resourceType: 'ajax', url: asURL(`api/tasks/${task.id}`) })).toHaveLength(1)
-
     await page.waitForSelector('textarea[name=description]')
     await expect(page.title()).resolves.toMatch('Tasks')
 
@@ -183,7 +166,6 @@ describe('/tasks/edit', () => {
 
   it('updates done status', async () => {
     // show edit view
-    await req.waitForResponses(1, { resourceType: 'ajax' })
     await page.waitForSelector('input[name=done]')
 
     const checked = await page.$eval('input[name=done]', (el) => (el as HTMLInputElement).checked)
