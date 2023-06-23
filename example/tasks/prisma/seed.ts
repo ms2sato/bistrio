@@ -13,6 +13,16 @@ async function main(prisma: PrismaClient) {
       title: 'Test1',
       description: 'Test1 Description',
       done: false,
+      comments: {
+        create: [
+          {
+            body: 'TestComment1',
+          },
+          {
+            body: 'TestComment2',
+          },
+        ],
+      },
     },
     {
       title: 'Test2',

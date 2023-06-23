@@ -15,6 +15,16 @@ model Task {
   title   String
   description    String
   done Boolean
+  comments Comment[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Comment {
+  id      Int      @id @default(autoincrement())
+  task Task @relation(fields: [taskId], references: [id])
+  taskId Int
+  body    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
