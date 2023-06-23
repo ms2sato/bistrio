@@ -1,11 +1,8 @@
-import * as React from 'react'
-import { useState } from 'react'
-
+import { ReactNode, StrictMode, LazyExoticComponent } from 'react'
 import { BrowserRouter, Routes, Route, useParams } from 'react-router-dom'
 import { hydrateRoot } from 'react-dom/client'
 import { ClientConfig, NamedResources, RenderSupportContext, Router, RouterSupport } from './index'
 
-import { LocaleSelector } from './locale'
 import { initLocale, LocaleDictionary } from './localizer'
 import { PageNode } from './render-support'
 import { setup, Engine } from './client'
@@ -13,14 +10,14 @@ import { setup, Engine } from './client'
 import { useRenderSupport } from './render-support-context'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type PageLoadFunc = (pagePath: string) => PageNode | React.LazyExoticComponent<any>
+export type PageLoadFunc = (pagePath: string) => PageNode | LazyExoticComponent<any>
 
 type EntryConfig = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   routes: (router: Router, routerSupport: RouterSupport<any>) => void
   pageLoadFunc: PageLoadFunc
   el: (() => HTMLElement) | string
-  RoutesWrapper: (props: { children: React.ReactNode }) => JSX.Element
+  RoutesWrapper: (props: { children: ReactNode }) => JSX.Element
 }
 
 export type EntriesConfig = {
@@ -58,29 +55,6 @@ export async function entry<R extends NamedResources>({
     return <Page />
   }
 
-  const RenderSupportable = ({
-    localeSelector,
-    children,
-  }: {
-    children: React.ReactNode
-    localeSelector: LocaleSelector
-  }) => {
-    const rs = engine.createRenderSupport(localeSelector)
-    return <RenderSupportContext.Provider value={rs}>{children}</RenderSupportContext.Provider>
-  }
-
-  const RoutesWrapper = entryConfig.RoutesWrapper
-
-  const Root = ({ children }: { children: React.ReactNode }) => {
-    return (
-      <BrowserRouter>
-        <RoutesWrapper>
-          <Routes>{children}</Routes>
-        </RoutesWrapper>
-      </BrowserRouter>
-    )
-  }
-
   let container: HTMLElement
   if (typeof entryConfig.el === 'string') {
     container = getContainerElement(entryConfig.el)
@@ -97,19 +71,22 @@ export async function entry<R extends NamedResources>({
   const routes = entryConfig.routes
   const engine: Engine<R> = await setup<R>(routes, entryConfig.pageLoadFunc, clientConfig)
 
-  const RouteList = await Promise.all(
-    Array.from(engine.pathToPage(), ([path, Page]) => {
-      return <Route key={path} path={path} element={<PageAdapter Page={Page} />}></Route>
-    })
-  )
+  const routeList = Array.from(engine.pathToPage(), ([path, Page]) => {
+    return <Route key={path} path={path} element={<PageAdapter Page={Page} />}></Route>
+  })
 
   const localeSelector = initLocale(localeMap)
+  const rs = engine.createRenderSupport(localeSelector)
   hydrateRoot(
     container,
-    <React.StrictMode>
-      <RenderSupportable localeSelector={localeSelector}>
-        <Root>{RouteList}</Root>
-      </RenderSupportable>
-    </React.StrictMode>
+    <StrictMode>
+      <RenderSupportContext.Provider value={rs}>
+        <entryConfig.RoutesWrapper>
+          <BrowserRouter>
+            <Routes>{routeList}</Routes>
+          </BrowserRouter>
+        </entryConfig.RoutesWrapper>
+      </RenderSupportContext.Provider>
+    </StrictMode>
   )
 }

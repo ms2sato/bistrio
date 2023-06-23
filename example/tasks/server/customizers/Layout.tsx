@@ -1,5 +1,5 @@
-import { ScriptProps, Scripts } from 'bistrio'
 import { ReactNode } from 'react'
+import { ScriptProps, Scripts } from 'bistrio'
 
 export function Layout({ children, ...props }: { children: ReactNode } & ScriptProps) {
   return (
