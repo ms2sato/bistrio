@@ -16,3 +16,19 @@ export const taskUpdateSchema = z.object({
 })
 
 export type TaskUpdateParams = z.infer<typeof taskUpdateSchema>
+
+const commentCoreProps = {
+  taskId: z.number(),
+  body: z.string().min(3).max(255),
+}
+
+export const commentCreateSchema = z.object(commentCoreProps)
+
+export type CommentCreateParams = z.infer<typeof commentCreateSchema>
+
+export const commentUpdateSchema = z.object({
+  id: z.number(),
+  ...commentCoreProps,
+})
+
+export type CommentUpdateParams = z.infer<typeof commentUpdateSchema>
