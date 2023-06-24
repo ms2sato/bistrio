@@ -22,9 +22,9 @@ import { PageNode } from './render-support'
 import { z } from 'zod'
 import React from 'react'
 
-const createPath = (resourceUrl: string, pathFormat: string, option: Record<string, string | number>) => {
+export const createPath = (resourceUrl: string, pathFormat: string, option: Record<string, string | number>) => {
   const keys: string[] = []
-  const apath = pathFormat.replace(/:[a-z][\w_]+/g, (ma) => {
+  const apath = pathJoin(resourceUrl, pathFormat).replace(/:[a-z][\w_]+/g, (ma) => {
     const attr = ma.substring(1)
     const param = option[attr]
     if (param === undefined || param === null) {
@@ -33,7 +33,7 @@ const createPath = (resourceUrl: string, pathFormat: string, option: Record<stri
     keys.push(attr)
     return String(param)
   })
-  return { httpPath: pathJoin(resourceUrl, apath), keys }
+  return { httpPath: apath, keys }
 }
 
 export type ResourceInfo = { httpPath: string; resource: Resource }

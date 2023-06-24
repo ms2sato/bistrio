@@ -74,7 +74,7 @@ const TaskRecord = ({ task: src }: { task: Task }) => {
           </a>
         )}
       </td>
-      <td>{task.title}</td>
+      <td><Link to={`/tasks/${task.id}`}>{task.title}</Link></td>
       <td>{task.description}</td>
       <td>
         <Link to={`/tasks/${task.id}/edit`}>{l.t`Edit`}</Link>&nbsp;|&nbsp;
