@@ -22,7 +22,7 @@ export interface UseSubmitProps<
 
 export interface UseSubmitResult<S, R, E extends ValidationError = ValidationError> {
   handleSubmit: React.FormEventHandler<HTMLFormElement>
-  params: S
+  attrs: S
   invalid: E | null
   result: R | undefined | null
   pending: boolean
@@ -33,7 +33,7 @@ export function useSubmit<ZS extends z.AnyZodObject, R, E extends ValidationErro
   action: { modifier, onSuccess, onInvalid, onFatal },
   schema,
 }: UseSubmitProps<ZS, R, E, S>): UseSubmitResult<S, R, E> {
-  const [params, setParams] = useState(source)
+  const [attrs, setAttrs] = useState(source)
   const [invalid, setInvalid] = useState<E | null>(null)
   const [result, setResult] = useState<R | undefined | null>(null)
 
@@ -55,7 +55,7 @@ export function useSubmit<ZS extends z.AnyZodObject, R, E extends ValidationErro
       setResult(undefined)
 
       const result = await modifier(newParams, ev)
-      setParams(newParams)
+      setAttrs(newParams)
       setResult(result)
       onSuccess && onSuccess(result, ev)
     })().catch((err) => {
@@ -73,7 +73,7 @@ export function useSubmit<ZS extends z.AnyZodObject, R, E extends ValidationErro
     })
   }
 
-  return { handleSubmit, params, invalid, result, pending: result === undefined }
+  return { handleSubmit, attrs, invalid, result, pending: result === undefined }
 }
 
 export type UseEventProps<R, E = unknown> = {
@@ -116,7 +116,7 @@ export function useUIEvent<R, E = unknown>({ modifier, onSuccess, onError }: Use
       if (onError) {
         onError(err as E, ev)
       } else if (onError === undefined) {
-        console.error(err)
+        throw err
       }
     })
   }
