@@ -1,8 +1,10 @@
 import { z } from 'zod'
 import { blankSchema } from './schemas'
 
+const optType = Symbol('opt<>')
+
 export class opt<T> {
-  constructor(public body: T) {}
+  constructor(public body: T, public _type: symbol = optType) {}
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -61,7 +63,9 @@ export function createValidationError(issues: ValidationIssue[]) {
 }
 
 export function isValidationError(err: unknown): err is ValidationError {
-  if(err instanceof z.ZodError) { return true }
+  if (err instanceof z.ZodError) {
+    return true
+  }
 
   const ze = err as Error
   return 'name' in ze && ze.name === 'ZodError'
