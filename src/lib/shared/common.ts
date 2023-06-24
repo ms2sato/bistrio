@@ -4,7 +4,8 @@ import { blankSchema } from './schemas'
 const optType = Symbol('opt<>')
 
 export class opt<T> {
-  constructor(public body: T, public _type: symbol = optType) {}
+  readonly [optType]: symbol = optType
+  constructor(public body: T) {}
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
