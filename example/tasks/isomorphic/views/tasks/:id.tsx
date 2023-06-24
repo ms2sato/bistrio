@@ -35,10 +35,10 @@ function TaskCreateForm({ id }: { id: number }) {
   const ref = useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
   const rs = useRenderSupport()
-  const { handleSubmit, invalid, pending, params } = useSubmit({
+  const { handleSubmit, invalid, pending, attrs } = useSubmit({
     source: { body: '' },
     action: {
-      modifier: async (params) => rs.resources().api_task_comment.create({ taskId: id, body: params.body }),
+      modifier: async (attrs) => rs.resources().api_task_comment.create({ taskId: id, body: attrs.body }),
       onSuccess: () => {
         ref.current && (ref.current.value = '')
         navigate(`/tasks/${id}`, { purge: true })
@@ -52,7 +52,7 @@ function TaskCreateForm({ id }: { id: number }) {
       {invalid && <ErrorPanel err={invalid}></ErrorPanel>}
       <form onSubmit={handleSubmit}>
         <fieldset disabled={pending}>
-          <input name="body" defaultValue={params.body} ref={ref}></input>
+          <input name="body" defaultValue={attrs.body} ref={ref}></input>
           <input type="submit"></input>
         </fieldset>
       </form>
