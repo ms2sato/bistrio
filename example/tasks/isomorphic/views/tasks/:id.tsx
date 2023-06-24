@@ -1,9 +1,8 @@
+import { Suspense, useRef } from 'react'
+import { useNavigate, useSubmit } from 'bistrio/client'
 import { useRenderSupport } from '@/.bistrio/routes/main'
 import { ErrorPanel } from '@/isomorphic/components/ErrorPanel'
 import { commentCreateSchema } from '@/isomorphic/params'
-import { useNavigate, useSubmit } from 'bistrio/client'
-import { Suspense } from 'react'
-import z from 'zod'
 
 export function Page() {
   return (
@@ -30,18 +29,20 @@ function TaskWithComments() {
   )
 }
 
-const taskFormSchem = commentCreateSchema.omit({ taskId: true }).extend({
-  id: z.coerce.number().optional(),
-})
+const taskFormSchem = commentCreateSchema.omit({ taskId: true })
 
 function TaskCreateForm({ id }: { id: number }) {
+  const ref = useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
   const rs = useRenderSupport()
-  const { handleSubmit, invalid, pending } = useSubmit({
+  const { handleSubmit, invalid, pending, params } = useSubmit({
     source: { body: '' },
     action: {
-      modifier: (params) => rs.resources().api_task_comment.create({ taskId: id, body: params.body }),
-      onSuccess: () => navigate(`/tasks/${id}`, { purge: true }),
+      modifier: async (params) => rs.resources().api_task_comment.create({ taskId: id, body: params.body }),
+      onSuccess: () => {
+        ref.current && (ref.current.value = '')
+        navigate(`/tasks/${id}`, { purge: true })
+      },
     },
     schema: taskFormSchem,
   })
@@ -51,7 +52,7 @@ function TaskCreateForm({ id }: { id: number }) {
       {invalid && <ErrorPanel err={invalid}></ErrorPanel>}
       <form onSubmit={handleSubmit}>
         <fieldset disabled={pending}>
-          <input name="body"></input>
+          <input name="body" defaultValue={params.body} ref={ref}></input>
           <input type="submit"></input>
         </fieldset>
       </form>
