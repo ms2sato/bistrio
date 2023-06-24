@@ -38,7 +38,7 @@ function TaskCreateForm({ id }: { id: number }) {
   const { handleSubmit, invalid, pending, attrs } = useSubmit({
     source: { body: '' },
     action: {
-      modifier: async (attrs) => rs.resources().api_task_comment.create({ taskId: id, body: attrs.body }),
+      modifier: async ({ body }) => rs.resources().api_task_comment.create({ taskId: id, body }),
       onSuccess: () => {
         ref.current && (ref.current.value = '')
         navigate(`/tasks/${id}`, { purge: true })
