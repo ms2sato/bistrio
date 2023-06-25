@@ -26,21 +26,21 @@ function TaskWithComments() {
           <li key={comment.id}>{comment.body}</li>
         ))}
       </ul>
-      <CommentCreateForm id={id} />
+      <CommentCreateForm taskId={id} />
     </>
   )
 }
 
-function CommentCreateForm({ id }: { id: number }) {
+function CommentCreateForm({ taskId }: { taskId: number }) {
   const navigate = useNavigate()
   const rs = useRenderSupport()
   const submitProps: CommentSubmitProps = {
     source: { body: '' },
     action: {
-      modifier: async ({ body }) => rs.resources().api_task_comment.create({ taskId: id, body }),
+      modifier: async ({ body }) => rs.resources().api_task_comment.create({ taskId, body }),
       onSuccess: (_result, el) => {
         el.reset()
-        navigate(`/tasks/${id}`, { purge: true })
+        navigate(`/tasks/${taskId}`, { purge: true })
       },
     },
     schema: taskFormSchem,
