@@ -43,16 +43,16 @@ function CommentCreateForm({ taskId }: { taskId: number }) {
         navigate(location.pathname, { purge: true })
       },
     },
-    schema: taskFormSchem,
+    schema: taskFormSchema,
   }
 
   return <CommentForm submitProps={submitProps}></CommentForm>
 }
 
-const taskFormSchem = commentCreateSchema.omit({ taskId: true })
+const taskFormSchema = commentCreateSchema.omit({ taskId: true })
 
 type CommentFormCustom = { reset(): void }
-type CommentSubmitProps = UseSubmitProps<typeof taskFormSchem, Comment, CommentFormCustom>
+type CommentSubmitProps = UseSubmitProps<typeof taskFormSchema, Comment, CommentFormCustom>
 type CommentFormProps = {
   submitProps: CommentSubmitProps
 }
