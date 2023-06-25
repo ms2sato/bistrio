@@ -1,6 +1,6 @@
 import { Task } from '@prisma/client'
 import { getPrismaCilent } from '../../server/lib/prisma-util'
-import { asURL, extend, RequestHolder } from '../support'
+import { asURL, extend, RequestHolder, waitForAnyInnerText, waitForNotAnyInnerText } from '../support'
 
 const prisma = getPrismaCilent()
 
@@ -46,9 +46,7 @@ describe('senario /tasks', () => {
     expect(req.errors).toHaveLength(0)
     expect(req.finished.where({ resourceType: 'ajax', method: 'POST' })).toHaveLength(1)
 
-    await page.waitForFunction(
-      'Array.from(document.querySelectorAll("td")).some((node)=> node.innerText == "TestDescription")'
-    )
+    await waitForAnyInnerText(page, 'td', 'TestDescription')
 
     await expect(page.title()).resolves.toMatch('Tasks')
     await expect(page.$eval('h1', (el) => el.innerText)).resolves.toMatch('Task list')
@@ -80,9 +78,7 @@ describe('senario /tasks', () => {
     expect(req.errors).toHaveLength(0)
     expect(req.finished.where({ resourceType: 'ajax', method: 'PUT' })).toHaveLength(1)
 
-    await page.waitForFunction(
-      'Array.from(document.querySelectorAll("td")).some((node)=> node.innerText == "NewTitle")'
-    )
+    await waitForAnyInnerText(page, 'td', 'NewTitle')
 
     await expect(page.title()).resolves.toMatch('Tasks')
     await expect(page.content()).resolves.toMatch('Task list')
@@ -96,9 +92,7 @@ describe('senario /tasks', () => {
     expect(req.errors).toHaveLength(0)
     expect(req.finished.where({ resourceType: 'ajax', method: 'DELETE' })).toHaveLength(1)
 
-    await page.waitForFunction(
-      'Array.from(document.querySelectorAll("td")).every((node) => node.innerText != "NewDescription")'
-    )
+    await waitForNotAnyInnerText(page, 'td', 'NewDescription')
 
     await expect(page.title()).resolves.toMatch('Tasks')
     await expect(page.content()).resolves.toMatch('Task list')
@@ -193,7 +187,7 @@ describe('/tasks/edit', () => {
     expect(req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL('api/tasks/') })).toHaveLength(1)
 
     // check updated values
-    await page.waitForFunction('Array.from(document.querySelectorAll("td")).some((node)=> node.innerText == "Done")')
+    await waitForAnyInnerText(page, 'td', 'Done')
     await expect(page.content()).resolves.toMatch('NewTitle')
   })
 })
