@@ -138,7 +138,7 @@ describe('/tasks/build', () => {
   })
 })
 
-describe('/tasks/edit', () => {
+describe('/tasks/:id/edit', () => {
   let req: RequestHolder
   let task: Task
 
@@ -189,5 +189,49 @@ describe('/tasks/edit', () => {
     // check updated values
     await waitForAnyInnerText(page, 'td', 'Done')
     await expect(page.content()).resolves.toMatch('NewTitle')
+  })
+})
+
+describe('/tasks/:id', () => {
+  let req: RequestHolder
+  let task: Task
+
+  beforeAll(async () => {
+    task = await prisma.task.create({ data: { title: 'Test1', description: 'Description1', done: false } })
+    req = extend(page)
+  })
+
+  afterAll(async () => {
+    await prisma.comment.deleteMany()
+    await prisma.task.deleteMany()
+  })
+
+  beforeEach(async () => {
+    await page.goto(asURL(`tasks/${task.id}`))
+  })
+
+  afterEach(() => {
+    req.clear()
+  })
+
+  it('returns Task view', async () => {
+    await waitForAnyInnerText(page, 'div', 'Description1')
+    await expect(page.title()).resolves.toMatch('Tasks')
+    await expect(page.content()).resolves.toMatch('Test1')
+  })
+
+  it('post comment', async () => {
+    await waitForAnyInnerText(page, 'div', 'Description1')
+    await page.$eval('input[name=body]', (el) => ((el as HTMLInputElement).value = 'TestComment'))
+    await page.$eval('input[type=submit]', (el) => (el as HTMLInputElement).click())
+
+    await req.waitForResponses(2, { resourceType: 'ajax' })
+    expect(req.errors).toHaveLength(0)
+    expect(req.finished.where({ resourceType: 'ajax', method: 'POST' })).toHaveLength(1)
+    expect(
+      req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL(`api/tasks/${task.id}`) })
+    ).toHaveLength(1)
+
+    await waitForAnyInnerText(page, 'li', 'TestComment')
   })
 })
