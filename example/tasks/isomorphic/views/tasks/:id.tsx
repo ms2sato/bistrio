@@ -4,6 +4,7 @@ import { useRenderSupport } from '@/.bistrio/routes/main'
 import { ErrorPanel } from '@/isomorphic/components/ErrorPanel'
 import { commentCreateSchema } from '@/isomorphic/params'
 import { Comment } from '@prisma/client'
+import { Link } from 'react-router-dom'
 
 export function Page() {
   return (
@@ -19,13 +20,23 @@ function TaskWithComments() {
   const task = rs.suspendedResources().api_task.show({ id })
   return (
     <>
-      <h2>{task.title}</h2>
+      <h2>
+        <Link to={'/tasks'}>Task</Link> / {task.title}
+      </h2>
       <div>{task.description}</div>
-      <ul>
-        {task.comments.map((comment) => (
-          <li key={comment.id}>{comment.body}</li>
-        ))}
-      </ul>
+      <hr />
+      <h3>Comments</h3>
+
+      {task.comments.length === 0 ? (
+        <div>No comments</div>
+      ) : (
+        <ul>
+          {task.comments.map((comment) => (
+            <li key={comment.id}>{comment.body}</li>
+          ))}
+        </ul>
+      )}
+
       <CommentCreateForm taskId={id} />
     </>
   )
