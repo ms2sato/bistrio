@@ -25,9 +25,9 @@ describe('senario /tasks', () => {
     await page.$eval('input[name=title]', (el) => ((el as HTMLInputElement).value = 'TestTitle'))
     await page.$eval('textarea[name=description]', (el) => ((el as HTMLInputElement).value = 'TestDescription'))
     req.clear()
-    await page.click('input[type="submit"]') // Create Ajax
+    // Create Ajax
+    await Promise.all([req.waitForResponses(2, { resourceType: 'ajax' }), page.click('input[type="submit"]')])
 
-    await req.waitForResponses(2, { resourceType: 'ajax' })
     expect(req.errors).toHaveLength(0)
     expect(req.finished.where({ resourceType: 'ajax', method: 'POST', url: asURL('api/tasks/') })).toHaveLength(1)
     expect(req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL('api/tasks/') })).toHaveLength(1)
@@ -40,9 +40,12 @@ describe('senario /tasks', () => {
     await expect(page.content()).resolves.toMatch('TestTitle')
     await expect(page.content()).resolves.toMatch('TestDescription')
     req.clear()
-    await page.click('tbody tr:first-child td:nth-child(2) a') // Done Ajax
+    // Done Ajax
+    await Promise.all([
+      req.waitForResponses(1, { resourceType: 'ajax' }),
+      page.click('tbody tr:first-child td:nth-child(2) a'),
+    ])
 
-    await req.waitForResponses(1, { resourceType: 'ajax' })
     expect(req.errors).toHaveLength(0)
     expect(req.finished.where({ resourceType: 'ajax', method: 'POST' })).toHaveLength(1)
 
@@ -72,11 +75,11 @@ describe('senario /tasks', () => {
     await page.$eval('input[name=title]', (el) => ((el as HTMLInputElement).value = 'NewTitle'))
     await page.$eval('textarea[name=description]', (el) => ((el as HTMLTextAreaElement).value = 'NewDescription'))
     req.clear()
-    await page.click('input[type="submit"]') // Update CSR + Ajax
+    // Update CSR + Ajax
+    await Promise.all([req.waitForResponses(1, { resourceType: 'ajax' }), page.click('input[type="submit"]')])
 
-    // await req.waitForResponses(1, { resourceType: 'ajax' })
-    // expect(req.errors).toHaveLength(0)
-    // expect(req.finished.where({ resourceType: 'ajax', method: 'PUT' })).toHaveLength(1)
+    expect(req.errors).toHaveLength(0)
+    expect(req.finished.where({ resourceType: 'ajax', method: 'PUT' })).toHaveLength(1)
 
     await waitForAnyInnerText(page, 'td', 'NewTitle')
 
@@ -86,11 +89,14 @@ describe('senario /tasks', () => {
     await expect(page.content()).resolves.toMatch('NewTitle')
     await expect(page.content()).resolves.toMatch('NewDescription')
     req.clear()
-    await page.click('tbody tr:first-child td:nth-child(5) a:nth-child(2)') // Delete
+    // Delete
+    await Promise.all([
+      req.waitForResponses(1, { resourceType: 'ajax' }),
+      page.click('tbody tr:first-child td:nth-child(5) a:nth-child(2)'),
+    ])
 
-    // await req.waitForResponses(1, { resourceType: 'ajax' })
-    // expect(req.errors).toHaveLength(0)
-    // expect(req.finished.where({ resourceType: 'ajax', method: 'DELETE' })).toHaveLength(1)
+    expect(req.errors).toHaveLength(0)
+    expect(req.finished.where({ resourceType: 'ajax', method: 'DELETE' })).toHaveLength(1)
 
     await waitForNotAnyInnerText(page, 'td', 'NewDescription')
 
