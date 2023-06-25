@@ -4,18 +4,24 @@ import { ValidationError, isValidationError } from '.'
 import { parseFormBody } from '../parse-form-body'
 import { createZodTraverseArrangerCreator } from '../create-zod-traverse-arranger-creator'
 
+export interface UseSubmitPropEventOptions<O> {
+  el: HTMLFormElement
+  custom: O
+}
+
 export interface UseSubmitProps<
   ZS extends z.AnyZodObject,
   R,
+  O = unknown,
   E extends ValidationError = ValidationError,
   S = z.infer<ZS>
 > {
   source: S
   action: {
-    modifier: (params: S, el: HTMLFormElement) => Promise<R>
-    onSuccess?: (result: R, el: HTMLFormElement) => void
-    onInvalid?: (invalid: E, el: HTMLFormElement) => void
-    onFatal?: (err: unknown, el: HTMLFormElement) => void
+    modifier: (params: S, options: UseSubmitPropEventOptions<O>) => Promise<R>
+    onSuccess?: (result: R, options: UseSubmitPropEventOptions<O>) => void
+    onInvalid?: (invalid: E, options: UseSubmitPropEventOptions<O>) => void
+    onFatal?: (err: unknown, options: UseSubmitPropEventOptions<O>) => void
   }
   schema: ZS
 }
@@ -29,11 +35,16 @@ export interface UseSubmitResult<S, R, E extends ValidationError = ValidationErr
   pending: boolean
 }
 
-export function useSubmit<ZS extends z.AnyZodObject, R, E extends ValidationError = ValidationError, S = z.infer<ZS>>({
-  source,
-  action: { modifier, onSuccess, onInvalid, onFatal },
-  schema,
-}: UseSubmitProps<ZS, R, E, S>): UseSubmitResult<S, R, E> {
+export function useSubmit<
+  ZS extends z.AnyZodObject,
+  R,
+  O = undefined,
+  E extends ValidationError = ValidationError,
+  S = z.infer<ZS>
+>(
+  { source, action: { modifier, onSuccess, onInvalid, onFatal }, schema }: UseSubmitProps<ZS, R, O, E, S>,
+  custom?: O
+): UseSubmitResult<S, R, E> {
   const [attrs, setAttrs] = useState(source)
   const [invalid, setInvalid] = useState<E | null>(null)
   const [result, setResult] = useState<R | undefined | null>(null)
@@ -55,18 +66,18 @@ export function useSubmit<ZS extends z.AnyZodObject, R, E extends ValidationErro
       setInvalid(null)
       setResult(undefined)
 
-      const result = await modifier(newParams, el)
+      const result = await modifier(newParams, { el, custom: custom as O })
       setAttrs(newParams)
       setResult(result)
-      onSuccess && onSuccess(result, el)
+      onSuccess && onSuccess(result, { el, custom: custom as O })
     })().catch((err) => {
       setResult(null)
       if (isValidationError(err)) {
         setInvalid(err as E)
-        onInvalid && onInvalid(err as E, el)
+        onInvalid && onInvalid(err as E, { el, custom: custom as O })
       } else {
         if (onFatal) {
-          onFatal(err, el)
+          onFatal(err, { el, custom: custom as O })
         } else {
           throw err
         }
