@@ -74,7 +74,9 @@ describe('senario /tasks', () => {
     expect(req.errors).toHaveLength(0)
     expect(req.finished.where({ resourceType: 'ajax', method: 'PUT' })).toHaveLength(1)
 
-    await page.waitForXPath('//td[text() = "NewTitle"]')
+    await page.waitForFunction(
+      'Array.from(document.querySelectorAll("td")).some((node)=> node.innerText == "NewTitle")'
+    )
 
     await expect(page.title()).resolves.toMatch('Tasks')
     await expect(page.content()).resolves.toMatch('Task list')
@@ -183,7 +185,7 @@ describe('/tasks/edit', () => {
     expect(req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL('api/tasks/') })).toHaveLength(1)
 
     // check updated values
-    await page.waitForXPath('//td[text() = "Done"]')
+    await page.waitForFunction('Array.from(document.querySelectorAll("td")).some((node)=> node.innerText == "Done")')
     await expect(page.content()).resolves.toMatch('NewTitle')
   })
 })
