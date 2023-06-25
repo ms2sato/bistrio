@@ -18,7 +18,7 @@ async function main(prisma: PrismaClient) {
   await prisma.$queryRaw`SET CONSTRAINTS ALL DEFERRED`
 
   for (const modelName of modelNames) {
-    const query = `TRUNCATE "public"."${modelName}" RESTART IDENTITY`
+    const query = `TRUNCATE "public"."${modelName}" RESTART IDENTITY CASCADE`
     console.log(query)
     await prisma.$queryRawUnsafe(query)
   }
