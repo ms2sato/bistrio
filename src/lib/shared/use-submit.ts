@@ -23,6 +23,7 @@ export interface UseSubmitProps<
 export interface UseSubmitResult<S, R, E extends ValidationError = ValidationError> {
   handleSubmit: React.FormEventHandler<HTMLFormElement>
   attrs: S
+  source: S
   invalid: E | null
   result: R | undefined | null
   pending: boolean
@@ -73,7 +74,7 @@ export function useSubmit<ZS extends z.AnyZodObject, R, E extends ValidationErro
     })
   }
 
-  return { handleSubmit, attrs, invalid, result, pending: result === undefined }
+  return { handleSubmit, attrs, source, invalid, result, pending: result === undefined }
 }
 
 export type UseEventProps<R, E = unknown> = {
