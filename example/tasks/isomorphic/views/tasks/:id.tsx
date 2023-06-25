@@ -1,4 +1,4 @@
-import { Suspense } from 'react'
+import { Suspense, useRef } from 'react'
 import { UseSubmitProps, useNavigate, useSubmit } from 'bistrio/client'
 import { useRenderSupport } from '@/.bistrio/routes/main'
 import { ErrorPanel } from '@/isomorphic/components/ErrorPanel'
@@ -38,9 +38,9 @@ function CommentCreateForm({ taskId }: { taskId: number }) {
     source: { body: '' },
     action: {
       modifier: async ({ body }) => rs.resources().api_task_comment.create({ taskId, body }),
-      onSuccess: (_result, el) => {
-        el.reset()
-        navigate(`/tasks/${taskId}`, { purge: true })
+      onSuccess: (_result, { custom }) => {
+        custom.reset()
+        navigate(location.pathname, { purge: true })
       },
     },
     schema: taskFormSchem,
@@ -50,17 +50,24 @@ function CommentCreateForm({ taskId }: { taskId: number }) {
 }
 
 const taskFormSchem = commentCreateSchema.omit({ taskId: true })
-type CommentSubmitProps = UseSubmitProps<typeof taskFormSchem, Comment>
+
+type CommentFormCustom = { reset(): void }
+type CommentSubmitProps = UseSubmitProps<typeof taskFormSchem, Comment, CommentFormCustom>
 type CommentFormProps = {
   submitProps: CommentSubmitProps
 }
 
 function CommentForm({ submitProps }: CommentFormProps) {
-  const { handleSubmit, invalid, pending, source } = useSubmit(submitProps)
+  const ref = useRef<HTMLFormElement>(null)
+  const { handleSubmit, invalid, pending, source } = useSubmit(submitProps, {
+    reset() {
+      ref.current?.reset()
+    },
+  })
   return (
     <>
       {invalid && <ErrorPanel err={invalid}></ErrorPanel>}
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} ref={ref}>
         <fieldset disabled={pending}>
           <input name="body" defaultValue={source.body} />
           <input type="submit" />
