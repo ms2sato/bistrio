@@ -12,10 +12,10 @@ export interface UseSubmitProps<
 > {
   source: S
   action: {
-    modifier: (params: S, ev: React.FormEvent<HTMLFormElement>) => Promise<R>
-    onSuccess?: (result: R, ev: React.FormEvent<HTMLFormElement>) => void
-    onInvalid?: (invalid: E, ev: React.FormEvent<HTMLFormElement>) => void
-    onFatal?: (err: unknown, ev: React.FormEvent<HTMLFormElement>) => void
+    modifier: (params: S, el: HTMLFormElement) => Promise<R>
+    onSuccess?: (result: R, el: HTMLFormElement) => void
+    onInvalid?: (invalid: E, el: HTMLFormElement) => void
+    onFatal?: (err: unknown, el: HTMLFormElement) => void
   }
   schema: ZS
 }
@@ -55,18 +55,18 @@ export function useSubmit<ZS extends z.AnyZodObject, R, E extends ValidationErro
       setInvalid(null)
       setResult(undefined)
 
-      const result = await modifier(newParams, ev)
+      const result = await modifier(newParams, el)
       setAttrs(newParams)
       setResult(result)
-      onSuccess && onSuccess(result, ev)
+      onSuccess && onSuccess(result, el)
     })().catch((err) => {
       setResult(null)
       if (isValidationError(err)) {
         setInvalid(err as E)
-        onInvalid && onInvalid(err as E, ev)
+        onInvalid && onInvalid(err as E, el)
       } else {
         if (onFatal) {
-          onFatal(err, ev)
+          onFatal(err, el)
         } else {
           throw err
         }
@@ -78,9 +78,9 @@ export function useSubmit<ZS extends z.AnyZodObject, R, E extends ValidationErro
 }
 
 export type UseEventProps<R, E = unknown> = {
-  modifier: (ev: React.UIEvent) => Promise<R>
-  onSuccess?: (result: R, ev: React.UIEvent) => void
-  onError?: ((err: E, ev: React.UIEvent) => void) | null
+  modifier: (el: Element) => Promise<R>
+  onSuccess?: (result: R, el: Element) => void
+  onError?: ((err: E, el: Element) => void) | null
 }
 
 export type UseEventStatus = 'fulfilled' | 'pending' | 'rejected' | null
@@ -98,24 +98,26 @@ export function useUIEvent<R, E = unknown>({ modifier, onSuccess, onError }: Use
       return
     }
 
+    const el = ev.currentTarget
+
     ;(async () => {
       setStatus('pending')
 
       setResult(undefined)
       setError(null)
 
-      const ret = await modifier(ev)
+      const ret = await modifier(el)
       setStatus('fulfilled')
       setResult(ret)
 
-      onSuccess && onSuccess(ret, ev)
+      onSuccess && onSuccess(ret, el)
     })().catch((err) => {
       setStatus('rejected')
       setResult(undefined)
       setError(err)
 
       if (onError) {
-        onError(err as E, ev)
+        onError(err as E, el)
       } else if (onError === undefined) {
         throw err
       }
