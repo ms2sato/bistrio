@@ -92,6 +92,8 @@ export type RequestHolder = {
   waitForResponses(count: number): Promise<void>
   waitForResponses(count: number, criterias: Criteria | Criteria[]): Promise<void>
   clear(): void
+  clearAndWaitForResponses(count: number): Promise<void>
+  clearAndWaitForResponses(count: number, criterias: Criteria | Criteria[]): Promise<void>
 }
 
 function requestHoldable(page: Page): RequestHolder {
@@ -159,10 +161,14 @@ function requestHoldable(page: Page): RequestHolder {
       waitingCriterias = []
       matchingCriteriaCount = 0
     },
+    async clearAndWaitForResponses(count: number, criterias: Criteria | Criteria[] = []) {
+      this.clear()
+      return this.waitForResponses(count, criterias)
+    },
   }
 }
 
-export function extend(page: Page) {
+export function spy(page: Page) {
   page.on('pageerror', (error) => {
     console.error('[Error]pageerror', error)
   })
