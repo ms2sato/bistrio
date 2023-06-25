@@ -181,3 +181,15 @@ export function extend(page: Page) {
 
   return requestHoldable(page)
 }
+
+export const waitForAnyInnerText = (page: Page, selector: string, text: string) => {
+  return page.waitForFunction(
+    `Array.from(document.querySelectorAll("${selector}")).some((node)=> node.innerText == "${text}")`
+  )
+}
+
+export const waitForNotAnyInnerText = (page: Page, selector: string, text: string) => {
+  return page.waitForFunction(
+    `Array.from(document.querySelectorAll("${selector}")).every((node) => node.innerText != "${text}")`
+  )
+}
