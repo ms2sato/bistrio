@@ -1,8 +1,9 @@
-import { Suspense, useRef } from 'react'
-import { useNavigate, useSubmit } from 'bistrio/client'
+import { Suspense, forwardRef, useRef } from 'react'
+import { UseSubmitProps, useNavigate, useSubmit } from 'bistrio/client'
 import { useRenderSupport } from '@/.bistrio/routes/main'
 import { ErrorPanel } from '@/isomorphic/components/ErrorPanel'
 import { commentCreateSchema } from '@/isomorphic/params'
+import { Comment } from '@prisma/client'
 
 export function Page() {
   return (
@@ -19,43 +20,56 @@ function TaskWithComments() {
   return (
     <>
       <h2>{task.title}</h2>
+      <div>{task.description}</div>
       <ul>
         {task.comments.map((comment) => (
           <li key={comment.id}>{comment.body}</li>
         ))}
       </ul>
-      <TaskCreateForm id={id} />
+      <CommentCreateForm id={id} />
     </>
   )
 }
 
-const taskFormSchem = commentCreateSchema.omit({ taskId: true })
-
-function TaskCreateForm({ id }: { id: number }) {
-  const ref = useRef<HTMLInputElement>(null)
+function CommentCreateForm({ id }: { id: number }) {
+  const ref = useRef<HTMLFormElement>(null)
   const navigate = useNavigate()
   const rs = useRenderSupport()
-  const { handleSubmit, invalid, pending, attrs } = useSubmit({
+  const submitProps: CommentSubmitProps = {
     source: { body: '' },
     action: {
       modifier: async ({ body }) => rs.resources().api_task_comment.create({ taskId: id, body }),
       onSuccess: () => {
-        ref.current && (ref.current.value = '')
+        ref.current?.reset()
         navigate(`/tasks/${id}`, { purge: true })
       },
     },
     schema: taskFormSchem,
-  })
+  }
 
+  return <CommentForm submitProps={submitProps} ref={ref}></CommentForm>
+}
+
+const taskFormSchem = commentCreateSchema.omit({ taskId: true })
+type CommentSubmitProps = UseSubmitProps<typeof taskFormSchem, Comment>
+type CommentFormProps = {
+  submitProps: CommentSubmitProps
+}
+
+const CommentForm = forwardRef<HTMLFormElement, CommentFormProps>(function CommentForm(
+  { submitProps }: CommentFormProps,
+  ref
+) {
+  const { handleSubmit, invalid, pending, source } = useSubmit(submitProps)
   return (
     <>
       {invalid && <ErrorPanel err={invalid}></ErrorPanel>}
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} ref={ref}>
         <fieldset disabled={pending}>
-          <input name="body" defaultValue={attrs.body} ref={ref}></input>
-          <input type="submit"></input>
+          <input name="body" defaultValue={source.body} />
+          <input type="submit" />
         </fieldset>
       </form>
     </>
   )
-}
+})
