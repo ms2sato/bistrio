@@ -178,13 +178,10 @@ export const generateWebpackConfig = ({
     ...webpackConfig,
     devtool: 'inline-source-map',
     stats: 'normal',
+    cache: true,
   }
 
-  const prodConfig: Configuration = {
-    ...webpackConfig,
-  }
-
-  return env === dev ? devConfig : prodConfig
+  return env === dev ? devConfig : webpackConfig
 }
 
 export type ScriptProps = GenerateScriptsProps & {

@@ -8,7 +8,7 @@
     "prepare": "npm run bistrio:gen",
     "dev": "concurrently --raw \"npm run dev:server\" \"npm run build:isomorphic && npm run watch\"",
     "dev:server": "NODE_ENV=development DEBUG=bistrio:*,restrant2:* dotenv -e .env.development -- node -r ./server/support/tsnode_register ./bin/dev",
-    "watch": "npm-watch",
+    "watch": "concurrently \"npm-watch\" \"webpack --watch --config ./config/client/webpack.config.ts\"",
     "copy-assets": "cpx 'public/**' dist/public && cpx 'config/**' dist/config",
     "build": "npm run copy-assets && npm run bistrio:gen && npm run build:client && npm run build:server",
     "clean": "rimraf dist",
@@ -40,16 +40,15 @@
   "watch": {
     "bistrio:gen": {
       "patterns": [
-        "isomorphic"
+        "isomorphic/routes",
+        "server/endpoint"
       ],
       "extensions": "ts,tsx"
     },
-    "build:client": {
+    "build:isomorphic": {
       "patterns": [
-        ".bistrio"
+        "isomorphic"
       ],
-      "initial": false,
-      "delay": 2500,
       "extensions": "ts,tsx"
     }
   },
