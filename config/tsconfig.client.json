@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
     "noImplicitAny": true,
-    "module": "node16",
+    "module": "es2022",
     "target": "es5",
     "lib": ["dom", "dom.iterable", "es2020"],
     "allowJs": true,
-    "moduleResolution": "node",
+    "moduleResolution": "node16",
     "jsx": "react-jsx"
   }
 }
