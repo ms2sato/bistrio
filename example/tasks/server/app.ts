@@ -36,10 +36,14 @@ export async function setup() {
     app.use(express.static(staticPathDev))
   }
 
+  if (!process.env.SESSION_SECRET) {
+    throw new Error('process.env.SESSION_SECRET is undefined')
+  }
+
   // TODO: can configure
   app.use(
     session({
-      secret: process.env.SESSION_SECRET || 'secret',
+      secret: process.env.SESSION_SECRET,
       resave: false,
       saveUninitialized: false,
       cookie: {
