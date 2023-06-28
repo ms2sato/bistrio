@@ -5,7 +5,6 @@
     "target": "es5",
     "lib": ["dom", "dom.iterable", "es2020"],
     "allowJs": true,
-    "moduleResolution": "node16",
     "jsx": "react-jsx"
   }
 }
