@@ -1,3 +1,5 @@
 dist/**/*
 example/**/*
 jest.config.js
+client.d.ts
+client.js
