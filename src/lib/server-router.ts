@@ -395,9 +395,9 @@ export const importAndSetup = async <S, R>(
       throw new FileNotFoundError(`module: '${fullPath}' is not found`)
     }
 
-    const ret = (await import(fullPath)) as { default: { default: EndpointFunc<S, R> } }
+    const ret = (await import(fullPath)) as { default: EndpointFunc<S, R> }
     try {
-      return ret.default.default(support, config)
+      return ret.default(support, config)
     } catch (err) {
       if (err instanceof Error) {
         throw new RouterError(`Error occured "${err.message}" on calling default function in "${modulePath}"`, {
