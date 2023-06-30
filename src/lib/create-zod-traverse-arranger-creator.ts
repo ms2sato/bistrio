@@ -1,6 +1,6 @@
 import { AnyZodObject, z } from 'zod'
 import { strip, cast, ArrangeResult, nullArrangeResult } from './shared/zod-util'
-import { TraverseArranger, TraverseArrangerCreator } from './parse-form-body'
+import { NextRet, TraverseArranger, TraverseArrangerCreator } from './parse-form-body'
 
 type ShapedSchema = {
   shape: Record<string, AnyZodObject>
@@ -23,12 +23,27 @@ export function createZodTraverseArrangerCreator(schema: z.AnyZodObject): Traver
 }
 
 export class ZodArranger implements TraverseArranger {
-  constructor(private schema: z.AnyZodObject) {}
+  private topSchema: z.AnyZodObject
+  private schema: z.AnyZodObject
 
-  next(path: string, _node: unknown, _value: unknown, _pathIndex: number): void {
+  constructor(schema: z.AnyZodObject) {
+    this.topSchema = schema
+    this.schema = schema
+  }
+
+  next(path: string, _node: unknown, _value: unknown, _pathIndex: number): NextRet | void {
     const schema = this.schema as unknown
     if (isShapedSchema(schema)) {
-      this.schema = strip(schema.shape[path])
+      const pathSchema = schema.shape[path]
+      if (!pathSchema) {
+        throw new Error(`Unexpected path: ${path}`)
+      }
+
+      this.schema = strip(pathSchema)
+
+      if (pathSchema instanceof z.ZodDefault) {
+        return { type: 'default', value: (pathSchema as z.ZodDefault<any>)._def.defaultValue() }
+      }
     } else {
       throw new Error(`Unexpected Type: ${this.schema.toString()}`)
     }
@@ -66,7 +81,11 @@ export class ZodArranger implements TraverseArranger {
       }
     }
 
-    throw new Error(`Unexpected Type: ${this.schema.toString()}`)
+    if (this.schema) {
+      throw new Error(`Unexpected Type: name=${_name}, ${this.schema.toString()}`)
+    } else {
+      throw new Error(`Unexpected Type: name=${_name}, without schema`)
+    }
   }
 
   arrangePropertyOnLast(_path: string, _node: unknown, value: unknown, _pathIndex: number): ArrangeResult {
@@ -75,6 +94,10 @@ export class ZodArranger implements TraverseArranger {
       return result
     }
     return nullArrangeResult
+  }
+
+  normalize(value: unknown): unknown {
+    return this.topSchema.parse(value)
   }
 
   private isArraySchema() {
