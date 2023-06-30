@@ -44,7 +44,6 @@ export function cast(schema: z.AnyZodObject, value: unknown): ArrangeResult {
       return { arranged: true, result: new Date(value as number) }
     }
     if (schema instanceof z.ZodString) {
-      if (value === '') return { arranged: true, result: null }
       return { arranged: true, result: (value as number).toString() }
     }
     return nullArrangeResult

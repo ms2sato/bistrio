@@ -1,21 +1,27 @@
 import { ArrangeResult, nullArrangeResult } from './shared/zod-util'
 
+export interface NextRet {
+  type: 'default'
+  value: unknown
+}
+
 export type TraverseArranger = {
-  next: (path: string, node: unknown, value: unknown, pathIndex: number) => void
+  next: (path: string, node: unknown, value: unknown, pathIndex: number) => NextRet | void
   nextItem: (name: string, node: unknown, value: unknown, pathIndex: number) => void
   arrangeIndexedArrayItemOnLast: (name: string, node: unknown, value: unknown, pathIndex: number) => ArrangeResult
   arrangeUnindexedArrayOnLast: (name: string, node: unknown, value: unknown[], pathIndex: number) => ArrangeResult
   arrangePropertyOnLast: (path: string, node: unknown, value: unknown, pathIndex: number) => ArrangeResult
+  normalize(value: unknown): unknown
 }
 
 export type TraverseArrangerCreator = {
   (): TraverseArranger
 }
 
-export function nullTraverseArranger() {
+export function nullTraverseArranger(): TraverseArranger {
   return {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    next() {},
+    next(): NextRet | void {},
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     nextItem() {},
     arrangeIndexedArrayItemOnLast() {
@@ -26,6 +32,9 @@ export function nullTraverseArranger() {
     },
     arrangePropertyOnLast() {
       return nullArrangeResult
+    },
+    normalize(value: unknown) {
+      return value
     },
   }
 }
@@ -92,7 +101,17 @@ function createTraverser(arranger: TraverseArranger, key: string) {
       } else {
         // format: name[]
 
-        arranger.next(name, recordNode, value, pathIndex)
+        const ret = arranger.next(name, recordNode, value, pathIndex)
+        // TODO: FIX! ここで valueがundefinedなら値をbodyから受け取っていない。
+        // その場合、default が指定されていたらその値をセットして終われる。
+
+        console.log(name, ret, value)
+
+        if (value === undefined && ret && ret.type === 'default') {
+          recordNode[name] = ret.value
+          return
+        }
+
         if (paths.length === pathIndex) {
           const array = value === undefined ? [] : value instanceof Array ? value : [value]
           recordNode[name] = arrangedResultOrRaw(
@@ -136,5 +155,5 @@ export function parseFormBody(
   for (const [key, value] of Object.entries(body)) {
     createTraverser(arrangerCreator(), key)(key.split('.'), ret, value)
   }
-  return ret
+  return arrangerCreator().normalize(ret) as Record<string, unknown>
 }
