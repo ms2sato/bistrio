@@ -101,7 +101,7 @@ export class ZodArranger implements TraverseArranger {
   }
 
   private isArraySchema() {
-    return this.schema instanceof z.ZodArray
+    return this.schema.constructor.name === 'ZodArray'
   }
 
   private castArray(elementSchema: z.AnyZodObject, value: unknown[]): ArrangeResult {
