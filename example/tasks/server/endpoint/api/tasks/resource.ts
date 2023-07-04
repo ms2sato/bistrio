@@ -1,8 +1,8 @@
 import { defineResource, IdNumberParams } from 'bistrio'
 import { Prisma, Task } from '@prisma/client'
 import { createPrismaEasyDataAccessor, getPrismaCilent } from '@server/lib/prisma-util'
-import { TaskCreateParams, TaskUpdateParams } from '@/isomorphic/params'
-import { TaskWithComments } from '@/isomorphic/types'
+import { TaskCreateWithTagsParams, TaskUpdateWithTagsParams } from '@/isomorphic/params'
+import { TaskWithTags } from '@/isomorphic/types'
 
 const prisma = getPrismaCilent()
 
@@ -12,20 +12,62 @@ const accessor = createPrismaEasyDataAccessor<Task, IdNumberParams, Prisma.TaskC
 )
 
 export default defineResource((_support, _options) => ({
-  index: async () => {
-    return accessor.list()
+  index: async () => await prisma.task.findMany(),
+
+  show: async (params: IdNumberParams): Promise<TaskWithTags> => {
+    const task = await prisma.task.findUniqueOrThrow({ where: params, include: { tags: { include: { tag: true } } } })
+    return { ...task, tags: task.tags.map((tag) => tag.tag.label) }
   },
 
-  show: async (params: IdNumberParams) => {
-    return accessor.get<TaskWithComments>(params, { include: { comments: true } })
+  create: async (params: TaskCreateWithTagsParams) => {
+    return prisma.task.create({
+      data: {
+        ...params,
+        done: false,
+        tags: {
+          create: params.tags.map((tag) => ({
+            tag: {
+              connectOrCreate: {
+                where: { label: tag },
+                create: { label: tag },
+              },
+            },
+          })),
+        },
+      },
+    })
   },
 
-  create: async (params: TaskCreateParams) => {
-    return accessor.create({ ...params, done: false })
-  },
+  update: async (params: TaskUpdateWithTagsParams) => {
+    const tags = await prisma.tagsOnTask.findMany({ where: { taskId: params.id }, include: { tag: true } })
+    const originalTagLabels = tags.map((tag) => tag.tag.label)
+    const tagLabelsForCreate = params.tags.filter((tag) => !originalTagLabels.includes(tag))
+    const tagsForDelete = tags.filter((tag) => !params.tags.includes(tag.tag.label))
 
-  update: async (params: TaskUpdateParams) => {
-    return accessor.update(params)
+    return prisma.$transaction(async (prisma) => {
+      const updated = await prisma.task.update({
+        where: { id: params.id },
+        data: {
+          ...params,
+          tags: {
+            create: tagLabelsForCreate.map((tag) => ({
+              tag: {
+                connectOrCreate: {
+                  where: { label: tag },
+                  create: { label: tag },
+                },
+              },
+            })),
+          },
+        },
+      })
+
+      await prisma.tagsOnTask.deleteMany({
+        where: { taskId: params.id, tagId: { in: tagsForDelete.map((tag) => tag.tagId) } },
+      })
+
+      return updated
+    })
   },
 
   destroy: async (params: IdNumberParams) => {

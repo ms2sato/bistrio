@@ -5,9 +5,20 @@ const taskCoreProps = {
   description: z.string().min(3).max(4096),
 }
 
-export const taskCreateSchema = z.object(taskCoreProps)
+const withTags = {
+  tags: z.array(z.string()).optional().default([]),
+}
 
+const taskWithTagsCoreProps = {
+  ...taskCoreProps,
+  ...withTags,
+}
+
+export const taskCreateSchema = z.object(taskCoreProps)
 export type TaskCreateParams = z.infer<typeof taskCreateSchema>
+
+export const taskCreateWithTagsSchema = z.object(taskWithTagsCoreProps)
+export type TaskCreateWithTagsParams = z.infer<typeof taskCreateWithTagsSchema>
 
 export const taskUpdateSchema = z.object({
   id: z.number(),
@@ -16,6 +27,15 @@ export const taskUpdateSchema = z.object({
 })
 
 export type TaskUpdateParams = z.infer<typeof taskUpdateSchema>
+
+export const taskUpdateWithTagsSchema = taskUpdateSchema.extend(withTags)
+export type TaskUpdateWithTagsParams = z.infer<typeof taskUpdateWithTagsSchema>
+
+export const taskIdSchema = z.object({
+  taskId: z.number()
+});
+
+export type TaskIdParams = z.infer<typeof taskIdSchema>
 
 const commentCoreProps = {
   taskId: z.number(),

@@ -8,7 +8,7 @@ export function Build() {
   const rs = useRenderSupport()
 
   const props: UseSubmitProps = {
-    source: { title: '', description: '' },
+    source: { title: '', description: '', tags: [] },
     action: {
       modifier: (params) => rs.resources().api_task.create(params),
       onSuccess: () => navigate(`/tasks`, { purge: true }),
