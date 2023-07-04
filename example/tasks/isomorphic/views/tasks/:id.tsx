@@ -25,19 +25,29 @@ function TaskWithComments() {
       </h2>
       <div>{task.description}</div>
       <hr />
-      <h3>Comments</h3>
+      <Suspense fallback={'...'}>
+        <Comments taskId={id} />
+      </Suspense>
+      <CommentCreateForm taskId={id} />
+    </>
+  )
+}
 
-      {task.comments.length === 0 ? (
+function Comments({ taskId }: { taskId: number }) {
+  const rs = useRenderSupport()
+  const comments = rs.suspendedResources().api_task_comment.index({ taskId })
+  return (
+    <>
+      <h3>Comments</h3>
+      {comments.length === 0 ? (
         <div>No comments</div>
       ) : (
         <ul>
-          {task.comments.map((comment) => (
+          {comments.map((comment) => (
             <li key={comment.id}>{comment.body}</li>
           ))}
         </ul>
       )}
-
-      <CommentCreateForm taskId={id} />
     </>
   )
 }
