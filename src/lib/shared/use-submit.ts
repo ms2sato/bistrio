@@ -58,7 +58,7 @@ export function useSubmit<
 
     const el = ev.currentTarget
     const formData = new FormData(el)
-    const formParams = Object.fromEntries(formData.entries())
+    const formParams = objectFromEntries(formData.entries())
 
     ;(async () => {
       const newParams = parseFormBody(formParams, createZodTraverseArrangerCreator(schema)) as S
@@ -86,6 +86,22 @@ export function useSubmit<
   }
 
   return { handleSubmit, attrs, source, invalid, result, pending: result === undefined }
+}
+
+function objectFromEntries(entries: IterableIterator<[string, FormDataEntryValue]>) {
+  const ret: Record<string, unknown> = {}
+  for (const [key, value] of entries) {
+    if (key.endsWith('[]')) {
+      if (ret[key]) {
+        ret[key] = [...(ret[key] as unknown[]), value]
+      } else {
+        ret[key] = [value]
+      }
+    } else {
+      ret[key] = value
+    }
+  }
+  return ret
 }
 
 export type UseEventProps<R, E = unknown> = {
