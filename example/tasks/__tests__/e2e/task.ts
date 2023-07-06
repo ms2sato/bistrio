@@ -22,7 +22,7 @@ describe('senario /tasks', () => {
     await expect(page.title()).resolves.toMatch('Tasks')
     await expect(page.content()).resolves.toMatch('Create new task')
     await page.$eval('input[name=title]', (el) => ((el as HTMLInputElement).value = 'TestTitle'))
-    await page.$eval('textarea[name=description]', (el) => ((el as HTMLInputElement).value = 'TestDescription'))
+    await page.$eval('textarea[name=description]', (el) => ((el as HTMLTextAreaElement).value = 'TestDescription'))
 
     // Create Ajax
     await Promise.all([req.clearAndWaitForResponses(2, { resourceType: 'ajax' }), page.click('input[type="submit"]')])
