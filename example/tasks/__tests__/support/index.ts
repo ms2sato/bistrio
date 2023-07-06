@@ -1,4 +1,5 @@
-import { HTTPRequest, Page } from 'puppeteer'
+import { HTTPRequest } from 'puppeteer'
+import { Page, Request } from 'expect-puppeteer/node_modules/@types/puppeteer'
 
 const HOST = process.env.HOST || 'http://localhost'
 const URL = `${HOST}:${process.env.PORT ? Number(process.env.PORT) : 4569}`
@@ -33,7 +34,7 @@ type Criteria = {
     | 'ajax'
 }
 
-export function matchCriteria(request: HTTPRequest, criteria: Criteria) {
+export function matchCriteria(request: Request, criteria: Criteria) {
   return (
     (criteria.url === undefined || request.url() === criteria.url) &&
     (criteria.method === undefined || request.method() === criteria.method) &&
@@ -43,15 +44,15 @@ export function matchCriteria(request: HTTPRequest, criteria: Criteria) {
   )
 }
 
-export function match(criterias: Criteria[], request: HTTPRequest): boolean {
+export function match(criterias: Criteria[], request: Request): boolean {
   return criterias.find((criteria) => matchCriteria(request, criteria)) !== undefined
 }
 
 export class RequestMap {
-  private map = new Map<RequestId, HTTPRequest>()
+  private map = new Map<RequestId, Request>()
 
-  public set: Map<RequestId, HTTPRequest>['set']
-  public has: Map<RequestId, HTTPRequest>['has']
+  public set: Map<RequestId, Request>['set']
+  public has: Map<RequestId, Request>['has']
 
   constructor() {
     this.set = this.map.set.bind(this.map)
@@ -69,7 +70,7 @@ export class RequestMap {
   }
 
   where(criteria: Criteria) {
-    const ret: HTTPRequest[] = []
+    const ret: Request[] = []
 
     for (const request of this.map.values()) {
       if (matchCriteria(request, criteria)) {
@@ -97,7 +98,7 @@ export type RequestHolder = {
 }
 
 function requestHoldable(page: Page): RequestHolder {
-  const getRequestId = (request: HTTPRequest) => (request as HttpRequestImpl)._requestId
+  const getRequestId = (request: Request) => (request as unknown as HttpRequestImpl)._requestId
 
   const requested: RequestMap = new RequestMap()
   const failed: RequestMap = new RequestMap()
