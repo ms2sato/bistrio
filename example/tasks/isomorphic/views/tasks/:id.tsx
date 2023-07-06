@@ -23,6 +23,14 @@ function TaskWithComments() {
       <h2>
         <Link to={'/tasks'}>Task</Link> / {task.title}
       </h2>
+      <div>
+        tags:
+        {task.tags.map((tag) => (
+          <span key={tag} style={{ padding: '2px 4px', margin: '2px', backgroundColor: 'lightgray' }}>
+            {tag}
+          </span>
+        ))}
+      </div>
       <div>{task.description}</div>
       <hr />
       <Suspense fallback={'...'}>
