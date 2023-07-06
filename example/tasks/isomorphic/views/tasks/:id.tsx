@@ -7,16 +7,22 @@ import { Comment } from '@prisma/client'
 import { Link } from 'react-router-dom'
 
 export function Page() {
+  const rs = useRenderSupport()
+  const id = Number(rs.params.id)
   return (
     <Suspense fallback="...">
-      <TaskWithComments />
+      <Task id={id} />
+      <hr />
+      <Suspense fallback={'...'}>
+        <Comments taskId={id} />
+      </Suspense>
+      <CommentCreateForm taskId={id} />
     </Suspense>
   )
 }
 
-function TaskWithComments() {
+function Task({ id }: { id: number }) {
   const rs = useRenderSupport()
-  const id = Number(rs.params.id)
   const task = rs.suspendedResources().api_task.show({ id })
   return (
     <>
@@ -32,11 +38,6 @@ function TaskWithComments() {
         ))}
       </div>
       <div>{task.description}</div>
-      <hr />
-      <Suspense fallback={'...'}>
-        <Comments taskId={id} />
-      </Suspense>
-      <CommentCreateForm taskId={id} />
     </>
   )
 }
