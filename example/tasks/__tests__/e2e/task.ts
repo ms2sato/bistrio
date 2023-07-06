@@ -34,7 +34,7 @@ describe('senario /tasks', () => {
     await page.waitForSelector('tbody')
 
     await expect(page.title()).resolves.toMatch('Tasks')
-    await expect(page.$eval('h1', (el) => el.innerText)).resolves.toMatch('Task list')
+    await expect(page.$eval('h1', (el) => (el as HTMLTitleElement).innerText)).resolves.toMatch('Task list')
     await expect(page.content()).resolves.toMatch('Undone')
     await expect(page.content()).resolves.toMatch('TestTitle')
     await expect(page.content()).resolves.toMatch('TestDescription')
@@ -50,7 +50,7 @@ describe('senario /tasks', () => {
     await waitForAnyInnerText(page, 'td', 'TestDescription')
 
     await expect(page.title()).resolves.toMatch('Tasks')
-    await expect(page.$eval('h1', (el) => el.innerText)).resolves.toMatch('Task list')
+    await expect(page.$eval('h1', (el) => (el as HTMLTitleElement).innerText)).resolves.toMatch('Task list')
     await expect(page.content()).resolves.toMatch('Done')
     await expect(page.content()).resolves.toMatch('TestTitle')
     await expect(page.content()).resolves.toMatch('TestDescription')
