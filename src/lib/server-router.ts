@@ -482,7 +482,7 @@ export class ActionContextImpl implements MutableActionContext {
 
 function defaultServerRouterConfig(): Omit<ServerRouterConfig, 'baseDir'> {
   return {
-    actions: Actions.standard(),
+    actions: Actions.page(),
     inputArranger: createSmartInputArranger(),
     createActionOptions: createNullActionOption,
     createActionContext: createDefaultActionContext,

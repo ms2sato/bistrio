@@ -99,3 +99,11 @@ export const choiseSources = (
   const defaultConstructDescriptor: ConstructDescriptor | undefined = defaultConstructConfig[actionName]
   return constructDescriptor?.sources || defaultConstructDescriptor?.sources || ['params']
 }
+
+export type Scope = (router: Router) => void
+
+export function scope(router: Router, subPath: string, scopeFun: Scope): Router {
+  const subRouter = router.sub(subPath)
+  scopeFun(subRouter)
+  return subRouter
+}
