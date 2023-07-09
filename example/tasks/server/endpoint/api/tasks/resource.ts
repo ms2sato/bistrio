@@ -1,15 +1,9 @@
 import { defineResource, IdNumberParams } from 'bistrio'
-import { Prisma, Task } from '@prisma/client'
-import { createPrismaEasyDataAccessor, getPrismaCilent } from '@server/lib/prisma-util'
+import { getPrismaCilent } from '@server/lib/prisma-util'
 import { TaskCreateWithTagsParams, TaskUpdateWithTagsParams } from '@/isomorphic/params'
 import { TaskWithTags } from '@/isomorphic/types'
 
 const prisma = getPrismaCilent()
-
-const accessor = createPrismaEasyDataAccessor<Task, IdNumberParams, Prisma.TaskCreateInput, Prisma.TaskUpdateInput>(
-  prisma.task,
-  'id'
-)
 
 export default defineResource((_support, _options) => ({
   index: async () => await prisma.task.findMany(),
@@ -70,8 +64,8 @@ export default defineResource((_support, _options) => ({
     })
   },
 
-  destroy: async (params: IdNumberParams) => {
-    return accessor.destroy(params)
+  destroy: async ({ id }: IdNumberParams) => {
+    await prisma.task.delete({ where: { [id]: id } })
   },
 
   done: async ({ id }: IdNumberParams) => {
