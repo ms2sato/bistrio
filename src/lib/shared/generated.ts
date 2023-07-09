@@ -9,5 +9,5 @@ export type NameToPath = {
 }
 
 export type NameToResource<R extends PathToResources, NP extends NameToPath> = {
-  [name in keyof NP]: R[NP[name]]
-}
+  [name in keyof NP as R[NP[name]] extends Resource ? name : never]: R[NP[name]];
+};
