@@ -6,13 +6,13 @@ export function routes(router: Router, support: RouterSupport<Middlewares>) {
   router = router.sub('/', support.middlewares.checkLoggedIn())
 
   router.resources('/', {
-    name: 'root',
+    name: 'page_root',
     actions: Actions.page({ only: ['index'] }),
   })
 
   const mainRouter = router.sub('/')
   mainRouter.options({ hydrate: true }).resources('/tasks', {
-    name: 'task',
+    name: 'page_task',
     actions: Actions.page(),
   })
 
@@ -23,18 +23,18 @@ export function routes(router: Router, support: RouterSupport<Middlewares>) {
         update: { schema: taskUpdateWithTagsSchema },
         done: { schema: idNumberSchema },
       },
-      name: 'api_task',
+      name: 'task',
       actions: [...Actions.api(), { action: 'done', path: '/:id/done', method: 'post' }],
     })
 
-    scope(apiRouter, '/tasks/:taskId', (tasksRouter) => {
-      tasksRouter.resources('/comments', {
+    scope(apiRouter, '/tasks/:taskId', (taskRouter) => {
+      taskRouter.resources('/comments', {
         construct: {
           index: { schema: taskIdSchema },
           create: { schema: commentCreateSchema },
           update: { schema: commentUpdateSchema },
         },
-        name: 'api_task_comment',
+        name: 'task_comment',
         actions: Actions.api({ only: ['index', 'create', 'update'] }),
       })
     })

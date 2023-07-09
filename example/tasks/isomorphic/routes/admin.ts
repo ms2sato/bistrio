@@ -7,7 +7,7 @@ export function routes(router: Router, support: RouterSupport<Middlewares>) {
 
   const adminRouter = router.sub('/admins/:adminId')
   adminRouter.resources('/users', {
-    name: 'admin_user',
+    name: 'page_admin_user',
     actions: Actions.page({ only: ['index'] }),
   })
 }

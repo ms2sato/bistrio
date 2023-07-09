@@ -10,7 +10,7 @@ export function Build() {
   const props: UseSubmitProps = {
     source: { title: '', description: '', tags: [] },
     action: {
-      modifier: (params) => rs.resources().api_task.create(params),
+      modifier: (params) => rs.resources().task.create(params),
       onSuccess: () => navigate(`/tasks`, { purge: true }),
     },
     schema: formSchema,

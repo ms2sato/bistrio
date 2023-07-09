@@ -8,12 +8,12 @@ function MyForm() {
   const navigate = useNavigate()
   const rs = useRenderSupport()
   const id = Number(rs.params.id)
-  const source = rs.suspendedResources().api_task.show({ id })
+  const source = rs.suspendedResources().task.show({ id })
 
   const props: UseSubmitProps = {
     source,
     action: {
-      modifier: (params) => rs.resources().api_task.update({ done: false, ...params, id }),
+      modifier: (params) => rs.resources().task.update({ done: false, ...params, id }),
       onSuccess: () => navigate('/tasks', { purge: true }),
     },
     schema: formSchema,

@@ -23,7 +23,7 @@ const TaskTable = () => {
   const rs = useRenderSupport()
   const l = rs.getLocalizer()
 
-  const tasks = rs.suspendedResources().api_task.index()
+  const tasks = rs.suspendedResources().task.index()
 
   return (
     <table>
@@ -51,12 +51,12 @@ const TaskRecord = ({ task: src }: { task: Task }) => {
   const l = rs.getLocalizer()
 
   const { handleEvent: handleDoneClick, pending: donePending } = useUIEvent({
-    modifier: () => rs.resources().api_task.done(task),
+    modifier: () => rs.resources().task.done(task),
     onSuccess: () => setTask({ ...task, done: true }),
   })
 
   const { handleEvent: handleDeleteClick, pending: deletePending } = useUIEvent({
-    modifier: () => rs.resources().api_task.destroy(task),
+    modifier: () => rs.resources().task.destroy(task),
     onSuccess: () => (location.href = '/tasks'),
   })
 
