@@ -641,17 +641,13 @@ export class ServerRouter extends BasicRouter {
 
   protected createHandlerBuildRunner(rpath: string, routeConfig: RouteConfig): HandlerBuildRunner {
     const fileRoot = this.serverRouterConfig.baseDir
+
+    const isPageOnly = routeConfig.actions?.every((action) => action.page) && true
+
     return async () => {
       handlerLog('buildHandler: %s', path.join(this.httpPath, rpath))
 
       const resourcePath = this.getResourcePath(rpath)
-      const resource = await importAndSetup<ResourceSupport, Resource>(
-        fileRoot,
-        resourcePath,
-        new ResourceSupport(fileRoot),
-        routeConfig
-      )
-
       const resourceName = routeConfig.name
       if (this.routerCore.nameToResource.get(resourceName)) {
         throw new Error(
@@ -660,7 +656,25 @@ export class ServerRouter extends BasicRouter {
           }`
         )
       }
-      this.routerCore.nameToResource.set(resourceName, createLocalResourceProxy(routeConfig, resource))
+
+      let resource
+      try {
+        resource = await importAndSetup<ResourceSupport, Resource>(
+          fileRoot,
+          resourcePath,
+          new ResourceSupport(fileRoot),
+          routeConfig
+        )
+      } catch(err) {
+        if(!(err instanceof FileNotFoundError) || !isPageOnly) {
+          throw err
+        }
+      }
+
+      if(resource) {
+        this.routerCore.nameToResource.set(resourceName, createLocalResourceProxy(routeConfig, resource))
+      }
+
       this.routerCore.nameToPath.set(resourceName, resourcePath)
 
       const adapterPath = this.getAdapterPath(rpath)
@@ -691,7 +705,7 @@ export class ServerRouter extends BasicRouter {
         const actionName = actionDescriptor.action
         const resourceHttpPath = this.getHttpPath(rpath)
 
-        const resourceMethod: ResourceMethod | undefined = resource[actionName]
+        const resourceMethod: ResourceMethod | undefined = resource?.[actionName]
         const actionFunc: Handler | Responder | RequestCallback | undefined = adapter[actionName]
         const constructDescriptor: ConstructDescriptor | undefined = routeConfig.construct?.[actionName]
 
@@ -764,6 +778,10 @@ export class ServerRouter extends BasicRouter {
           } else {
             if (!schema) {
               throw new Error('Unreachable: schema is undefined')
+            }
+
+            if(!resource) {
+              throw new Error('Unreachable: resource is undefined')
             }
 
             const sources = choiseSources(this.serverRouterConfig.constructConfig, constructDescriptor, actionName)

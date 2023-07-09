@@ -29,16 +29,23 @@ class NameToPathRouter implements Router {
     fs.writeFileSync(out, text)
   }
 
-  createResources({ out }: { out: string }) {
-    const ret = `${Object.keys(this.nameToPath)
+  createResources({ out, config }: { out: string, config: Config }) {
+    const resourcePath = (name: string) => path.join(config.structure.serverDir, 'endpoint', this.nameToPath[name], 'resource.ts')
+    const existsResource = (name: string): boolean => fs.existsSync(resourcePath(name))
+    const changeExt = (filePath: string) => filePath.replace(/\.ts$/, "")
+    const getResourceFile = (name: string): string => path.relative(path.dirname(out), changeExt(resourcePath(name)))
+
+    const resourceNames = Object.keys(this.nameToPath).filter((name) => existsResource(name))
+
+    const ret = `${resourceNames
       .map(
         (name, index) =>
-          `import type __Resource${index} from '../../../server/endpoint${this.nameToPath[name]}/resource'`
+          `import type __Resource${index} from '${getResourceFile(name)}'`
       )
       .join('\n')}
 
 export type Resources = {
-  ${Object.keys(this.nameToPath)
+  ${resourceNames
     .map((name, index) => `'${this.nameToPath[name]}': ReturnType<typeof __Resource${index}>`)
     .join('\n  ')}
 }
@@ -109,7 +116,7 @@ export async function generate<M extends Middlewares>({
     })
   )
 
-  generateForAll(bistrioGenRoot, allRoutes)
+  generateForAll(bistrioGenRoot, allRoutes, config)
 
   console.log('Generated!')
 }
@@ -129,14 +136,15 @@ function generateForEntry<M extends Middlewares>(
   }
 
   router.createNameToPath({ out: path.join(genRoot, '_name_to_path.ts') })
-  router.createResources({ out: path.join(genRoot, '_resources.ts') })
+  router.createResources({ out: path.join(genRoot, '_resources.ts'), config })
   router.createTypes({ out: path.join(genRoot, 'index.ts') })
   router.createEntry({ out: path.join(genRoot, '_entry.ts'), name, config })
 }
 
 function generateForAll<M extends Middlewares>(
   bistrioGenRoot: string,
-  routes: (router: Router, support: RouterSupport<M>) => void
+  routes: (router: Router, support: RouterSupport<M>) => void,
+  config: Config
 ) {
   const name = 'all'
 
@@ -149,6 +157,6 @@ function generateForAll<M extends Middlewares>(
   }
 
   router.createNameToPath({ out: path.join(genRoot, '_name_to_path.ts') })
-  router.createResources({ out: path.join(genRoot, '_resources.ts') })
+  router.createResources({ out: path.join(genRoot, '_resources.ts'), config })
   router.createTypes({ out: path.join(genRoot, 'index.ts') })
 }
