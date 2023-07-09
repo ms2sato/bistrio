@@ -83,9 +83,9 @@ export type Option =
       only?: undefined
     }
 
-const standardActions = [build, edit, show, index, create, update, destroy]
-export function standard(option?: Option): readonly ActionDescriptor[] {
-  const actions = standardActions.map((action) => ({ ...action }))
+const pageActions = [build, edit, show, index]
+export function page(option?: Option): readonly ActionDescriptor[] {
+  const actions = pageActions.map((action) => ({ ...action }))
   return applyOption(actions, option)
 }
 
