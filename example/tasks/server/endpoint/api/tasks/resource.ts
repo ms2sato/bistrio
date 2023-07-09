@@ -65,7 +65,7 @@ export default defineResource((_support, _options) => ({
   },
 
   destroy: async ({ id }: IdNumberParams) => {
-    await prisma.task.delete({ where: { [id]: id } })
+    await prisma.task.delete({ where: { id } })
   },
 
   done: async ({ id }: IdNumberParams) => {

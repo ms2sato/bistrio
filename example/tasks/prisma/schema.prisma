@@ -23,7 +23,7 @@ model Task {
 
 model Comment {
   id      Int      @id @default(autoincrement())
-  task Task @relation(fields: [taskId], references: [id])
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
   taskId Int
   body    String
   createdAt DateTime @default(now())
@@ -39,9 +39,9 @@ model Tag {
 }
 
 model TagsOnTask {
-  task      Task     @relation(fields: [taskId], references: [id])
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
   taskId     Int
-  tag   Tag @relation(fields: [tagId], references: [id])
+  tag   Tag @relation(fields: [tagId], references: [id], onDelete: Cascade)
   tagId Int
 
   @@id([taskId, tagId])
