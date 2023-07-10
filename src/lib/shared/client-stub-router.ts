@@ -218,7 +218,16 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
 
           const body = filterWithoutKeys(parsedInput, keys)
           if (Object.keys(body).length > 0) {
-            return fetcher.fetch(httpPath, method, JSON.stringify(body))
+            if(method === 'get' || method === 'head') {
+              const reqParams = new URLSearchParams()
+              for(const [key, val] of Object.entries(body)) {
+                reqParams.set(key, JSON.stringify(val))
+              }
+
+              return fetcher.fetch(`${httpPath}?${reqParams.toString()}`, method)
+            } else {
+              return fetcher.fetch(httpPath, method, JSON.stringify(body))
+            }
           } else {
             return fetcher.fetch(httpPath, method)
           }
