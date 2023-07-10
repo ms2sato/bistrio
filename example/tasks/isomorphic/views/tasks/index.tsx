@@ -4,15 +4,33 @@ import { useUIEvent } from 'bistrio/client'
 
 import { useRenderSupport } from '@bistrio/routes/main'
 import { Task } from '@prisma/client'
-import { PageParams } from '@/isomorphic/params'
 
 export function Index() {
-  const [currentPage, setCurrentPage] = useState(1)
-  const [isPending, startTransition] = useTransition()
   const rs = useRenderSupport()
   const l = rs.getLocalizer()
 
-  const pageParams = { skip: (currentPage - 1) * 3, take: 3 }
+  return (
+    <>
+      <h1>{l.t`Task list`}</h1>
+      <Link to="/tasks/build">{l.t`Create new task`}</Link>
+      <Suspense fallback={<p>{l.t`Loading...`}</p>}>
+        <TaskTable></TaskTable>
+      </Suspense>
+    </>
+  )
+}
+
+const TaskTable = () => {
+  const rs = useRenderSupport()
+
+  const [currentPage, setCurrentPage] = useState(1)
+  const [limit] = useState(3)
+  const pageParams = { offset: (currentPage - 1) * limit, limit }
+
+  const { data: tasks, count } = rs.suspendedResources().task.index(pageParams)
+  const maxPage = Math.ceil(count / limit)
+
+  const [isPending, startTransition] = useTransition()
 
   const handlePrevPageClick = () => {
     startTransition(() => setCurrentPage((currentPage) => currentPage - 1))
@@ -22,50 +40,43 @@ export function Index() {
     startTransition(() => setCurrentPage((currentPage) => currentPage + 1))
   }
 
-  return (
-    <>
-      <h1>{l.t`Task list`}</h1>
-      <Link to="/tasks/build">{l.t`Create new task`}</Link>
-      <Suspense fallback={<p>{l.t`Loading...`}</p>}>
-        <TaskTable {...pageParams}></TaskTable>
-        <div>
-          <a href="#" onClick={() => handlePrevPageClick()} style={currentPage === 1 ? { pointerEvents: 'none' } : {}}>
-            Prev
-          </a>
-          <span>{currentPage}</span>
-          <a href="#" onClick={() => handleNextPageClick()}>
-            Next
-          </a>
-          {isPending && '...'}
-        </div>
-      </Suspense>
-    </>
-  )
-}
-
-const TaskTable = (pageParams: PageParams) => {
-  const rs = useRenderSupport()
   const l = rs.getLocalizer()
 
-  const tasks = rs.suspendedResources().task.index(pageParams)
-
   return (
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>{l.o('models.tasks.done')}</th>
-          <th>Title</th>
-          <th>Description</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {tasks.map((task) => (
-          <TaskRecord key={task.id} task={task} />
-        ))}
-      </tbody>
-    </table>
+    <>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>{l.o('models.tasks.done')}</th>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {tasks.map((task) => (
+            <TaskRecord key={task.id} task={task} />
+          ))}
+        </tbody>
+      </table>
+      <div>
+        <a href="#" onClick={() => handlePrevPageClick()} style={currentPage === 1 ? { pointerEvents: 'none' } : {}}>
+          Prev
+        </a>
+        <span>
+          {currentPage} / {maxPage}
+        </span>
+        <a
+          href="#"
+          onClick={() => handleNextPageClick()}
+          style={currentPage === maxPage ? { pointerEvents: 'none' } : {}}
+        >
+          Next
+        </a>
+        {isPending && '...'}
+      </div>
+    </>
   )
 }
 

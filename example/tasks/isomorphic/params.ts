@@ -1,12 +1,18 @@
 import { z } from 'zod'
 
 const pageCoreProps = {
-  skip: z.number(),
-  take: z.number()
+  offset: z.number(),
+  limit: z.number()
 }
 
 export const pageSchema = z.object(pageCoreProps)
 export type PageParams = z.infer<typeof pageSchema>
+
+export type Paginated<E> = {
+  data: E[]
+  count: number
+  params: PageParams
+}
 
 const taskCoreProps = {
   title: z.string().min(3).max(255),

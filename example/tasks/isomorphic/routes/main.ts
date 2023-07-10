@@ -1,5 +1,12 @@
 import { RouterSupport, Router, Actions, idNumberSchema, scope } from 'bistrio/client'
-import { commentCreateSchema, commentUpdateSchema, pageSchema, taskCreateWithTagsSchema, taskIdSchema, taskUpdateWithTagsSchema } from '../params'
+import {
+  commentCreateSchema,
+  commentUpdateSchema,
+  pageSchema,
+  taskCreateWithTagsSchema,
+  taskIdSchema,
+  taskUpdateWithTagsSchema,
+} from '../params'
 import { Middlewares } from './middlewares'
 
 export function routes(router: Router, support: RouterSupport<Middlewares>) {
