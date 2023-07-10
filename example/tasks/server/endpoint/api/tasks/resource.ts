@@ -1,12 +1,19 @@
 import { defineResource, IdNumberParams } from 'bistrio'
 import { getPrismaCilent } from '@server/lib/prisma-util'
-import { PageParams, TaskCreateWithTagsParams, TaskUpdateWithTagsParams } from '@/isomorphic/params'
+import { PageParams, TaskCreateWithTagsParams, TaskUpdateWithTagsParams, Paginated } from '@/isomorphic/params'
 import { TaskWithTags } from '@/isomorphic/types'
+import { Task } from '@prisma/client'
 
 const prisma = getPrismaCilent()
 
 export default defineResource((_support, _options) => ({
-  index: async (params: PageParams) => await prisma.task.findMany(params),
+  index: async (params: PageParams): Promise<Paginated<Task>> => {
+    return {
+      data: await prisma.task.findMany({ skip: params.offset, take: params.limit }),
+      count: await prisma.task.count(),
+      params,
+    }
+  },
 
   show: async (params: IdNumberParams): Promise<TaskWithTags> => {
     const task = await prisma.task.findUniqueOrThrow({ where: params, include: { tags: { include: { tag: true } } } })
