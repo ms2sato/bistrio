@@ -1,5 +1,5 @@
 import { RouterSupport, Router, Actions, idNumberSchema, scope } from 'bistrio/client'
-import { commentCreateSchema, commentUpdateSchema, taskCreateWithTagsSchema, taskIdSchema, taskUpdateWithTagsSchema } from '../params'
+import { commentCreateSchema, commentUpdateSchema, pageSchema, taskCreateWithTagsSchema, taskIdSchema, taskUpdateWithTagsSchema } from '../params'
 import { Middlewares } from './middlewares'
 
 export function routes(router: Router, support: RouterSupport<Middlewares>) {
@@ -19,6 +19,7 @@ export function routes(router: Router, support: RouterSupport<Middlewares>) {
   scope(router, '/api', (apiRouter) => {
     apiRouter.resources('/tasks', {
       construct: {
+        index: { schema: pageSchema, sources: ['query', 'params'] },
         create: { schema: taskCreateWithTagsSchema },
         update: { schema: taskUpdateWithTagsSchema },
         done: { schema: idNumberSchema },

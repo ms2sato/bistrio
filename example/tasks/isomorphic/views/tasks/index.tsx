@@ -1,29 +1,53 @@
-import { Suspense, useState } from 'react'
+import { Suspense, useState, useTransition } from 'react'
 import { Link } from 'react-router-dom'
 import { useUIEvent } from 'bistrio/client'
 
 import { useRenderSupport } from '@bistrio/routes/main'
 import { Task } from '@prisma/client'
+import { PageParams } from '@/isomorphic/params'
 
 export function Index() {
+  const [currentPage, setCurrentPage] = useState(1)
+  const [isPending, startTransition] = useTransition()
   const rs = useRenderSupport()
   const l = rs.getLocalizer()
+
+  const pageParams = { skip: (currentPage - 1) * 3, take: 3 }
+
+  const handlePrevPageClick = () => {
+    startTransition(() => setCurrentPage((currentPage) => currentPage - 1))
+  }
+
+  const handleNextPageClick = () => {
+    startTransition(() => setCurrentPage((currentPage) => currentPage + 1))
+  }
+
   return (
     <>
       <h1>{l.t`Task list`}</h1>
       <Link to="/tasks/build">{l.t`Create new task`}</Link>
       <Suspense fallback={<p>{l.t`Loading...`}</p>}>
-        <TaskTable></TaskTable>
+        <TaskTable {...pageParams}></TaskTable>
+        <div>
+          <a href="#" onClick={() => handlePrevPageClick()} style={currentPage === 1 ? { pointerEvents: 'none' } : {}}>
+            Prev
+          </a>
+          <span>{currentPage}</span>
+          <a href="#" onClick={() => handleNextPageClick()}>
+            Next
+          </a>
+          {isPending && '...'}
+        </div>
       </Suspense>
     </>
   )
 }
 
-const TaskTable = () => {
+const TaskTable = (pageParams: PageParams) => {
   const rs = useRenderSupport()
   const l = rs.getLocalizer()
 
-  const tasks = rs.suspendedResources().task.index()
+  const tasks = rs.suspendedResources().task.index(pageParams)
 
   return (
     <table>
@@ -74,7 +98,9 @@ const TaskRecord = ({ task: src }: { task: Task }) => {
           </a>
         )}
       </td>
-      <td><Link to={`/tasks/${task.id}`}>{task.title}</Link></td>
+      <td>
+        <Link to={`/tasks/${task.id}`}>{task.title}</Link>
+      </td>
       <td>{task.description}</td>
       <td>
         <Link to={`/tasks/${task.id}/edit`}>{l.t`Edit`}</Link>&nbsp;|&nbsp;

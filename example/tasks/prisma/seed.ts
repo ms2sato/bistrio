@@ -23,21 +23,114 @@ async function main(prisma: PrismaClient) {
           },
         ],
       },
+      tags: {
+        create: [
+          {
+            tag: {
+              connectOrCreate: {
+                where: { label: 'tag1' },
+                create: { label: 'tag1' },
+              },
+            },
+          },
+          {
+            tag: {
+              connectOrCreate: {
+                where: { label: 'tag2' },
+                create: { label: 'tag2' },
+              },
+            },
+          }
+        ]
+      }
     },
     {
       title: 'Test2',
       description: 'Test2 Description',
+      done: false,
+      tags: {
+        create: [
+          {
+            tag: {
+              connectOrCreate: {
+                where: { label: 'tag2' },
+                create: { label: 'tag2' },
+              },
+            },
+          },
+          {
+            tag: {
+              connectOrCreate: {
+                where: { label: 'tag3' },
+                create: { label: 'tag3' },
+              },
+            },
+          }
+        ]
+      }
+    },
+    {
+      title: 'Test3',
+      description: 'Test3 Description',
+      done: false,
+    },
+    {
+      title: 'Test4',
+      description: 'Test4 Description',
+      done: false,
+    },
+    {
+      title: 'Test5',
+      description: 'Test5 Description',
+      done: false,
+    },
+    {
+      title: 'Test6',
+      description: 'Test6 Description',
+      done: false,
+    },
+    {
+      title: 'Test7',
+      description: 'Test7 Description',
+      done: false,
+    },
+    {
+      title: 'Test8',
+      description: 'Test8 Description',
+      done: false,
+    },
+    {
+      title: 'Test9',
+      description: 'Test9 Description',
+      done: false,
+    },
+    {
+      title: 'Test10',
+      description: 'Test10 Description',
+      done: false,
+    },
+    {
+      title: 'Test11',
+      description: 'Test11 Description',
+      done: false,
+    },
+    {
+      title: 'Test12',
+      description: 'Test12 Description',
       done: false,
     },
   ]
 
   for (let i = 0; i < tasks.length; ++i) {
     const task = tasks[i]
+    console.log('task', task)
+    const id = i + 1
     const param = {
-      where: { id: i + 1 },
+      where: { id: id },
       update: task,
       create: task,
     }
+    console.log('params', param)
     console.log(await prisma.task.upsert(param))
   }
 }
