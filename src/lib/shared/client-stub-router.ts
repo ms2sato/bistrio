@@ -16,7 +16,7 @@ import {
   ValidationError,
   createValidationError,
 } from '../../client'
-import { filterWithoutKeys } from './object-util'
+import { filterWithoutKeys, toURLSearchParams } from './object-util'
 import { pathJoin } from './path-util'
 import { PageNode } from './render-support'
 import { z } from 'zod'
@@ -219,12 +219,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
           const body = filterWithoutKeys(parsedInput, keys)
           if (Object.keys(body).length > 0) {
             if(method === 'get' || method === 'head') {
-              const reqParams = new URLSearchParams()
-              for(const [key, val] of Object.entries(body)) {
-                reqParams.set(key, JSON.stringify(val))
-              }
-
-              return fetcher.fetch(`${httpPath}?${reqParams.toString()}`, method)
+              return fetcher.fetch(`${httpPath}?${toURLSearchParams(body).toString()}`, method)
             } else {
               return fetcher.fetch(httpPath, method, JSON.stringify(body))
             }

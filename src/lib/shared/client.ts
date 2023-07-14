@@ -37,7 +37,7 @@ class CacheReadableSuspenseDecorator implements Suspendable {
             delete window.BISTRIO.cache[key]
             return ret
           }),
-        key
+        key,
       )
     }
 
@@ -60,7 +60,7 @@ export class ClientRenderSupport<RS extends NamedResources> implements RenderSup
 
   constructor(
     private core: ClientGenretateRouterCore,
-    private localeSelector: LocaleSelector
+    private localeSelector: LocaleSelector,
   ) {
     this.suspense = new CacheReadableSuspenseDecorator(suspense())
   }
@@ -92,6 +92,14 @@ export class ClientRenderSupport<RS extends NamedResources> implements RenderSup
   suspend<T>(asyncProcess: () => Promise<T>, key: string): T {
     return this.suspense.suspend(asyncProcess, key)
   }
+
+  get location() {
+    return window.location
+  }
+
+  get query() {
+    return Object.fromEntries(new URLSearchParams(window.location.search))
+  }
 }
 
 export type Engine<RS extends NamedResources> = {
@@ -102,7 +110,7 @@ export type Engine<RS extends NamedResources> = {
 export async function setup<RS extends NamedResources>(
   routes: (router: Router, routerSupport: RouterSupport) => void,
   pageLoadFunc: PageLoadFunc,
-  clientConfig: ClientConfig = defaultClientConfig()
+  clientConfig: ClientConfig = defaultClientConfig(),
 ): Promise<Engine<RS>> {
   const cgr = new ClientGenretateRouter<RS>(clientConfig, pageLoadFunc)
   routes(cgr, nullRouterSupport) // routerSupport and Middleware is not working on client side

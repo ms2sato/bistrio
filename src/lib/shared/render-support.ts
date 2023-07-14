@@ -27,7 +27,7 @@ export function readable<T>(promise: Promise<T>): SuspendedReader<T> {
     },
     (err: unknown) => {
       _error = err
-    }
+    },
   )
   return {
     read: () => {
@@ -46,6 +46,7 @@ export function readable<T>(promise: Promise<T>): SuspendedReader<T> {
 }
 
 export type ParamsDictionary = { [key: string]: string | undefined }
+export type QueryDictionary = { [key: string]: undefined | string | string[] | QueryDictionary | QueryDictionary[] }
 
 export type StubMethodParams<P> = {
   [K in keyof P]: P[K] extends opt<unknown> ? ResourceMethodOptions : P[K]
@@ -78,7 +79,8 @@ export type RenderSupport<RS extends NamedResources> = {
   readonly suspense: Suspendable
   suspend: <T>(asyncProcess: () => Promise<T>, key: string) => T
   params: Readonly<ParamsDictionary>
-  // TODO: query
+  readonly query: Readonly<QueryDictionary>
+  readonly location: Location
   readonly isClient: boolean
   readonly isServer: boolean
 }

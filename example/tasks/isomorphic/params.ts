@@ -1,8 +1,8 @@
 import { z } from 'zod'
 
 const pageCoreProps = {
-  offset: z.number(),
-  limit: z.number()
+  page: z.number(),
+  limit: z.number(),
 }
 
 export const pageSchema = z.object(pageCoreProps)
@@ -46,8 +46,8 @@ export const taskUpdateWithTagsSchema = taskUpdateSchema.extend(withTags)
 export type TaskUpdateWithTagsParams = z.infer<typeof taskUpdateWithTagsSchema>
 
 export const taskIdSchema = z.object({
-  taskId: z.number()
-});
+  taskId: z.number(),
+})
 
 export type TaskIdParams = z.infer<typeof taskIdSchema>
 
