@@ -45,38 +45,34 @@ const usePager = (props: { page?: number; limit?: number }) => {
   return { page, limit, pageParams, prev, next, setLimit, setPage }
 }
 
-// @see https://stackoverflow.com/questions/3895478/does-javascript-have-a-method-like-range-to-generate-a-range-within-the-supp
-const range = (start: number, end: number) =>
-  Array.from(
-    (function* () {
-      while (start < end) yield start++
-    })(),
-  )
+function usePageLink() {
+  const location = useLocation()
+  return (info: PageParams) => `${location.pathname}?${toURLSearchParams(info).toString()}`
+}
 
-const TaskTable = () => {
+function usePagination(props: { page?: number; limit?: number }) {
   const pageLink = usePageLink()
   const navigate = useNavigate()
   const rs = useRenderSupport()
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const { search, state: s} = useLocation()
+  const { search, state: s } = useLocation()
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const state: PageParams | undefined = s // TODO: to safe
   const query = Object.fromEntries(new URLSearchParams(search).entries())
 
   const { page, limit, pageParams, setLimit, setPage } = usePager({
-    limit: query.limit ? Number(query.limit) : 3,
-    page: query.page ? Number(query.page) : 1,
+    limit: query.limit ? Number(query.limit) : props.limit,
+    page: query.page ? Number(query.page) : props.page,
   })
 
   // Rerendering for PageLink clicking
   if (state && (page !== state.page || limit !== state.limit)) {
     setPage(state.page)
     setLimit(state.limit)
-    return
   }
 
-  const { data: tasks, count } = rs.suspendedResources().task.index(pageParams)
+  const { data, count } = rs.suspendedResources().task.index(pageParams) // TODO: replacable as loader
   const maxPage = Math.ceil(count / limit)
 
   const toInfo = (pages: number[]) => pages.map((page) => ({ ...pageParams, page }))
@@ -103,9 +99,52 @@ const TaskTable = () => {
   const prevInfo = page > 1 ? { ...pageParams, page: page - 1 } : null
   const nextInfo = page === maxPage ? null : { ...pageParams, page: page + 1 }
 
-  const handleLimitChange: React.ChangeEventHandler<HTMLSelectElement> = (ev) => {
-    const info: PageParams = { page: 1, limit: Number(ev.target.value) }
+  const navigateTolimitChanged = (limit: number) => {
+    const info: PageParams = { page: 1, limit }
     navigate(pageLink(info), { state: info })
+  }
+
+  return {
+    data,
+    page,
+    limit,
+    state,
+    maxPage,
+    pageParams,
+    prevPages,
+    nextPages,
+    prevInfo,
+    nextInfo,
+    setLimit,
+    setPage,
+    navigateTolimitChanged,
+  }
+}
+
+// @see https://stackoverflow.com/questions/3895478/does-javascript-have-a-method-like-range-to-generate-a-range-within-the-supp
+const range = (start: number, end: number) =>
+  Array.from(
+    (function* () {
+      while (start < end) yield start++
+    })(),
+  )
+
+const TaskTable = () => {
+  const rs = useRenderSupport()
+  const {
+    data: tasks,
+    page,
+    limit,
+    maxPage,
+    navigateTolimitChanged,
+    prevPages,
+    nextPages,
+    prevInfo,
+    nextInfo,
+  } = usePagination({ limit: 3, page: 1 })
+
+  const handleLimitChange: React.ChangeEventHandler<HTMLSelectElement> = (ev) => {
+    navigateTolimitChanged(Number(ev.target.value))
   }
 
   const limits = [3, 5, 10]
@@ -154,11 +193,6 @@ const TaskTable = () => {
       </div>
     </>
   )
-}
-
-function usePageLink() {
-  const rs = useRenderSupport()
-  return (info: PageParams) => `${rs.location.pathname}?${toURLSearchParams(info).toString()}`
 }
 
 function PageLink({ page, limit, children }: PageParams & { children?: ReactNode }) {
