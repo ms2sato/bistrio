@@ -1,9 +1,10 @@
-import { Suspense, useState, useTransition } from 'react'
-import { Link } from 'react-router-dom'
-import { useUIEvent } from 'bistrio/client'
+import { ReactNode, Suspense, useState } from 'react'
+import { Link, Location, useLocation as useLocationOrg, useNavigate } from 'react-router-dom'
+import { toURLSearchParams, useUIEvent } from 'bistrio/client'
 
 import { useRenderSupport } from '@bistrio/routes/main'
 import { Task } from '@prisma/client'
+import { PageParams } from '@/isomorphic/params'
 
 export function Index() {
   const rs = useRenderSupport()
@@ -20,25 +21,94 @@ export function Index() {
   )
 }
 
+function useLocation(): Location {
+  const rs = useRenderSupport()
+  return rs.isClient
+    ? useLocationOrg()
+    : {
+        pathname: rs.location.pathname,
+        search: rs.location.search,
+        hash: rs.location.hash,
+        state: undefined,
+        key: 'default',
+      }
+}
+
+const usePager = (props: { page?: number; limit?: number }) => {
+  const [page, setPage] = useState(props.page ?? 1)
+  const [limit, setLimit] = useState(props.limit ?? 25)
+  const pageParams = { page, limit }
+
+  const prev = () => setPage((currentPage) => currentPage - 1)
+  const next = () => setPage((currentPage) => currentPage + 1)
+
+  return { page, limit, pageParams, prev, next, setLimit, setPage }
+}
+
+// @see https://stackoverflow.com/questions/3895478/does-javascript-have-a-method-like-range-to-generate-a-range-within-the-supp
+const range = (start: number, end: number) =>
+  Array.from(
+    (function* () {
+      while (start < end) yield start++
+    })(),
+  )
+
 const TaskTable = () => {
+  const pageLink = usePageLink()
+  const navigate = useNavigate()
   const rs = useRenderSupport()
 
-  const [currentPage, setCurrentPage] = useState(1)
-  const [limit] = useState(3)
-  const pageParams = { offset: (currentPage - 1) * limit, limit }
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const { search, state: s} = useLocation()
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const state: PageParams | undefined = s // TODO: to safe
+  const query = Object.fromEntries(new URLSearchParams(search).entries())
+
+  const { page, limit, pageParams, setLimit, setPage } = usePager({
+    limit: query.limit ? Number(query.limit) : 3,
+    page: query.page ? Number(query.page) : 1,
+  })
+
+  // Rerendering for PageLink clicking
+  if (state && (page !== state.page || limit !== state.limit)) {
+    setPage(state.page)
+    setLimit(state.limit)
+    return
+  }
 
   const { data: tasks, count } = rs.suspendedResources().task.index(pageParams)
   const maxPage = Math.ceil(count / limit)
 
-  const [isPending, startTransition] = useTransition()
+  const toInfo = (pages: number[]) => pages.map((page) => ({ ...pageParams, page }))
 
-  const handlePrevPageClick = () => {
-    startTransition(() => setCurrentPage((currentPage) => currentPage - 1))
+  const prevPageNums = (page: number, length: number): number[] => {
+    return range(Math.max(page - length, 1), page)
   }
 
-  const handleNextPageClick = () => {
-    startTransition(() => setCurrentPage((currentPage) => currentPage + 1))
+  const prevPageInfoList = (page: number, length: number): PageParams[] => {
+    return toInfo(prevPageNums(page, length))
   }
+
+  const nextPageNums = (page: number, length: number): number[] => {
+    return range(Math.min(page + 1, maxPage), Math.min(page + length + 1, maxPage + 1))
+  }
+
+  const nextPageInfoList = (page: number, length: number) => {
+    return toInfo(nextPageNums(page, length))
+  }
+
+  const length = 2
+  const prevPages = prevPageInfoList(page, length)
+  const nextPages = nextPageInfoList(page, length)
+  const prevInfo = page > 1 ? { ...pageParams, page: page - 1 } : null
+  const nextInfo = page === maxPage ? null : { ...pageParams, page: page + 1 }
+
+  const handleLimitChange: React.ChangeEventHandler<HTMLSelectElement> = (ev) => {
+    const info: PageParams = { page: 1, limit: Number(ev.target.value) }
+    navigate(pageLink(info), { state: info })
+  }
+
+  const limits = [3, 5, 10]
 
   const l = rs.getLocalizer()
 
@@ -61,26 +131,47 @@ const TaskTable = () => {
         </tbody>
       </table>
       <div>
-        <a href="#" onClick={() => handlePrevPageClick()} style={currentPage === 1 ? { pointerEvents: 'none' } : {}}>
-          Prev
-        </a>
-        <span>
-          {currentPage} / {maxPage}
-        </span>
-        <a
-          href="#"
-          onClick={() => handleNextPageClick()}
-          style={currentPage === maxPage ? { pointerEvents: 'none' } : {}}
-        >
-          Next
-        </a>
-        {isPending && '...'}
+        <div>
+          <span>
+            {page} / {maxPage}
+          </span>
+          <select name="limit" onChange={handleLimitChange}>
+            {limits.map((l) => (
+              <option value={l} selected={l === limit}>
+                {l}
+              </option>
+            ))}
+          </select>
+        </div>
+        {prevInfo && <PageLink {...prevInfo}>Prev</PageLink>}
+        {prevPages.map((info) => (
+          <PageLink {...info} key={info.page} />
+        ))}
+        {nextPages.map((info) => (
+          <PageLink {...info} key={info.page} />
+        ))}
+        {nextInfo && <PageLink {...nextInfo}>Next</PageLink>}
       </div>
     </>
   )
 }
 
-const TaskRecord = ({ task: src }: { task: Task }) => {
+function usePageLink() {
+  const rs = useRenderSupport()
+  return (info: PageParams) => `${rs.location.pathname}?${toURLSearchParams(info).toString()}`
+}
+
+function PageLink({ page, limit, children }: PageParams & { children?: ReactNode }) {
+  const pageLink = usePageLink()
+  const info: PageParams = { page, limit }
+  return (
+    <Link to={pageLink(info)} preventScrollReset={true} state={info}>
+      {children || page.toString()}
+    </Link>
+  )
+}
+
+function TaskRecord({ task: src }: { task: Task }) {
   const [task, setTask] = useState(src)
   const rs = useRenderSupport()
   const l = rs.getLocalizer()

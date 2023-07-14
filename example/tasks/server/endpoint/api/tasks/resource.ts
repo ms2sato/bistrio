@@ -9,7 +9,7 @@ const prisma = getPrismaCilent()
 export default defineResource((_support, _options) => ({
   index: async (params: PageParams): Promise<Paginated<Task>> => {
     return {
-      data: await prisma.task.findMany({ skip: params.offset, take: params.limit }),
+      data: await prisma.task.findMany({ skip: (params.page - 1) * params.limit, take: params.limit }),
       count: await prisma.task.count(),
       params,
     }

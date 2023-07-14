@@ -1,4 +1,5 @@
 import path from 'path'
+import url from 'url'
 import internal, { Transform, TransformCallback } from 'stream'
 import express from 'express'
 import React from 'react'
@@ -44,7 +45,10 @@ function isStringable(obj: any): obj is Stringable {
 
 class ScriptInserter<RS extends NamedResources> extends Transform {
   private sentKeys: string[] = []
-  constructor(private rs: ServerRenderSupport<RS>, options?: internal.TransformOptions | undefined) {
+  constructor(
+    private rs: ServerRenderSupport<RS>,
+    options?: internal.TransformOptions | undefined,
+  ) {
     super(options)
   }
 
@@ -53,7 +57,7 @@ class ScriptInserter<RS extends NamedResources> extends Transform {
       const chnkStr = chunk.toString()
       if (chnkStr.endsWith('</script>')) {
         const entries = Object.entries(this.rs.suspense.readers).filter(
-          ([key, reader]) => !this.sentKeys.includes(key) && reader.result !== undefined
+          ([key, reader]) => !this.sentKeys.includes(key) && reader.result !== undefined,
         )
         if (entries.length > 0) {
           const scripts = entries
@@ -80,7 +84,7 @@ function renderReactViewStream<RS extends NamedResources>(
   res: express.Response,
   node: React.ReactNode,
   rs: ServerRenderSupport<RS>,
-  failText = ''
+  failText = '',
 ) {
   let didError = false
   const scriptInserter = new ScriptInserter(rs)
@@ -113,14 +117,14 @@ function createRenderFunc(constructView: ConstructViewFunc, viewRoot: string, fa
     this: ActionContextImpl,
     view: string,
     options: object | undefined,
-    callback?: (err: Error, html: string) => void
+    callback?: (err: Error, html: string) => void,
   ): void
   function render(this: ActionContextImpl, view: string, callback?: (err: Error, html: string) => void): void
   function render(
     this: ActionContextImpl,
     view: string,
     options: object | undefined | { (err: Error, html: string): void },
-    callback?: (err: Error, html: string) => void
+    callback?: (err: Error, html: string) => void,
   ): void {
     const viewPath = path.join(viewRoot, view)
     ;(async () => {
@@ -157,13 +161,13 @@ function createRenderFunc(constructView: ConstructViewFunc, viewRoot: string, fa
 export type BuildActionContextCreator = (
   viewRoot: string,
   arrange: ConstructViewFunc,
-  failText: string
+  failText: string,
 ) => ActionContextCreator
 
 export function buildActionContextCreator(
   viewRoot: string,
   constructView: ConstructViewFunc,
-  failText = ''
+  failText = '',
 ): ActionContextCreator {
   return (props) => {
     const ctx = new ActionContextImpl(props.router, props.req, props.res, props.descriptor, props.httpPath)
@@ -210,5 +214,15 @@ export class ServerRenderSupport<RS extends NamedResources> implements RenderSup
 
   get params() {
     return this.ctx.params
+  }
+
+  get query() {
+    return this.ctx.query
+  }
+
+  get location() {
+    const req = this.ctx.req
+    const full = `${req.protocol}://${req.header('host') || 'unknown'}${req.originalUrl}`
+    return url.parse(full) as unknown as Location // TODO: throw unimplemented error for some properties
   }
 }
