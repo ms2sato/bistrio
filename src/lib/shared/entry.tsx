@@ -1,13 +1,11 @@
 import { ReactNode, StrictMode, LazyExoticComponent } from 'react'
-import { BrowserRouter, Routes, Route, useParams } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { hydrateRoot } from 'react-dom/client'
 import { ClientConfig, NamedResources, RenderSupportContext, Router, RouterSupport } from './index'
 
 import { initLocale, LocaleDictionary } from './localizer'
 import { PageNode } from './render-support'
 import { setup, Engine } from './client'
-
-import { useRenderSupport } from './render-support-context'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type PageLoadFunc = (pagePath: string) => PageNode | LazyExoticComponent<any>
@@ -48,13 +46,6 @@ export async function entry<R extends NamedResources>({
     throw new Error(`entry config "${name}" not found in routes/_entries.ts`)
   }
 
-  const PageAdapter = ({ Page }: { Page: PageNode }) => {
-    const params = useParams()
-    const rs = useRenderSupport<R>()
-    rs.params = params
-    return <Page />
-  }
-
   let container: HTMLElement
   if (typeof entryConfig.el === 'string') {
     container = getContainerElement(entryConfig.el)
@@ -72,7 +63,7 @@ export async function entry<R extends NamedResources>({
   const engine: Engine<R> = await setup<R>(routes, entryConfig.pageLoadFunc, clientConfig)
 
   const routeList = Array.from(engine.pathToPage(), ([path, Page]) => {
-    return <Route key={path} path={path} element={<PageAdapter Page={Page} />}></Route>
+    return <Route key={path} path={path} element={<Page />}></Route>
   })
 
   const localeSelector = initLocale(localeMap)
@@ -87,6 +78,6 @@ export async function entry<R extends NamedResources>({
           </BrowserRouter>
         </entryConfig.RoutesWrapper>
       </RenderSupportContext.Provider>
-    </StrictMode>
+    </StrictMode>,
   )
 }

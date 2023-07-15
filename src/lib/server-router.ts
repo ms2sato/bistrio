@@ -452,6 +452,9 @@ export class ActionContextImpl implements MutableActionContext {
     const filePath = this.descriptor.path.endsWith('/') ? `${this.descriptor.path}index` : this.descriptor.path
     return path.join(this.httpPath, filePath)
   }
+  get routePath() {
+    return path.join(this.httpPath, this.descriptor.path)
+  }
 
   resources(): NamedResources {
     return this.router.namedResources()

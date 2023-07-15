@@ -1,5 +1,4 @@
 import path from 'path'
-import url from 'url'
 import internal, { Transform, TransformCallback } from 'stream'
 import express from 'express'
 import React from 'react'
@@ -218,11 +217,5 @@ export class ServerRenderSupport<RS extends NamedResources> implements RenderSup
 
   get query() {
     return this.ctx.query
-  }
-
-  get location() {
-    const req = this.ctx.req
-    const full = `${req.protocol}://${req.header('host') || 'unknown'}${req.originalUrl}`
-    return url.parse(full) as unknown as Location // TODO: throw unimplemented error for some properties
   }
 }
