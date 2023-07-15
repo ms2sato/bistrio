@@ -2,6 +2,7 @@ import { StaticRouter } from 'react-router-dom/server'
 import { ConstructViewFunc, RenderSupportContext, ScriptProps } from 'bistrio'
 import { Layout } from './Layout'
 import { RoutesWrapper } from '@/isomorphic/components/RoutesWrapper'
+import { Routes, Route } from 'react-router-dom'
 
 export const constructView: ConstructViewFunc = ({ node: Page, hydrate, ctx, rs }) => {
   // This is sample impl, changing js for any roles
@@ -14,7 +15,9 @@ export const constructView: ConstructViewFunc = ({ node: Page, hydrate, ctx, rs 
       <RenderSupportContext.Provider value={rs}>
         <RoutesWrapper>
           <StaticRouter location={ctx.req.url}>
-            <Page></Page>
+            <Routes>
+              <Route path={ctx.routePath} element={<Page />} />
+            </Routes>
           </StaticRouter>
         </RoutesWrapper>
       </RenderSupportContext.Provider>

@@ -93,10 +93,6 @@ export class ClientRenderSupport<RS extends NamedResources> implements RenderSup
     return this.suspense.suspend(asyncProcess, key)
   }
 
-  get location() {
-    return window.location
-  }
-
   get query() {
     return Object.fromEntries(new URLSearchParams(window.location.search))
   }

@@ -14,8 +14,9 @@ export type ActionContext = {
   readonly input: unknown
   readonly req: express.Request
   readonly res: express.Response
-  readonly httpPath: string
-  readonly httpFilePath: string
+  readonly httpPath: string // acccept resource path
+  readonly httpFilePath: string // path for output file ex. /test/:id/items/index
+  readonly routePath: string // path for routing ex. /test/:id/items
   readonly descriptor: ActionDescriptor
   readonly willRespondJson: () => boolean
   resources(): NamedResources
@@ -24,7 +25,7 @@ export type ActionContext = {
 export type MutableActionContext = ActionContext & {
   mergeInputs(
     sources: readonly string[],
-    pred?: (input: Record<string, unknown>, source: string) => Record<string, unknown>
+    pred?: (input: Record<string, unknown>, source: string) => Record<string, unknown>,
   ): Record<string, unknown>
 }
 
@@ -48,7 +49,7 @@ export type Adapter<Opt = unknown, In = unknown> = {
 export type CreateActionOptionFunction = (
   ctx: ActionContext,
   httpPath: string,
-  ad: ActionDescriptor
+  ad: ActionDescriptor,
 ) => unknown | Promise<unknown>
 
 /**

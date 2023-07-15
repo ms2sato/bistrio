@@ -80,7 +80,6 @@ export type RenderSupport<RS extends NamedResources> = {
   suspend: <T>(asyncProcess: () => Promise<T>, key: string) => T
   params: Readonly<ParamsDictionary>
   readonly query: Readonly<QueryDictionary>
-  readonly location: Location
   readonly isClient: boolean
   readonly isServer: boolean
 }

@@ -3,11 +3,13 @@ import { Suspense } from 'react'
 import { useNavigate } from 'bistrio/client'
 import { useRenderSupport } from '@bistrio/routes/main'
 import { Form, UseSubmitProps, formSchema } from '@/isomorphic/components/tasks/Form'
+import { useParams } from 'react-router-dom'
 
 function MyForm() {
   const navigate = useNavigate()
+  const params = useParams()
   const rs = useRenderSupport()
-  const id = Number(rs.params.id)
+  const id = Number(params.id)
   const source = rs.suspendedResources().task.show({ id })
 
   const props: UseSubmitProps = {

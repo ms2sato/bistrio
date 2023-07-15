@@ -37,6 +37,9 @@ export class NullActionContext implements ActionContext {
   get httpFilePath(): string {
     throw new Error(this.errorMessage)
   }
+  get routePath(): string {
+    throw new Error(this.errorMessage)
+  }
   get descriptor(): ActionDescriptor {
     throw new Error(this.errorMessage)
   }

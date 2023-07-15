@@ -1,14 +1,16 @@
 import { Suspense, useRef } from 'react'
+import { Link, useParams } from 'react-router-dom'
+
 import { UseSubmitProps, useNavigate, useSubmit } from 'bistrio/client'
 import { useRenderSupport } from '@/.bistrio/routes/main'
 import { ErrorPanel } from '@/isomorphic/components/ErrorPanel'
 import { commentCreateSchema } from '@/isomorphic/params'
 import { Comment } from '@prisma/client'
-import { Link } from 'react-router-dom'
 
 export function Page() {
-  const rs = useRenderSupport()
-  const id = Number(rs.params.id)
+  const params = useParams()
+
+  const id = Number(params.id)
   return (
     <Suspense fallback="...">
       <Task id={id} />

@@ -1,5 +1,5 @@
 import { ReactNode, Suspense, useState } from 'react'
-import { Link, Location, useLocation as useLocationOrg, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { toURLSearchParams, useUIEvent } from 'bistrio/client'
 
 import { useRenderSupport } from '@bistrio/routes/main'
@@ -19,19 +19,6 @@ export function Index() {
       </Suspense>
     </>
   )
-}
-
-function useLocation(): Location {
-  const rs = useRenderSupport()
-  return rs.isClient
-    ? useLocationOrg()
-    : {
-        pathname: rs.location.pathname,
-        search: rs.location.search,
-        hash: rs.location.hash,
-        state: undefined,
-        key: 'default',
-      }
 }
 
 const usePager = (props: { page?: number; limit?: number }) => {
@@ -147,7 +134,7 @@ const TaskTable = () => {
     nextInfo,
   } = usePagination({
     loader: (pageParams) => rs.suspendedResources().task.index(pageParams),
-    limit: 3,
+    limit: 5,
   })
 
   const handleLimitChange: React.ChangeEventHandler<HTMLSelectElement> = (ev) => {

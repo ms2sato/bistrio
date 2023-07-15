@@ -29,7 +29,7 @@ describe('senario /tasks', () => {
 
     expect(req.errors).toHaveLength(0)
     expect(req.finished.where({ resourceType: 'ajax', method: 'POST', url: asURL('api/tasks/') })).toHaveLength(1)
-    expect(req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL('api/tasks/') })).toHaveLength(1)
+    expect(req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL('api/tasks/?page=1&limit=5') })).toHaveLength(1)
 
     await page.waitForSelector('tbody')
 
@@ -120,7 +120,7 @@ describe('/tasks', () => {
   })
 
   it('returns task table', async () => {
-    await page.waitForXPath('//td[text() = "Description3"]')
+    await waitForAnyInnerText(page, 'td', 'Description3')
     await expect(page.title()).resolves.toMatch('Tasks')
   })
 })
@@ -187,7 +187,7 @@ describe('/tasks/:id/edit', () => {
     // show index view
     expect(req.errors).toHaveLength(0)
     expect(req.finished.where({ resourceType: 'ajax', method: 'PUT' })).toHaveLength(1)
-    expect(req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL('api/tasks/') })).toHaveLength(1)
+    expect(req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL('api/tasks/?page=1&limit=5') })).toHaveLength(1)
 
     // check updated values
     await waitForAnyInnerText(page, 'td', 'Done')
@@ -228,7 +228,7 @@ describe('/tasks/:id', () => {
     await page.$eval('input[name=body]', (el) => ((el as HTMLInputElement).value = 'TestComment'))
 
     await Promise.all([
-      req.clearAndWaitForResponses(2, { resourceType: 'ajax' }),
+      req.clearAndWaitForResponses(3, { resourceType: 'ajax' }),
       page.$eval('input[type=submit]', (el) => (el as HTMLInputElement).click()),
     ])
 
@@ -236,6 +236,9 @@ describe('/tasks/:id', () => {
     expect(req.finished.where({ resourceType: 'ajax', method: 'POST' })).toHaveLength(1)
     expect(
       req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL(`api/tasks/${task.id}`) })
+    ).toHaveLength(1)
+    expect(
+      req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL(`api/tasks/${task.id}/comments/`) })
     ).toHaveLength(1)
 
     await waitForAnyInnerText(page, 'li', 'TestComment')
