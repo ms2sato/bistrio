@@ -50,20 +50,24 @@ function usePageLink() {
   return (info: PageParams) => `${location.pathname}?${toURLSearchParams(info).toString()}`
 }
 
-function usePagination(props: { page?: number; limit?: number }) {
+const parseQuery = (search: string) => Object.fromEntries(new URLSearchParams(search).entries())
+
+type PaginationLoader<T> = (pageParams: PageParams) => { data: T; count: number }
+type PaginationProps<T> = { page?: number; limit?: number; loader: PaginationLoader<T> }
+
+function usePagination<T>(props: PaginationProps<T>) {
   const pageLink = usePageLink()
   const navigate = useNavigate()
-  const rs = useRenderSupport()
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const { search, state: s } = useLocation()
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const state: PageParams | undefined = s // TODO: to safe
-  const query = Object.fromEntries(new URLSearchParams(search).entries())
+  const query = parseQuery(search)
 
   const { page, limit, pageParams, setLimit, setPage } = usePager({
-    limit: query.limit ? Number(query.limit) : props.limit,
-    page: query.page ? Number(query.page) : props.page,
+    limit: query.limit ? Number(query.limit) : props.limit || 25,
+    page: query.page ? Number(query.page) : props.page || 1,
   })
 
   // Rerendering for PageLink clicking
@@ -72,10 +76,10 @@ function usePagination(props: { page?: number; limit?: number }) {
     setLimit(state.limit)
   }
 
-  const { data, count } = rs.suspendedResources().task.index(pageParams) // TODO: replacable as loader
+  const { data, count } = props.loader(pageParams)
   const maxPage = Math.ceil(count / limit)
 
-  const toInfo = (pages: number[]) => pages.map((page) => ({ ...pageParams, page }))
+  const toInfo = (pages: number[]): PageParams[] => pages.map((page) => ({ ...pageParams, page }))
 
   const prevPageNums = (page: number, length: number): number[] => {
     return range(Math.max(page - length, 1), page)
@@ -141,7 +145,10 @@ const TaskTable = () => {
     nextPages,
     prevInfo,
     nextInfo,
-  } = usePagination({ limit: 3, page: 1 })
+  } = usePagination({
+    loader: (pageParams) => rs.suspendedResources().task.index(pageParams),
+    limit: 3,
+  })
 
   const handleLimitChange: React.ChangeEventHandler<HTMLSelectElement> = (ev) => {
     navigateTolimitChanged(Number(ev.target.value))
@@ -174,9 +181,9 @@ const TaskTable = () => {
           <span>
             {page} / {maxPage}
           </span>
-          <select name="limit" onChange={handleLimitChange}>
+          <select name="limit" defaultValue={limit} onChange={handleLimitChange}>
             {limits.map((l) => (
-              <option value={l} selected={l === limit}>
+              <option value={l} key={l}>
                 {l}
               </option>
             ))}
