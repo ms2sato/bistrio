@@ -41,15 +41,34 @@ const parseQuery = (search: string) => Object.fromEntries(new URLSearchParams(se
 
 type PaginationLoader<T> = (pageParams: PageParams) => { data: T; count: number }
 type PaginationProps<T> = { page?: number; limit?: number; loader: PaginationLoader<T> }
+type PaginationAttrs = {
+  page: number
+  limit: number
+  state: PageParams | null
+  maxPage: number
+  pageParams: PageParams
+  prev: () => void
+  next: () => void
+  prevPageParams: () => PageParams | null
+  nextPageParams: () => PageParams | null
+  prevPageParamsList: (length: number) => PageParams[]
+  nextPageParamsList: (length: number) => PageParams[]
+  setLimit: (limit: number) => void
+  setPage: (page: number) => void
+  navigateTolimitChanged: (limit: number) => void
+}
+type PaginationReturn<T> = PaginationAttrs & {
+  data: T
+}
 
-function usePagination<T>(props: PaginationProps<T>) {
+function usePagination<T>(props: PaginationProps<T>): PaginationReturn<T> {
   const pageLink = usePageLink()
   const navigate = useNavigate()
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const { search, state: s } = useLocation()
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const state: PageParams | undefined = s // TODO: to safe
+  const state: PageParams | null = s // TODO: to safe
   const query = parseQuery(search)
 
   const { page, limit, pageParams, setLimit, setPage, prev, next } = usePager({
@@ -121,31 +140,15 @@ const range = (start: number, end: number) =>
 
 const TaskTable = () => {
   const rs = useRenderSupport()
-  const {
-    data: tasks,
-    page,
-    limit,
-    maxPage,
-    navigateTolimitChanged,
-    prevPageParamsList,
-    nextPageParamsList,
-    prevPageParams,
-    nextPageParams,
-  } = usePagination({
-    loader: (pageParams) => rs.suspendedResources().task.index(pageParams),
-    limit: 5,
-  })
-
-  const handleLimitChange: React.ChangeEventHandler<HTMLSelectElement> = (ev) => {
-    navigateTolimitChanged(Number(ev.target.value))
-  }
 
   const limits = [3, 5, 10]
 
+  const { data: tasks, ...paginationAttrs } = usePagination({
+    loader: (pageParams) => rs.suspendedResources().task.index(pageParams),
+    limit: limits[1],
+  })
+
   const l = rs.getLocalizer()
-  const length = 2
-  const prevInfo = prevPageParams()
-  const nextInfo = nextPageParams()
 
   return (
     <>
@@ -165,29 +168,53 @@ const TaskTable = () => {
           ))}
         </tbody>
       </table>
-      <div>
-        <div>
-          <span>
-            {page} / {maxPage}
-          </span>
-          <select name="limit" defaultValue={limit} onChange={handleLimitChange}>
-            {limits.map((l) => (
-              <option value={l} key={l}>
-                {l}
-              </option>
-            ))}
-          </select>
-        </div>
-        {prevInfo && <PageLink {...prevInfo}>Prev</PageLink>}
-        {prevPageParamsList(length).map((info) => (
-          <PageLink {...info} key={info.page} />
-        ))}
-        {nextPageParamsList(length).map((info) => (
-          <PageLink {...info} key={info.page} />
-        ))}
-        {nextInfo && <PageLink {...nextInfo}>Next</PageLink>}
-      </div>
+      <Pagination {...paginationAttrs} limits={limits} listSize={2} />
     </>
+  )
+}
+
+function Pagination({
+  page,
+  maxPage,
+  limit,
+  limits,
+  listSize,
+  navigateTolimitChanged,
+  prevPageParams,
+  nextPageParams,
+  prevPageParamsList,
+  nextPageParamsList,
+}: PaginationAttrs & { limits: number[]; listSize: number }) {
+  const handleLimitChange: React.ChangeEventHandler<HTMLSelectElement> = (ev) => {
+    navigateTolimitChanged(Number(ev.target.value))
+  }
+
+  const prevInfo = prevPageParams()
+  const nextInfo = nextPageParams()
+
+  return (
+    <div>
+      <div>
+        <span>
+          {page} / {maxPage}
+        </span>
+        <select name="limit" defaultValue={limit} onChange={handleLimitChange}>
+          {limits.map((l) => (
+            <option value={l} key={l}>
+              {l}
+            </option>
+          ))}
+        </select>
+      </div>
+      {prevInfo && <PageLink {...prevInfo}>Prev</PageLink>}
+      {prevPageParamsList(listSize).map((info) => (
+        <PageLink {...info} key={info.page} />
+      ))}
+      {nextPageParamsList(listSize).map((info) => (
+        <PageLink {...info} key={info.page} />
+      ))}
+      {nextInfo && <PageLink {...nextInfo}>Next</PageLink>}
+    </div>
   )
 }
 
