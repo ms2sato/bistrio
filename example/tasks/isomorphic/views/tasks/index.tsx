@@ -52,7 +52,7 @@ function usePagination<T>(props: PaginationProps<T>) {
   const state: PageParams | undefined = s // TODO: to safe
   const query = parseQuery(search)
 
-  const { page, limit, pageParams, setLimit, setPage } = usePager({
+  const { page, limit, pageParams, setLimit, setPage, prev, next } = usePager({
     limit: query.limit ? Number(query.limit) : props.limit || 25,
     page: query.page ? Number(query.page) : props.page || 1,
   })
@@ -66,29 +66,26 @@ function usePagination<T>(props: PaginationProps<T>) {
   const { data, count } = props.loader(pageParams)
   const maxPage = Math.ceil(count / limit)
 
-  const toInfo = (pages: number[]): PageParams[] => pages.map((page) => ({ ...pageParams, page }))
+  const toPageParams = (pages: number[]): PageParams[] => pages.map((page) => ({ ...pageParams, page }))
 
-  const prevPageNums = (page: number, length: number): number[] => {
+  const prevPageNums = (length: number): number[] => {
     return range(Math.max(page - length, 1), page)
   }
 
-  const prevPageInfoList = (page: number, length: number): PageParams[] => {
-    return toInfo(prevPageNums(page, length))
+  const prevPageParamsList = (length: number): PageParams[] => {
+    return toPageParams(prevPageNums(length))
   }
 
-  const nextPageNums = (page: number, length: number): number[] => {
+  const nextPageNums = (length: number): number[] => {
     return range(Math.min(page + 1, maxPage), Math.min(page + length + 1, maxPage + 1))
   }
 
-  const nextPageInfoList = (page: number, length: number) => {
-    return toInfo(nextPageNums(page, length))
+  const nextPageParamsList = (length: number) => {
+    return toPageParams(nextPageNums(length))
   }
 
-  const length = 2
-  const prevPages = prevPageInfoList(page, length)
-  const nextPages = nextPageInfoList(page, length)
-  const prevInfo = page > 1 ? { ...pageParams, page: page - 1 } : null
-  const nextInfo = page === maxPage ? null : { ...pageParams, page: page + 1 }
+  const prevPageParams = () => (page > 1 ? { ...pageParams, page: page - 1 } : null)
+  const nextPageParams = () => (page === maxPage ? null : { ...pageParams, page: page + 1 })
 
   const navigateTolimitChanged = (limit: number) => {
     const info: PageParams = { page: 1, limit }
@@ -102,10 +99,12 @@ function usePagination<T>(props: PaginationProps<T>) {
     state,
     maxPage,
     pageParams,
-    prevPages,
-    nextPages,
-    prevInfo,
-    nextInfo,
+    prev,
+    next,
+    prevPageParams,
+    nextPageParams,
+    prevPageParamsList,
+    nextPageParamsList,
     setLimit,
     setPage,
     navigateTolimitChanged,
@@ -128,10 +127,10 @@ const TaskTable = () => {
     limit,
     maxPage,
     navigateTolimitChanged,
-    prevPages,
-    nextPages,
-    prevInfo,
-    nextInfo,
+    prevPageParamsList,
+    nextPageParamsList,
+    prevPageParams,
+    nextPageParams,
   } = usePagination({
     loader: (pageParams) => rs.suspendedResources().task.index(pageParams),
     limit: 5,
@@ -144,6 +143,9 @@ const TaskTable = () => {
   const limits = [3, 5, 10]
 
   const l = rs.getLocalizer()
+  const length = 2
+  const prevInfo = prevPageParams()
+  const nextInfo = nextPageParams()
 
   return (
     <>
@@ -177,10 +179,10 @@ const TaskTable = () => {
           </select>
         </div>
         {prevInfo && <PageLink {...prevInfo}>Prev</PageLink>}
-        {prevPages.map((info) => (
+        {prevPageParamsList(length).map((info) => (
           <PageLink {...info} key={info.page} />
         ))}
-        {nextPages.map((info) => (
+        {nextPageParamsList(length).map((info) => (
           <PageLink {...info} key={info.page} />
         ))}
         {nextInfo && <PageLink {...nextInfo}>Next</PageLink>}
