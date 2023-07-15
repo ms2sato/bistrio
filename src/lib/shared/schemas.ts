@@ -24,3 +24,19 @@ export const uploadedFileSchema = z.object({
 })
 
 export type UploadedFile = z.infer<typeof uploadedFileSchema>
+
+// --- for pagination ---
+
+const pageCoreProps = {
+  page: z.number(),
+  limit: z.number(),
+}
+
+export const pageSchema = z.object(pageCoreProps)
+export type PageParams = z.infer<typeof pageSchema>
+
+export type Paginated<E> = {
+  data: E[]
+  count: number
+  params: PageParams
+}

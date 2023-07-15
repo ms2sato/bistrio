@@ -1,8 +1,7 @@
-import { RouterSupport, Router, Actions, idNumberSchema, scope } from 'bistrio/client'
+import { RouterSupport, Router, Actions, idNumberSchema, scope, pageSchema } from 'bistrio/client'
 import {
   commentCreateSchema,
   commentUpdateSchema,
-  pageSchema,
   taskCreateWithTagsSchema,
   taskIdSchema,
   taskUpdateWithTagsSchema,

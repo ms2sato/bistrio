@@ -1,6 +1,6 @@
-import { defineResource, IdNumberParams } from 'bistrio'
+import { defineResource, IdNumberParams, PageParams, Paginated } from 'bistrio'
 import { getPrismaCilent } from '@server/lib/prisma-util'
-import { PageParams, TaskCreateWithTagsParams, TaskUpdateWithTagsParams, Paginated } from '@/isomorphic/params'
+import { TaskCreateWithTagsParams, TaskUpdateWithTagsParams } from '@/isomorphic/params'
 import { TaskWithTags } from '@/isomorphic/types'
 import { Task } from '@prisma/client'
 
