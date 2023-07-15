@@ -70,7 +70,7 @@ const TaskTable = () => {
           ))}
         </tbody>
       </table>
-      <Pagination {...paginationAttrs} listSize={1} />
+      <Pagination {...paginationAttrs} listSize={2} />
     </>
   )
 }
