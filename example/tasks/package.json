@@ -46,18 +46,13 @@
       ],
       "extensions": "ts,tsx"
     },
-    "build:isomorphic": {
-      "patterns": [
-        "isomorphic"
-      ],
-      "inherit": true,
-      "extensions": "ts,tsx"
-    },
     "dev:server": {
       "patterns": [
+        ".bistrio/filemap.json",
         "isomorphic",
         "server"
       ],
+      "runOnChangeOnly": true,
       "quiet": true,
       "inherit": true,
       "extensions": "ts,tsx"
@@ -68,6 +63,7 @@
         "isomorphic"
       ],
       "delay": 2500,
+      "runOnChangeOnly": true,
       "inherit": true,
       "extensions": "ts,tsx"
     }
