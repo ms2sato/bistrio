@@ -1,6 +1,6 @@
 import { Suspense, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { usePagination, useUIEvent } from 'bistrio/client'
+import { PaginationAttrs, usePagination, useUIEvent } from 'bistrio/client'
 
 import { useRenderSupport } from '@bistrio/routes/main'
 import { Task } from '@prisma/client'
@@ -31,29 +31,11 @@ const TaskTable = () => {
     limit: limits[1],
   })
 
-  const { page, maxPage, limit, navigateTolimitChanged } = paginationAttrs
-
   const l = rs.getLocalizer()
-
-  const handleLimitChange: React.ChangeEventHandler<HTMLSelectElement> = (ev) => {
-    navigateTolimitChanged(Number(ev.target.value))
-  }
 
   return (
     <>
-      <div>
-        <span>
-          {page} / {maxPage}
-        </span>
-        <select name="limit" defaultValue={limit} onChange={handleLimitChange}>
-          {limits.map((l) => (
-            <option value={l} key={l}>
-              {l}
-            </option>
-          ))}
-        </select>
-      </div>
-
+      <PageTool {...paginationAttrs} limits={limits} />
       <table>
         <thead>
           <tr>
@@ -75,34 +57,33 @@ const TaskTable = () => {
   )
 }
 
+function PageTool({ page, maxPage, limit, limits, navigateTolimitChanged }: PaginationAttrs & { limits: number[] }) {
+  return (
+    <div>
+      <span>
+        {page} / {maxPage}
+      </span>
+      <select name="limit" defaultValue={limit} onChange={(ev) => navigateTolimitChanged(Number(ev.target.value))}>
+        {limits.map((limitItem) => (
+          <option value={limitItem} key={limitItem}>
+            {limitItem}
+          </option>
+        ))}
+      </select>
+    </div>
+  )
+}
+
 function TaskRecord({ task: src }: { task: Task }) {
   const [task, setTask] = useState(src)
   const rs = useRenderSupport()
   const l = rs.getLocalizer()
 
-  const { handleEvent: handleDoneClick, pending: donePending } = useUIEvent({
-    modifier: () => rs.resources().task.done(task),
-    onSuccess: () => setTask({ ...task, done: true }),
-  })
-
-  const { handleEvent: handleDeleteClick, pending: deletePending } = useUIEvent({
-    modifier: () => rs.resources().task.destroy(task),
-    onSuccess: () => (location.href = '/tasks'),
-  })
-
   return (
     <tr>
       <td>{task.id}</td>
       <td>
-        {donePending ? (
-          '...'
-        ) : task.done ? (
-          l.o('models.tasks.getStatus', task.done)
-        ) : (
-          <a href="#" onClick={handleDoneClick}>
-            {l.o('models.tasks.getStatus', task.done)}
-          </a>
-        )}
+        <DoneSelector task={task} setTask={setTask} />
       </td>
       <td>
         <Link to={`/tasks/${task.id}`}>{task.title}</Link>
@@ -110,10 +91,46 @@ function TaskRecord({ task: src }: { task: Task }) {
       <td>{task.description}</td>
       <td>
         <Link to={`/tasks/${task.id}/edit`}>{l.t`Edit`}</Link>&nbsp;|&nbsp;
-        {deletePending ? '...' : <a href="#" onClick={handleDeleteClick}>{l.t`Delete`}</a>}
+        <Remover task={task} />
       </td>
     </tr>
   )
+}
+
+function DoneSelector({ task, setTask }: { task: Task; setTask: (task: Task) => void }) {
+  const rs = useRenderSupport()
+  const l = rs.getLocalizer()
+
+  const { handleEvent: handleDoneClick, pending } = useUIEvent({
+    modifier: () => rs.resources().task.done(task),
+    onSuccess: () => setTask({ ...task, done: true }),
+  })
+
+  return (
+    <>
+      {pending ? (
+        '...'
+      ) : task.done ? (
+        l.o('models.tasks.getStatus', task.done)
+      ) : (
+        <a href="#" onClick={handleDoneClick}>
+          {l.o('models.tasks.getStatus', task.done)}
+        </a>
+      )}
+    </>
+  )
+}
+
+function Remover({ task }: { task: Task }) {
+  const rs = useRenderSupport()
+  const l = rs.getLocalizer()
+
+  const { handleEvent: handleDeleteClick, pending } = useUIEvent({
+    modifier: () => rs.resources().task.destroy(task),
+    onSuccess: () => (location.href = '/tasks'),
+  })
+
+  return <>{pending ? '...' : <a href="#" onClick={handleDeleteClick}>{l.t`Delete`}</a>}</>
 }
 
 export { Index as Page }
