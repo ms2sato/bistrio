@@ -7,7 +7,7 @@
     "dev:start": "NODE_ENV=production dotenv -e .env.development -- npm start",
     "prepare": "npm run bistrio:gen",
     "dev": "npm run watch",
-    "dev:server": "NODE_ENV=development DEBUG=bistrio:* dotenv -e .env.development -- node -r ./server/support/tsnode_register ./bin/dev",
+    "dev:server": "NODE_ENV=development DEBUG=bistrio:*,-bistrio:debug:* dotenv -e .env.development -- node -r ./server/support/tsnode_register ./bin/dev",
     "dev:client": "webpack --config ./config/client/webpack.config.ts",
     "watch": "npm-watch",
     "copy-assets": "cpx 'public/**' dist/public && cpx 'config/**' dist/config",
