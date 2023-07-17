@@ -3,22 +3,13 @@ import fs from 'fs'
 import { isErrorWithCode } from './is-error'
 import createDebug from 'debug'
 
-const debug = createDebug('bistrio:view')
+const debug = createDebug('bistrio:debug:view')
 
 const isDev = !process.env.NODE_ENV || process.env.NODE_ENV == 'development'
-
-const removeCache = (modulePath: string) => {
-  const resolved = require.resolve(modulePath)
-  debug('removeCache: %s', resolved)
-  delete require.cache[resolved]
-}
 
 const forceImportAsJs = async (filePath: string) => {
   const jsPath = `${filePath}.js`
   if (fs.existsSync(jsPath)) {
-    if (isDev) {
-      removeCache(jsPath)
-    }
     debug(`require: %s`, jsPath)
     return await require(jsPath)
   }
