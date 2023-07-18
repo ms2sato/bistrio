@@ -5,7 +5,7 @@ import createDebug from 'debug'
 import webpack, { Configuration } from 'webpack'
 import { TsconfigPathsPlugin } from 'tsconfig-paths-webpack-plugin'
 
-import { Config, ConfigCustom, fillConfig, config } from '../'
+import { Config, ConfigCustom, fillConfig, config, StructureConfig } from '../'
 
 const debug = createDebug('bistrio:webpack')
 
@@ -17,6 +17,7 @@ export type GenereteEntryFunc = (params: { config: Config }) => Configuration['e
 
 export type GenerateWebpackConfigParams = {
   config: ConfigCustom
+  bundlerConfigPath: string
   generateEntry?: GenereteEntryFunc
 }
 
@@ -26,6 +27,8 @@ const defaultGenerateEntry = ({ config }: { config: Config }): Configuration['en
     return obj
   }, {})
 }
+
+const getFilemapPath = (structureConfig: StructureConfig) => path.resolve(structureConfig.generatedDir, 'filemap.json')
 
 const pluginName = 'URLMapPlugin'
 class URLMapPlugin {
@@ -49,16 +52,14 @@ class URLMapPlugin {
 
         const data: Filemap = { js: jsMap }
         const filename = this.filemapPath
+        const dir = path.dirname(filename)
+        if (!existsSync(dir)) {
+          mkdirSync(dir, 0o755)
+        }
         writeFile(filename, JSON.stringify(data, null, 2), { flag: 'w' })
-          .then(() => {
-            return chmod(filename, 0o666)
-          })
-          .then(() => {
-            callback()
-          })
-          .catch((err: false | Error | null | undefined) => {
-            callback(err)
-          })
+          .then(() => chmod(filename, 0o666))
+          .then(() => callback())
+          .catch((err: false | Error | null | undefined) => callback(err))
       } catch (err) {
         callback(err as Error)
       }
@@ -76,6 +77,7 @@ function isWebpackMode(webpackMode: string | undefined): webpackMode is Mode {
 
 export const generateWebpackConfig = ({
   config: custom,
+  bundlerConfigPath,
   generateEntry = defaultGenerateEntry,
 }: GenerateWebpackConfigParams) => {
   debug('NODE_ENV=%s', process.env.NODE_ENV)
@@ -135,7 +137,7 @@ export const generateWebpackConfig = ({
       extensions: ['.tsx', '.ts', '.js'],
       plugins: [new TsconfigPathsPlugin({ configFile, extensions: ['.tsx', '.ts', '.js'] })],
     },
-    plugins: [new URLMapPlugin(path.resolve(structureConfig.generatedDir, 'filemap.json'))],
+    plugins: [new URLMapPlugin(getFilemapPath(structureConfig))],
     optimization: {
       splitChunks: {
         chunks: 'initial',
@@ -181,7 +183,13 @@ export const generateWebpackConfig = ({
     ...webpackConfig,
     devtool: 'inline-source-map',
     stats: 'normal',
-    cache: true,
+    cache: {
+      type: 'filesystem',
+      buildDependencies: {
+        config: [bundlerConfigPath],
+      },
+      cacheDirectory: path.resolve(structureConfig.cacheDir, 'webpack'),
+    },
   }
 
   return env === dev ? devConfig : webpackConfig
@@ -215,7 +223,7 @@ let filemapLoader: FilemapLoader
 
 const getFilemapLoader = () => {
   if (!filemapLoader) {
-    filemapLoader = new FilemapLoader(path.resolve(config().structure.generatedDir, 'filemap.json'))
+    filemapLoader = new FilemapLoader(getFilemapPath(config().structure))
   }
   return filemapLoader
 }

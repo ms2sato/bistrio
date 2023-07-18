@@ -10,6 +10,7 @@ export type StructureConfig = {
   isomorphicDir: string
   serverDir: string
   configDir: string
+  cacheDir: string
 }
 
 export type StructureConfigCustom = PartialWithRequired<StructureConfig, 'configDir'>
@@ -33,6 +34,7 @@ export function fillStrucrureConfig(strucrureConfig: StructureConfigCustom): Str
   const distDir = path.resolve(baseDir, 'dist')
   const isomorphicDir = path.resolve(baseDir, 'isomorphic')
   const serverDir = path.resolve(baseDir, 'server')
+  const cacheDir = path.resolve(baseDir, '.cache')
 
   return {
     generatedDir,
@@ -40,6 +42,7 @@ export function fillStrucrureConfig(strucrureConfig: StructureConfigCustom): Str
     distDir,
     isomorphicDir,
     serverDir,
+    cacheDir,
     ...strucrureConfig,
     baseDir,
   }

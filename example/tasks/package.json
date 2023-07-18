@@ -10,10 +10,11 @@
     "dev:server": "NODE_ENV=development DEBUG=bistrio:*,-bistrio:debug:* dotenv -e .env.development -- node -r ./server/support/tsnode_register ./bin/dev",
     "watch": "run-p watch:**",
     "watch:server": "npm-watch",
+    "prewatch:client": "npm run bistrio:gen",
     "watch:client": "webpack --watch --config ./config/client/webpack.config.ts",
     "copy-assets": "cpx 'public/**' dist/public && cpx 'config/**' dist/config",
     "build": "npm run copy-assets && npm run bistrio:gen && npm run build:client && npm run build:server",
-    "clean": "rimraf dist",
+    "clean": "rimraf dist .cache .bistrio",
     "console": "NODE_ENV=development dotenv -e .env.development -- node  -r ./server/support/tsnode_register -r ./server/support/console.ts",
     "lint": "npm run eslint && npm run check-types",
     "lint:fix": "npm run eslint:fix && npm run check-types && npm run format",
@@ -44,6 +45,12 @@
       "patterns": [
         "isomorphic/routes",
         "server/endpoint"
+      ],
+      "extensions": "ts,tsx"
+    },
+    "build:isomorphic": {
+      "patterns": [
+        "isomorphic"
       ],
       "extensions": "ts,tsx"
     },
