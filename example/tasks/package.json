@@ -10,7 +10,7 @@
     "dev:server": "NODE_ENV=development DEBUG=bistrio:*,-bistrio:debug:* dotenv -e .env.development -- node -r ./server/support/tsnode_register ./bin/dev",
     "watch": "run-p watch:**",
     "watch:server": "npm-watch",
-    "watch:livereload": "livereload -w 1500 -ee 'tsx,ts' 'isomorphic,public' -d",
+    "watch:livereload": "livereload -w 1500 -ee 'tsx,ts' 'isomorphic,public'",
     "prewatch:client": "npm run bistrio:gen",
     "watch:client": "webpack --watch --config ./config/client/webpack.config.ts",
     "copy-assets": "cpx 'public/**' dist/public && cpx 'config/**' dist/config",
