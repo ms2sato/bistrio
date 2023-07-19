@@ -1,4 +1,4 @@
-import { Prisma, Task } from "@prisma/client"
+import { Prisma, Task } from '@prisma/client'
 
 const taskWithComments = Prisma.validator<Prisma.TaskArgs>()({
   include: { comments: true },

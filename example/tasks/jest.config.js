@@ -2,11 +2,14 @@ const config = {
   verbose: true,
   preset: './config/jest/preset.js',
   transform: {
-    '^.+\\.(ts|tsx)$': ['ts-jest', {
-      tsconfig: './config/tsconfig.test.json',
-    }],
+    '^.+\\.(ts|tsx)$': [
+      'ts-jest',
+      {
+        tsconfig: './config/tsconfig.test.json',
+      },
+    ],
   },
-  testPathIgnorePatterns: ["<rootDir>/__tests__/support/"],
+  testPathIgnorePatterns: ['<rootDir>/__tests__/support/'],
 }
 
 module.exports = config

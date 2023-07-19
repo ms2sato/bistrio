@@ -50,14 +50,14 @@ export async function setup() {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
       },
-    })
+    }),
   )
 
   app.use(
     localeMiddleware({
       defaultLanguage: 'en',
       localeMap: localeMap,
-    })
+    }),
   )
 
   app.use((req, res, next) => {

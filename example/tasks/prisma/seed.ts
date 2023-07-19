@@ -40,9 +40,9 @@ async function main(prisma: PrismaClient) {
                 create: { label: 'tag2' },
               },
             },
-          }
-        ]
-      }
+          },
+        ],
+      },
     },
     {
       title: 'Test2',
@@ -65,9 +65,9 @@ async function main(prisma: PrismaClient) {
                 create: { label: 'tag3' },
               },
             },
-          }
-        ]
-      }
+          },
+        ],
+      },
     },
     {
       title: 'Test3',

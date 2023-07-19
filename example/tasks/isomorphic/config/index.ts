@@ -8,7 +8,7 @@ const pageLoadFunc = (pagePath: string) => {
   return lazy(() =>
     import(/*webpackChunkName: "[request]" */ `../views${pagePath}`).then(({ Page }) => ({
       default: Page,
-    }))
+    })),
   )
 }
 
