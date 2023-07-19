@@ -29,7 +29,9 @@ describe('senario /tasks', () => {
 
     expect(req.errors).toHaveLength(0)
     expect(req.finished.where({ resourceType: 'ajax', method: 'POST', url: asURL('api/tasks/') })).toHaveLength(1)
-    expect(req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL('api/tasks/?page=1&limit=5') })).toHaveLength(1)
+    expect(
+      req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL('api/tasks/?page=1&limit=5') }),
+    ).toHaveLength(1)
 
     await page.waitForSelector('tbody')
 
@@ -187,7 +189,9 @@ describe('/tasks/:id/edit', () => {
     // show index view
     expect(req.errors).toHaveLength(0)
     expect(req.finished.where({ resourceType: 'ajax', method: 'PUT' })).toHaveLength(1)
-    expect(req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL('api/tasks/?page=1&limit=5') })).toHaveLength(1)
+    expect(
+      req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL('api/tasks/?page=1&limit=5') }),
+    ).toHaveLength(1)
 
     // check updated values
     await waitForAnyInnerText(page, 'td', 'Done')
@@ -235,10 +239,10 @@ describe('/tasks/:id', () => {
     expect(req.errors).toHaveLength(0)
     expect(req.finished.where({ resourceType: 'ajax', method: 'POST' })).toHaveLength(1)
     expect(
-      req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL(`api/tasks/${task.id}`) })
+      req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL(`api/tasks/${task.id}`) }),
     ).toHaveLength(1)
     expect(
-      req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL(`api/tasks/${task.id}/comments/`) })
+      req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL(`api/tasks/${task.id}/comments/`) }),
     ).toHaveLength(1)
 
     await waitForAnyInnerText(page, 'li', 'TestComment')

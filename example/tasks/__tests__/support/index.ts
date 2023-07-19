@@ -60,13 +60,11 @@ export class RequestMap {
   }
 
   asArray() {
-    return Array.from(
-      Array.from(this.map.values()).map((req) => ({
-        url: req.url(),
-        method: req.method(),
-        resourceType: req.resourceType(),
-      }))
-    )
+    return Array.from(this.map.values()).map((req) => ({
+      url: req.url(),
+      method: req.method(),
+      resourceType: req.resourceType(),
+    }))
   }
 
   where(criteria: Criteria) {
@@ -191,12 +189,12 @@ export function spy(page: Page) {
 
 export const waitForAnyInnerText = (page: Page, selector: string, text: string) => {
   return page.waitForFunction(
-    `Array.from(document.querySelectorAll("${selector}")).some((node)=> node.innerText == "${text}")`
+    `Array.from(document.querySelectorAll("${selector}")).some((node)=> node.innerText == "${text}")`,
   )
 }
 
 export const waitForNotAnyInnerText = (page: Page, selector: string, text: string) => {
   return page.waitForFunction(
-    `Array.from(document.querySelectorAll("${selector}")).every((node) => node.innerText != "${text}")`
+    `Array.from(document.querySelectorAll("${selector}")).every((node) => node.innerText != "${text}")`,
   )
 }
