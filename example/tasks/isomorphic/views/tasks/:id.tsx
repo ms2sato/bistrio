@@ -2,7 +2,7 @@ import { Suspense, useRef } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
 import { UseSubmitProps, useNavigate, useSubmit } from 'bistrio/client'
-import { useRenderSupport } from '@/.bistrio/routes/main'
+import { useRenderSupport } from '@bistrio/routes/main'
 import { ErrorPanel } from '@/isomorphic/components/ErrorPanel'
 import { commentCreateSchema } from '@/isomorphic/params'
 import { Comment } from '@prisma/client'
