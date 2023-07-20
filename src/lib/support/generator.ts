@@ -4,7 +4,10 @@ import { RouteConfig, Router, RouterOptions } from '../../client'
 import { Config, ConfigCustom, fillConfig, Middlewares, nullRouterSupport, RouterSupport } from '../..'
 
 class NameToPathRouter implements Router {
-  constructor(private httpPath: string = '/', readonly nameToPath: { [path: string]: string } = {}) {}
+  constructor(
+    private httpPath: string = '/',
+    readonly nameToPath: { [path: string]: string } = {},
+  ) {}
 
   sub(rpath: string, ..._args: unknown[]): Router {
     return new NameToPathRouter(path.join(this.httpPath, rpath), this.nameToPath)
@@ -29,19 +32,17 @@ class NameToPathRouter implements Router {
     fs.writeFileSync(out, text)
   }
 
-  createResources({ out, config }: { out: string, config: Config }) {
-    const resourcePath = (name: string) => path.join(config.structure.serverDir, 'endpoint', this.nameToPath[name], 'resource.ts')
+  createResources({ out, config }: { out: string; config: Config }) {
+    const resourcePath = (name: string) =>
+      path.join(config.structure.serverDir, 'endpoint', this.nameToPath[name], 'resource.ts')
     const existsResource = (name: string): boolean => fs.existsSync(resourcePath(name))
-    const changeExt = (filePath: string) => filePath.replace(/\.ts$/, "")
+    const changeExt = (filePath: string) => filePath.replace(/\.ts$/, '')
     const getResourceFile = (name: string): string => path.relative(path.dirname(out), changeExt(resourcePath(name)))
 
     const resourceNames = Object.keys(this.nameToPath).filter((name) => existsResource(name))
 
     const ret = `${resourceNames
-      .map(
-        (name, index) =>
-          `import type __Resource${index} from '${getResourceFile(name)}'`
-      )
+      .map((name, index) => `import type __Resource${index} from '${getResourceFile(name)}'`)
       .join('\n')}
 
 export type Resources = {
@@ -113,10 +114,15 @@ export async function generate<M extends Middlewares>({
   await Promise.all(
     Object.entries(entriesConfig).map(([name, { routes }]) => {
       return generateForEntry(bistrioGenRoot, name, routes, config)
-    })
+    }),
   )
 
   generateForAll(bistrioGenRoot, allRoutes, config)
+
+  const ret = {
+    generatedAt: new Date(),
+  }
+  fs.writeFileSync(path.join(bistrioGenRoot, '.generated.json'), JSON.stringify(ret))
 
   console.log('Generated!')
 }
@@ -126,7 +132,7 @@ function generateForEntry<M extends Middlewares>(
   bistrioGenRoot: string,
   name: string,
   routes: (router: Router, support: RouterSupport<M>) => void,
-  config: Config
+  config: Config,
 ) {
   routes(router, nullRouterSupport as RouterSupport<M>)
 
@@ -144,7 +150,7 @@ function generateForEntry<M extends Middlewares>(
 function generateForAll<M extends Middlewares>(
   bistrioGenRoot: string,
   routes: (router: Router, support: RouterSupport<M>) => void,
-  config: Config
+  config: Config,
 ) {
   const name = 'all'
 
