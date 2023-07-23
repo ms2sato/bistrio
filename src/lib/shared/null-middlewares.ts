@@ -8,6 +8,5 @@ export const nullMiddlewares = new Proxy(
         return () => {}
       }
     },
-  }
+  },
 )
-

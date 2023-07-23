@@ -89,7 +89,7 @@ function createTraverser(arranger: TraverseArranger, key: string) {
           arranger.next(name, recordNode, value, pathIndex)
           arrayNodeItem[index] = arrangedResultOrRaw(
             arranger.arrangeIndexedArrayItemOnLast(name, recordNode, value, pathIndex),
-            value
+            value,
           )
         } else {
           if (arrayNodeItem[index] === undefined) {
@@ -116,7 +116,7 @@ function createTraverser(arranger: TraverseArranger, key: string) {
           const array = value === undefined ? [] : value instanceof Array ? value : [value]
           recordNode[name] = arrangedResultOrRaw(
             arranger.arrangeUnindexedArrayOnLast(name, recordNode, array, pathIndex),
-            array
+            array,
           )
         } else {
           throw new Error('Unimplemented')
@@ -149,7 +149,7 @@ function createTraverser(arranger: TraverseArranger, key: string) {
 
 export function parseFormBody(
   body: Record<string, unknown>,
-  arrangerCreator: TraverseArrangerCreator = nullTraverseArranger
+  arrangerCreator: TraverseArrangerCreator = nullTraverseArranger,
 ): Record<string, unknown> {
   const ret: Record<string, unknown> = {}
   for (const [key, value] of Object.entries(body)) {

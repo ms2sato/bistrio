@@ -30,7 +30,7 @@ class ResourceHolderCreateRouter extends BasicRouter {
       nameToResource: new Map(),
       nameToPath: new Map(),
     },
-    private routerOptions: RouterOptions = { hydrate: false }
+    private routerOptions: RouterOptions = { hydrate: false },
   ) {
     super(serverRouterConfig, httpPath, routerCore)
   }
@@ -42,7 +42,7 @@ class ResourceHolderCreateRouter extends BasicRouter {
       this.serverRouterConfig,
       path.join(this.httpPath, rpath),
       this.routerCore,
-      { ...this.routerOptions }
+      { ...this.routerOptions },
     )
   }
 
@@ -62,7 +62,7 @@ class ResourceHolderCreateRouter extends BasicRouter {
         fileRoot,
         resourcePath,
         resourceSupport,
-        routeConfig
+        routeConfig,
       )
 
       const resourceProxy = createLocalResourceProxy(routeConfig, resource)
@@ -71,7 +71,7 @@ class ResourceHolderCreateRouter extends BasicRouter {
         throw new Error(
           `Duplicated Resource name: ${name}; path: ${resourcePath}, with: ${
             this.routerCore.nameToPath.get(name) || 'unknown'
-          }`
+          }`,
         )
       }
 
@@ -83,12 +83,12 @@ class ResourceHolderCreateRouter extends BasicRouter {
 
 declare global {
   // eslint-disable-next-line no-var
-  var resources: Record<string, Resource>;
+  var resources: Record<string, Resource>
 }
 
 export async function loadResources<M extends Middlewares>(
   serverRouterConfig: ServerRouterConfigCustom,
-  routes: (router: Router, support: RouterSupport<M>) => void
+  routes: (router: Router, support: RouterSupport<M>) => void,
 ) {
   const resources = {} as Record<string, Resource>
 

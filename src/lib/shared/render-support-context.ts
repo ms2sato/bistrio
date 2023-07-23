@@ -4,7 +4,7 @@ import { RenderSupport } from './'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const RenderSupportContext: React.Context<RenderSupport<any>> = createContext<RenderSupport<any>>(
-  {} as RenderSupport<any>
+  {} as RenderSupport<any>,
 )
 
 export const useRenderSupport = <RS extends NamedResources>() => {

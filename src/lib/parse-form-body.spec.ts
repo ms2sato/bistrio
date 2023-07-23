@@ -92,7 +92,7 @@ describe('array node', () => {
         'user.hobbies[0].type': 'stringed',
         'user.hobbies[1].name': 'piano',
         'user.hobbies[1].type': 'keyboard',
-      })
+      }),
     ).toEqual({
       user: {
         hobbies: [
