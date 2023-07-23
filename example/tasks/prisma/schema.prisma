@@ -11,38 +11,38 @@ datasource db {
 }
 
 model Task {
-  id      Int      @id @default(autoincrement())
-  title   String
-  description    String
-  done Boolean
-  comments Comment[]
-  tags TagsOnTask[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          Int          @id @default(autoincrement())
+  title       String
+  description String
+  done        Boolean
+  comments    Comment[]
+  tags        TagsOnTask[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }
 
 model Comment {
-  id      Int      @id @default(autoincrement())
-  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  taskId Int
-  body    String
+  id        Int      @id @default(autoincrement())
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  taskId    Int
+  body      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Tag {
-  id      Int      @id @default(autoincrement())
-  label String @unique
-  tasks TagsOnTask[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        Int          @id @default(autoincrement())
+  label     String       @unique
+  tasks     TagsOnTask[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
 }
 
 model TagsOnTask {
-  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  taskId     Int
-  tag   Tag @relation(fields: [tagId], references: [id], onDelete: Cascade)
-  tagId Int
+  task   Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  taskId Int
+  tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  tagId  Int
 
   @@id([taskId, tagId])
 }
