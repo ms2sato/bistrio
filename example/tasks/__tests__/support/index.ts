@@ -59,6 +59,10 @@ export class RequestMap {
     this.has = this.map.has.bind(this.map)
   }
 
+  get length() {
+    return this.map.size
+  }
+
   asArray() {
     return Array.from(this.map.values()).map((req) => ({
       url: req.url(),

@@ -28,6 +28,7 @@ describe('senario /tasks', () => {
     await Promise.all([req.clearAndWaitForResponses(2, { resourceType: 'ajax' }), page.click('input[type="submit"]')])
 
     expect(req.errors).toHaveLength(0)
+    expect(req.failed).toHaveLength(0)
     expect(req.finished.where({ resourceType: 'ajax', method: 'POST', url: asURL('api/tasks/') })).toHaveLength(1)
     expect(
       req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL('api/tasks/?page=1&limit=5') }),
@@ -47,6 +48,7 @@ describe('senario /tasks', () => {
     ])
 
     expect(req.errors).toHaveLength(0)
+    expect(req.failed).toHaveLength(0)
     expect(req.finished.where({ resourceType: 'ajax', method: 'POST' })).toHaveLength(1)
 
     await waitForAnyInnerText(page, 'td', 'TestDescription')
@@ -78,6 +80,7 @@ describe('senario /tasks', () => {
     await Promise.all([req.clearAndWaitForResponses(1, { resourceType: 'ajax' }), page.click('input[type="submit"]')])
 
     expect(req.errors).toHaveLength(0)
+    expect(req.failed).toHaveLength(0)
     expect(req.finished.where({ resourceType: 'ajax', method: 'PUT' })).toHaveLength(1)
 
     await waitForAnyInnerText(page, 'td', 'NewTitle')
@@ -94,6 +97,7 @@ describe('senario /tasks', () => {
     ])
 
     expect(req.errors).toHaveLength(0)
+    expect(req.failed).toHaveLength(0)
     expect(req.finished.where({ resourceType: 'ajax', method: 'DELETE' })).toHaveLength(1)
 
     await waitForNotAnyInnerText(page, 'td', 'NewDescription')
@@ -188,6 +192,7 @@ describe('/tasks/:id/edit', () => {
 
     // show index view
     expect(req.errors).toHaveLength(0)
+    expect(req.failed).toHaveLength(0)
     expect(req.finished.where({ resourceType: 'ajax', method: 'PUT' })).toHaveLength(1)
     expect(
       req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL('api/tasks/?page=1&limit=5') }),
@@ -237,6 +242,7 @@ describe('/tasks/:id', () => {
     ])
 
     expect(req.errors).toHaveLength(0)
+    expect(req.failed).toHaveLength(0)
     expect(req.finished.where({ resourceType: 'ajax', method: 'POST' })).toHaveLength(1)
     expect(
       req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL(`api/tasks/${task.id}`) }),
