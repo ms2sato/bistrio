@@ -14,7 +14,10 @@ type ParentLocaleDictionary = {
 }
 
 export class LocalizerImpl implements Localizer {
-  constructor(private dictionary: LocaleDictionary, private lang: string) {}
+  constructor(
+    private dictionary: LocaleDictionary,
+    private lang: string,
+  ) {}
 
   t(template: Template, ...values: unknown[]): string {
     const key = Array.prototype.join.call(template.raw, '@')

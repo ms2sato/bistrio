@@ -75,7 +75,7 @@ export function isValidationError(err: unknown): err is ValidationError {
 export const choiceSchema = (
   defaultConstructConfig: ConstructConfig,
   constructDescriptor: ConstructDescriptor | undefined,
-  actionName: string
+  actionName: string,
 ) => {
   const defaultConstructDescriptor: ConstructDescriptor | undefined = defaultConstructConfig[actionName]
 
@@ -94,7 +94,7 @@ export const choiceSchema = (
 export const choiseSources = (
   defaultConstructConfig: ConstructConfig,
   constructDescriptor: ConstructDescriptor | undefined,
-  actionName: string
+  actionName: string,
 ) => {
   const defaultConstructDescriptor: ConstructDescriptor | undefined = defaultConstructConfig[actionName]
   return constructDescriptor?.sources || defaultConstructDescriptor?.sources || ['params']

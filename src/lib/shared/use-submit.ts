@@ -14,7 +14,7 @@ export interface UseSubmitProps<
   R,
   O = unknown,
   E extends ValidationError = ValidationError,
-  S = z.infer<ZS>
+  S = z.infer<ZS>,
 > {
   source: S
   action: {
@@ -40,10 +40,10 @@ export function useSubmit<
   R,
   O = undefined,
   E extends ValidationError = ValidationError,
-  S = z.infer<ZS>
+  S = z.infer<ZS>,
 >(
   { source, action: { modifier, onSuccess, onInvalid, onFatal }, schema }: UseSubmitProps<ZS, R, O, E, S>,
-  custom?: O
+  custom?: O,
 ): UseSubmitResult<S, R, E> {
   const [attrs, setAttrs] = useState(source)
   const [invalid, setInvalid] = useState<E | null>(null)

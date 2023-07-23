@@ -10,7 +10,7 @@ export function filterWithoutKeys(obj: { [key: string]: unknown }, keys: string[
 
 export function toURLSearchParams(obj: Record<string, unknown>): URLSearchParams {
   const reqParams = new URLSearchParams()
-  for(const [key, val] of Object.entries(obj)) {
+  for (const [key, val] of Object.entries(obj)) {
     reqParams.set(key, JSON.stringify(val))
   }
   return reqParams

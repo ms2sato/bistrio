@@ -138,7 +138,7 @@ class StandardJsonResponder<Opt = undefined, Out = unknown, Src = unknown> imple
 
   success(ctx: ActionContext, output: Out): void | Promise<void> {
     let ret
-    if (output === undefined || output === null){
+    if (output === undefined || output === null) {
       ret = this.jsonFormatter.success(output)
     } else if (isContextHolder(output)) {
       const data = { ...output }
@@ -175,7 +175,7 @@ class SmartResponder<Opt = undefined, Out = unknown, Src = unknown> implements R
   constructor(
     private router: ServerRouter,
     private fatalHandler: FatalHandler,
-    private jsonResonder = new StandardJsonResponder()
+    private jsonResonder = new StandardJsonResponder(),
   ) {}
 
   success(ctx: ActionContext, output: Out): void | Promise<void> {
@@ -208,7 +208,7 @@ const createSmartResponder = ({ router }: ResourceMethodHandlerParams) => {
     () => {
       throw new Error('Unimplemented Fatal Handler')
     },
-    new StandardJsonResponder()
+    new StandardJsonResponder(),
   )
 }
 
@@ -353,7 +353,7 @@ export const importAndSetup = async <S, R>(
   fileRoot: string,
   modulePath: string,
   support: S,
-  config: RouteConfig
+  config: RouteConfig,
 ): Promise<R> => {
   let fullPath = path.join(fileRoot, modulePath)
 
@@ -424,7 +424,7 @@ export class ActionContextImpl implements MutableActionContext {
     readonly req: express.Request,
     readonly res: express.Response,
     readonly descriptor: ActionDescriptor,
-    readonly httpPath: string
+    readonly httpPath: string,
   ) {
     // @see https://stackoverflow.com/questions/47647709/method-alias-with-typescript
     this.render = this.res.render.bind(this.res)
@@ -467,7 +467,7 @@ export class ActionContextImpl implements MutableActionContext {
 
   mergeInputs(
     sources: readonly string[],
-    pred: (input: Record<string, unknown>, source: string) => Record<string, unknown> = (input) => input
+    pred: (input: Record<string, unknown>, source: string) => Record<string, unknown> = (input) => input,
   ) {
     const request = this.req as unknown as Record<string, Record<string, unknown>>
     const input = sources.reduce((prev, source) => {
@@ -519,7 +519,7 @@ export abstract class BasicRouter implements Router {
       handlerBuildRunners: [],
       nameToResource: new Map(),
       nameToPath: new Map(),
-    }
+    },
   ) {
     this.serverRouterConfig = fillServerRouterConfig(serverRouterConfig)
   }
@@ -547,7 +547,7 @@ export abstract class BasicRouter implements Router {
     return path.join(
       this.serverRouterConfig.resourceRoot,
       this.getHttpPath(rpath),
-      this.serverRouterConfig.resourceFileName
+      this.serverRouterConfig.resourceFileName,
     )
   }
 
@@ -555,7 +555,7 @@ export abstract class BasicRouter implements Router {
     return path.join(
       this.serverRouterConfig.adapterRoot,
       this.getHttpPath(rpath),
-      this.serverRouterConfig.adapterFileName
+      this.serverRouterConfig.adapterFileName,
     )
   }
 }
@@ -617,7 +617,7 @@ export class ServerRouter extends BasicRouter {
     serverRouterConfig: ServerRouterConfigCustom = { baseDir: './' },
     httpPath = '/',
     readonly routerCore: RouterCore = { handlerBuildRunners: [], nameToResource: new Map(), nameToPath: new Map() },
-    private routerOptions: RouterOptions = { hydrate: false }
+    private routerOptions: RouterOptions = { hydrate: false },
   ) {
     super(serverRouterConfig, httpPath, routerCore)
     this.router = express.Router({ mergeParams: true })
@@ -656,7 +656,7 @@ export class ServerRouter extends BasicRouter {
         throw new Error(
           `Duplicated Resource Name: ${resourceName}; path: ${resourcePath}, with: ${
             this.routerCore.nameToPath.get(resourceName) ?? 'unknown'
-          }`
+          }`,
         )
       }
 
@@ -666,15 +666,15 @@ export class ServerRouter extends BasicRouter {
           fileRoot,
           resourcePath,
           new ResourceSupport(fileRoot),
-          routeConfig
+          routeConfig,
         )
-      } catch(err) {
-        if(!(err instanceof FileNotFoundError) || !isPageOnly) {
+      } catch (err) {
+        if (!(err instanceof FileNotFoundError) || !isPageOnly) {
           throw err
         }
       }
 
-      if(resource) {
+      if (resource) {
         this.routerCore.nameToResource.set(resourceName, createLocalResourceProxy(routeConfig, resource))
       }
 
@@ -688,7 +688,7 @@ export class ServerRouter extends BasicRouter {
           fileRoot,
           adapterPath,
           new ActionSupport(fileRoot),
-          routeConfig
+          routeConfig,
         )
       } catch (err) {
         if (err instanceof FileNotFoundError) {
@@ -716,14 +716,14 @@ export class ServerRouter extends BasicRouter {
         if (!actionOverride) {
           if (resourceMethod === undefined && !actionDescriptor.page) {
             throw new RouterError(
-              `Logic not found! define action.page option on routes, or define ${resourcePath}#${actionName} or/and ${adapterPath}#${actionName}`
+              `Logic not found! define action.page option on routes, or define ${resourcePath}#${actionName} or/and ${adapterPath}#${actionName}`,
             )
           }
         }
 
         if (actionOverride && resourceMethod !== undefined) {
           routeLog.extend('warn')(
-            `${resourcePath}#${actionName} is defined but will not be called auto. Responder support auto call; proposal: 'Remove ${resourcePath}#${actionName}' or 'Change to Responder(not Function) ${adapterPath}/#${actionName}' or 'Remove ${adapterPath}/#${actionName}'`
+            `${resourcePath}#${actionName} is defined but will not be called auto. Responder support auto call; proposal: 'Remove ${resourcePath}#${actionName}' or 'Change to Responder(not Function) ${adapterPath}/#${actionName}' or 'Remove ${adapterPath}/#${actionName}'`,
           )
         }
 
@@ -783,7 +783,7 @@ export class ServerRouter extends BasicRouter {
               throw new Error('Unreachable: schema is undefined')
             }
 
-            if(!resource) {
+            if (!resource) {
               throw new Error('Unreachable: resource is undefined')
             }
 
@@ -793,7 +793,7 @@ export class ServerRouter extends BasicRouter {
               adapterPath,
               actionName,
               schema.constructor.name,
-              sources
+              sources,
             )
 
             const handler: express.Handler = createResourceMethodHandler({
@@ -821,7 +821,7 @@ export class ServerRouter extends BasicRouter {
           actionOverride,
           !!resourceMethod,
           actionDescriptor.page,
-          actionDescriptor.hydrate
+          actionDescriptor.hydrate,
         )
 
         const urlPathWithExt = `${urlPath.replace(/\/$/, '')}.:format?`

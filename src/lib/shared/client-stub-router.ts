@@ -182,7 +182,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
       resourceNameToInfo: new Map<string, ResourceInfo>(),
       handlerBuildRunners: [],
       pathToPage: new Map(),
-    }
+    },
   ) {}
 
   sub(rpath: string, ..._args: unknown[]): Router {
@@ -201,7 +201,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
       ad: ActionDescriptor,
       resourceUrl: string,
       schema: z.AnyZodObject,
-      method: HttpMethod
+      method: HttpMethod,
     ) => {
       if (schema === blankSchema) {
         return async function (...options: unknown[]) {
@@ -218,7 +218,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
 
           const body = filterWithoutKeys(parsedInput, keys)
           if (Object.keys(body).length > 0) {
-            if(method === 'get' || method === 'head') {
+            if (method === 'get' || method === 'head') {
               return fetcher.fetch(`${httpPath}?${toURLSearchParams(body).toString()}`, method)
             } else {
               return fetcher.fetch(httpPath, method, JSON.stringify(body))

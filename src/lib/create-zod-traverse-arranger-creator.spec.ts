@@ -59,7 +59,7 @@ test('value date', () => {
 
 test('value string[]', () => {
   expect(
-    parseFormBody({ 'hobbies[]': ['guitar', 'piano'] }, createZodTraverseArrangerCreator(stringArraySchema))
+    parseFormBody({ 'hobbies[]': ['guitar', 'piano'] }, createZodTraverseArrangerCreator(stringArraySchema)),
   ).toEqual({
     hobbies: ['guitar', 'piano'],
   })
@@ -73,7 +73,7 @@ test('cast array string to number', () => {
 
 test('value number[index]=value', () => {
   expect(
-    parseFormBody({ 'numbers[0]': '12', 'numbers[1]': '23' }, createZodTraverseArrangerCreator(numberArraySchema))
+    parseFormBody({ 'numbers[0]': '12', 'numbers[1]': '23' }, createZodTraverseArrangerCreator(numberArraySchema)),
   ).toEqual({
     numbers: [12, 23],
   })
@@ -83,8 +83,8 @@ test('value items[index].number', () => {
   expect(
     parseFormBody(
       { 'items[0].number': '12', 'items[0].type': 'type1', 'items[1].number': '23', 'items[1].type': 'type2' },
-      createZodTraverseArrangerCreator(itemArraySchema)
-    )
+      createZodTraverseArrangerCreator(itemArraySchema),
+    ),
   ).toEqual({
     items: [
       {
@@ -107,7 +107,7 @@ test('default array', () => {
 
 test('default arrayoverride', () => {
   expect(
-    parseFormBody({ 'numbersHasDefault[]': ['12', '23'] }, createZodTraverseArrangerCreator(defaultArraySchema))
+    parseFormBody({ 'numbersHasDefault[]': ['12', '23'] }, createZodTraverseArrangerCreator(defaultArraySchema)),
   ).toEqual({
     numbersHasDefault: [12, 23],
   })
