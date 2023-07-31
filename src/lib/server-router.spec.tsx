@@ -62,7 +62,6 @@ class TestServerRouter extends ServerRouter {
         return { msg: 'ret build' }
       },
       hasOption: (ao: opt<ActionOption>) => {
-        console.log(ao)
         return { msg: 'ret hasOption', opt: ao.body }
       },
     })
