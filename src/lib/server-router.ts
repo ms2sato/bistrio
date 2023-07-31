@@ -264,7 +264,7 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
   return (req, res, next) => {
     ;(async () => {
       const ctx = serverRouterConfig.createActionContext({ router, req, res, descriptor: actionDescriptor, httpPath })
-      const option = await serverRouterConfig.createActionOptions(ctx, httpPath, actionDescriptor)
+      const option = await serverRouterConfig.createActionOptions(ctx, actionDescriptor)
 
       const wrappedOption = new opt(option)
       if (schema == blankSchema) {
@@ -331,7 +331,7 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
   }
 }
 
-export const createNullActionOption: CreateActionOptionFunction = (_ctx, _httpPath, _ad) => {
+export const createNullActionOption: CreateActionOptionFunction = (_ctx, _ad) => {
   return Promise.resolve(undefined)
 }
 
@@ -457,7 +457,7 @@ export class ActionContextImpl implements MutableActionContext {
   }
 
   resources(): NamedResources {
-    return this.router.namedResources()
+    return this.router.namedResources(this)
   }
 
   willRespondJson() {
@@ -505,7 +505,7 @@ export function fillServerRouterConfig(serverRouterConfig: ServerRouterConfigCus
 
 export type RouterCore = {
   handlerBuildRunners: HandlerBuildRunner[]
-  nameToResource: Map<string, Resource>
+  nameToResource: Map<string, ResourceConstructor>
   nameToPath: Map<string, string>
 }
 
@@ -560,39 +560,95 @@ export abstract class BasicRouter implements Router {
   }
 }
 
-export const createLocalResourceProxy = (config: RouteConfig, resource: Resource): Resource => {
-  const resourceProxy: Resource = {}
-  for (const actionName in resource) {
-    const resourceMethod = resource[actionName]
-    const cad: ConstructDescriptor | undefined = config.construct?.[actionName]
-    if (cad?.schema) {
-      const schema = cad.schema
-      resourceProxy[actionName] = function (...args) {
-        if (args.length === 0) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-          return resourceMethod.apply(resource)
-        } else if (args[0] instanceof opt) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-          return resourceMethod.apply(resource, [args[0]])
-        } else {
-          const parsedInput = schema.parse(args[0])
-          if (parsedInput === undefined) {
-            throw new Error('UnexpectedInput')
+type ResourceConstructor = (ctx: ActionContext) => Resource
+
+export const createLocalResourceProxy = (
+  serverRouterConfig: ServerRouterConfig,
+  config: RouteConfig,
+  resource: Resource,
+): ResourceConstructor => {
+  return (ctx) => {
+    const resourceProxy: Resource = {}
+    for (const actionName in resource) {
+      const resourceMethod = resource[actionName]
+      const cad: ConstructDescriptor | undefined = config.construct?.[actionName]
+      const actionDescriptor = config.actions?.find((action) => action.action === actionName)
+      if (!actionDescriptor) {
+        continue
+      }
+
+      if (cad?.schema) {
+        const schema = cad.schema
+        resourceProxy[actionName] = async function (...args) {
+          const option = await serverRouterConfig.createActionOptions(ctx, actionDescriptor)
+          const wrappedOption = new opt(option)
+
+          if (args.length === 0) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+            return resourceMethod.apply(resource, [wrappedOption])
+          } else {
+            schema.parse(args[0]) // if throw error, args[0] is unexpected
+
+            // TOOD: typesafe
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-assignment
+            return resourceMethod.apply(resource, [...args, wrappedOption])
           }
+        }
+      } else {
+        resourceProxy[actionName] = async function () {
+          const option = await serverRouterConfig.createActionOptions(ctx, actionDescriptor)
+          const wrappedOption = new opt(option)
+
           // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-          return resourceMethod.apply(resource, args)
+          return resourceMethod.apply(resource, [wrappedOption])
         }
       }
-    } else {
-      resourceProxy[actionName] = function (option) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        return resourceMethod.apply(resource, [option])
-      }
     }
-  }
 
-  return resourceProxy
+    return resourceProxy
+  }
 }
+
+// export const createLocalResourceProxy = (config: RouteConfig, resource: Resource): ResourceConstructor => {
+//   return (ctx) => {
+//     const resourceProxy: Resource = {}
+//     for (const actionName in resource) {
+//       const resourceMethod = resource[actionName]
+//       const cad: ConstructDescriptor | undefined = config.construct?.[actionName]
+//       if (cad?.schema) {
+//         const schema = cad.schema
+//         resourceProxy[actionName] = function (...args) {
+
+//           const option = await serverRouterConfig.createActionOptions(ctx, httpPath, actionDescriptor)
+
+//           const wrappedOption = new opt(option)
+
+//           if (args.length === 0) {
+//             // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+//             return resourceMethod.apply(resource)
+//           } else if (args[0] instanceof opt) {
+//             // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+//             return resourceMethod.apply(resource, [args[0]])
+//           } else {
+//             const parsedInput = schema.parse(args[0])
+//             if (parsedInput === undefined) {
+//               throw new Error('UnexpectedInput')
+//             }
+//             // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+//             return resourceMethod.apply(resource, args)
+//           }
+//         }
+//       } else {
+//         resourceProxy[actionName] = function (option) {
+//           // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+//           return resourceMethod.apply(resource, [option])
+//         }
+//       }
+//     }
+
+//     return resourceProxy
+//   }
+// }
 
 type Thenable = {
   then: (onfulfilled: (value: unknown) => unknown) => Thenable
@@ -638,13 +694,32 @@ export class ServerRouter extends BasicRouter {
     return this
   }
 
-  namedResources(): NamedResources {
-    return Object.fromEntries(this.routerCore.nameToResource)
+  namedResources(ctx: ActionContext): NamedResources {
+    // TODO: optimize
+    const ret: NamedResources = {}
+    for (const [name, resourceConstructor] of this.routerCore.nameToResource) {
+      ret[name] = resourceConstructor(ctx)
+    }
+    return ret
+  }
+
+  // protected for test
+  protected async loadResource(resourcePath: string, routeConfig: RouteConfig) {
+    const fileRoot = this.serverRouterConfig.baseDir
+    return await importAndSetup<ResourceSupport, Resource>(
+      fileRoot,
+      resourcePath,
+      new ResourceSupport(fileRoot),
+      routeConfig,
+    )
+  }
+
+  protected async loadAdapter(adapterPath: string, routeConfig: RouteConfig) {
+    const fileRoot = this.serverRouterConfig.baseDir
+    return await importAndSetup<ActionSupport, Adapter>(fileRoot, adapterPath, new ActionSupport(fileRoot), routeConfig)
   }
 
   protected createHandlerBuildRunner(rpath: string, routeConfig: RouteConfig): HandlerBuildRunner {
-    const fileRoot = this.serverRouterConfig.baseDir
-
     const isPageOnly = routeConfig.actions?.every((action) => action.page) && true
 
     return async () => {
@@ -662,12 +737,7 @@ export class ServerRouter extends BasicRouter {
 
       let resource
       try {
-        resource = await importAndSetup<ResourceSupport, Resource>(
-          fileRoot,
-          resourcePath,
-          new ResourceSupport(fileRoot),
-          routeConfig,
-        )
+        resource = await this.loadResource(resourcePath, routeConfig)
       } catch (err) {
         if (!(err instanceof FileNotFoundError) || !isPageOnly) {
           throw err
@@ -675,7 +745,11 @@ export class ServerRouter extends BasicRouter {
       }
 
       if (resource) {
-        this.routerCore.nameToResource.set(resourceName, createLocalResourceProxy(routeConfig, resource))
+        console.log('resourcePath', resourcePath)
+        this.routerCore.nameToResource.set(
+          resourceName,
+          createLocalResourceProxy(this.serverRouterConfig, routeConfig, resource),
+        )
       }
 
       this.routerCore.nameToPath.set(resourceName, resourcePath)
@@ -684,12 +758,7 @@ export class ServerRouter extends BasicRouter {
       let adapter: Adapter
 
       try {
-        adapter = await importAndSetup<ActionSupport, Adapter>(
-          fileRoot,
-          adapterPath,
-          new ActionSupport(fileRoot),
-          routeConfig,
-        )
+        adapter = await this.loadAdapter(adapterPath, routeConfig)
       } catch (err) {
         if (err instanceof FileNotFoundError) {
           adapter = {}

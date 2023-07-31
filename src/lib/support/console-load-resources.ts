@@ -53,31 +53,32 @@ class ResourceHolderCreateRouter extends BasicRouter {
 
   protected createHandlerBuildRunner(rpath: string, routeConfig: RouteConfig): HandlerBuildRunner {
     debugLog('createHandlerBuildRunner: %s', rpath)
-    const fileRoot = this.serverRouterConfig.baseDir
-    return async () => {
-      debugLog('%s', rpath)
-      const resourcePath = this.getResourcePath(rpath)
-      const resourceSupport = new ResourceSupport(fileRoot)
-      const resource = await importAndSetup<ResourceSupport, Resource>(
-        fileRoot,
-        resourcePath,
-        resourceSupport,
-        routeConfig,
-      )
+    throw new Error('Unimplemented')
+    // const fileRoot = this.serverRouterConfig.baseDir
+    // return async () => {
+    //   debugLog('%s', rpath)
+    //   const resourcePath = this.getResourcePath(rpath)
+    //   const resourceSupport = new ResourceSupport(fileRoot)
+    //   const resource = await importAndSetup<ResourceSupport, Resource>(
+    //     fileRoot,
+    //     resourcePath,
+    //     resourceSupport,
+    //     routeConfig,
+    //   )
 
-      const resourceProxy = createLocalResourceProxy(routeConfig, resource)
-      const name = routeConfig.name
-      if (this.resourcesHolder[name]) {
-        throw new Error(
-          `Duplicated Resource name: ${name}; path: ${resourcePath}, with: ${
-            this.routerCore.nameToPath.get(name) || 'unknown'
-          }`,
-        )
-      }
+    //   const resourceProxy = createLocalResourceProxy(routeConfig, resource)
+    //   const name = routeConfig.name
+    //   if (this.resourcesHolder[name]) {
+    //     throw new Error(
+    //       `Duplicated Resource name: ${name}; path: ${resourcePath}, with: ${
+    //         this.routerCore.nameToPath.get(name) || 'unknown'
+    //       }`,
+    //     )
+    //   }
 
-      this.resourcesHolder[name] = resourceProxy
-      this.routerCore.nameToPath.set(name, resourcePath)
-    }
+    //   this.resourcesHolder[name] = resourceProxy
+    //   this.routerCore.nameToPath.set(name, resourcePath)
+    //}
   }
 }
 
