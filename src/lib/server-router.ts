@@ -745,7 +745,6 @@ export class ServerRouter extends BasicRouter {
       }
 
       if (resource) {
-        console.log('resourcePath', resourcePath)
         this.routerCore.nameToResource.set(
           resourceName,
           createLocalResourceProxy(this.serverRouterConfig, routeConfig, resource),
