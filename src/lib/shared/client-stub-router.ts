@@ -90,18 +90,18 @@ class ResponseJsonParser {
   }
 }
 
-type StandardJsonSuccess = {
+export type StandardJsonSuccess = {
   status: 'success'
   data?: unknown
 }
 
-type StandardJsonInvalid = {
+export type StandardJsonInvalid = {
   status: 'error'
   errors: ValidationError['errors']
   message: ValidationError['message']
 }
 
-type StandardJsonFatal = {
+export type StandardJsonFatal = {
   status: 'fatal'
 }
 
