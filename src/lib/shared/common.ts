@@ -72,6 +72,8 @@ export function isValidationError(err: unknown): err is ValidationError {
   return 'name' in ze && ze.name === 'ZodError'
 }
 
+export class FileNotFoundError extends Error {}
+
 export const choiceSchema = (
   defaultConstructConfig: ConstructConfig,
   constructDescriptor: ConstructDescriptor | undefined,

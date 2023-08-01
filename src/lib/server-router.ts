@@ -38,6 +38,7 @@ import {
   PartialWithRequired,
   StandardJsonFormatter,
   JsonFormatter,
+  FileNotFoundError,
 } from '..'
 import { HttpMethod, RouterOptions, opt } from './shared'
 
@@ -346,8 +347,6 @@ export function renderDefault(ctx: ActionContext, options: unknown = undefined) 
   // as object for Express
   ctx.render(viewPath, options as object)
 }
-
-class FileNotFoundError extends Error {}
 
 export const importAndSetup = async <S, R>(
   fileRoot: string,
