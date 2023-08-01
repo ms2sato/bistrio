@@ -505,7 +505,7 @@ export function fillServerRouterConfig(serverRouterConfig: ServerRouterConfigCus
 
 export type RouterCore = {
   handlerBuildRunners: HandlerBuildRunner[]
-  nameToResource: Map<string, ResourceConstructor>
+  nameToResource: Map<string, ResourceProyCreateFunc>
   nameToPath: Map<string, string>
 }
 
@@ -558,15 +558,32 @@ export abstract class BasicRouter implements Router {
       this.serverRouterConfig.adapterFileName,
     )
   }
+
+  // protected for test
+  protected async loadResource(resourcePath: string, routeConfig: RouteConfig) {
+    const fileRoot = this.serverRouterConfig.baseDir
+    return await importAndSetup<ResourceSupport, Resource>(
+      fileRoot,
+      resourcePath,
+      new ResourceSupport(fileRoot),
+      routeConfig,
+    )
+  }
+
+  // protected for test
+  protected async loadAdapter(adapterPath: string, routeConfig: RouteConfig) {
+    const fileRoot = this.serverRouterConfig.baseDir
+    return await importAndSetup<ActionSupport, Adapter>(fileRoot, adapterPath, new ActionSupport(fileRoot), routeConfig)
+  }
 }
 
-type ResourceConstructor = (ctx: ActionContext) => Resource
+export type ResourceProyCreateFunc = (ctx: ActionContext) => Resource
 
-export const createLocalResourceProxy = (
+const createLocalResourceProxy = (
   serverRouterConfig: ServerRouterConfig,
   config: RouteConfig,
   resource: Resource,
-): ResourceConstructor => {
+): ResourceProyCreateFunc => {
   return (ctx) => {
     const resourceProxy: Resource = {}
     for (const actionName in resource) {
@@ -608,47 +625,6 @@ export const createLocalResourceProxy = (
     return resourceProxy
   }
 }
-
-// export const createLocalResourceProxy = (config: RouteConfig, resource: Resource): ResourceConstructor => {
-//   return (ctx) => {
-//     const resourceProxy: Resource = {}
-//     for (const actionName in resource) {
-//       const resourceMethod = resource[actionName]
-//       const cad: ConstructDescriptor | undefined = config.construct?.[actionName]
-//       if (cad?.schema) {
-//         const schema = cad.schema
-//         resourceProxy[actionName] = function (...args) {
-
-//           const option = await serverRouterConfig.createActionOptions(ctx, httpPath, actionDescriptor)
-
-//           const wrappedOption = new opt(option)
-
-//           if (args.length === 0) {
-//             // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-//             return resourceMethod.apply(resource)
-//           } else if (args[0] instanceof opt) {
-//             // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-//             return resourceMethod.apply(resource, [args[0]])
-//           } else {
-//             const parsedInput = schema.parse(args[0])
-//             if (parsedInput === undefined) {
-//               throw new Error('UnexpectedInput')
-//             }
-//             // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-//             return resourceMethod.apply(resource, args)
-//           }
-//         }
-//       } else {
-//         resourceProxy[actionName] = function (option) {
-//           // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-//           return resourceMethod.apply(resource, [option])
-//         }
-//       }
-//     }
-
-//     return resourceProxy
-//   }
-// }
 
 type Thenable = {
   then: (onfulfilled: (value: unknown) => unknown) => Thenable
@@ -701,22 +677,6 @@ export class ServerRouter extends BasicRouter {
       ret[name] = resourceConstructor(ctx)
     }
     return ret
-  }
-
-  // protected for test
-  protected async loadResource(resourcePath: string, routeConfig: RouteConfig) {
-    const fileRoot = this.serverRouterConfig.baseDir
-    return await importAndSetup<ResourceSupport, Resource>(
-      fileRoot,
-      resourcePath,
-      new ResourceSupport(fileRoot),
-      routeConfig,
-    )
-  }
-
-  protected async loadAdapter(adapterPath: string, routeConfig: RouteConfig) {
-    const fileRoot = this.serverRouterConfig.baseDir
-    return await importAndSetup<ActionSupport, Adapter>(fileRoot, adapterPath, new ActionSupport(fileRoot), routeConfig)
   }
 
   protected createHandlerBuildRunner(rpath: string, routeConfig: RouteConfig): HandlerBuildRunner {
