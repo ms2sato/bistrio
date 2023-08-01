@@ -39,6 +39,7 @@ import {
   StandardJsonFormatter,
   JsonFormatter,
   FileNotFoundError,
+  toErrorString,
 } from '..'
 import { HttpMethod, RouterOptions, opt } from './shared'
 
@@ -577,6 +578,12 @@ export abstract class BasicRouter implements Router {
 }
 
 export type ResourceProxyCreateFunc = (ctx: ActionContext) => Resource
+class ResourceMethodCallingError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'ResourceMethodCallingError'
+  }
+}
 
 const createLocalResourceProxy = (
   serverRouterConfig: ServerRouterConfig,
@@ -593,30 +600,27 @@ const createLocalResourceProxy = (
         continue
       }
 
-      if (cad?.schema) {
-        const schema = cad.schema
-        resourceProxy[actionName] = async function (...args) {
+      const schema = choiceSchema(serverRouterConfig.constructConfig, cad, actionName)
+      resourceProxy[actionName] = async function (...args) {
+        try {
           const option = await serverRouterConfig.createActionOptions(ctx, actionDescriptor)
           const wrappedOption = new opt(option)
 
           if (args.length === 0) {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-            return resourceMethod.apply(resource, [wrappedOption])
+            return await resourceMethod.apply(resource, [wrappedOption])
           } else {
             schema.parse(args[0]) // if throw error, args[0] is unexpected
 
             // TOOD: typesafe
             // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-assignment
-            return resourceMethod.apply(resource, [...args, wrappedOption])
+            return await resourceMethod.apply(resource, [...args, wrappedOption])
           }
-        }
-      } else {
-        resourceProxy[actionName] = async function () {
-          const option = await serverRouterConfig.createActionOptions(ctx, actionDescriptor)
-          const wrappedOption = new opt(option)
-
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-          return resourceMethod.apply(resource, [wrappedOption])
+        } catch (err) {
+          console.error(err)
+          throw new ResourceMethodCallingError(
+            `ResourceMethod Calling Failed: ${config.name}#${actionName}; ${toErrorString(err)}`,
+          )
         }
       }
     }
