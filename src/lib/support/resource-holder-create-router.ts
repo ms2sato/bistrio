@@ -3,6 +3,7 @@ import debug from 'debug'
 import {
   BasicRouter,
   ConstructDescriptor,
+  FileNotFoundError,
   HandlerBuildRunner,
   opt,
   Resource,
@@ -49,10 +50,20 @@ export class ResourceHolderCreateRouter extends BasicRouter {
 
   protected createHandlerBuildRunner(rpath: string, routeConfig: RouteConfig): HandlerBuildRunner {
     debugLog('createHandlerBuildRunner: %s', rpath)
+    const isPageOnly = routeConfig.actions?.every((action) => action.page) && true
+
     return async () => {
       debugLog('%s', rpath)
       const resourcePath = this.getResourcePath(rpath)
-      const resource = await this.loadResource(resourcePath, routeConfig)
+      let resource
+      try {
+        resource = await this.loadResource(resourcePath, routeConfig)
+      } catch (err) {
+        if (!(err instanceof FileNotFoundError) || !isPageOnly) {
+          throw err
+        }
+        return
+      }
 
       const resourceProxy = createLocalResourceProxy(routeConfig, resource)
       const name = routeConfig.name
