@@ -504,7 +504,7 @@ export function fillServerRouterConfig(serverRouterConfig: ServerRouterConfigCus
 
 export type RouterCore = {
   handlerBuildRunners: HandlerBuildRunner[]
-  nameToResource: Map<string, ResourceProyCreateFunc>
+  nameToResource: Map<string, ResourceProxyCreateFunc>
   nameToPath: Map<string, string>
 }
 
@@ -576,13 +576,13 @@ export abstract class BasicRouter implements Router {
   }
 }
 
-export type ResourceProyCreateFunc = (ctx: ActionContext) => Resource
+export type ResourceProxyCreateFunc = (ctx: ActionContext) => Resource
 
 const createLocalResourceProxy = (
   serverRouterConfig: ServerRouterConfig,
   config: RouteConfig,
   resource: Resource,
-): ResourceProyCreateFunc => {
+): ResourceProxyCreateFunc => {
   return (ctx) => {
     const resourceProxy: Resource = {}
     for (const actionName in resource) {
