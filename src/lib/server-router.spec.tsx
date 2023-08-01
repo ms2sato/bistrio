@@ -1,7 +1,15 @@
 import express from 'express'
 import { ConstructViewFunc, ServerRenderSupport, buildActionContextCreator } from './server-render-support'
 import { ServerRouter, ServerRouterConfigCustom } from './server-router'
-import { ActionDescriptor, RouteConfig, StandardJsonSuccess, blankSchema, opt } from './shared'
+import {
+  ActionDescriptor,
+  IdNumberParams,
+  RouteConfig,
+  StandardJsonSuccess,
+  blankSchema,
+  idNumberSchema,
+  opt,
+} from './shared'
 import { CreateActionOptionFunction } from './action-context'
 
 type ActionOption = { test: number }
@@ -61,6 +69,9 @@ class TestServerRouter extends ServerRouter {
       build: () => {
         return { msg: 'ret build' }
       },
+      show: ({ id }: IdNumberParams) => {
+        return { msg: `ret show ${id}` }
+      },
       hasOption: (ao: opt<ActionOption>) => {
         return { msg: 'ret hasOption', opt: ao.body }
       },
@@ -83,6 +94,7 @@ const buildRouter = async ({
     actions: [
       { action: 'build', method: 'get', path: '/build' },
       { action: 'hasOption', method: 'get', path: '/has_option' },
+      { action: 'show', method: 'get', path: '/:id' },
     ],
     construct: { build: { schema: blankSchema }, hasOption: { schema: blankSchema } },
   })
@@ -113,6 +125,11 @@ describe('ServerRouter', () => {
     test('access resources', async () => {
       const rs = await createServerRenderSupport()
       expect(await rs.resources().test_resource.build()).toStrictEqual({ msg: 'ret build' })
+    })
+
+    test('access resources with params', async () => {
+      const rs = await createServerRenderSupport()
+      expect(await rs.resources().test_resource.show({ id: 1 })).toStrictEqual({ msg: 'ret show 1' })
     })
 
     test('access resources with actionOptions', async () => {

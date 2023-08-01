@@ -11,3 +11,6 @@ export const isErrorWithCode = (err: unknown): err is ErrorWithCode => {
   const error = err as ErrorWithCode
   return 'code' in error && typeof error.code === 'string' && isError(err)
 }
+
+export const toErrorString = (err: unknown): string =>
+  isError(err) ? err.message : `Unknown error object ${String(err)}`
