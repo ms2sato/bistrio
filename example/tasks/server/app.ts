@@ -5,6 +5,8 @@ import cookieParser from 'cookie-parser'
 import logger from 'morgan'
 import createDebug from 'debug'
 import session from 'express-session'
+import Redis from 'ioredis'
+import RedisStore from 'connect-redis'
 
 import { fillConfig, localeMiddleware, useExpressRouter } from 'bistrio'
 import { checkAdmin, checkLoggedIn } from './middlewares'
@@ -22,6 +24,8 @@ if (!process.env.NODE_ENV) {
 
 fillConfig(configCustom)
 const debug = createDebug('bistrio:params')
+
+const redis = process.env.REDIS_URL ? new Redis(process.env.REDIS_URL) : new Redis()
 
 export async function setup() {
   const app = express()
@@ -48,9 +52,11 @@ export async function setup() {
       name: 'tasks.session',
       resave: false,
       saveUninitialized: false,
+      store: new RedisStore({ client: redis, prefix: 'taskssess:' }),
       cookie: {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
+        sameSite: true,
       },
     }),
   )
