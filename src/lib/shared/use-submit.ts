@@ -74,7 +74,11 @@ export function useSubmit<
       setResult(null)
       if (isValidationError(err)) {
         setInvalid(err as E)
-        onInvalid && onInvalid(err as E, { el, custom: custom as O })
+        if (onInvalid) {
+          onInvalid(err as E, { el, custom: custom as O })
+        } else {
+          console.error(err)
+        }
       } else {
         if (onFatal) {
           onFatal(err, { el, custom: custom as O })

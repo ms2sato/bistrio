@@ -60,6 +60,8 @@ export type Responder<Opt = unknown, Out = unknown, Src = unknown> = {
 export type RequestCallback<In = unknown> = {
   beforeValidation?: (ctx: ActionContext, source: unknown, schema: z.AnyZodObject) => unknown
   afterValidation?: (ctx: ActionContext, input: In, schema: z.AnyZodObject) => unknown
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  override?: (ctx: ActionContext, arg1: any, arg2?: any) => unknown // TODO: typesafe
 }
 
 export type Adapter<Opt = unknown, In = unknown> = {

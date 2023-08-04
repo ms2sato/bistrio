@@ -161,7 +161,7 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
     }
   }
 
-  const handleFatal = async (ctx: ActionContext, err: Error, option: unknown, next: NextFunction) => {
+  const handleFatal = async (ctx: ActionContext, err: Error, option: unknown, _next: NextFunction) => {
     if (responder && 'fatal' in responder) {
       try {
         handlerLog('%s#%s.fatal', adapterPath, actionName)
@@ -171,7 +171,7 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
         await defaultResponder.fatal(ctx, err)
       }
     } else {
-      return next(err)
+      await defaultResponder.fatal(ctx, err)
     }
   }
 
@@ -201,15 +201,19 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
             }
 
             handlerLog('input', input)
-            if (input) {
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-              const output = await resourceMethod.apply(resource, [input, wrappedOption])
-              await respond(ctx, output, option)
+
+            let output
+            if (responder && 'override' in responder) {
+              output = input
+                ? await responder.override?.apply(responder, [ctx, input, wrappedOption])
+                : await responder.override?.apply(responder, [ctx, wrappedOption])
             } else {
               // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-              const output = await resourceMethod.apply(resource, [wrappedOption])
-              await respond(ctx, output, option)
+              output = input
+                ? await resourceMethod.apply(resource, [input, wrappedOption])
+                : await resourceMethod.apply(resource, [wrappedOption])
             }
+            await respond(ctx, output, option)
           } catch (err) {
             if (err instanceof z.ZodError) {
               const validationError = err

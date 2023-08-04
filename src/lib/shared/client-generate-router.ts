@@ -78,6 +78,26 @@ export interface JsonFormatter<S = unknown, I = unknown, F = unknown> {
   fatal(_err: Error): JsonResponse<F>
 }
 
+class HttpClientError extends Error {
+  constructor(
+    message: string,
+    readonly res: Response,
+  ) {
+    super(message)
+    this.name = 'HttpClientError'
+  }
+}
+
+class HttpServerError extends Error {
+  constructor(
+    message: string,
+    readonly res: Response,
+  ) {
+    super(message)
+    this.name = 'HttpServerError'
+  }
+}
+
 class ResponseJsonParser {
   async parse(res: Response): Promise<unknown> {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -88,8 +108,14 @@ class ResponseJsonParser {
       throw createValidationError(ret.errors)
     }
 
+    if (400 <= res.status && res.status < 500) {
+      const ret = json as StandardJsonFatal
+      throw new HttpClientError(ret.message, res)
+    }
+
     if (500 <= res.status && res.status < 600) {
-      throw new Error(`Fatal Error on Server`) // TODO: ServerSideError
+      const ret = json as StandardJsonFatal
+      throw new HttpServerError(ret.message, res)
     }
 
     return (json as StandardJsonSuccess).data
@@ -109,6 +135,17 @@ export type StandardJsonInvalid = {
 
 export type StandardJsonFatal = {
   status: 'fatal'
+  message: string
+}
+
+export class HttpResponseError extends Error {
+  constructor(
+    message: string,
+    readonly code: number,
+  ) {
+    super(message)
+    this.name = 'HttpResponseError'
+  }
 }
 
 export class StandardJsonFormatter
@@ -133,9 +170,14 @@ export class StandardJsonFormatter
     return { json, status: 422 }
   }
 
-  fatal(_err: Error) {
-    const json: StandardJsonFatal = { status: 'fatal' }
-    return { json: json, status: 500 }
+  fatal(err: Error) {
+    if (err instanceof HttpResponseError) {
+      const json: StandardJsonFatal = { status: 'fatal', message: err.message }
+      return { json, status: err.code }
+    }
+
+    const json: StandardJsonFatal = { status: 'fatal', message: 'Fatal error on server' }
+    return { json, status: 500 }
   }
 }
 

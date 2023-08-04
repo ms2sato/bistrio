@@ -13,7 +13,7 @@ function PageNotFound() {
 export function RoutesWrapper({ children }: { children: ReactNode }) {
   return (
     <ErrorBoundary fallback={<PageNotFound></PageNotFound>}>
-      <Suspense fallback="<p>Loading...</p>">{children}</Suspense>
+      <Suspense fallback={<p>Loading...</p>}>{children}</Suspense>
     </ErrorBoundary>
   )
 }

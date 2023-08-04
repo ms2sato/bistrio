@@ -14,6 +14,7 @@ import { routes } from '@isomorphic/routes/all'
 import { Middlewares } from '@/isomorphic/routes/middlewares'
 import { config } from './config/server'
 import { config as configCustom } from '../config'
+import { init as initPassport } from './lib/passport-util'
 
 if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = 'development'
@@ -44,6 +45,7 @@ export async function setup() {
   app.use(
     session({
       secret: process.env.SESSION_SECRET,
+      name: 'tasks.session',
       resave: false,
       saveUninitialized: false,
       cookie: {
@@ -52,6 +54,8 @@ export async function setup() {
       },
     }),
   )
+
+  initPassport(app)
 
   app.use(
     localeMiddleware({

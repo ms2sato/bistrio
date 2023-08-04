@@ -1,5 +1,41 @@
 import { z } from 'zod'
 
+export const Role = {
+  Unknown: -1,
+  Normal: 0,
+  Admin: 9,
+} as const satisfies {
+  [key: string]: number
+}
+
+const roleValuSchema = z.union([z.literal(Role.Unknown), z.literal(Role.Normal), z.literal(Role.Admin)])
+
+const userCoreProps = {
+  id: z.number(),
+  username: z
+    .string()
+    .min(3)
+    .max(255)
+    .regex(/^[a-z][a-z0-9]+$/),
+  role: roleValuSchema,
+  createdAt: z.date(),
+  updatedAt: z.date(),
+}
+
+export const userSchema = z.object(userCoreProps)
+export type User = z.infer<typeof userSchema>
+
+const userCreateProps = {
+  username: userCoreProps['username'],
+  password: z.string().min(8).max(255),
+}
+
+export const userCreateSchema = z.object(userCreateProps)
+export type UserCreateParams = z.infer<typeof userCreateSchema>
+
+export const sessionCreateSchema = z.object(userCreateProps)
+export type SessionCreateParams = z.infer<typeof sessionCreateSchema>
+
 const taskCoreProps = {
   title: z.string().min(3).max(255),
   description: z.string().min(3).max(4096),
