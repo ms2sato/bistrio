@@ -1,9 +1,11 @@
+import { User } from '@/isomorphic/params'
 import { CreateActionOptionFunction } from 'bistrio'
 import createDebug from 'debug'
 
 const debug = createDebug('bistrio:customizer')
 
 export type CustomMethodOption = {
+  user?: User
   admin?: {
     id: number
     accessedAt: Date
@@ -12,8 +14,9 @@ export type CustomMethodOption = {
 
 export const createActionOptions: CreateActionOptionFunction = (ctx, _ad) => {
   debug('createOptions: req.params %s', ctx.params)
+  console.log('User', ctx.req.user)
 
-  const customMethodOption: CustomMethodOption = {}
+  const customMethodOption: CustomMethodOption = { user: ctx.req.user as User } // TODO: typesafe
 
   if (ctx.params.adminId) {
     customMethodOption.admin = {
@@ -22,5 +25,5 @@ export const createActionOptions: CreateActionOptionFunction = (ctx, _ad) => {
     }
   }
 
-  return [customMethodOption]
+  return customMethodOption
 }

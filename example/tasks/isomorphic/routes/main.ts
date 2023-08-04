@@ -1,7 +1,8 @@
-import { RouterSupport, Router, Actions, idNumberSchema, scope, pageSchema } from 'bistrio/client'
+import { RouterSupport, Router, Actions, idNumberSchema, scope, pageSchema, blankSchema } from 'bistrio/client'
 import {
   commentCreateSchema,
   commentUpdateSchema,
+  sessionCreateSchema,
   taskCreateWithTagsSchema,
   taskIdSchema,
   taskUpdateWithTagsSchema,
@@ -19,13 +20,38 @@ export function routes(router: Router, support: RouterSupport<Middlewares>) {
     actions: Actions.page({ only: ['index'] }),
   })
 
-  const mainRouter = router.sub('/')
-  mainRouter.layout({ element: TaskLayout }).options({ hydrate: true }).resources('/tasks', {
-    name: 'page_task',
-    actions: Actions.page(),
+  scope(router, '/', (pageRouter) => {
+    pageRouter.options({ hydrate: true })
+
+    pageRouter.resources('/auth', {
+      name: 'page_auth',
+      actions: [{ action: 'login', path: '/login', method: 'get', page: true }],
+      construct: {
+        login: { schema: blankSchema },
+      },
+    })
+
+    pageRouter.layout({ element: TaskLayout }).resources('/tasks', {
+      name: 'page_task',
+      actions: Actions.page(),
+    })
   })
 
   scope(router, '/api', (apiRouter) => {
+    apiRouter.resources('/auth', {
+      name: 'auth',
+      construct: {
+        user: { schema: blankSchema },
+        verify: { schema: sessionCreateSchema, sources: ['body'] },
+        create: { schema: blankSchema },
+      },
+      actions: [
+        { action: 'user', path: '/user', method: 'get' },
+        { action: 'create', path: '/', method: 'post' },
+        { action: 'verify', path: '/sessions', method: 'post' },
+      ],
+    })
+
     apiRouter.resources('/tasks', {
       construct: {
         index: { schema: pageSchema, sources: ['query', 'params'] },

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import fs from 'fs'
-import { isErrorWithCode } from './is-error'
+import { isErrorWithCode } from './shared/is-error'
 import createDebug from 'debug'
 
 const debug = createDebug('bistrio:debug:view')
