@@ -1,4 +1,4 @@
-import { Resource, NamedResources, Router } from '../../client'
+import { Resource, NamedResources } from '../../client'
 import { LocaleSelector, Localizer } from './locale'
 import {
   createSuspendedResourcesProxy,
@@ -10,16 +10,7 @@ import {
   suspense,
   SuspensePurgeOptions,
 } from './render-support'
-import {
-  ClientGenretateRouter,
-  ClientGenretateRouterCore,
-  ClientConfig,
-  PathPageMap,
-  ResourceInfo,
-  defaultClientConfig,
-} from './client-stub-router'
-import { RouterSupport, nullRouterSupport } from './router-support'
-import { PageLoadFunc } from '.'
+import { ClientGenretateRouterCore, ResourceInfo } from './client-generate-router'
 
 class CacheReadableSuspenseDecorator implements Suspendable {
   constructor(private body: Suspendable) {}
@@ -95,31 +86,5 @@ export class ClientRenderSupport<RS extends NamedResources> implements RenderSup
 
   get query() {
     return Object.fromEntries(new URLSearchParams(window.location.search))
-  }
-}
-
-export type Engine<RS extends NamedResources> = {
-  createRenderSupport: (localeSelector: LocaleSelector) => ClientRenderSupport<RS>
-  pathToPage: () => PathPageMap
-}
-
-export async function setup<RS extends NamedResources>(
-  routes: (router: Router, routerSupport: RouterSupport) => void,
-  pageLoadFunc: PageLoadFunc,
-  clientConfig: ClientConfig = defaultClientConfig(),
-): Promise<Engine<RS>> {
-  const cgr = new ClientGenretateRouter<RS>(clientConfig, pageLoadFunc)
-  routes(cgr, nullRouterSupport) // routerSupport and Middleware is not working on client side
-  await cgr.build()
-  const core = cgr.getCore()
-
-  return {
-    createRenderSupport(localeSelector: LocaleSelector): ClientRenderSupport<RS> {
-      return new ClientRenderSupport<RS>(core, localeSelector)
-    },
-
-    pathToPage() {
-      return core.pathToPage
-    },
   }
 }
