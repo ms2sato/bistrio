@@ -2,7 +2,11 @@ import { type RequestHandler } from 'express'
 
 export const checkLoggedIn = (): RequestHandler => {
   return (req, res, next) => {
-    console.log('checkLoggedIn!', req.user)
+    if (!req.isAuthenticated()) {
+      res.redirect('/auth/login') // TODO: for flash message
+      return
+    }
+
     next()
   }
 }

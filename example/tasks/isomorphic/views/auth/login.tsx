@@ -1,17 +1,19 @@
 import { useState } from 'react'
-import { useSubmit } from 'bistrio/client'
+import { useNavigate, useSubmit } from 'bistrio/client'
 import { sessionCreateSchema } from '@isomorphic/params'
 import { ErrorPanel } from '@isomorphic/components/ErrorPanel'
 import { useRenderSupport } from '@bistrio/routes/main'
 
 export function Page() {
   const rs = useRenderSupport()
+  const navigate = useNavigate()
   const [err, setError] = useState<unknown>(undefined)
 
   const { handleSubmit, source, invalid } = useSubmit({
     source: { username: '', password: '' },
     action: {
       modifier: (params) => rs.resources().auth.verify(params),
+      onSuccess: () => navigate('/tasks'), // TODO: flash message
       onFatal: (err) => setError(err),
     },
     schema: sessionCreateSchema,
