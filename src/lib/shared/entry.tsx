@@ -1,5 +1,5 @@
 import { ReactNode, StrictMode, LazyExoticComponent } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { createBrowserRouter, RouteObject, RouterProvider } from 'react-router-dom'
 import { hydrateRoot } from 'react-dom/client'
 import { ClientConfig, NamedResources, RenderSupportContext, Router, RouterSupport } from './index'
 
@@ -62,9 +62,8 @@ export async function entry<R extends NamedResources>({
   const routes = entryConfig.routes
   const engine: Engine<R> = await setup<R>(routes, entryConfig.pageLoadFunc, clientConfig)
 
-  const routeList = Array.from(engine.pathToPage(), ([path, Page]) => {
-    return <Route key={path} path={path} element={<Page />}></Route>
-  })
+  const routeList:RouteObject[] = Array.from(engine.pathToPage(), ([path, Page]) => ({ path, element: <Page /> }))
+  const router = createBrowserRouter(routeList)
 
   const localeSelector = initLocale(localeMap)
   const rs = engine.createRenderSupport(localeSelector)
@@ -73,9 +72,7 @@ export async function entry<R extends NamedResources>({
     <StrictMode>
       <RenderSupportContext.Provider value={rs}>
         <entryConfig.RoutesWrapper>
-          <BrowserRouter>
-            <Routes>{routeList}</Routes>
-          </BrowserRouter>
+          <RouterProvider router={router} />
         </entryConfig.RoutesWrapper>
       </RenderSupportContext.Provider>
     </StrictMode>,
