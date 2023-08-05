@@ -1,4 +1,4 @@
-import { createPath } from '.'
+import { createPath } from './client-generate-router'
 
 test('None changes for without placeholder', () => {
   const ret = createPath('/api', '/test/abc', {})

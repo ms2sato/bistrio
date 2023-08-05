@@ -1,11 +1,19 @@
 import { ReactNode, StrictMode, LazyExoticComponent } from 'react'
 import { createBrowserRouter, RouteObject, RouterProvider } from 'react-router-dom'
 import { hydrateRoot } from 'react-dom/client'
-import { ClientConfig, NamedResources, RenderSupportContext, Router, RouterSupport } from './index'
-
-import { initLocale, LocaleDictionary } from './localizer'
-import { PageNode } from './render-support'
-import { setup, Engine } from './client'
+import {
+  ClientConfig,
+  ClientGenretateRouter,
+  ClientRenderSupport,
+  NamedResources,
+  nullRouterSupport,
+  RenderSupportContext,
+  Router,
+  RouterSupport,
+  initLocale,
+  LocaleDictionary,
+  PageNode,
+} from './index'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type PageLoadFunc = (pagePath: string) => PageNode | LazyExoticComponent<any>
@@ -59,14 +67,16 @@ export async function entry<R extends NamedResources>({
     throw new Error('container not found')
   }
 
-  const routes = entryConfig.routes
-  const engine: Engine<R> = await setup<R>(routes, entryConfig.pageLoadFunc, clientConfig)
+  const cgr = new ClientGenretateRouter<R>(clientConfig, entryConfig.pageLoadFunc)
+  entryConfig.routes(cgr, nullRouterSupport) // routerSupport and Middleware is not working on client side
+  await cgr.build()
+  const core = cgr.getCore()
 
-  const routeList:RouteObject[] = Array.from(engine.pathToPage(), ([path, Page]) => ({ path, element: <Page /> }))
+  const routeList: RouteObject[] = Array.from(core.pathToPage, ([path, Page]) => ({ path, element: <Page /> }))
   const router = createBrowserRouter(routeList)
 
   const localeSelector = initLocale(localeMap)
-  const rs = engine.createRenderSupport(localeSelector)
+  const rs = new ClientRenderSupport<R>(core, localeSelector)
   hydrateRoot(
     container,
     <StrictMode>
