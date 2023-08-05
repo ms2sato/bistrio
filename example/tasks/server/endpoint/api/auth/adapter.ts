@@ -23,4 +23,19 @@ export default defineAdapter<Adapter>(() => ({
       return userSchema.parse(user)
     },
   },
+
+  logout: {
+    override: async (ctx) => {
+      await new Promise<void>((resolve, reject) => {
+        ctx.req.logout((err) => {
+          if (err) {
+            reject(err)
+          } else {
+            resolve()
+          }
+        })
+      })
+      return { ok: true }
+    },
+  },
 }))

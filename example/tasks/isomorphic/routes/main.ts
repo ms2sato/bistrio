@@ -44,11 +44,13 @@ export function routes(router: Router, support: RouterSupport<Middlewares>) {
         user: { schema: blankSchema },
         verify: { schema: sessionCreateSchema, sources: ['body'] },
         create: { schema: blankSchema },
+        logout: { schema: blankSchema },
       },
       actions: [
         { action: 'user', path: '/user', method: 'get' },
         { action: 'create', path: '/', method: 'post' },
-        { action: 'verify', path: '/sessions', method: 'post' },
+        { action: 'verify', path: '/session', method: 'patch' },
+        { action: 'logout', path: '/session', method: 'delete' },
       ],
     })
 

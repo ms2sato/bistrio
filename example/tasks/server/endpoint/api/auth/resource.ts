@@ -11,4 +11,7 @@ export default defineResource((_support, _options) => ({
     console.log('user in resource', option?.body)
     return option?.body.user || { username: 'unknown', id: 0, role: -1, createdAt: new Date(), updatedAt: new Date() }
   },
+  logout: () => {
+    throw new Error('override by adapter')
+  },
 }))
