@@ -28,14 +28,13 @@ describe('createPath', () => {
   })
 })
 
-const pageNameToComponent: Record<string, PageNode> = {
+const pageNameToDummyComponent: Record<string, PageNode> = {
   '/users/:id': () => <div></div>,
 }
 
 describe('ClientGenretateRouter', () => {
   test('pickup paages', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return
-    const pageLoadFunc: PageLoadFunc = (pageName: string) => pageNameToComponent[pageName]
+    const pageLoadFunc: PageLoadFunc = (pageName: string) => pageNameToDummyComponent[pageName]
     const routes = (router: Router, _routerSupport: RouterSupport) => {
       router.resources('/users', {
         name: 'user',
@@ -44,7 +43,7 @@ describe('ClientGenretateRouter', () => {
 
       router.resources('/tasks', {
         name: 'task',
-        actions: [{ action: 'show', method: 'get', path: '/:id' }],
+        actions: [{ action: 'show', method: 'get', path: '/:id' }], // will not pickup, because of `page: false`
       })
     }
 
@@ -57,10 +56,7 @@ describe('ClientGenretateRouter', () => {
     const core = cgr.getCore()
 
     expect(core.routeObject).toStrictEqual({
-      children: [
-        { path: 'users', children: [{ path: ':id', Component: pageNameToComponent['/users/:id'] }] },
-        { path: 'tasks' }, // node only TODO: remove for optimize
-      ],
+      children: [{ path: 'users', children: [{ path: ':id', Component: pageNameToDummyComponent['/users/:id'] }] }],
     })
   })
 })
