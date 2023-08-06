@@ -1,3 +1,6 @@
+import { z } from 'zod'
+import { type RouteObject } from 'react-router-dom'
+
 import {
   ConstructDescriptor,
   Resource,
@@ -19,8 +22,6 @@ import {
 import { filterWithoutKeys, toURLSearchParams } from './object-util'
 import { pathJoin } from './path-util'
 import { PageNode } from './render-support'
-import { z } from 'zod'
-import React from 'react'
 
 export const createPath = (resourceUrl: string, pathFormat: string, option: Record<string, string | number>) => {
   const keys: string[] = []
@@ -48,7 +49,7 @@ export type ClientGenretateRouterCore = {
   pageLoadFunc: PageLoadFunc
   handlerBuildRunners: HandlerBuildRunner[]
   resourceNameToInfo: ResourceNameToInfo
-  pathToPage: PathPageMap
+  routeObject: RouteObject
 }
 
 export type ClientConfig = {
@@ -170,24 +171,42 @@ export const fillClientConfig = (config: ClientConfigCustom) => {
   return { ...config, ...defaultClientConfig() }
 }
 
+function createSubRouteObject(routeObject: RouteObject, rpath: string): RouteObject {
+  const subRouteObject = { path: rpath.replace(/^\//, '') } // force absolute route
+  if (!routeObject.children) {
+    routeObject.children = []
+  }
+  routeObject.children.push(subRouteObject)
+  return subRouteObject
+}
+
 export class ClientGenretateRouter<RS extends NamedResources> implements Router {
   constructor(
     private config: ClientConfig,
     private pageLoadFunc: PageLoadFunc,
     private httpPath = '/',
+    private routeObject: RouteObject = {},
     private core: ClientGenretateRouterCore = {
       host: config.host(),
       constructConfig: config.constructConfig,
       pageLoadFunc,
       resourceNameToInfo: new Map<string, ResourceInfo>(),
       handlerBuildRunners: [],
-      pathToPage: new Map(),
+      routeObject: routeObject,
     },
   ) {}
 
   sub(rpath: string, ..._args: unknown[]): Router {
+    const subRouteObject = createSubRouteObject(this.routeObject, rpath)
+
     // TODO: args and middlewares
-    return new ClientGenretateRouter<RS>(this.config, this.pageLoadFunc, pathJoin(this.httpPath, rpath), this.core)
+    return new ClientGenretateRouter<RS>(
+      this.config,
+      this.pageLoadFunc,
+      pathJoin(this.httpPath, rpath),
+      subRouteObject,
+      this.core,
+    )
   }
 
   options(_value: RouterOptions) {
@@ -196,6 +215,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
 
   resources(rpath: string, routeConfig: RouteConfig): void {
     const fetcher = this.config.createFetcher()
+    const subRouteObject = createSubRouteObject(this.routeObject, rpath)
 
     const createStubMethod = (
       ad: ActionDescriptor,
@@ -255,7 +275,8 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
 
           const pagePath = pathJoin(httpPath, ad.path)
           if (ad.page) {
-            this.core.pathToPage.set(pagePath, this.core.pageLoadFunc(pagePath))
+            const actionRouteObject = createSubRouteObject(subRouteObject, ad.path)
+            actionRouteObject.Component = this.core.pageLoadFunc(pagePath)
           }
         }
       }
@@ -279,7 +300,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
     await Promise.all(promises)
   }
 
-  getCore() {
+  getCore(): ClientGenretateRouterCore {
     return this.core
   }
 }
