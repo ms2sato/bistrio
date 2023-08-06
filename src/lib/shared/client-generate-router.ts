@@ -22,6 +22,7 @@ import {
 import { filterWithoutKeys, toURLSearchParams } from './object-util'
 import { pathJoin } from './path-util'
 import { PageNode } from './render-support'
+import { RouteObjectPickupper } from './route-object-pickupper'
 
 export const createPath = (resourceUrl: string, pathFormat: string, option: Record<string, string | number>) => {
   const keys: string[] = []
@@ -171,33 +172,28 @@ export const fillClientConfig = (config: ClientConfigCustom) => {
   return { ...config, ...defaultClientConfig() }
 }
 
-function createSubRouteObject(routeObject: RouteObject, rpath?: string): RouteObject {
-  const subRouteObject = rpath ? { path: rpath.replace(/^\//, '') } : {} // force absolute route
-  if (!routeObject.children) {
-    routeObject.children = []
-  }
-  routeObject.children.push(subRouteObject)
-  return subRouteObject
-}
-
 export class ClientGenretateRouter<RS extends NamedResources> implements Router {
+  private routeObjectPickupper: RouteObjectPickupper
+
   constructor(
     private config: ClientConfig,
     private pageLoadFunc: PageLoadFunc,
     private httpPath = '/',
-    private routeObject: RouteObject = {},
+    routeObject: RouteObject = {},
     private core: ClientGenretateRouterCore = {
       host: config.host(),
       constructConfig: config.constructConfig,
       pageLoadFunc,
       resourceNameToInfo: new Map<string, ResourceInfo>(),
       handlerBuildRunners: [],
-      routeObject: routeObject,
+      routeObject,
     },
-  ) {}
+  ) {
+    this.routeObjectPickupper = new RouteObjectPickupper(routeObject, pageLoadFunc)
+  }
 
   sub(rpath: string, ..._args: unknown[]): Router {
-    const subRouteObject = createSubRouteObject(this.routeObject, rpath)
+    const subRouteObject = this.routeObjectPickupper.addNewSub(rpath)
 
     // TODO: args and middlewares
     return new ClientGenretateRouter<RS>(
@@ -278,15 +274,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
           }
         }
 
-        if (pageActionDescriptors.length !== 0) {
-          const pageLoadFunc = this.core.pageLoadFunc
-          const subRouteObject = createSubRouteObject(this.routeObject, rpath)
-
-          for (const ad of pageActionDescriptors) {
-            const actionRouteObject = createSubRouteObject(subRouteObject, ad.path)
-            actionRouteObject.Component = pageLoadFunc(pathJoin(httpPath, ad.path))
-          }
-        }
+        this.routeObjectPickupper.pushPageRouteObjects(httpPath, rpath, pageActionDescriptors)
       }
       return resource
     }
