@@ -1,5 +1,5 @@
 import { ReactNode, StrictMode, LazyExoticComponent } from 'react'
-import { createBrowserRouter, RouteObject, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom'
 import { hydrateRoot } from 'react-dom/client'
 import {
   ClientConfig,
@@ -38,6 +38,14 @@ const getContainerElement = (id = 'app'): HTMLElement => {
   return el
 }
 
+function NullLayout() {
+  return (
+    <div className="test">
+      <Outlet />
+    </div>
+  )
+}
+
 export async function entry<R extends NamedResources>({
   entriesConfig,
   name,
@@ -67,13 +75,12 @@ export async function entry<R extends NamedResources>({
     throw new Error('container not found')
   }
 
-  const cgr = new ClientGenretateRouter<R>(clientConfig, entryConfig.pageLoadFunc)
+  const cgr = new ClientGenretateRouter<R>(clientConfig, entryConfig.pageLoadFunc, '/', { Component: NullLayout }) // TODO: remove test code
   entryConfig.routes(cgr, nullRouterSupport) // routerSupport and Middleware is not working on client side
   await cgr.build()
   const core = cgr.getCore()
 
-  const routeList: RouteObject[] = Array.from(core.pathToPage, ([path, Page]) => ({ path, element: <Page /> }))
-  const router = createBrowserRouter(routeList)
+  const router = createBrowserRouter([core.routeObject])
 
   const localeSelector = initLocale(localeMap)
   const rs = new ClientRenderSupport<R>(core, localeSelector)
