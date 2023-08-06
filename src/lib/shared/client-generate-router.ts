@@ -171,8 +171,8 @@ export const fillClientConfig = (config: ClientConfigCustom) => {
   return { ...config, ...defaultClientConfig() }
 }
 
-function createSubRouteObject(routeObject: RouteObject, rpath: string): RouteObject {
-  const subRouteObject = { path: rpath.replace(/^\//, '') } // force absolute route
+function createSubRouteObject(routeObject: RouteObject, rpath?: string): RouteObject {
+  const subRouteObject = rpath ? { path: rpath.replace(/^\//, '') } : {} // force absolute route
   if (!routeObject.children) {
     routeObject.children = []
   }
@@ -215,7 +215,6 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
 
   resources(rpath: string, routeConfig: RouteConfig): void {
     const fetcher = this.config.createFetcher()
-    const subRouteObject = createSubRouteObject(this.routeObject, rpath)
 
     const createStubMethod = (
       ad: ActionDescriptor,
@@ -253,6 +252,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
     const createResourceProxy = (httpPath: string) => {
       const resourceUrl = pathJoin(this.core.host, httpPath)
       const resource: Resource = {}
+      const pageActionDescriptors: ActionDescriptor[] = []
       if (routeConfig.actions) {
         for (const ad of routeConfig.actions) {
           const actionName = ad.action
@@ -273,10 +273,18 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
 
           resource[actionName] = createStubMethod(ad, resourceUrl, schema, method)
 
-          const pagePath = pathJoin(httpPath, ad.path)
           if (ad.page) {
+            pageActionDescriptors.push(ad)
+          }
+        }
+
+        if (pageActionDescriptors.length !== 0) {
+          const pageLoadFunc = this.core.pageLoadFunc
+          const subRouteObject = createSubRouteObject(this.routeObject, rpath)
+
+          for (const ad of pageActionDescriptors) {
             const actionRouteObject = createSubRouteObject(subRouteObject, ad.path)
-            actionRouteObject.Component = this.core.pageLoadFunc(pagePath)
+            actionRouteObject.Component = pageLoadFunc(pathJoin(httpPath, ad.path))
           }
         }
       }
