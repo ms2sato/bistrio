@@ -6,8 +6,6 @@ import debug from 'debug'
 import {
   ActionContext,
   ActionDescriptor,
-  Actions,
-  ActionSupport,
   ConstructConfig,
   ConstructDescriptor,
   ConstructSource,
@@ -16,9 +14,7 @@ import {
   InputArranger,
   Renderer,
   Adapter,
-  ResourceSupport,
   RouteConfig,
-  Router,
   RouterError,
   RequestCallback,
   parseFormBody,
@@ -28,7 +24,6 @@ import {
   HandlerBuildRunner,
   Resource,
   EndpointFunc,
-  ValidationError,
   ResourceMethod,
   MutableActionContext,
   NamedResources,
@@ -36,18 +31,16 @@ import {
   choiseSources,
   blankSchema,
   PartialWithRequired,
-  StandardJsonFormatter,
-  JsonFormatter,
   FileNotFoundError,
   toErrorString,
   PageLoadFunc,
   RouterCore,
-  RouterCoreLight,
   NullLayout,
 } from '..'
 import { HttpMethod, RouterOptions, opt } from './shared'
 import { RouteObject } from 'react-router-dom'
 import { RouteObjectPickupper } from './shared/route-object-pickupper'
+import { BasicRouter } from './basic-router'
 
 const log = debug('restrant2')
 const routeLog = log.extend('route')
@@ -131,94 +124,6 @@ export const createSmartInputArranger = (contentType2Arranger: ContentType2Arran
     }
     return contentType2Arranger[''](ctx, sources, schema) // TODO: overwritable
   }
-}
-
-type ContextHolder = {
-  ctx: ActionContext
-}
-
-function isContextHolder(obj: unknown): obj is ContextHolder {
-  return (obj as ContextHolder).ctx !== undefined && typeof (obj as ContextHolder).ctx === 'object'
-}
-
-// FIXME: @see https://google.github.io/styleguide/jsoncstyleguide.xml
-class StandardJsonResponder<Opt = undefined, Out = unknown, Src = unknown> implements Responder<Opt, Out, Src> {
-  constructor(private jsonFormatter: JsonFormatter = new StandardJsonFormatter()) {}
-
-  success(ctx: ActionContext, output: Out): void | Promise<void> {
-    let ret
-    if (output === undefined || output === null) {
-      ret = this.jsonFormatter.success(output)
-    } else if (isContextHolder(output)) {
-      const data = { ...output }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { ctx, ...dataWithoutCtx } = data
-      ret = this.jsonFormatter.success(dataWithoutCtx)
-    } else {
-      ret = this.jsonFormatter.success(output)
-    }
-    ctx.res.status(ret.status)
-    ctx.res.json(ret.json)
-  }
-
-  invalid(ctx: ActionContext, validationError: ValidationError, _source: Src): void | Promise<void> {
-    const ret = this.jsonFormatter.invalid(validationError)
-    ctx.res.status(ret.status)
-    ctx.res.json(ret.json)
-  }
-
-  fatal(ctx: ActionContext, err: Error): void | Promise<void> {
-    if (process.env.NODE_ENV === 'production') {
-      const ret = this.jsonFormatter.fatal(err)
-      ctx.res.status(ret.status)
-      ctx.res.json(ret.json)
-    } else {
-      throw err
-    }
-  }
-}
-
-type FatalHandler = (ctx: ActionContext, err: Error) => void
-
-class SmartResponder<Opt = undefined, Out = unknown, Src = unknown> implements Responder<Opt, Out, Src> {
-  constructor(
-    private router: ServerRouter,
-    private fatalHandler: FatalHandler,
-    private jsonResonder = new StandardJsonResponder(),
-  ) {}
-
-  success(ctx: ActionContext, output: Out): void | Promise<void> {
-    if (ctx.willRespondJson()) {
-      return this.jsonResonder.success(ctx, output)
-    }
-
-    if (this.router.serverRouterConfig.renderDefault(ctx, output) === false) {
-      return this.jsonResonder.success(ctx, output)
-    }
-  }
-
-  invalid(ctx: ActionContext, validationError: ValidationError, source: Src): void | Promise<void> {
-    return this.jsonResonder.invalid(ctx, validationError, source)
-  }
-
-  fatal(ctx: ActionContext, err: Error): void | Promise<void> {
-    console.error('fatal', err)
-    if (ctx.willRespondJson()) {
-      return this.jsonResonder.fatal(ctx, err)
-    }
-
-    this.fatalHandler(ctx, err)
-  }
-}
-
-const createSmartResponder = ({ router }: ResourceMethodHandlerParams) => {
-  return new SmartResponder(
-    router,
-    () => {
-      throw new Error('Unimplemented Fatal Handler')
-    },
-    new StandardJsonResponder(),
-  )
 }
 
 const createResourceMethodHandler = (params: ResourceMethodHandlerParams): express.Handler => {
@@ -491,90 +396,6 @@ export class ActionContextImpl implements MutableActionContext {
 
   getCore(): RouterCore {
     return this.router.routerCore
-  }
-}
-
-function defaultServerRouterConfig(): Omit<ServerRouterConfig, 'baseDir' | 'pageLoadFunc'> {
-  return {
-    actions: Actions.page(),
-    inputArranger: createSmartInputArranger(),
-    createActionOptions: createNullActionOption,
-    createActionContext: createDefaultActionContext,
-    constructConfig: Actions.defaultConstructConfig(),
-    createDefaultResponder: createSmartResponder,
-    renderDefault: renderDefault,
-    adapterRoot: './endpoint',
-    adapterFileName: 'adapter',
-    resourceRoot: './endpoint',
-    resourceFileName: 'resource',
-  }
-}
-
-export function fillServerRouterConfig(serverRouterConfig: ServerRouterConfigCustom): ServerRouterConfig {
-  return Object.assign(defaultServerRouterConfig(), serverRouterConfig)
-}
-
-export abstract class BasicRouter implements Router {
-  readonly serverRouterConfig: ServerRouterConfig
-
-  constructor(
-    serverRouterConfig: ServerRouterConfigCustom,
-    readonly httpPath: string = '/',
-    protected readonly routerCore: RouterCoreLight,
-  ) {
-    this.serverRouterConfig = fillServerRouterConfig(serverRouterConfig)
-  }
-
-  abstract sub(...args: unknown[]): Router
-  abstract options(value: RouterOptions): Router
-
-  protected abstract createHandlerBuildRunner(rpath: string, routeConfig: RouteConfig): HandlerBuildRunner
-
-  resources(rpath: string, config: RouteConfig): void {
-    this.routerCore.handlerBuildRunners.push(this.createHandlerBuildRunner(rpath, config))
-  }
-
-  async build() {
-    for (const requestHandlerSources of this.routerCore.handlerBuildRunners) {
-      await requestHandlerSources()
-    }
-  }
-
-  protected getHttpPath(rpath: string) {
-    return path.join(this.httpPath, rpath)
-  }
-
-  protected getResourcePath(rpath: string) {
-    return path.join(
-      this.serverRouterConfig.resourceRoot,
-      this.getHttpPath(rpath),
-      this.serverRouterConfig.resourceFileName,
-    )
-  }
-
-  protected getAdapterPath(rpath: string) {
-    return path.join(
-      this.serverRouterConfig.adapterRoot,
-      this.getHttpPath(rpath),
-      this.serverRouterConfig.adapterFileName,
-    )
-  }
-
-  // protected for test
-  protected async loadResource(resourcePath: string, routeConfig: RouteConfig) {
-    const fileRoot = this.serverRouterConfig.baseDir
-    return await importAndSetup<ResourceSupport, Resource>(
-      fileRoot,
-      resourcePath,
-      new ResourceSupport(fileRoot),
-      routeConfig,
-    )
-  }
-
-  // protected for test
-  protected async loadAdapter(adapterPath: string, routeConfig: RouteConfig) {
-    const fileRoot = this.serverRouterConfig.baseDir
-    return await importAndSetup<ActionSupport, Adapter>(fileRoot, adapterPath, new ActionSupport(fileRoot), routeConfig)
   }
 }
 

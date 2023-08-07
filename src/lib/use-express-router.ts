@@ -1,4 +1,5 @@
 import path from 'path'
+import { Application } from 'express'
 import {
   ActionContextCreator,
   ConstructViewFunc,
@@ -8,9 +9,8 @@ import {
   RouterSupport,
   ServerRouter,
   ServerRouterConfigCustom,
-  buildActionContextCreator,
 } from '..'
-import { Application } from 'express'
+import { buildActionContextCreator } from './build-action-context-creator'
 
 export type ExpressRouterConfig<M extends Middlewares> = {
   app: Application

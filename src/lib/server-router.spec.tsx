@@ -1,5 +1,5 @@
 import express from 'express'
-import { ConstructViewFunc, ServerRenderSupport, buildActionContextCreator } from './server-render-support'
+import { ServerRenderSupport } from './server-render-support'
 import { ServerRouter, ServerRouterConfigCustom } from './server-router'
 import {
   ActionDescriptor,
@@ -11,6 +11,8 @@ import {
   opt,
 } from './shared'
 import { CreateActionOptionFunction } from './action-context'
+import { ConstructViewFunc } from '..'
+import { buildActionContextCreator } from './build-action-context-creator'
 
 type ActionOption = { test: number }
 type VirtualRequest = { url: string; method: string; headers: Record<string, string> }
@@ -108,7 +110,7 @@ const buildRouter = async ({
 const createDummyActionContext = async (params: { serverRouterConfig?: ServerRouterConfigCustom }) => {
   const router = await buildRouter(params)
 
-  const constructView: ConstructViewFunc = () => <>TextView</>
+  const constructView: ConstructViewFunc = () => <>TestView</>
   const req = {} as express.Request
   const res = { render: () => 1, redirect: () => 1 } as unknown as express.Response
   const httpPath = '/test/build'
