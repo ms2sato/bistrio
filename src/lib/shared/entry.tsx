@@ -1,5 +1,5 @@
 import { ReactNode, StrictMode, LazyExoticComponent } from 'react'
-import { BrowserRouter, Outlet } from 'react-router-dom'
+import { BrowserRouter } from 'react-router-dom'
 import { hydrateRoot } from 'react-dom/client'
 import {
   ClientConfig,

@@ -1,4 +1,3 @@
-import { ComponentType, lazy } from 'react'
 import { NamedResources, PageLoadFunc, PageNode, Router, RouterSupport, nullRouterSupport } from '../..'
 import { ClientGenretateRouter, createPath, defaultClientConfig } from './client-generate-router'
 

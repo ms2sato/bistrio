@@ -1,23 +1,21 @@
 import path from 'path'
 import debug from 'debug'
 import {
-  BasicRouter,
   ConstructDescriptor,
   FileNotFoundError,
   HandlerBuildRunner,
   opt,
   Resource,
   RouteConfig,
-  RouterCore,
   RouterCoreLight,
   RouterOptions,
   ServerRouterConfigCustom,
 } from '../../'
+import { BasicRouter } from '../basic-router'
 
 const log = debug('bistrio')
 const debugLog = log.extend('console')
 
-// export for test
 export class ResourceHolderCreateRouter extends BasicRouter {
   constructor(
     private resourcesHolder: Record<string, Resource>,
