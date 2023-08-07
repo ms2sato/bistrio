@@ -40,8 +40,14 @@ import {
   JsonFormatter,
   FileNotFoundError,
   toErrorString,
+  PageLoadFunc,
+  RouterCore,
+  RouterCoreLight,
+  NullLayout,
 } from '..'
 import { HttpMethod, RouterOptions, opt } from './shared'
+import { RouteObject } from 'react-router-dom'
+import { RouteObjectPickupper } from './shared/route-object-pickupper'
 
 const log = debug('restrant2')
 const routeLog = log.extend('route')
@@ -83,6 +89,7 @@ export type ServerRouterConfig = {
   adapterFileName: string
   resourceRoot: string
   resourceFileName: string
+  pageLoadFunc: PageLoadFunc
 }
 
 export function arrangeFormInput(ctx: MutableActionContext, sources: readonly string[], schema: z.AnyZodObject) {
@@ -102,7 +109,7 @@ export type ContentArranger = {
 
 type ContentType2Arranger = Record<string, ContentArranger>
 
-export type ServerRouterConfigCustom = PartialWithRequired<ServerRouterConfig, 'baseDir'>
+export type ServerRouterConfigCustom = PartialWithRequired<ServerRouterConfig, 'baseDir' | 'pageLoadFunc'>
 
 export const defaultContentType2Arranger: ContentType2Arranger = {
   'application/json': arrangeJsonInput,
@@ -481,9 +488,13 @@ export class ActionContextImpl implements MutableActionContext {
     this._input = input
     return input
   }
+
+  getCore(): RouterCore {
+    return this.router.routerCore
+  }
 }
 
-function defaultServerRouterConfig(): Omit<ServerRouterConfig, 'baseDir'> {
+function defaultServerRouterConfig(): Omit<ServerRouterConfig, 'baseDir' | 'pageLoadFunc'> {
   return {
     actions: Actions.page(),
     inputArranger: createSmartInputArranger(),
@@ -503,23 +514,13 @@ export function fillServerRouterConfig(serverRouterConfig: ServerRouterConfigCus
   return Object.assign(defaultServerRouterConfig(), serverRouterConfig)
 }
 
-export type RouterCore = {
-  handlerBuildRunners: HandlerBuildRunner[]
-  nameToResource: Map<string, ResourceProxyCreateFunc>
-  nameToPath: Map<string, string>
-}
-
 export abstract class BasicRouter implements Router {
   readonly serverRouterConfig: ServerRouterConfig
 
   constructor(
-    serverRouterConfig: ServerRouterConfigCustom = { baseDir: './' },
+    serverRouterConfig: ServerRouterConfigCustom,
     readonly httpPath: string = '/',
-    protected readonly routerCore: RouterCore = {
-      handlerBuildRunners: [],
-      nameToResource: new Map(),
-      nameToPath: new Map(),
-    },
+    protected readonly routerCore: RouterCoreLight,
   ) {
     this.serverRouterConfig = fillServerRouterConfig(serverRouterConfig)
   }
@@ -647,22 +648,37 @@ function hasRoutingMethod(router: unknown, method: HttpMethod): router is Routin
 
 export class ServerRouter extends BasicRouter {
   readonly router: express.Router
+  private routeObjectPickupper: RouteObjectPickupper
 
   constructor(
-    serverRouterConfig: ServerRouterConfigCustom = { baseDir: './' },
+    serverRouterConfig: ServerRouterConfigCustom,
     httpPath = '/',
-    readonly routerCore: RouterCore = { handlerBuildRunners: [], nameToResource: new Map(), nameToPath: new Map() },
+    routeObject: RouteObject = { Component: NullLayout },
+    readonly routerCore: RouterCore = {
+      handlerBuildRunners: [],
+      nameToResource: new Map(),
+      nameToPath: new Map(),
+      routeObject,
+    },
     private routerOptions: RouterOptions = { hydrate: false },
   ) {
     super(serverRouterConfig, httpPath, routerCore)
     this.router = express.Router({ mergeParams: true })
+    this.routeObjectPickupper = new RouteObjectPickupper(routeObject, this.serverRouterConfig.pageLoadFunc)
   }
 
   sub(rpath: string, ...handlers: RequestHandler[]) {
+    const subRouteObject = this.routeObjectPickupper.addNewSub(rpath)
     // TODO: impl class SubServerRouter without build
-    const subRouter = new ServerRouter(this.serverRouterConfig, path.join(this.httpPath, rpath), this.routerCore, {
-      ...this.routerOptions,
-    })
+    const subRouter = new ServerRouter(
+      this.serverRouterConfig,
+      path.join(this.httpPath, rpath),
+      subRouteObject,
+      this.routerCore,
+      {
+        ...this.routerOptions,
+      },
+    )
 
     this.router.use(rpath, ...[...handlers, subRouter.router])
     return subRouter
@@ -730,6 +746,8 @@ export class ServerRouter extends BasicRouter {
       }
 
       const actionDescriptors: readonly ActionDescriptor[] = routeConfig.actions || this.serverRouterConfig.actions
+      const resourceHttpPath = this.getHttpPath(rpath)
+      const pageActionDescriptors: ActionDescriptor[] = []
 
       for (const actionDescriptor of actionDescriptors) {
         if (actionDescriptor.page && actionDescriptor.hydrate === undefined) {
@@ -737,7 +755,6 @@ export class ServerRouter extends BasicRouter {
         }
 
         const actionName = actionDescriptor.action
-        const resourceHttpPath = this.getHttpPath(rpath)
 
         const resourceMethod: ResourceMethod | undefined = resource?.[actionName]
         const actionFunc: Handler | Responder | RequestCallback | undefined = adapter[actionName]
@@ -808,6 +825,7 @@ export class ServerRouter extends BasicRouter {
               }
             }
 
+            pageActionDescriptors.push(actionDescriptor)
             params = [handler]
           } else {
             if (!schema) {
@@ -874,6 +892,8 @@ export class ServerRouter extends BasicRouter {
           }
         }
       }
+
+      this.routeObjectPickupper.pushPageRouteObjects(resourceHttpPath, rpath, pageActionDescriptors)
     }
   }
 }

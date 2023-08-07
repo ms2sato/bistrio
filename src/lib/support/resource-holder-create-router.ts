@@ -9,6 +9,7 @@ import {
   Resource,
   RouteConfig,
   RouterCore,
+  RouterCoreLight,
   RouterOptions,
   ServerRouterConfigCustom,
 } from '../../'
@@ -22,7 +23,7 @@ export class ResourceHolderCreateRouter extends BasicRouter {
     private resourcesHolder: Record<string, Resource>,
     serverRouterConfig: ServerRouterConfigCustom,
     httpPath = '/',
-    protected readonly routerCore: RouterCore = {
+    protected readonly routerCore: RouterCoreLight = {
       handlerBuildRunners: [],
       nameToResource: new Map(),
       nameToPath: new Map(),

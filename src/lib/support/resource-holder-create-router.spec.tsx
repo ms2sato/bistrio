@@ -1,12 +1,15 @@
 import { CreateActionOptionFunction } from '../action-context'
-import { FileNotFoundError, Resource, blankSchema, opt } from '../shared'
+import { FileNotFoundError, PageLoadFunc, Resource, blankSchema, opt } from '../shared'
 import { ResourceHolderCreateRouter } from './resource-holder-create-router'
 
 type ActionOption = { test: number }
 
+const DummyComponent = () => <div>test</div>
+const pageLoadFunc: PageLoadFunc = () => DummyComponent
+
 test('standard', async () => {
   const holder: Record<string, Resource> = {}
-  const router = new ResourceHolderCreateRouter(holder, { baseDir: './' })
+  const router = new ResourceHolderCreateRouter(holder, { baseDir: './', pageLoadFunc })
   const spy = jest.spyOn(router as any, 'loadResource').mockImplementation(() =>
     Promise.resolve({
       build: () => ({ msg: 'ret build' }),
@@ -29,7 +32,7 @@ test('with actionOption', async () => {
   const createActionOptions: CreateActionOptionFunction = () => ({ test: 321 })
 
   const holder: Record<string, Resource> = {}
-  const router = new ResourceHolderCreateRouter(holder, { baseDir: './', createActionOptions })
+  const router = new ResourceHolderCreateRouter(holder, { baseDir: './', createActionOptions, pageLoadFunc })
   const spy = jest.spyOn(router as any, 'loadResource').mockImplementation(() =>
     Promise.resolve({
       hasOption: (ao: opt<ActionOption>) => ({ msg: 'ret hasOption', opt: ao.body }),
@@ -53,7 +56,7 @@ test('with actionOption', async () => {
 
 test('page only', async () => {
   const holder: Record<string, Resource> = {}
-  const router = new ResourceHolderCreateRouter(holder, { baseDir: './' })
+  const router = new ResourceHolderCreateRouter(holder, { baseDir: './', pageLoadFunc })
   const spy = jest.spyOn(router as any, 'loadResource').mockImplementation(() => {
     throw new FileNotFoundError('Resource Not Found') // but handled if page only
   })
