@@ -4,10 +4,10 @@ import { ServerRouter, ServerRouterConfigCustom } from './server-router'
 import {
   ActionDescriptor,
   IdNumberParams,
+  PageLoadFunc,
   RouteConfig,
   StandardJsonSuccess,
   blankSchema,
-  idNumberSchema,
   opt,
 } from './shared'
 import { CreateActionOptionFunction } from './action-context'
@@ -83,12 +83,15 @@ class TestServerRouter extends ServerRouter {
   }
 }
 
+const DummyComponent = () => <div>test</div>
+const pageLoadFunc: PageLoadFunc = () => DummyComponent
+
 const buildRouter = async ({
   serverRouterConfig,
 }: {
   serverRouterConfig?: ServerRouterConfigCustom
 }): Promise<TestServerRouter> => {
-  const router = new TestServerRouter(serverRouterConfig)
+  const router = new TestServerRouter(serverRouterConfig || { baseDir: './', pageLoadFunc })
   router.resources('/test', {
     name: 'test_resource',
     actions: [
@@ -134,7 +137,9 @@ describe('ServerRouter', () => {
 
     test('access resources with actionOptions', async () => {
       const createActionOptions: CreateActionOptionFunction = () => ({ test: 321 })
-      const rs = await createServerRenderSupport({ serverRouterConfig: { createActionOptions, baseDir: './' } })
+      const rs = await createServerRenderSupport({
+        serverRouterConfig: { createActionOptions, baseDir: './', pageLoadFunc },
+      })
       expect(await rs.resources().test_resource.hasOption()).toStrictEqual({ msg: 'ret hasOption', opt: { test: 321 } })
     })
 
@@ -153,7 +158,9 @@ describe('ServerRouter', () => {
 
     test('access suspendedResources with actionOptions', async () => {
       const createActionOptions: CreateActionOptionFunction = () => ({ test: 321 })
-      const rs = await createServerRenderSupport({ serverRouterConfig: { createActionOptions, baseDir: './' } })
+      const rs = await createServerRenderSupport({
+        serverRouterConfig: { createActionOptions, baseDir: './', pageLoadFunc },
+      })
 
       // expect.assertions(2)
       try {
@@ -185,7 +192,9 @@ describe('ServerRouter', () => {
 
     test('requests with actionOpitons', async () => {
       const createActionOptions: CreateActionOptionFunction = () => ({ test: 321 })
-      const router = await buildRouter({ serverRouterConfig: { createActionOptions, baseDir: './' } })
+      const router = await buildRouter({
+        serverRouterConfig: { createActionOptions, baseDir: './', pageLoadFunc: () => DummyComponent },
+      })
 
       const ret = await virtualRequest(router, {
         url: '/test/has_option',

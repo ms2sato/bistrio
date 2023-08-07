@@ -1,8 +1,27 @@
 import express from 'express'
 import { z } from 'zod'
-import { ValidationError, Resource, ActionDescriptor, RouteConfig, NamedResources } from '..'
+import { RouteObject } from 'react-router-dom'
+import {
+  ValidationError,
+  Resource,
+  ActionDescriptor,
+  RouteConfig,
+  NamedResources,
+  HandlerBuildRunner,
+  ResourceProxyCreateFunc,
+} from '..'
 
 export { z }
+
+export type RouterCoreLight = {
+  handlerBuildRunners: HandlerBuildRunner[]
+  nameToResource: Map<string, ResourceProxyCreateFunc>
+  nameToPath: Map<string, string>
+}
+
+export type RouterCore = RouterCoreLight & {
+  routeObject: RouteObject
+}
 
 export type ActionContext = {
   render: express.Response['render']
@@ -20,6 +39,7 @@ export type ActionContext = {
   readonly descriptor: ActionDescriptor
   readonly willRespondJson: () => boolean
   resources(): NamedResources
+  getCore(): RouterCore
 }
 
 export type MutableActionContext = ActionContext & {

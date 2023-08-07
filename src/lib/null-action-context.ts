@@ -1,5 +1,5 @@
 import express from 'express'
-import { NamedResources, ActionContext, ActionDescriptor } from '..'
+import { NamedResources, ActionContext, ActionDescriptor, RouterCore } from '..'
 
 export class NullActionContext implements ActionContext {
   private errorMessage = 'Cannot access this ActionContext(May not request context)'
@@ -47,6 +47,9 @@ export class NullActionContext implements ActionContext {
     throw new Error(this.errorMessage)
   }
   resources(): NamedResources {
+    throw new Error(this.errorMessage)
+  }
+  getCore(): RouterCore {
     throw new Error(this.errorMessage)
   }
 }

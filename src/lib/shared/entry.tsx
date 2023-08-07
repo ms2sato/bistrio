@@ -1,5 +1,5 @@
 import { ReactNode, StrictMode, LazyExoticComponent } from 'react'
-import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom'
+import { BrowserRouter, Outlet } from 'react-router-dom'
 import { hydrateRoot } from 'react-dom/client'
 import {
   ClientConfig,
@@ -14,6 +14,7 @@ import {
   LocaleDictionary,
   PageNode,
 } from './index'
+import { NullLayout, toRoutes } from './react-router-util'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type PageLoadFunc = (pagePath: string) => PageNode | LazyExoticComponent<any>
@@ -36,14 +37,6 @@ const getContainerElement = (id = 'app'): HTMLElement => {
     throw new Error('Container element not found')
   }
   return el
-}
-
-function NullLayout() {
-  return (
-    <div className="test">
-      <Outlet />
-    </div>
-  )
 }
 
 export async function entry<R extends NamedResources>({
@@ -80,8 +73,6 @@ export async function entry<R extends NamedResources>({
   await cgr.build()
   const core = cgr.getCore()
 
-  const router = createBrowserRouter([core.routeObject])
-
   const localeSelector = initLocale(localeMap)
   const rs = new ClientRenderSupport<R>(core, localeSelector)
   hydrateRoot(
@@ -89,7 +80,7 @@ export async function entry<R extends NamedResources>({
     <StrictMode>
       <RenderSupportContext.Provider value={rs}>
         <entryConfig.RoutesWrapper>
-          <RouterProvider router={router} />
+          <BrowserRouter>{toRoutes(core.routeObject)}</BrowserRouter>
         </entryConfig.RoutesWrapper>
       </RenderSupportContext.Provider>
     </StrictMode>,
