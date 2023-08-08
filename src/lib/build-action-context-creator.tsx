@@ -1,11 +1,12 @@
 import express from 'express'
 import internal, { Transform, TransformCallback } from 'stream'
+import { StaticRouter } from 'react-router-dom/server'
 
 import { ServerRenderSupport } from './server-render-support'
 import { ActionContextCreator, ActionContextImpl } from './server-router'
 import { renderToPipeableStream } from 'react-dom/server'
 import { isErrorWithCode, isError } from './is-error'
-import { NamedResources } from './shared'
+import { NamedResources, RenderSupportContext, toRoutes } from './shared'
 import { ConstructViewFunc } from './common'
 
 export function buildActionContextCreator(
@@ -15,7 +16,8 @@ export function buildActionContextCreator(
 ): ActionContextCreator {
   return ({ router, req, res, descriptor, httpPath }) => {
     const ctx = new ActionContextImpl(router, req, res, descriptor, httpPath)
-    ctx.render = createRenderFunc(constructView, viewRoot, failText)
+    const Router = toRoutes(router.routerCore.routeObject)
+    ctx.render = createRenderFunc(constructView, Router, failText)
     return ctx
   }
 }
@@ -94,7 +96,7 @@ function renderReactViewStream<RS extends NamedResources>(
   })
 }
 
-function createRenderFunc(constructView: ConstructViewFunc, viewRoot: string, failText = '') {
+function createRenderFunc(constructView: ConstructViewFunc, Router: JSX.Element, failText = '') {
   function render(
     this: ActionContextImpl,
     view: string,
@@ -111,8 +113,15 @@ function createRenderFunc(constructView: ConstructViewFunc, viewRoot: string, fa
     ;(async () => {
       const hydrate: boolean = this.descriptor.hydrate ?? false
       const rs = new ServerRenderSupport(this)
-      const node = await constructView({ node: () => <></>, hydrate, options, ctx: this, rs }) // TODO: fix node
-      renderReactViewStream(this.res, node, rs, failText)
+
+      const node = await constructView({ node: () => Router, hydrate, options, ctx: this, rs }) // TODO: fix node
+      const viewNode = (
+        <StaticRouter location={this.req.url}>
+          <RenderSupportContext.Provider value={rs}>{node}</RenderSupportContext.Provider>
+        </StaticRouter>
+      )
+
+      renderReactViewStream(this.res, viewNode, rs, failText)
     })().catch((err) => {
       let message
       if (isErrorWithCode(err) && err.code == 'ERR_MODULE_NOT_FOUND') {
