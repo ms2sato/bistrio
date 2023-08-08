@@ -1,13 +1,18 @@
 import { ReactNode } from 'react'
-import { Livereload, ScriptProps, Scripts } from 'bistrio'
+import { ActionContext, Livereload, ScriptProps, Scripts } from 'bistrio'
 
-export function Layout({ children, ...props }: { children: ReactNode } & ScriptProps) {
+export function Layout({ children, ctx, hydrate }: { children: ReactNode; ctx: ActionContext; hydrate: boolean }) {
+  // This is sample impl, changing js for any roles
+  const script = ctx.query['admin'] == 'true' ? ['admin'] : ['main']
+
+  const scriptProps: ScriptProps = { hydrate, script }
+
   return (
     <html>
       <head>
         <title>Tasks</title>
         <link type="text/css" rel="stylesheet" href="/stylesheets/style.css"></link>
-        <Scripts {...props}></Scripts>
+        <Scripts {...scriptProps}></Scripts>
         <Livereload />
       </head>
       <body>
