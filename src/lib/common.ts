@@ -1,9 +1,9 @@
 import { ActionContext } from './action-context'
 import { ActionContextCreator } from './server-router'
-import { PageNode, RenderSupport } from './shared'
+import { RenderSupport } from './shared'
 
 export type ConstructViewFunc = (props: {
-  node: PageNode
+  routes: JSX.Element
   hydrate: boolean
   options: unknown
   rs: RenderSupport<any>
