@@ -16,8 +16,8 @@ export function buildActionContextCreator(
 ): ActionContextCreator {
   return ({ router, req, res, descriptor, httpPath }) => {
     const ctx = new ActionContextImpl(router, req, res, descriptor, httpPath)
-    const Router = toRoutes(router.routerCore.routeObject)
-    ctx.render = createRenderFunc(constructView, Router, failText)
+    const routes = toRoutes(router.routerCore.routeObject)
+    ctx.render = createRenderFunc(constructView, routes, failText)
     return ctx
   }
 }
@@ -96,7 +96,7 @@ function renderReactViewStream<RS extends NamedResources>(
   })
 }
 
-function createRenderFunc(constructView: ConstructViewFunc, Router: JSX.Element, failText = '') {
+function createRenderFunc(constructView: ConstructViewFunc, routes: JSX.Element, failText = '') {
   function render(
     this: ActionContextImpl,
     view: string,
@@ -114,7 +114,7 @@ function createRenderFunc(constructView: ConstructViewFunc, Router: JSX.Element,
       const hydrate: boolean = this.descriptor.hydrate ?? false
       const rs = new ServerRenderSupport(this)
 
-      const node = await constructView({ node: () => Router, hydrate, options, ctx: this, rs }) // TODO: fix node
+      const node = await constructView({ routes, hydrate, options, ctx: this, rs }) // TODO: fix node
       const viewNode = (
         <StaticRouter location={this.req.url}>
           <RenderSupportContext.Provider value={rs}>{node}</RenderSupportContext.Provider>

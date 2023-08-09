@@ -2,12 +2,10 @@ import { ConstructViewFunc } from 'bistrio'
 import { Layout } from './Layout'
 import { RoutesWrapper } from '@/isomorphic/components/RoutesWrapper'
 
-export const constructView: ConstructViewFunc = ({ node: App, hydrate, ctx }) => {
+export const constructView: ConstructViewFunc = ({ routes, hydrate, ctx }) => {
   return (
     <Layout hydrate={hydrate} ctx={ctx}>
-      <RoutesWrapper>
-        <App></App>
-      </RoutesWrapper>
+      <RoutesWrapper>{routes}</RoutesWrapper>
     </Layout>
   )
 }
