@@ -1,7 +1,15 @@
 import path from 'path'
 import fs from 'fs'
 import { RouteConfig, Router, RouterOptions } from '../../client'
-import { Config, ConfigCustom, fillConfig, Middlewares, nullRouterSupport, RouterSupport } from '../..'
+import {
+  Config,
+  ConfigCustom,
+  fillConfig,
+  Middlewares,
+  nullRouterSupport,
+  RouterLayoutType,
+  RouterSupport,
+} from '../..'
 
 class NameToPathRouter implements Router {
   constructor(
@@ -11,6 +19,10 @@ class NameToPathRouter implements Router {
 
   sub(rpath: string, ..._args: unknown[]): Router {
     return new NameToPathRouter(path.join(this.httpPath, rpath), this.nameToPath)
+  }
+
+  layout(_props: RouterLayoutType): Router {
+    return new NameToPathRouter(this.httpPath, this.nameToPath)
   }
 
   options(_value: RouterOptions) {

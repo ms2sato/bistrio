@@ -7,8 +7,11 @@ import {
   taskUpdateWithTagsSchema,
 } from '../params'
 import { Middlewares } from './middlewares'
+import UserLayout from '../components/UserLayout'
+import TaskLayout from '../components/tasks/TaskLayout'
 
 export function routes(router: Router, support: RouterSupport<Middlewares>) {
+  router = router.layout({ Component: UserLayout })
   router = router.sub('/', support.middlewares.checkLoggedIn())
 
   router.resources('/', {
@@ -17,7 +20,7 @@ export function routes(router: Router, support: RouterSupport<Middlewares>) {
   })
 
   const mainRouter = router.sub('/')
-  mainRouter.options({ hydrate: true }).resources('/tasks', {
+  mainRouter.layout({ Component: TaskLayout }).options({ hydrate: true }).resources('/tasks', {
     name: 'page_task',
     actions: Actions.page(),
   })

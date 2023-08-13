@@ -14,7 +14,7 @@ import {
   LocaleDictionary,
   PageNode,
 } from './index'
-import { NullLayout, toRoutes } from './react-router-util'
+import { toRoutes } from './react-router-util'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type PageLoadFunc = (pagePath: string) => PageNode | LazyExoticComponent<any>
@@ -68,7 +68,7 @@ export async function entry<R extends NamedResources>({
     throw new Error('container not found')
   }
 
-  const cgr = new ClientGenretateRouter<R>(clientConfig, entryConfig.pageLoadFunc, '/', { Component: NullLayout }) // TODO: remove test code
+  const cgr = new ClientGenretateRouter<R>(clientConfig, entryConfig.pageLoadFunc, '/', {}) // TODO: remove test code
   entryConfig.routes(cgr, nullRouterSupport) // routerSupport and Middleware is not working on client side
   await cgr.build()
   const core = cgr.getCore()

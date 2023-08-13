@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { blankSchema } from './schemas'
+import { ComponentType, ReactNode } from 'react'
 
 const optType = Symbol('opt<>')
 
@@ -46,11 +47,15 @@ export type RouteConfig = {
 }
 
 export type RouterOptions = {
-  hydrate: boolean
+  hydrate?: boolean
+  layout?: React.ComponentType
 }
+
+export type RouterLayoutType = { element: ReactNode } | { Component: ComponentType }
 
 export interface Router {
   sub(...args: unknown[]): Router
+  layout(props: RouterLayoutType): Router
   resources(path: string, config: RouteConfig): void
   options(value: RouterOptions): Router
 }

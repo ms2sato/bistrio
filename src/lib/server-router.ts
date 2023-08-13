@@ -35,7 +35,7 @@ import {
   toErrorString,
   PageLoadFunc,
   RouterCore,
-  NullLayout,
+  RouterLayoutType,
 } from '..'
 import { HttpMethod, RouterOptions, opt } from './shared'
 import { RouteObject } from 'react-router-dom'
@@ -474,7 +474,7 @@ export class ServerRouter extends BasicRouter {
   constructor(
     serverRouterConfig: ServerRouterConfigCustom,
     httpPath = '/',
-    routeObject: RouteObject = { Component: NullLayout },
+    private routeObject: RouteObject = {},
     readonly routerCore: RouterCore = {
       handlerBuildRunners: [],
       nameToResource: new Map(),
@@ -505,6 +505,20 @@ export class ServerRouter extends BasicRouter {
     return subRouter
   }
 
+  layout(props: RouterLayoutType) {
+    const layoutRouteObject: RouteObject | undefined = this.routeObjectPickupper.addNewLayout(props)
+
+    if (layoutRouteObject) {
+      const subRouter = new ServerRouter(this.serverRouterConfig, this.httpPath, layoutRouteObject, this.routerCore, {
+        ...this.routerOptions,
+      })
+
+      return subRouter
+    }
+
+    return this
+  }
+
   options(value: RouterOptions) {
     this.routerOptions = value
     return this
@@ -521,6 +535,10 @@ export class ServerRouter extends BasicRouter {
 
   protected createHandlerBuildRunner(rpath: string, routeConfig: RouteConfig): HandlerBuildRunner {
     const isPageOnly = routeConfig.actions?.every((action) => action.page) && true
+
+    const hasPages = routeConfig.actions?.some((ad) => ad.page) ?? false
+    const subRouteObject = hasPages ? this.routeObjectPickupper.addNewSub(rpath) : undefined
+    const pageActionDescriptors: ActionDescriptor[] = []
 
     return async () => {
       handlerLog('buildHandler: %s', path.join(this.httpPath, rpath))
@@ -567,8 +585,7 @@ export class ServerRouter extends BasicRouter {
       }
 
       const actionDescriptors: readonly ActionDescriptor[] = routeConfig.actions || this.serverRouterConfig.actions
-      const resourceHttpPath = this.getHttpPath(rpath)
-      const pageActionDescriptors: ActionDescriptor[] = []
+      const fullResourceRoutePath = this.getHttpPath(rpath)
 
       for (const actionDescriptor of actionDescriptors) {
         if (actionDescriptor.page && actionDescriptor.hydrate === undefined) {
@@ -610,7 +627,7 @@ export class ServerRouter extends BasicRouter {
               req,
               res,
               descriptor: actionDescriptor,
-              httpPath: resourceHttpPath,
+              httpPath: fullResourceRoutePath,
             })
             try {
               handlerLog('%s#%s as Handler', adapterPath, actionName)
@@ -636,7 +653,7 @@ export class ServerRouter extends BasicRouter {
                 req,
                 res,
                 descriptor: actionDescriptor,
-                httpPath: resourceHttpPath,
+                httpPath: fullResourceRoutePath,
               })
               try {
                 handlerLog('page: %s', ctx.httpFilePath)
@@ -671,7 +688,7 @@ export class ServerRouter extends BasicRouter {
               resource,
               sources,
               router: this,
-              httpPath: resourceHttpPath,
+              httpPath: fullResourceRoutePath,
               schema,
               adapterPath,
               actionDescriptor,
@@ -714,7 +731,9 @@ export class ServerRouter extends BasicRouter {
         }
       }
 
-      this.routeObjectPickupper.pushPageRouteObjects(resourceHttpPath, rpath, pageActionDescriptors)
+      if (subRouteObject) {
+        this.routeObjectPickupper.pushPageRouteObjectsToSub(fullResourceRoutePath, subRouteObject, pageActionDescriptors)
+      }
     }
   }
 }
