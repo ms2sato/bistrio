@@ -12,7 +12,7 @@ import TaskLayout from '../components/tasks/TaskLayout'
 
 export function routes(router: Router, support: RouterSupport<Middlewares>) {
   router = router.sub('/', support.middlewares.checkLoggedIn())
-  router = router.layout({ Component: UserLayout })
+  router = router.layout({ element: UserLayout })
 
   router.resources('/', {
     name: 'page_root',
@@ -20,7 +20,7 @@ export function routes(router: Router, support: RouterSupport<Middlewares>) {
   })
 
   const mainRouter = router.sub('/')
-  mainRouter.layout({ Component: TaskLayout }).options({ hydrate: true }).resources('/tasks', {
+  mainRouter.layout({ element: TaskLayout }).options({ hydrate: true }).resources('/tasks', {
     name: 'page_task',
     actions: Actions.page(),
   })
