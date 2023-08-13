@@ -13,6 +13,7 @@ import {
 import { CreateActionOptionFunction } from './action-context'
 import { ConstructViewFunc } from '..'
 import { buildActionContextCreator } from './build-action-context-creator'
+import { Outlet } from 'react-router-dom'
 
 type ActionOption = { test: number }
 type VirtualRequest = { url: string; method: string; headers: Record<string, string> }
@@ -208,6 +209,79 @@ describe('ServerRouter', () => {
       expect(ret.data).toStrictEqual({
         msg: 'ret hasOption',
         opt: { test: 321 },
+      })
+    })
+  })
+
+  describe('layout', () => {
+    const DummyLayout = () => (
+      <div className="dummy-layout">
+        <Outlet />
+      </div>
+    )
+
+    test('simple', async () => {
+      const router = new TestServerRouter({ baseDir: './', pageLoadFunc })
+      router.layout({ Component: DummyLayout }).resources('/test', {
+        name: 'test_resource',
+        actions: [{ action: 'page', method: 'get', path: '/:id', page: true }],
+        construct: { show: { schema: blankSchema } },
+      })
+      await router.build()
+
+      const routeObject = router.routerCore.routeObject
+      expect(routeObject).toStrictEqual({
+        Component: DummyLayout,
+        children: [
+          {
+            children: [
+              {
+                Component: DummyComponent,
+                path: ':id',
+              },
+            ],
+            path: 'test',
+          },
+        ],
+      })
+    })
+
+    test('nested', async () => {
+      const router = new TestServerRouter({ baseDir: './', pageLoadFunc })
+      const layoutRouter = router.layout({ Component: DummyLayout })
+      const subRouter = layoutRouter.sub('/sub')
+      const subLayoutRouter = subRouter.layout({ Component: DummyLayout })
+      subLayoutRouter.resources('/test', {
+        name: 'test_resource',
+        actions: [{ action: 'page', method: 'get', path: '/:id', page: true }],
+        construct: { show: { schema: blankSchema } },
+      })
+      await router.build()
+
+      const routeObject = router.routerCore.routeObject
+      expect(routeObject).toStrictEqual({
+        Component: DummyLayout,
+        children: [
+          {
+            path: 'sub',
+            children: [
+              {
+                Component: DummyLayout,
+                children: [
+                  {
+                    children: [
+                      {
+                        Component: DummyComponent,
+                        path: ':id',
+                      },
+                    ],
+                    path: 'test',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
       })
     })
   })

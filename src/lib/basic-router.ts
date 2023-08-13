@@ -10,6 +10,7 @@ import {
   RouteConfig,
   Router,
   RouterCoreLight,
+  RouterLayoutType,
   RouterOptions,
   ServerRouterConfig,
   ServerRouterConfigCustom,
@@ -63,6 +64,7 @@ export abstract class BasicRouter implements Router {
   }
 
   abstract sub(...args: unknown[]): Router
+  abstract layout(props: RouterLayoutType): Router
   abstract options(value: RouterOptions): Router
 
   protected abstract createHandlerBuildRunner(rpath: string, routeConfig: RouteConfig): HandlerBuildRunner

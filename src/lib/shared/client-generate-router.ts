@@ -18,6 +18,7 @@ import {
   PageLoadFunc,
   ValidationError,
   createValidationError,
+  RouterLayoutType,
 } from '../../client'
 import { filterWithoutKeys, toURLSearchParams } from './object-util'
 import { pathJoin } from './path-util'
@@ -209,6 +210,24 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
     return this
   }
 
+  layout(props: RouterLayoutType) {
+    const layoutRouteObject: RouteObject | undefined = this.routeObjectPickupper.addNewLayout(props)
+
+    if (layoutRouteObject) {
+      const layoutRouter = new ClientGenretateRouter(
+        this.config,
+        this.pageLoadFunc,
+        this.httpPath,
+        layoutRouteObject,
+        this.core,
+      )
+
+      return layoutRouter
+    }
+
+    return this
+  }
+
   resources(rpath: string, routeConfig: RouteConfig): void {
     const fetcher = this.config.createFetcher()
 
@@ -245,10 +264,9 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
       }
     }
 
-    const createResourceProxy = (httpPath: string) => {
-      const resourceUrl = pathJoin(this.core.host, httpPath)
+    const createResourceProxy = (fullResourceRoutePath: string) => {
+      const resourceUrl = pathJoin(this.core.host, fullResourceRoutePath)
       const resource: Resource = {}
-      const pageActionDescriptors: ActionDescriptor[] = []
       if (routeConfig.actions) {
         for (const ad of routeConfig.actions) {
           const actionName = ad.action
@@ -257,7 +275,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
             method = ad.method
           } else {
             if (ad.method.length === 0) {
-              throw new Error(`method is blank array: ${httpPath}#${ad.action}`)
+              throw new Error(`method is blank array: ${fullResourceRoutePath}#${ad.action}`)
             }
 
             // TODO: choice which method
@@ -273,21 +291,31 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
             pageActionDescriptors.push(ad)
           }
         }
-
-        this.routeObjectPickupper.pushPageRouteObjects(httpPath, rpath, pageActionDescriptors)
       }
       return resource
     }
 
+    const hasPages = routeConfig.actions?.some((ad) => ad.page) ?? false
+    const subRouteObject = hasPages ? this.routeObjectPickupper.addNewSub(rpath) : undefined
+    const pageActionDescriptors: ActionDescriptor[] = []
+
     this.core.handlerBuildRunners.push(() => {
-      const httpPath = pathJoin(this.httpPath, rpath)
-      const resource = createResourceProxy(httpPath)
+      const fullResourceRoutePath = pathJoin(this.httpPath, rpath)
+      const resource = createResourceProxy(fullResourceRoutePath)
 
       const pathInfo: ResourceInfo = {
-        httpPath,
+        httpPath: fullResourceRoutePath,
         resource,
       }
       this.core.resourceNameToInfo.set(routeConfig.name, pathInfo)
+
+      if (subRouteObject) {
+        this.routeObjectPickupper.pushPageRouteObjectsToSub(
+          fullResourceRoutePath,
+          subRouteObject,
+          pageActionDescriptors,
+        )
+      }
     })
   }
 

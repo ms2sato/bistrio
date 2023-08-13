@@ -8,6 +8,7 @@ import {
   Resource,
   RouteConfig,
   RouterCoreLight,
+  RouterLayoutType,
   RouterOptions,
   ServerRouterConfigCustom,
 } from '../../'
@@ -37,6 +38,16 @@ export class ResourceHolderCreateRouter extends BasicRouter {
       this.resourcesHolder,
       this.serverRouterConfig,
       path.join(this.httpPath, rpath),
+      this.routerCore,
+      { ...this.routerOptions },
+    )
+  }
+
+  layout(_props: RouterLayoutType) {
+    return new ResourceHolderCreateRouter(
+      this.resourcesHolder,
+      this.serverRouterConfig,
+      this.httpPath,
       this.routerCore,
       { ...this.routerOptions },
     )

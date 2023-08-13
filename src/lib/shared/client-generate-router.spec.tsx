@@ -1,4 +1,5 @@
-import { NamedResources, PageLoadFunc, PageNode, Router, RouterSupport, nullRouterSupport } from '../..'
+import { Outlet } from 'react-router-dom'
+import { NamedResources, PageNode, Router } from '../..'
 import { ClientGenretateRouter, createPath, defaultClientConfig } from './client-generate-router'
 
 describe('createPath', () => {
@@ -31,10 +32,25 @@ const pageNameToDummyComponent: Record<string, PageNode> = {
   '/users/:id': () => <div></div>,
 }
 
+const DummyLayout = () => (
+  <div>
+    <Outlet></Outlet>
+  </div>
+)
+
 describe('ClientGenretateRouter', () => {
-  test('pickup paages', async () => {
-    const pageLoadFunc: PageLoadFunc = (pageName: string) => pageNameToDummyComponent[pageName]
-    const routes = (router: Router, _routerSupport: RouterSupport) => {
+  const buildRouter = async (routes: (router: Router) => void) => {
+    const cgr = new ClientGenretateRouter<NamedResources>(
+      { ...defaultClientConfig(), host: () => 'dummy' },
+      (pageName: string) => pageNameToDummyComponent[pageName],
+    )
+    routes(cgr) // routerSupport and Middleware is not working on client side
+    await cgr.build()
+    return cgr
+  }
+
+  test('pickup pages', async () => {
+    const routes = (router: Router) => {
       router.resources('/users', {
         name: 'user',
         actions: [{ action: 'show', method: 'get', path: '/:id', page: true }],
@@ -46,16 +62,64 @@ describe('ClientGenretateRouter', () => {
       })
     }
 
-    const cgr = new ClientGenretateRouter<NamedResources>(
-      { ...defaultClientConfig(), host: () => 'dummy' },
-      pageLoadFunc,
-    )
-    routes(cgr, nullRouterSupport) // routerSupport and Middleware is not working on client side
-    await cgr.build()
-    const core = cgr.getCore()
+    const router = await buildRouter(routes)
+    const core = router.getCore()
 
     expect(core.routeObject).toStrictEqual({
       children: [{ path: 'users', children: [{ path: ':id', Component: pageNameToDummyComponent['/users/:id'] }] }],
+    })
+  })
+
+  test('simple layout', async () => {
+    const routes = (router: Router) => {
+      const layoutRouter = router.layout({ Component: DummyLayout })
+
+      layoutRouter.resources('/users', {
+        name: 'user',
+        actions: [{ action: 'show', method: 'get', path: '/:id', page: true }],
+      })
+
+      layoutRouter.resources('/tasks', {
+        name: 'task',
+        actions: [{ action: 'show', method: 'get', path: '/:id' }], // will not pickup, because of `page: false`
+      })
+    }
+
+    const router = await buildRouter(routes)
+    const core = router.getCore()
+
+    expect(core.routeObject).toStrictEqual({
+      Component: DummyLayout,
+      children: [{ path: 'users', children: [{ path: ':id', Component: pageNameToDummyComponent['/users/:id'] }] }],
+    })
+  })
+
+  test('nested layout', async () => {
+    const routes = (router: Router) => {
+      const layoutRouter = router.layout({ Component: DummyLayout })
+
+      layoutRouter.resources('/users', {
+        name: 'user',
+        actions: [{ action: 'show', method: 'get', path: '/:id', page: true }],
+      })
+
+      const subRouter = layoutRouter.sub('sub')
+      const subLayoutRouter = subRouter.layout({ Component: DummyLayout })
+      subLayoutRouter.resources('/tasks', {
+        name: 'task',
+        actions: [{ action: 'show', method: 'get', path: '/:id' }], // will not pickup, because of `page: false`
+      })
+    }
+
+    const router = await buildRouter(routes)
+    const core = router.getCore()
+
+    expect(core.routeObject).toStrictEqual({
+      Component: DummyLayout,
+      children: [
+        { path: 'users', children: [{ path: ':id', Component: pageNameToDummyComponent['/users/:id'] }] },
+        { path: 'sub', children: [{ Component: DummyLayout }] },
+      ],
     })
   })
 })
