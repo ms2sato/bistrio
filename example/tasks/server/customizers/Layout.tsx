@@ -2,9 +2,7 @@ import { ReactNode } from 'react'
 import { ActionContext, Livereload, ScriptProps, Scripts } from 'bistrio'
 
 export function Layout({ children, ctx, hydrate }: { children: ReactNode; ctx: ActionContext; hydrate: boolean }) {
-  // This is sample impl, changing js for any roles
-  const script = ctx.query['admin'] == 'true' ? ['admin'] : ['main']
-
+  const script = ctx.req.originalUrl.startsWith('/admin') ? ['admin'] : ['main']
   const scriptProps: ScriptProps = { hydrate, script }
 
   return (

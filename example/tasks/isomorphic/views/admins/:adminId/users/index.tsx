@@ -1,9 +1,5 @@
 function Index() {
-  return (
-    <>
-      <p>test</p>
-    </>
-  )
+  return <div>test</div>
 }
 
 export { Index as Page }
