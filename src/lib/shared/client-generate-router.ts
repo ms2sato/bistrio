@@ -24,6 +24,9 @@ import { filterWithoutKeys, toURLSearchParams } from './object-util'
 import { pathJoin } from './path-util'
 import { PageNode } from './render-support'
 import { RouteObjectPickupper } from './route-object-pickupper'
+import createDebug from 'debug'
+
+const debug = createDebug('bistrio:debug:client')
 
 export const createPath = (resourceUrl: string, pathFormat: string, option: Record<string, string | number>) => {
   const keys: string[] = []
@@ -299,9 +302,12 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
     const subRouteObject = hasPages ? this.routeObjectPickupper.addNewSub(rpath) : undefined
     const pageActionDescriptors: ActionDescriptor[] = []
 
+    debug('hasPages: %d, subRouteObject: %o', hasPages, subRouteObject)
+
     this.core.handlerBuildRunners.push(() => {
       const fullResourceRoutePath = pathJoin(this.httpPath, rpath)
       const resource = createResourceProxy(fullResourceRoutePath)
+      debug('pageAd: %o', pageActionDescriptors)
 
       const pathInfo: ResourceInfo = {
         httpPath: fullResourceRoutePath,

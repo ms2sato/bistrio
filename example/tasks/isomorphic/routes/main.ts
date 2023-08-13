@@ -11,8 +11,8 @@ import UserLayout from '../components/UserLayout'
 import TaskLayout from '../components/tasks/TaskLayout'
 
 export function routes(router: Router, support: RouterSupport<Middlewares>) {
-  router = router.layout({ Component: UserLayout })
   router = router.sub('/', support.middlewares.checkLoggedIn())
+  router = router.layout({ Component: UserLayout })
 
   router.resources('/', {
     name: 'page_root',

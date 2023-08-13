@@ -8,6 +8,9 @@ import { renderToPipeableStream } from 'react-dom/server'
 import { isErrorWithCode, isError } from './is-error'
 import { NamedResources, RenderSupportContext, toRoutes } from './shared'
 import { ConstructViewFunc } from './common'
+import createDebug from 'debug'
+
+const debug = createDebug('bistrio:debug:build-action-context-creator')
 
 export function buildActionContextCreator(
   viewRoot: string,
@@ -115,8 +118,9 @@ function createRenderFunc(constructView: ConstructViewFunc, routes: JSX.Element,
       const rs = new ServerRenderSupport(this)
 
       const node = await constructView({ routes, hydrate, options, ctx: this, rs }) // TODO: fix node
+      debug(`req.url: %s`, this.req.originalUrl)
       const viewNode = (
-        <StaticRouter location={this.req.url}>
+        <StaticRouter location={this.req.originalUrl}>
           <RenderSupportContext.Provider value={rs}>{node}</RenderSupportContext.Provider>
         </StaticRouter>
       )
