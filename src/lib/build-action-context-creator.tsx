@@ -118,7 +118,7 @@ function createRenderFunc(constructView: ConstructViewFunc, routes: JSX.Element,
       const rs = new ServerRenderSupport(this)
 
       const node = await constructView({ routes, hydrate, options, ctx: this, rs }) // TODO: fix node
-      debug(`req.url: %s`, this.req.originalUrl)
+      debug(`req.originalUrl: %s`, this.req.originalUrl)
       const viewNode = (
         <StaticRouter location={this.req.originalUrl}>
           <RenderSupportContext.Provider value={rs}>{node}</RenderSupportContext.Provider>
