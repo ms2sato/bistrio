@@ -513,6 +513,8 @@ export class ServerRouter extends BasicRouter {
         ...this.routerOptions,
       })
 
+      this.router.use(subRouter.router)
+
       return subRouter
     }
 
@@ -732,7 +734,11 @@ export class ServerRouter extends BasicRouter {
       }
 
       if (subRouteObject) {
-        this.routeObjectPickupper.pushPageRouteObjectsToSub(fullResourceRoutePath, subRouteObject, pageActionDescriptors)
+        this.routeObjectPickupper.pushPageRouteObjectsToSub(
+          fullResourceRoutePath,
+          subRouteObject,
+          pageActionDescriptors,
+        )
       }
     }
   }
