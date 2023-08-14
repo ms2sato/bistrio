@@ -12,8 +12,7 @@ import UserLayout from '../components/UserLayout'
 import TaskLayout from '../components/tasks/TaskLayout'
 
 export function routes(router: Router, support: RouterSupport<Middlewares>) {
-  router = router.sub('/', support.middlewares.checkLoggedIn())
-  router = router.layout({ element: UserLayout })
+  router = router.layout({ element: UserLayout }).options({ hydrate: true })
 
   router.resources('/', {
     name: 'page_root',
@@ -21,8 +20,6 @@ export function routes(router: Router, support: RouterSupport<Middlewares>) {
   })
 
   scope(router, '/', (pageRouter) => {
-    pageRouter.options({ hydrate: true })
-
     pageRouter.resources('/auth', {
       name: 'page_auth',
       actions: [{ action: 'login', path: '/login', method: 'get', page: true }],
@@ -31,9 +28,13 @@ export function routes(router: Router, support: RouterSupport<Middlewares>) {
       },
     })
 
-    pageRouter.layout({ element: TaskLayout }).resources('/tasks', {
-      name: 'page_task',
-      actions: Actions.page(),
+    scope(pageRouter, '/', (pageRouter) => {
+      pageRouter = pageRouter.sub('/', support.middlewares.checkLoggedIn())
+
+      pageRouter.layout({ element: TaskLayout }).resources('/tasks', {
+        name: 'page_task',
+        actions: Actions.page(),
+      })
     })
   })
 
