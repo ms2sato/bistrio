@@ -194,6 +194,7 @@ const createFetcher: CreateFetcherFunc = (): Fetcher => {
         method,
         headers: {
           'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
         },
         body,
       })
