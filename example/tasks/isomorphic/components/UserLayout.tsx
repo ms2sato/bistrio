@@ -1,11 +1,13 @@
 import { Link, Outlet } from 'react-router-dom'
 import { useUIEvent, useNavigate } from 'bistrio/client'
 import { useRenderSupport } from '../../.bistrio/routes/main'
+import { FlashMessage } from './FlashMessage'
 
 export default function UserLayout() {
   return (
     <div>
       <Header />
+      <FlashMessage />
       <Outlet />
       <footer>for user</footer>
     </div>
