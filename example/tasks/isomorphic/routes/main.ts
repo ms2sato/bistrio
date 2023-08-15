@@ -1,3 +1,4 @@
+import { lazy } from 'react'
 import { RouterSupport, Router, Actions, idNumberSchema, scope, pageSchema, blankSchema } from 'bistrio/client'
 import {
   commentCreateSchema,
@@ -8,11 +9,10 @@ import {
   taskUpdateWithTagsSchema,
 } from '../params'
 import { Middlewares } from './middlewares'
-import UserLayout from '../components/UserLayout'
 import TaskLayout from '../components/tasks/TaskLayout'
 
 export function routes(router: Router, support: RouterSupport<Middlewares>) {
-  router = router.layout({ element: UserLayout }).options({ hydrate: true })
+  router = router.layout({ Component: lazy(() => import('../components/UserLayout')) }).options({ hydrate: true })
 
   router.resources('/', {
     name: 'page_root',
