@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { PageParams } from './schemas'
 import { usePager } from './use-pager'
 import { toURLSearchParams } from './object-util'
+import { useEffect } from 'react'
 
 export function usePageLink() {
   const location = useLocation()
@@ -15,7 +16,6 @@ export type PaginationProps<T> = { page?: number; limit?: number; loader: Pagina
 export type PaginationAttrs = {
   page: number
   limit: number
-  state: PageParams | null
   maxPage: number
   pageParams: PageParams
   prev: () => void
@@ -37,22 +37,20 @@ export function usePagination<T>(props: PaginationProps<T>): PaginationReturn<T>
   const pageLink = usePageLink()
   const navigate = useNavigate()
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const { search, state: s } = useLocation()
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const state: PageParams | null = s // TODO: to safe
+  const { search } = useLocation()
   const query = parseQuery(search)
 
   const { page, limit, pageParams, setLimit, setPage, prev, next } = usePager({
-    limit: query.limit ? Number(query.limit) : props.limit || 25,
-    page: query.page ? Number(query.page) : props.page || 1,
+    limit: getLimit(query, props.limit),
+    page: getPage(query, props.page),
   })
 
   // Rerendering for PageLink clicking
-  if (state && (page !== state.page || limit !== state.limit)) {
-    setPage(state.page)
-    setLimit(state.limit)
-  }
+  // @see https://stackoverflow.com/questions/62836374/react-router-does-not-update-component-if-url-parameter-changes
+  useEffect(() => {
+    setPage(getPage(query, props.page))
+    setLimit(getLimit(query, props.limit))
+  }, [query.limit, query.page])
 
   const { data, count } = props.loader(pageParams)
   const maxPage = Math.ceil(count / limit)
@@ -87,7 +85,6 @@ export function usePagination<T>(props: PaginationProps<T>): PaginationReturn<T>
     data,
     page,
     limit,
-    state,
     maxPage,
     pageParams,
     prev,
@@ -101,6 +98,12 @@ export function usePagination<T>(props: PaginationProps<T>): PaginationReturn<T>
     navigateTolimitChanged,
   }
 }
+
+const getLimit = (query: Record<string, string>, defaultValue: number | undefined) =>
+  query.limit ? Number(query.limit) : defaultValue || 25
+
+const getPage = (query: Record<string, string>, defaultValue: number | undefined) =>
+  query.page ? Number(query.page) : defaultValue || 1
 
 // @see https://stackoverflow.com/questions/3895478/does-javascript-have-a-method-like-range-to-generate-a-range-within-the-supp
 const range = (start: number, end: number) =>
