@@ -13,7 +13,12 @@ export function Page() {
     source: { username: '', password: '' },
     action: {
       modifier: (params) => rs.resources().auth.verify(params),
-      onSuccess: () => navigate('/tasks'), // TODO: flash message
+      onSuccess: (result) =>
+        navigate(
+          '/tasks',
+          { purge: true },
+          { state: { flashMessage: { text: `Logged in as ${result.username}`, type: 'info' } } },
+        ),
       onFatal: (err) => setError(err),
     },
     schema: sessionCreateSchema,
@@ -22,7 +27,6 @@ export function Page() {
   return (
     <>
       <h1>Sign in</h1>
-      <UserProfile />
       <ErrorPanel err={invalid || err} />
       <form onSubmit={handleSubmit}>
         <section>
@@ -45,12 +49,4 @@ export function Page() {
       </form>
     </>
   )
-}
-
-function UserProfile() {
-  const rs = useRenderSupport()
-  const user = rs.suspendedResources().auth.user()
-  console.log(user)
-
-  return <div>{user?.username}</div>
 }
