@@ -182,8 +182,12 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
 
       const wrappedOption = new opt(option)
       if (schema == blankSchema) {
+        // TODO: typesafe
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const output = await resourceMethod.apply(resource, [wrappedOption])
+        const output =
+          responder && 'override' in responder
+            ? await responder.override?.apply(responder, [ctx, wrappedOption])
+            : await resourceMethod.apply(resource, [wrappedOption])
         await respond(ctx, output, option)
       } else {
         try {
