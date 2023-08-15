@@ -10,8 +10,8 @@ import {
   blankSchema,
   opt,
 } from './shared'
-import { CreateActionOptionFunction } from './action-context'
-import { ConstructViewFunc } from '..'
+import { Adapter, CreateActionOptionFunction } from './action-context'
+import { ConstructViewFunc, Resource, idNumberSchema } from '..'
 import { buildActionContextCreator } from './build-action-context-creator'
 import { Outlet } from 'react-router-dom'
 
@@ -66,23 +66,33 @@ const virtualRequest = (router: ServerRouter, req: VirtualRequest): Promise<Virt
     )
   })
 
-class TestServerRouter extends ServerRouter {
+const dummyResource = {
+  build: () => {
+    return { msg: 'ret build' }
+  },
+  show: ({ id }: IdNumberParams) => {
+    return { msg: `ret show ${id}` }
+  },
+  hasOption: (ao: opt<ActionOption>) => {
+    return { msg: 'ret hasOption', opt: ao.body }
+  },
+} as const satisfies Resource
+
+class TestServerRouter<R extends Resource> extends ServerRouter {
+  constructor(
+    props: ServerRouterConfigCustom,
+    private resource: R,
+    private adapter: Adapter = {},
+  ) {
+    super(props)
+  }
+
   protected async loadResource(_resourcePath: string, _routeConfig: RouteConfig) {
-    return Promise.resolve({
-      build: () => {
-        return { msg: 'ret build' }
-      },
-      show: ({ id }: IdNumberParams) => {
-        return { msg: `ret show ${id}` }
-      },
-      hasOption: (ao: opt<ActionOption>) => {
-        return { msg: 'ret hasOption', opt: ao.body }
-      },
-    })
+    return Promise.resolve(this.resource)
   }
 
   protected loadAdapter(_adapterPath: string, _routeConfig: RouteConfig) {
-    return Promise.resolve({})
+    return Promise.resolve(this.adapter)
   }
 }
 
@@ -93,8 +103,8 @@ const buildRouter = async ({
   serverRouterConfig,
 }: {
   serverRouterConfig?: ServerRouterConfigCustom
-}): Promise<TestServerRouter> => {
-  const router = new TestServerRouter(serverRouterConfig || { baseDir: './', pageLoadFunc })
+}): Promise<TestServerRouter<typeof dummyResource>> => {
+  const router = new TestServerRouter(serverRouterConfig || { baseDir: './', pageLoadFunc }, dummyResource)
   router.resources('/test', {
     name: 'test_resource',
     actions: [
@@ -213,6 +223,70 @@ describe('ServerRouter', () => {
     })
   })
 
+  describe('adapter', () => {
+    test('no args', async () => {
+      const router = new TestServerRouter(
+        { baseDir: './', pageLoadFunc },
+        {
+          get() {
+            throw new Error('Unexpected called resource method')
+          },
+        },
+        {
+          get: {
+            override: () => ({ msg: 'ret adapter get' }),
+          },
+        },
+      )
+      router.resources('/test', {
+        name: 'test_resource',
+        actions: [{ action: 'get', method: 'get', path: '/get' }],
+        construct: { get: { schema: blankSchema } },
+      })
+      await router.build()
+
+      const ret = await virtualRequest(router, {
+        url: '/test/get',
+        method: 'GET',
+        headers: { 'content-type': 'application/json' },
+      })
+
+      expect(ret.statusCode).toBe(200)
+      expect(ret.data).toStrictEqual({ msg: 'ret adapter get' })
+    })
+
+    test('an arg', async () => {
+      const router = new TestServerRouter(
+        { baseDir: './', pageLoadFunc },
+        {
+          get(_params: IdNumberParams) {
+            throw new Error('Unexpected called resource method')
+          },
+        },
+        {
+          get: {
+            override: (_ctx, _params: IdNumberParams) => ({ msg: 'ret adapter get' }),
+          },
+        },
+      )
+      router.resources('/test', {
+        name: 'test_resource',
+        actions: [{ action: 'get', method: 'get', path: '/:id' }],
+        construct: { get: { schema: idNumberSchema } },
+      })
+      await router.build()
+
+      const ret = await virtualRequest(router, {
+        url: '/test/1',
+        method: 'GET',
+        headers: { 'content-type': 'application/json' },
+      })
+
+      expect(ret.statusCode).toBe(200)
+      expect(ret.data).toStrictEqual({ msg: 'ret adapter get' })
+    })
+  })
+
   describe('layout', () => {
     const DummyLayout = () => (
       <div className="dummy-layout">
@@ -221,7 +295,7 @@ describe('ServerRouter', () => {
     )
 
     test('simple', async () => {
-      const router = new TestServerRouter({ baseDir: './', pageLoadFunc })
+      const router = new TestServerRouter({ baseDir: './', pageLoadFunc }, dummyResource)
       router.layout({ Component: DummyLayout }).resources('/test', {
         name: 'test_resource',
         actions: [{ action: 'page', method: 'get', path: '/:id', page: true }],
@@ -247,7 +321,7 @@ describe('ServerRouter', () => {
     })
 
     test('nested', async () => {
-      const router = new TestServerRouter({ baseDir: './', pageLoadFunc })
+      const router = new TestServerRouter({ baseDir: './', pageLoadFunc }, dummyResource)
       const layoutRouter = router.layout({ Component: DummyLayout })
       const subRouter = layoutRouter.sub('/sub')
       const subLayoutRouter = subRouter.layout({ Component: DummyLayout })
