@@ -1,19 +1,23 @@
-import { Outlet } from 'react-router-dom'
+import { Link, Outlet } from 'react-router-dom'
 import { useUIEvent, useNavigate } from 'bistrio/client'
 import { useRenderSupport } from '../../.bistrio/routes/main'
 
-export default (
-  <div>
-    <Header />
-    <Outlet />
-    <footer>for user</footer>
-  </div>
-)
+export default function UserLayout() {
+  return (
+    <div>
+      <Header />
+      <Outlet />
+      <footer>for user</footer>
+    </div>
+  )
+}
 
 function Header() {
   const rs = useRenderSupport()
+  const user = rs.suspendedResources().auth.user()
+
   const navigate = useNavigate()
-  const { handleEvent, pending } = useUIEvent({
+  const { handleEvent: handleLogout, pending } = useUIEvent({
     modifier: () => rs.resources().auth.logout(),
     onSuccess: () => navigate('/', { purge: true }),
   })
@@ -21,10 +25,15 @@ function Header() {
     <header>
       {pending ? (
         '...'
+      ) : user.role === -1 ? (
+        <Link to="/auth/login">Login</Link>
       ) : (
-        <a href="#" onClick={handleEvent}>
-          Logout
-        </a>
+        <>
+          <a href="#" onClick={handleLogout}>
+            Logout
+          </a>
+          {user.username}
+        </>
       )}
     </header>
   )
