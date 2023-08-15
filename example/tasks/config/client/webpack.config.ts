@@ -1,4 +1,3 @@
-import path from 'path'
 import { config } from '../../config'
 import { generateWebpackConfig } from 'bistrio'
 
