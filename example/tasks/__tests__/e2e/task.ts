@@ -4,6 +4,14 @@ import { asURL, spy, RequestHolder, waitForAnyInnerText, waitForNotAnyInnerText 
 
 const prisma = getPrismaCilent()
 
+beforeAll(async () => {
+  await page.goto(asURL('/auth/login'))
+  await page.$eval('input[name=username]', (el) => ((el as HTMLInputElement).value = 'user1'))
+  await page.$eval('input[name=password]', (el) => ((el as HTMLInputElement).value = 'password'))
+  await page.click('button[type="submit"]')
+  await waitForAnyInnerText(page, 'header a', 'Logout')
+})
+
 describe('senario /tasks', () => {
   let req: RequestHolder
 
@@ -25,7 +33,7 @@ describe('senario /tasks', () => {
     await page.$eval('textarea[name=description]', (el) => ((el as HTMLTextAreaElement).value = 'TestDescription'))
 
     // Create Ajax
-    await Promise.all([req.clearAndWaitForResponses(2, { resourceType: 'ajax' }), page.click('input[type="submit"]')])
+    await Promise.all([req.clearAndWaitForResponses(3, { resourceType: 'ajax' }), page.click('input[type="submit"]')])
 
     expect(req.errors).toHaveLength(0)
     expect(req.failed).toHaveLength(0)
@@ -186,7 +194,7 @@ describe('/tasks/:id/edit', () => {
     await page.$eval('input[name=done]', (el) => ((el as HTMLInputElement).checked = true))
     await page.$eval('input[name=title]', (el) => ((el as HTMLInputElement).value = 'NewTitle'))
     await Promise.all([
-      req.clearAndWaitForResponses(2, { resourceType: 'ajax' }),
+      req.clearAndWaitForResponses(3, { resourceType: 'ajax' }),
       page.$eval('input[type=submit]', (el) => (el as HTMLInputElement).click()),
     ])
 
@@ -237,7 +245,7 @@ describe('/tasks/:id', () => {
     await page.$eval('input[name=body]', (el) => ((el as HTMLInputElement).value = 'TestComment'))
 
     await Promise.all([
-      req.clearAndWaitForResponses(3, { resourceType: 'ajax' }),
+      req.clearAndWaitForResponses(4, { resourceType: 'ajax' }),
       page.$eval('input[type=submit]', (el) => (el as HTMLInputElement).click()),
     ])
 
