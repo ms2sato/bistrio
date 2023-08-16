@@ -30,11 +30,11 @@
     "db:migrate": "dotenv -e .env.development -- prisma migrate dev",
     "db:reset": "dotenv -e .env.development -- prisma migrate reset",
     "db:rollback": "dotenv -e .env.development -- prisma migrate resolve --rolled-back",
-    "db:seed": "dotenv -e .env.development -- ts-node prisma/seed.ts",
+    "db:seed": "dotenv -e .env.development -- prisma db seed",
     "db:truncate": "dotenv -e .env.development -- ts-node prisma/truncate.ts",
     "db:migrate:test": "NODE_ENV=test dotenv -e .env.test -- prisma migrate dev",
     "db:reset:test": "NODE_ENV=test dotenv -e .env.test -- prisma migrate reset",
-    "db:seed:test": "NODE_ENV=test dotenv -e .env.test -- ts-node prisma/seed.ts",
+    "db:seed:test": "NODE_ENV=test dotenv -e .env.test -- prisma db seed",
     "db:truncate:test": "NODE_ENV=test dotenv -e .env.test -- ts-node prisma/truncate.ts",
     "build:client": "webpack build --config ./config/client/webpack.config.ts",
     "build:server": "cpx .bistrio/filemap.json dist/.bistrio/ && tsc && tsc-alias",
@@ -68,6 +68,9 @@
       "inherit": true,
       "extensions": "ts,tsx"
     }
+  },
+  "prisma": {
+    "seed": "node -r ./server/support/tsnode_register prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^4.9.0",
