@@ -26,15 +26,17 @@ async function main(prisma: PrismaClient) {
   await prisma.$queryRaw`SET CONSTRAINTS ALL IMMEDIATE`
 }
 
+console.log('[BEGIN TRUNCATE]')
 const prisma = new PrismaClient()
-
 main(prisma)
   .catch((e) => {
     console.error(e)
     process.exit(1)
   })
   .finally(() => {
-    prisma.$disconnect().catch((e) => {
+    prisma.$disconnect().then(()=> {
+      console.log('[END TRUNCATE]')
+    }).catch((e) => {
       console.error(e)
     })
   })
