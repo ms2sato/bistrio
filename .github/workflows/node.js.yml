@@ -13,6 +13,7 @@ env:
   TZ: 'Asia/Tokyo'
   NODE_ENV: test
   DATABASE_URL: 'postgresql://postgres:password@localhost:5432/myapp_test?schema=public'
+  REDIS_URL: 'redis://localhost:6379'
   SESSION_SECRET: 'secret'
 
 jobs:
@@ -29,6 +30,15 @@ jobs:
           POSTGRES_PASSWORD: password
           POSTGRES_DB: myapp_test
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     strategy:
       matrix:
