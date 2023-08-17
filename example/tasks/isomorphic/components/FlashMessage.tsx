@@ -1,20 +1,48 @@
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
-export type FlashMessageState = { flashMessage: { text: string; type: 'info' | 'error' } }
+export type FlashMessageProps = { text: string; type: 'info' | 'error' }
+export type FlashMessageState = { flashMessage: FlashMessageProps }
 
-export function FlashMessage() {
+export function isFlashMessageState(state: unknown): state is FlashMessageState {
+  if (!state) {
+    return false
+  }
+  const typedState = state as FlashMessageState
+  return (
+    'flashMessage' in typedState &&
+    typeof typedState.flashMessage.text === 'string' &&
+    (typedState.flashMessage.type === 'info' || typedState.flashMessage.type === 'error')
+  )
+}
+
+type DismissFunc = () => void
+
+export function useFlashMessage(): [FlashMessageProps | undefined, DismissFunc] {
   const location = useLocation()
-  const [flashMessage, setFlashMessage] = useState<FlashMessageState['flashMessage'] | undefined>(undefined)
+  const [flashMessage, setFlashMessage] = useState<FlashMessageProps | undefined>(undefined)
 
   useEffect(() => {
-    if (!location.state || !('flashMessage' in location.state)) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const state = location.state
+    setFlashMessage(isFlashMessageState(state) ? state.flashMessage : undefined)
+  }, [location.state])
+
+  return [
+    flashMessage,
+    function dismiss() {
       setFlashMessage(undefined)
-      return
-    }
+    },
+  ]
+}
 
-    setFlashMessage((location.state as FlashMessageState).flashMessage)
-  }, [location])
-
-  return flashMessage ? <div className={`flash-message ${flashMessage.type}`}>{flashMessage.text}</div> : <></>
+export function FlashMessage() {
+  const [flashMessage, dismiss] = useFlashMessage()
+  return flashMessage ? (
+    <div onClick={() => dismiss()} className={`flash-message ${flashMessage.type}`}>
+      {flashMessage.text}
+    </div>
+  ) : (
+    <></>
+  )
 }
