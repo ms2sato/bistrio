@@ -1,4 +1,3 @@
-import React from 'react'
 import { isError, isValidationError } from 'bistrio/client'
 
 export function ErrorPanel({ err }: { err: unknown }) {
