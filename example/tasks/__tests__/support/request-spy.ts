@@ -163,7 +163,7 @@ function requestHoldable(page: Page): RequestHolder {
     },
     async clearAndWaitForResponses(count: number, criterias: Criteria | Criteria[] = []) {
       this.clear()
-      return this.waitForResponses(count, criterias)
+      return await this.waitForResponses(count, criterias)
     },
   }
 }
