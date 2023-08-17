@@ -1,16 +1,12 @@
 import { Task } from '@prisma/client'
 import { getPrismaCilent } from '../../server/lib/prisma-util'
-import { asURL, spy, RequestHolder, waitForAnyInnerText, waitForNotAnyInnerText } from '../support'
+import { asURL } from '../support'
+import { spy, RequestHolder, waitForAnyInnerText, waitForNotAnyInnerText } from '../support/request-spy'
+import { signIn } from '../support/helper'
 
 const prisma = getPrismaCilent()
 
-beforeAll(async () => {
-  await page.goto(asURL('/auth/login'))
-  await page.$eval('input[name=username]', (el) => ((el as HTMLInputElement).value = 'user1'))
-  await page.$eval('input[name=password]', (el) => ((el as HTMLInputElement).value = 'password'))
-  await page.click('button[type="submit"]')
-  await waitForAnyInnerText(page, 'header a', 'Logout')
-})
+beforeAll(async () => await signIn('user1', 'password'))
 
 describe('senario /tasks', () => {
   let req: RequestHolder
@@ -29,14 +25,13 @@ describe('senario /tasks', () => {
 
     await expect(page.title()).resolves.toMatch('Tasks')
     await expect(page.content()).resolves.toMatch('Create new task')
-    await page.$eval('input[name=title]', (el) => ((el as HTMLInputElement).value = 'TestTitle'))
-    await page.$eval('textarea[name=description]', (el) => ((el as HTMLTextAreaElement).value = 'TestDescription'))
+    await page.type('input[name=title]', 'TestTitle')
+    await page.type('textarea[name=description]', 'TestDescription')
 
     // Create Ajax
     await Promise.all([req.clearAndWaitForResponses(3, { resourceType: 'ajax' }), page.click('input[type="submit"]')])
 
-    expect(req.errors).toHaveLength(0)
-    expect(req.failed).toHaveLength(0)
+    expect(req.ok).toBe(true)
     expect(req.finished.where({ resourceType: 'ajax', method: 'POST', url: asURL('api/tasks/') })).toHaveLength(1)
     expect(
       req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL('api/tasks/?page=1&limit=5') }),
@@ -55,8 +50,7 @@ describe('senario /tasks', () => {
       page.click('tbody tr:first-child td:nth-child(2) a'),
     ])
 
-    expect(req.errors).toHaveLength(0)
-    expect(req.failed).toHaveLength(0)
+    expect(req.ok).toBe(true)
     expect(req.finished.where({ resourceType: 'ajax', method: 'POST' })).toHaveLength(1)
 
     await waitForAnyInnerText(page, 'td', 'TestDescription')
@@ -67,28 +61,31 @@ describe('senario /tasks', () => {
     await expect(page.content()).resolves.toMatch('TestTitle')
     await expect(page.content()).resolves.toMatch('TestDescription')
 
-    await page.click('tbody tr:first-child td:nth-child(5) a:first-child') // Edit CSR
-    await page.waitForSelector('textarea[name=description]')
+    await Promise.all([
+      page.click('tbody tr:first-child td:nth-child(5) a:first-child'), // Edit CSR
+      page.waitForSelector('textarea[name=description]'),
+    ])
 
     await expect(page.content()).resolves.toMatch('TestTitle')
     await expect(page.content()).resolves.toMatch('TestDescription')
 
-    await page.$eval('input[name=title]', (el) => ((el as HTMLInputElement).value = 'll'))
-    await page.waitForSelector('textarea[name=description]')
-    await page.$eval('textarea[name=description]', (el) => ((el as HTMLTextAreaElement).value = ''))
+    await page.$eval('input[name=title]', (el) => ((el as HTMLInputElement).value = 'll')) // for overwrite all text
+    await page.$eval('textarea[name=description]', (el) => ((el as HTMLTextAreaElement).value = '')) // for overwrite all text
 
-    await page.click('input[type="submit"]') // Update(validation error) CSR
-    await page.waitForSelector('ul li')
+    await Promise.all([
+      page.click('input[type="submit"]'), // Update(validation error) CSR
+      page.waitForSelector('ul li'),
+    ])
 
     await expect(page.content()).resolves.toMatch('title: String must contain at least 3 character(s)')
 
-    await page.$eval('input[name=title]', (el) => ((el as HTMLInputElement).value = 'NewTitle'))
-    await page.$eval('textarea[name=description]', (el) => ((el as HTMLTextAreaElement).value = 'NewDescription'))
+    await page.$eval('input[name=title]', (el) => ((el as HTMLInputElement).value = 'NewTitle')) // for overwrite all text
+    await page.$eval('textarea[name=description]', (el) => ((el as HTMLTextAreaElement).value = 'NewDescription')) // for overwrite all text
+
     // Update CSR + Ajax
     await Promise.all([req.clearAndWaitForResponses(1, { resourceType: 'ajax' }), page.click('input[type="submit"]')])
 
-    expect(req.errors).toHaveLength(0)
-    expect(req.failed).toHaveLength(0)
+    expect(req.ok).toBe(true)
     expect(req.finished.where({ resourceType: 'ajax', method: 'PUT' })).toHaveLength(1)
 
     await waitForAnyInnerText(page, 'td', 'NewTitle')
@@ -104,8 +101,7 @@ describe('senario /tasks', () => {
       page.click('tbody tr:first-child td:nth-child(5) a:nth-child(2)'),
     ])
 
-    expect(req.errors).toHaveLength(0)
-    expect(req.failed).toHaveLength(0)
+    expect(req.ok).toBe(true)
     expect(req.finished.where({ resourceType: 'ajax', method: 'DELETE' })).toHaveLength(1)
 
     await waitForNotAnyInnerText(page, 'td', 'NewDescription')
@@ -191,16 +187,12 @@ describe('/tasks/:id/edit', () => {
     expect(checked).toBeFalsy()
 
     // input new data and submit
-    await page.$eval('input[name=done]', (el) => ((el as HTMLInputElement).checked = true))
-    await page.$eval('input[name=title]', (el) => ((el as HTMLInputElement).value = 'NewTitle'))
-    await Promise.all([
-      req.clearAndWaitForResponses(3, { resourceType: 'ajax' }),
-      page.$eval('input[type=submit]', (el) => (el as HTMLInputElement).click()),
-    ])
+    await page.click('input[name=done]')
+    await page.type('input[name=title]', 'NewTitle')
+    await Promise.all([req.clearAndWaitForResponses(3, { resourceType: 'ajax' }), page.click('input[type=submit]')])
 
     // show index view
-    expect(req.errors).toHaveLength(0)
-    expect(req.failed).toHaveLength(0)
+    expect(req.ok).toBe(true)
     expect(req.finished.where({ resourceType: 'ajax', method: 'PUT' })).toHaveLength(1)
     expect(
       req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL('api/tasks/?page=1&limit=5') }),
@@ -242,15 +234,11 @@ describe('/tasks/:id', () => {
 
   it('post comment', async () => {
     await waitForAnyInnerText(page, 'div', 'Description1')
-    await page.$eval('input[name=body]', (el) => ((el as HTMLInputElement).value = 'TestComment'))
+    await page.type('input[name=body]', 'TestComment')
 
-    await Promise.all([
-      req.clearAndWaitForResponses(4, { resourceType: 'ajax' }),
-      page.$eval('input[type=submit]', (el) => (el as HTMLInputElement).click()),
-    ])
+    await Promise.all([req.clearAndWaitForResponses(4, { resourceType: 'ajax' }), page.click('input[type=submit]')])
 
-    expect(req.errors).toHaveLength(0)
-    expect(req.failed).toHaveLength(0)
+    expect(req.ok).toBe(true)
     expect(req.finished.where({ resourceType: 'ajax', method: 'POST' })).toHaveLength(1)
     expect(
       req.finished.where({ resourceType: 'ajax', method: 'GET', url: asURL(`api/tasks/${task.id}`) }),
