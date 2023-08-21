@@ -88,13 +88,38 @@ export type PageNode = React.FC
 
 export type ReaderMap = { [key: string]: SuspendedReader<unknown> }
 
-export type SuspensePurgeOptions = { startsWith: string } | { only: string | string[] } | { except: string | string[] }
+export type SuspensePurgeOptions =
+  | boolean
+  | { startsWith: string }
+  | { only: string | string[] }
+  | { except: string | string[] }
 
 export interface Suspendable {
   readonly readers: ReaderMap
   suspend<T>(asyncProcess: () => Promise<T>, key: string): T
   fetchJson<T>(url: string, key: string): T
   purge(options?: SuspensePurgeOptions): void
+}
+
+export function isSuspensePurgeOptions(option: unknown): option is SuspensePurgeOptions {
+  if (option === undefined || option === null) {
+    return false
+  }
+  if (typeof option === 'boolean') {
+    return true
+  }
+  if (typeof option === 'object') {
+    if ('startsWith' in option && typeof option.startsWith === 'string') {
+      return true
+    }
+    if ('only' in option && (typeof option.only === 'string' || Array.isArray(option.only))) {
+      return true
+    }
+    if ('except' in option && (typeof option.except === 'string' || Array.isArray(option.except))) {
+      return true
+    }
+  }
+  return false
 }
 
 export class SuspenseImpl implements Suspendable {
@@ -117,7 +142,11 @@ export class SuspenseImpl implements Suspendable {
   }
 
   purge(options?: SuspensePurgeOptions) {
-    if (!options) {
+    if (options === false) {
+      return
+    }
+
+    if (options === undefined || options === true) {
       return Object.keys(this.readers).forEach((key) => delete this.readers[key])
     }
 

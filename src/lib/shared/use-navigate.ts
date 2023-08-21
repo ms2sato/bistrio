@@ -1,8 +1,14 @@
 import { NavigateOptions as NaviOptions, useNavigate as useNavi, To } from 'react-router-dom'
-import { useRenderSupport, FlashMessageState, isFlashMessageState } from '.'
+import {
+  useRenderSupport,
+  FlashMessageState,
+  isFlashMessageState,
+  SuspensePurgeOptions,
+  isSuspensePurgeOptions,
+} from '.'
 
 export type PurgeOption = {
-  purge: boolean
+  purge: SuspensePurgeOptions
 }
 
 export const isPurgeOption = (option: unknown): option is PurgeOption => {
@@ -10,7 +16,7 @@ export const isPurgeOption = (option: unknown): option is PurgeOption => {
     return false
   }
   const typedOption = option as PurgeOption
-  return 'purge' in typedOption && typeof typedOption.purge === 'boolean'
+  return 'purge' in typedOption && isSuspensePurgeOptions(typedOption.purge)
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -28,9 +34,7 @@ export function useNavigate(): NavigateFunc {
   return function navigate(to: To | number, options?: NavigateOptions, navigateOptions: NaviOptions = {}) {
     if (options) {
       if (isPurgeOption(options)) {
-        if (options.purge === true) {
-          rs.suspense.purge()
-        }
+        rs.suspense.purge(options.purge)
       }
       if (isFlashMessageState(options)) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
