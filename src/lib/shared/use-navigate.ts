@@ -33,7 +33,8 @@ export function useNavigate(): NavigateFunc {
         }
       }
       if (isFlashMessageState(options)) {
-        navigateOptions.state = options
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        navigateOptions.state = { ...options, ...navigateOptions.state }
       }
     }
 
