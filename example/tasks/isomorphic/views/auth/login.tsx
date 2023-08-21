@@ -14,11 +14,7 @@ export function Page() {
     action: {
       modifier: (params) => rs.resources().auth.verify(params),
       onSuccess: (result) =>
-        navigate(
-          '/tasks',
-          { purge: true },
-          { state: { flashMessage: { text: `Logged in as ${result.username}`, type: 'info' } } },
-        ),
+        navigate('/tasks', { purge: true, flashMessage: { text: `Logged in as ${result.username}`, type: 'info' } }),
       onFatal: (err) => setError(err),
     },
     schema: sessionCreateSchema,

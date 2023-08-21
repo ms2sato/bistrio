@@ -11,8 +11,10 @@ import {
 import { Middlewares } from './middlewares'
 import TaskLayout from '../components/tasks/TaskLayout'
 
+const UserLayout = lazy(() => import('../components/UserLayout'))
+
 export function routes(router: Router, support: RouterSupport<Middlewares>) {
-  router = router.layout({ Component: lazy(() => import('../components/UserLayout')) }).options({ hydrate: true })
+  router = router.layout({ Component: UserLayout }).options({ hydrate: true })
 
   router.resources('/', {
     name: 'page_root',
