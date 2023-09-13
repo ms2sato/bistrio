@@ -1,6 +1,5 @@
 import express, { NextFunction, RequestHandler } from 'express'
 import path from 'path'
-import fs from 'fs'
 import { z } from 'zod'
 import debug from 'debug'
 import {
@@ -69,6 +68,8 @@ export type ResourceMethodHandlerParams = {
   adapter: Adapter
 }
 
+export type ImportAndSetupFunc = <S, R>(fileRoot: string, modulePath: string, support: S, config: RouteConfig) => Promise<R>
+
 export type ServerRouterConfig = {
   baseDir: string
   actions: readonly ActionDescriptor[]
@@ -83,6 +84,7 @@ export type ServerRouterConfig = {
   resourceRoot: string
   resourceFileName: string
   pageLoadFunc: PageLoadFunc
+  importAndSetup: ImportAndSetupFunc
 }
 
 export function arrangeFormInput(ctx: MutableActionContext, sources: readonly string[], schema: z.AnyZodObject) {
@@ -102,7 +104,7 @@ export type ContentArranger = {
 
 type ContentType2Arranger = Record<string, ContentArranger>
 
-export type ServerRouterConfigCustom = PartialWithRequired<ServerRouterConfig, 'baseDir' | 'pageLoadFunc'>
+export type ServerRouterConfigCustom = PartialWithRequired<ServerRouterConfig, 'baseDir' | 'pageLoadFunc' | 'importAndSetup'>
 
 export const defaultContentType2Arranger: ContentType2Arranger = {
   'application/json': arrangeJsonInput,
@@ -275,59 +277,63 @@ export const importAndSetup = async <S, R>(
   support: S,
   config: RouteConfig,
 ): Promise<R> => {
-  let fullPath = path.join(fileRoot, modulePath)
-
-  if (process.env.NODE_ENV == 'development') {
-    let ret
-    try {
-      // for ts-node dynamic import
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      ret = require(fullPath) as { default: EndpointFunc<S, R> }
-    } catch (err) {
-      if (
-        !fs.existsSync(fullPath) &&
-        !fs.existsSync(`${fullPath}.ts`) &&
-        !fs.existsSync(`${fullPath}.tsx`) &&
-        !fs.existsSync(`${fullPath}.js`)
-      ) {
-        throw new FileNotFoundError(`module: '${fullPath}' is not found`)
-      }
-      throw err
-    }
-
-    try {
-      return ret.default(support, config)
-    } catch (err) {
-      if (err instanceof Error) {
-        throw new RouterError(`Error occured "${err.message}" on calling default function in "${modulePath}"`, {
-          cause: err,
-        })
-      } else {
-        throw new TypeError(`Unexpected Error Object: ${err as string}`, { cause: err })
-      }
-    }
-  } else {
-    if (!fullPath.endsWith('.js')) {
-      fullPath = `${fullPath}.js`
-    }
-
-    if (!fs.existsSync(fullPath)) {
-      throw new FileNotFoundError(`module: '${fullPath}' is not found`)
-    }
-
-    const ret = (await import(fullPath)) as { default: EndpointFunc<S, R> }
-    try {
-      return ret.default(support, config)
-    } catch (err) {
-      if (err instanceof Error) {
-        throw new RouterError(`Error occured "${err.message}" on calling default function in "${modulePath}"`, {
-          cause: err,
-        })
-      } else {
-        throw new TypeError(`Unexpected Error Object: ${err as string}`)
-      }
-    }
+  // const fullPath = path.join(fileRoot, modulePath)
+  const ret = (await import(/*webpackChunkName: "[request]" */ `${fileRoot}/${modulePath}}`)) as {
+    default: EndpointFunc<S, R>
   }
+  return ret.default(support, config)
+
+  // if (process.env.NODE_ENV == 'development') {
+  //   let ret
+  //   try {
+  //     // for ts-node dynamic import
+  //     // eslint-disable-next-line @typescript-eslint/no-var-requires
+  //     ret = require(fullPath) as { default: EndpointFunc<S, R> }
+  //   } catch (err) {
+  //     if (
+  //       !fs.existsSync(fullPath) &&
+  //       !fs.existsSync(`${fullPath}.ts`) &&
+  //       !fs.existsSync(`${fullPath}.tsx`) &&
+  //       !fs.existsSync(`${fullPath}.js`)
+  //     ) {
+  //       throw new FileNotFoundError(`module: '${fullPath}' is not found`)
+  //     }
+  //     throw err
+  //   }
+
+  //   try {
+  //     return ret.default(support, config)
+  //   } catch (err) {
+  //     if (err instanceof Error) {
+  //       throw new RouterError(`Error occured "${err.message}" on calling default function in "${modulePath}"`, {
+  //         cause: err,
+  //       })
+  //     } else {
+  //       throw new TypeError(`Unexpected Error Object: ${err as string}`, { cause: err })
+  //     }
+  //   }
+  // } else {
+  //   if (!fullPath.endsWith('.js')) {
+  //     fullPath = `${fullPath}.js`
+  //   }
+
+  //   if (!fs.existsSync(fullPath)) {
+  //     throw new FileNotFoundError(`module: '${fullPath}' is not found`)
+  //   }
+
+  //   const ret = (await import(fullPath)) as { default: EndpointFunc<S, R> }
+  //   try {
+  //     return ret.default(support, config)
+  //   } catch (err) {
+  //     if (err instanceof Error) {
+  //       throw new RouterError(`Error occured "${err.message}" on calling default function in "${modulePath}"`, {
+  //         cause: err,
+  //       })
+  //     } else {
+  //       throw new TypeError(`Unexpected Error Object: ${err as string}`)
+  //     }
+  //   }
+  // }
 }
 
 export const createDefaultActionContext: ActionContextCreator = ({ router, req, res, descriptor, httpPath }) => {

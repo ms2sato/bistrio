@@ -1,6 +1,6 @@
 import express from 'express'
 import { ServerRenderSupport } from './server-render-support'
-import { ServerRouter, ServerRouterConfigCustom } from './server-router'
+import { ImportAndSetupFunc, ServerRouter, ServerRouterConfigCustom } from './server-router'
 import {
   ActionDescriptor,
   IdNumberParams,
@@ -98,13 +98,24 @@ class TestServerRouter<R extends Resource> extends ServerRouter {
 
 const DummyComponent = () => <div>test</div>
 const pageLoadFunc: PageLoadFunc = () => DummyComponent
+const importAndSetup: ImportAndSetupFunc = <S, R>(
+  _fileRoot: string,
+  _modulePath: string,
+  _support: S,
+  _config: RouteConfig,
+) => {
+  return {} as R
+}
 
 const buildRouter = async ({
   serverRouterConfig,
 }: {
   serverRouterConfig?: ServerRouterConfigCustom
 }): Promise<TestServerRouter<typeof dummyResource>> => {
-  const router = new TestServerRouter(serverRouterConfig || { baseDir: './', pageLoadFunc }, dummyResource)
+  const router = new TestServerRouter(
+    serverRouterConfig || { baseDir: './', pageLoadFunc, importAndSetup },
+    dummyResource,
+  )
   router.resources('/test', {
     name: 'test_resource',
     actions: [
@@ -151,7 +162,7 @@ describe('ServerRouter', () => {
     test('access resources with actionOptions', async () => {
       const createActionOptions: CreateActionOptionFunction = () => ({ test: 321 })
       const rs = await createServerRenderSupport({
-        serverRouterConfig: { createActionOptions, baseDir: './', pageLoadFunc },
+        serverRouterConfig: { createActionOptions, baseDir: './', pageLoadFunc, importAndSetup },
       })
       expect(await rs.resources().test_resource.hasOption()).toStrictEqual({ msg: 'ret hasOption', opt: { test: 321 } })
     })
@@ -172,7 +183,7 @@ describe('ServerRouter', () => {
     test('access suspendedResources with actionOptions', async () => {
       const createActionOptions: CreateActionOptionFunction = () => ({ test: 321 })
       const rs = await createServerRenderSupport({
-        serverRouterConfig: { createActionOptions, baseDir: './', pageLoadFunc },
+        serverRouterConfig: { createActionOptions, baseDir: './', pageLoadFunc, importAndSetup },
       })
 
       // expect.assertions(2)
@@ -206,7 +217,7 @@ describe('ServerRouter', () => {
     test('requests with actionOpitons', async () => {
       const createActionOptions: CreateActionOptionFunction = () => ({ test: 321 })
       const router = await buildRouter({
-        serverRouterConfig: { createActionOptions, baseDir: './', pageLoadFunc: () => DummyComponent },
+        serverRouterConfig: { createActionOptions, baseDir: './', pageLoadFunc: () => DummyComponent, importAndSetup },
       })
 
       const ret = await virtualRequest(router, {
@@ -226,7 +237,7 @@ describe('ServerRouter', () => {
   describe('adapter', () => {
     test('no args', async () => {
       const router = new TestServerRouter(
-        { baseDir: './', pageLoadFunc },
+        { baseDir: './', pageLoadFunc, importAndSetup },
         {
           get() {
             throw new Error('Unexpected called resource method')
@@ -257,7 +268,7 @@ describe('ServerRouter', () => {
 
     test('an arg', async () => {
       const router = new TestServerRouter(
-        { baseDir: './', pageLoadFunc },
+        { baseDir: './', pageLoadFunc, importAndSetup },
         {
           get(_params: IdNumberParams) {
             throw new Error('Unexpected called resource method')
@@ -295,7 +306,7 @@ describe('ServerRouter', () => {
     )
 
     test('simple', async () => {
-      const router = new TestServerRouter({ baseDir: './', pageLoadFunc }, dummyResource)
+      const router = new TestServerRouter({ baseDir: './', pageLoadFunc, importAndSetup }, dummyResource)
       router.layout({ Component: DummyLayout }).resources('/test', {
         name: 'test_resource',
         actions: [{ action: 'page', method: 'get', path: '/:id', page: true }],
@@ -321,7 +332,7 @@ describe('ServerRouter', () => {
     })
 
     test('nested', async () => {
-      const router = new TestServerRouter({ baseDir: './', pageLoadFunc }, dummyResource)
+      const router = new TestServerRouter({ baseDir: './', pageLoadFunc, importAndSetup }, dummyResource)
       const layoutRouter = router.layout({ Component: DummyLayout })
       const subRouter = layoutRouter.sub('/sub')
       const subLayoutRouter = subRouter.layout({ Component: DummyLayout })

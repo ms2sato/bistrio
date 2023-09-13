@@ -17,7 +17,6 @@ import {
   createDefaultActionContext,
   createNullActionOption,
   createSmartInputArranger,
-  importAndSetup,
   renderDefault,
 } from '..'
 import { SmartResponder, StandardJsonResponder } from './smart-responder'
@@ -32,7 +31,7 @@ const createSmartResponder = ({ router }: ResourceMethodHandlerParams) => {
   )
 }
 
-function defaultServerRouterConfig(): Omit<ServerRouterConfig, 'baseDir' | 'pageLoadFunc'> {
+function defaultServerRouterConfig(): Omit<ServerRouterConfig, 'baseDir' | 'pageLoadFunc' | 'importAndSetup'> {
   return {
     actions: Actions.page(),
     inputArranger: createSmartInputArranger(),
@@ -102,7 +101,7 @@ export abstract class BasicRouter implements Router {
   // protected for test
   protected async loadResource(resourcePath: string, routeConfig: RouteConfig) {
     const fileRoot = this.serverRouterConfig.baseDir
-    return await importAndSetup<ResourceSupport, Resource>(
+    return await this.serverRouterConfig.importAndSetup<ResourceSupport, Resource>(
       fileRoot,
       resourcePath,
       new ResourceSupport(fileRoot),
@@ -113,6 +112,6 @@ export abstract class BasicRouter implements Router {
   // protected for test
   protected async loadAdapter(adapterPath: string, routeConfig: RouteConfig) {
     const fileRoot = this.serverRouterConfig.baseDir
-    return await importAndSetup<ActionSupport, Adapter>(fileRoot, adapterPath, new ActionSupport(fileRoot), routeConfig)
+    return await this.serverRouterConfig.importAndSetup<ActionSupport, Adapter>(fileRoot, adapterPath, new ActionSupport(fileRoot), routeConfig)
   }
 }
