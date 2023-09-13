@@ -1,4 +1,4 @@
-const { setup } = require('../dist/server/app')
+const { setup } = require('../dist/server/app.js')
 const { support } = require('bistrio')
 
 async function main() {

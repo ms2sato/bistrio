@@ -2,8 +2,9 @@
   "name": "tasks",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "start": "node ./bin/server",
+    "start": "node ./bin/server.cjs",
     "dev:start": "NODE_ENV=production dotenv -e .env.development -- npm start",
     "prepare": "npm run bistrio:gen",
     "dev": "npm run watch",
@@ -39,8 +40,11 @@
     "build:client": "webpack build --config ./config/client/webpack.config.ts",
     "build:server": "cpx .bistrio/filemap.json dist/.bistrio/ && tsc && tsc-alias",
     "build:isomorphic": "tsc --project ./config/tsconfig.isomorphic.json && tsc-alias --project ./config/tsconfig.isomorphic.json",
-    "bistrio:gen": "node -r ./server/support/tsnode_register bin/generate.ts",
-    "bistrio:gen:clean": "rimraf .bistrio"
+    "bistrio:gen": "node --loader ts-node/esm -r ./server/support/tsnode_register.cjs bin/generate.ts",
+    "bistrio:gen:clean": "rimraf .bistrio",
+    "rspack:build:client": "node --loader ts-node/esm node_modules/.bin/rspack build -c rspack.config.client.ts",
+    "rspack:build:server": "node --loader ts-node/esm node_modules/.bin/rspack build -c rspack.config.server.ts",
+    "rspack:server": "NODE_ENV=development dotenv -e .env.development -- node dist/server/server.cjs"
   },
   "watch": {
     "bistrio:gen": {
@@ -74,7 +78,7 @@
   },
   "dependencies": {
     "@prisma/client": "^4.9.0",
-    "bcrypt": "^5.1.0",
+    "@rspack/cli": "^0.3.2",
     "bistrio": "file:../../bistrio-0.4.0.tgz",
     "connect-redis": "^7.1.0",
     "cookie-parser": "~1.4.6",
@@ -86,8 +90,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-error-boundary": "^4.0.10",
-    "ts-jest": "^29.0.5",
-    "ts-node": "^10.9.1"
+    "ts-jest": "^29.0.5"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",
@@ -122,9 +125,9 @@
     "rimraf": "^5.0.1",
     "start-server-and-test": "^2.0.0",
     "ts-loader": "^9.4.2",
+    "ts-node": "^10.9.1",
     "tsc-alias": "^1.8.2",
     "tsconfig-paths": "^4.1.2",
-    "tsconfig-paths-webpack-plugin": "^4.0.0",
     "typescript": "^5.1.3",
     "webpack": ">=5.76.0",
     "webpack-cli": "^5.1.1"

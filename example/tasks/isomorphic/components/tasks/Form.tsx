@@ -1,5 +1,5 @@
 import z from 'zod'
-import { UseSubmitProps as TUseSubmitProps, useSubmit } from 'bistrio/client'
+import { UseSubmitProps as TUseSubmitProps, useSubmit } from 'bistrio/client.js'
 
 import { taskCreateWithTagsSchema } from '@/isomorphic/params'
 import { ErrorPanel } from '../ErrorPanel'

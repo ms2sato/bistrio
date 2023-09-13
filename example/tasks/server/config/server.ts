@@ -1,4 +1,4 @@
-import path from 'path'
+import path from 'node:path'
 import { ServerRouterConfigCustom } from 'bistrio'
 import { createActionOptions } from '../customizers/index'
 import { pageLoadFunc } from '@isomorphic/config'

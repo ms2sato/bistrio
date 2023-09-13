@@ -1,5 +1,5 @@
 import { Link, Outlet } from 'react-router-dom'
-import { useUIEvent, useNavigate } from 'bistrio/client'
+import { useUIEvent, useNavigate } from 'bistrio/client.js'
 import { useRenderSupport } from '../../.bistrio/routes/main'
 import { FlashMessage } from './FlashMessage'
 

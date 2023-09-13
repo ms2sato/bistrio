@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, useSubmit } from 'bistrio/client'
+import { useNavigate, useSubmit } from 'bistrio/client.js'
 import { sessionCreateSchema } from '@isomorphic/params'
 import { ErrorPanel } from '@isomorphic/components/ErrorPanel'
 import { useRenderSupport } from '@bistrio/routes/main'

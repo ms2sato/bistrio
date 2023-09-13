@@ -1,5 +1,5 @@
 import { support } from 'bistrio'
-import { setup } from '../server/app'
+import { setup } from '../server/app.ts'
 
 setup()
   .then((app) => {

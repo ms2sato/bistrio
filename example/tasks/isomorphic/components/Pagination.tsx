@@ -1,6 +1,6 @@
 import { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { PageParams, PaginationAttrs, usePageLink } from 'bistrio/client'
+import { PageParams, PaginationAttrs, usePageLink } from 'bistrio/client.js'
 
 export function Pagination({
   page,

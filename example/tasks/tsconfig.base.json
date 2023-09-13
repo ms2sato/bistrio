@@ -1,8 +1,21 @@
 {
-  "extends": "./node_modules/bistrio/config/tsconfig.json",
   "compilerOptions": {
+    "target": "ES6",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
-    "outDir": "dist",
+    "outDir": "dist/server",
     "paths": {
       "@/*": ["*"],
       "@server/*": ["server/*"],

@@ -1,5 +1,5 @@
 import { lazy } from 'react'
-import { RouterSupport, Router, Actions, idNumberSchema, scope, pageSchema, blankSchema } from 'bistrio/client'
+import { RouterSupport, Router, Actions, idNumberSchema, scope, pageSchema, blankSchema } from 'bistrio/client.js'
 import {
   commentCreateSchema,
   commentUpdateSchema,
@@ -7,11 +7,11 @@ import {
   taskCreateWithTagsSchema,
   taskIdSchema,
   taskUpdateWithTagsSchema,
-} from '../params'
-import { Middlewares } from './middlewares'
-import TaskLayout from '../components/tasks/TaskLayout'
+} from '../params.ts'
+import { Middlewares } from './middlewares.ts'
+import TaskLayout from '../components/tasks/TaskLayout.tsx'
 
-const UserLayout = lazy(() => import('../components/UserLayout'))
+const UserLayout = lazy(() => import('../components/UserLayout.tsx'))
 
 export function routes(router: Router, support: RouterSupport<Middlewares>) {
   router = router.layout({ Component: UserLayout }).options({ hydrate: true })

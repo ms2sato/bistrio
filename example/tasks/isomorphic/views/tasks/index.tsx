@@ -1,6 +1,6 @@
 import { Suspense, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { PaginationAttrs, usePagination, useUIEvent } from 'bistrio/client'
+import { PaginationAttrs, usePagination, useUIEvent } from 'bistrio/client.js'
 
 import { useRenderSupport } from '@bistrio/routes/main'
 import { Task } from '@prisma/client'

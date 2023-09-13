@@ -1,7 +1,7 @@
 import { support } from 'bistrio'
 
-import { config } from '../config'
-import { routes as allRoutes } from '../isomorphic/routes/all'
+import { config } from '../config/index.ts'
+import { routes as allRoutes } from '../isomorphic/routes/all.ts'
 
 const main = async () => {
   await support.generate({ config, allRoutes })

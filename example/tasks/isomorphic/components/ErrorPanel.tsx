@@ -1,4 +1,4 @@
-import { isError, isValidationError } from 'bistrio/client'
+import { isError, isValidationError } from 'bistrio/client.js'
 
 export function ErrorPanel({ err }: { err: unknown }) {
   if (err === undefined || err === null) {

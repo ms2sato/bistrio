@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { useNavigate } from 'bistrio/client'
+import { useNavigate } from 'bistrio/client.js'
 import { Form, UseSubmitProps, formSchema } from '../../components/tasks/Form'
 import { useRenderSupport } from '@bistrio/routes/main'
 
