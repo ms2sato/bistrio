@@ -8,21 +8,21 @@ import session from 'express-session'
 import Redis from 'ioredis'
 import RedisStore from 'connect-redis'
 
-import { fillConfig, localeMiddleware, useExpressRouter } from 'bistrio'
+import { initConfig, localeMiddleware, useExpressRouter } from 'bistrio'
 import { checkAdmin, checkLoggedIn } from './middlewares'
 import { localeMap } from '@isomorphic/locales/index'
 import { constructView } from './customizers/construct-view'
 import { routes } from '@isomorphic/routes/all'
 import { Middlewares } from '@/isomorphic/routes/middlewares'
-import { config } from './config/server'
-import { config as configCustom } from '../config'
+import { serverRouterConfig } from './config/server'
+import { config } from '../config'
 import { init as initPassport } from './lib/passport-util'
 
 if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = 'development'
 }
 
-fillConfig(configCustom)
+initConfig(config)
 const debug = createDebug('bistrio:params')
 
 const redis = process.env.REDIS_URL ? new Redis(process.env.REDIS_URL) : new Redis()
@@ -86,7 +86,7 @@ export async function setup() {
     checkLoggedIn,
   }
 
-  await useExpressRouter({ app, middlewares, routes, constructView, serverRouterConfig: config() })
+  await useExpressRouter({ app, middlewares, routes, constructView, serverRouterConfig: serverRouterConfig() })
 
   // error handler
   app.use(function (err: unknown, req, res, _next) {

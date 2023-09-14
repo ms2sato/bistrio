@@ -49,7 +49,7 @@ export function fillStrucrureConfig(strucrureConfig: StructureConfigCustom): Str
 }
 
 let filledConfig: Config | undefined = undefined
-export const fillConfig = (config: ConfigCustom): Config => {
+export const initConfig = (config: ConfigCustom): Config => {
   filledConfig = {
     client: fillClientConfig(config.client || {}),
     structure: fillStrucrureConfig(config.structure),
@@ -60,7 +60,7 @@ export const fillConfig = (config: ConfigCustom): Config => {
 
 export const config = () => {
   if (!filledConfig) {
-    throw new Error('Config is not initialized, please use fillConfig')
+    throw new Error('Config is not initialized, please use initConfig')
   }
   return filledConfig
 }

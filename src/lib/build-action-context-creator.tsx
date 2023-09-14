@@ -3,11 +3,11 @@ import internal, { Transform, TransformCallback } from 'stream'
 import { StaticRouter } from 'react-router-dom/server'
 
 import { ServerRenderSupport } from './server-render-support'
-import { ActionContextCreator, ActionContextImpl } from './server-router'
+import { ActionContextImpl } from './server-router-impl'
 import { renderToPipeableStream } from 'react-dom/server'
 import { isErrorWithCode, isError } from './shared/is-error'
 import { NamedResources, RenderSupportContext, toRoutes } from './shared'
-import { ConstructViewFunc } from './common'
+import { ActionContextCreator, ConstructViewFunc } from './common'
 import createDebug from 'debug'
 
 const debug = createDebug('bistrio:debug:build-action-context-creator')

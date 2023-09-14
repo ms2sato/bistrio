@@ -1,15 +1,8 @@
 import path from 'path'
 import { Application } from 'express'
-import {
-  ActionContextCreator,
-  ConstructViewFunc,
-  Middlewares,
-  NormalRouterSupport,
-  Router,
-  RouterSupport,
-  ServerRouter,
-  ServerRouterConfigCustom,
-} from '..'
+import { ConstructViewFunc, Middlewares, NormalRouterSupport, Router, RouterSupport, ServerRouterConfig } from '..'
+import { ActionContextCreator } from './common'
+import { ServerRouterImpl } from './server-router-impl'
 import { buildActionContextCreator } from './build-action-context-creator'
 
 export type ExpressRouterConfig<M extends Middlewares> = {
@@ -17,7 +10,7 @@ export type ExpressRouterConfig<M extends Middlewares> = {
   middlewares: M
   constructView: ConstructViewFunc
   routes: (router: Router, support: RouterSupport<M>) => void
-  serverRouterConfig: ServerRouterConfigCustom
+  serverRouterConfig: ServerRouterConfig
 }
 
 export const useExpressRouter = async <M extends Middlewares>({
@@ -37,9 +30,9 @@ export const useExpressRouter = async <M extends Middlewares>({
   }
 
   const createActionContext: ActionContextCreator = buildActionContextCreator(viewRoot, constructView, '')
-  const serverConfig: ServerRouterConfigCustom = { createActionContext, ...serverRouterConfig }
+  const serverConfig: ServerRouterConfig = { ...serverRouterConfig, createActionContext }
 
-  const router: ServerRouter = new ServerRouter(serverConfig)
+  const router: ServerRouterImpl = new ServerRouterImpl(serverConfig)
   const routerSupport = new NormalRouterSupport<M>(middlewares)
   routes(router, routerSupport)
   app.use(router.router)

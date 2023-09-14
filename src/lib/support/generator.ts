@@ -4,7 +4,7 @@ import { RouteConfig, Router, RouterOptions } from '../../client'
 import {
   Config,
   ConfigCustom,
-  fillConfig,
+  initConfig,
   Middlewares,
   nullRouterSupport,
   RouterLayoutType,
@@ -110,7 +110,7 @@ export async function generate<M extends Middlewares>({
 }) {
   console.log('Generating...')
 
-  const config = fillConfig(configCustom)
+  const config = initConfig(configCustom)
   const entriesConfig = config.entries
 
   const bistrioRoot = config.structure.generatedDir

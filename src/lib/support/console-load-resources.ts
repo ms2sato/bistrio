@@ -1,4 +1,4 @@
-import { Middlewares, nullRouterSupport, Resource, Router, RouterSupport, ServerRouterConfigCustom } from '../../'
+import { Middlewares, nullRouterSupport, Resource, Router, RouterSupport, ServerRouterConfig } from '../../'
 import { ResourceHolderCreateRouter } from './resource-holder-create-router'
 
 declare global {
@@ -7,7 +7,7 @@ declare global {
 }
 
 export async function loadResources<M extends Middlewares>(
-  serverRouterConfig: ServerRouterConfigCustom,
+  serverRouterConfig: ServerRouterConfig,
   routes: (router: Router, support: RouterSupport<M>) => void,
 ) {
   const resources = {} as Record<string, Resource>
