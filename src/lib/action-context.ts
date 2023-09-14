@@ -1,14 +1,7 @@
 import express from 'express'
 import { z } from 'zod'
 import { RouteObject } from 'react-router-dom'
-import {
-  ValidationError,
-  Resource,
-  ActionDescriptor,
-  RouteConfig,
-  NamedResources,
-  HandlerBuildRunner,
-} from '..'
+import { ValidationError, Resource, ActionDescriptor, RouteConfig, NamedResources, HandlerBuildRunner } from '..'
 import { ResourceProxyCreateFunc } from './server-router-impl'
 
 export { z }

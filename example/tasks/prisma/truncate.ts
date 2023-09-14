@@ -34,9 +34,12 @@ main(prisma)
     process.exit(1)
   })
   .finally(() => {
-    prisma.$disconnect().then(()=> {
-      console.log('[END TRUNCATE]')
-    }).catch((e) => {
-      console.error(e)
-    })
+    prisma
+      .$disconnect()
+      .then(() => {
+        console.log('[END TRUNCATE]')
+      })
+      .catch((e) => {
+        console.error(e)
+      })
   })

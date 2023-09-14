@@ -2,7 +2,7 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "jsx": "react-jsxdev",
-    "typeRoots": ["../server/types"],
+    "typeRoots": ["../server/types"]
   },
   "ts-node": {
     "require": ["tsconfig-paths/register"],

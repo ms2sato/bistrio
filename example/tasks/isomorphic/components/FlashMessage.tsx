@@ -1,4 +1,4 @@
-import { useFlashMessage } from "bistrio/client"
+import { useFlashMessage } from 'bistrio/client'
 
 export function FlashMessage() {
   const [flashMessage, dismiss] = useFlashMessage()

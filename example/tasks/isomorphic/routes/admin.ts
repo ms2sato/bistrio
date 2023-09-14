@@ -9,6 +9,6 @@ export function routes(router: Router, support: RouterSupport<Middlewares>) {
     name: 'page_admin_user',
     actions: Actions.page({ only: ['index'] }),
   })
-  
+
   mainRoutes(router, support)
 }
