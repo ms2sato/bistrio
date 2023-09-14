@@ -1,5 +1,5 @@
 import { Application } from 'express'
-import { ConstructViewFunc, Middlewares, NormalRouterSupport, Router, RouterSupport, ServerRouterConfig, config } from '..'
+import { ConstructViewFunc, Middlewares, NormalRouterSupport, Router, RouterSupport, ServerRouterConfig } from '..'
 import { ActionContextCreator } from './common'
 import { ServerRouterImpl } from './server-router-impl'
 import { buildActionContextCreator } from './build-action-context-creator'
