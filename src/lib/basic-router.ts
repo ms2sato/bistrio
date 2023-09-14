@@ -1,67 +1,25 @@
 import path from 'path'
 import {
   ActionSupport,
-  Actions,
   Adapter,
   HandlerBuildRunner,
   Resource,
-  ResourceMethodHandlerParams,
   ResourceSupport,
   RouteConfig,
   Router,
   RouterCoreLight,
   RouterLayoutType,
   RouterOptions,
-  ServerRouterConfig,
-  ServerRouterConfigCustom,
-  createDefaultActionContext,
-  createNullActionOption,
-  createSmartInputArranger,
-  importAndSetup,
-  renderDefault,
 } from '..'
-import { SmartResponder, StandardJsonResponder } from './smart-responder'
-
-const createSmartResponder = ({ router }: ResourceMethodHandlerParams) => {
-  return new SmartResponder(
-    router,
-    () => {
-      throw new Error('Unimplemented Fatal Handler')
-    },
-    new StandardJsonResponder(),
-  )
-}
-
-function defaultServerRouterConfig(): Omit<ServerRouterConfig, 'baseDir' | 'pageLoadFunc'> {
-  return {
-    actions: Actions.page(),
-    inputArranger: createSmartInputArranger(),
-    createActionOptions: createNullActionOption,
-    createActionContext: createDefaultActionContext,
-    constructConfig: Actions.defaultConstructConfig(),
-    createDefaultResponder: createSmartResponder,
-    renderDefault: renderDefault,
-    adapterRoot: './endpoint',
-    adapterFileName: 'adapter',
-    resourceRoot: './endpoint',
-    resourceFileName: 'resource',
-  }
-}
-
-export function fillServerRouterConfig(serverRouterConfig: ServerRouterConfigCustom): ServerRouterConfig {
-  return Object.assign(defaultServerRouterConfig(), serverRouterConfig)
-}
+import { ServerRouterConfig } from './server-router-config'
+import { importAndSetup } from './server-router-impl'
 
 export abstract class BasicRouter implements Router {
-  readonly serverRouterConfig: ServerRouterConfig
-
   constructor(
-    serverRouterConfig: ServerRouterConfigCustom,
+    readonly serverRouterConfig: ServerRouterConfig,
     readonly httpPath: string = '/',
     protected readonly routerCore: RouterCoreLight,
-  ) {
-    this.serverRouterConfig = fillServerRouterConfig(serverRouterConfig)
-  }
+  ) {}
 
   abstract sub(...args: unknown[]): Router
   abstract layout(props: RouterLayoutType): Router

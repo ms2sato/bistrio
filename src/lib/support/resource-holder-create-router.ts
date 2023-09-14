@@ -10,7 +10,7 @@ import {
   RouterCoreLight,
   RouterLayoutType,
   RouterOptions,
-  ServerRouterConfigCustom,
+  ServerRouterConfig,
 } from '../../'
 import { BasicRouter } from '../basic-router'
 
@@ -20,7 +20,7 @@ const debugLog = log.extend('console')
 export class ResourceHolderCreateRouter extends BasicRouter {
   constructor(
     private resourcesHolder: Record<string, Resource>,
-    serverRouterConfig: ServerRouterConfigCustom,
+    serverRouterConfig: ServerRouterConfig,
     httpPath = '/',
     protected readonly routerCore: RouterCoreLight = {
       handlerBuildRunners: [],

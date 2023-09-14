@@ -6,13 +6,9 @@ import debug from 'debug'
 import {
   ActionContext,
   ActionDescriptor,
-  ConstructConfig,
   ConstructDescriptor,
-  ConstructSource,
   CreateActionOptionFunction,
   Handler,
-  InputArranger,
-  Renderer,
   Adapter,
   RouteConfig,
   RouterError,
@@ -33,9 +29,12 @@ import {
   PartialWithRequired,
   FileNotFoundError,
   toErrorString,
-  PageLoadFunc,
   RouterCore,
   RouterLayoutType,
+  ServerRouterConfig,
+  ServerRouter,
+  ResourceMethodHandlerParams,
+  ActionContextCreator,
 } from '..'
 import { HttpMethod, RouterOptions, opt } from './shared'
 import { RouteObject } from 'react-router-dom'
@@ -45,45 +44,6 @@ import { BasicRouter } from './basic-router'
 const log = debug('restrant2')
 const routeLog = log.extend('route')
 const handlerLog = log.extend('handler')
-
-export type ActionContextProps = {
-  router: ServerRouter
-  req: express.Request
-  res: express.Response
-  descriptor: ActionDescriptor
-  httpPath: string
-}
-
-export type ActionContextCreator = (props: ActionContextProps) => MutableActionContext
-
-export type ResourceMethodHandlerParams = {
-  resourceMethod: ResourceMethod
-  resource: Resource
-  sources: readonly ConstructSource[]
-  router: ServerRouter
-  httpPath: string
-  schema: z.AnyZodObject
-  adapterPath: string
-  actionDescriptor: ActionDescriptor
-  responder: Responder | RequestCallback
-  adapter: Adapter
-}
-
-export type ServerRouterConfig = {
-  baseDir: string
-  actions: readonly ActionDescriptor[]
-  inputArranger: InputArranger
-  createActionOptions: CreateActionOptionFunction
-  createActionContext: ActionContextCreator
-  constructConfig: ConstructConfig
-  createDefaultResponder: (params: ResourceMethodHandlerParams) => Required<Responder>
-  renderDefault: Renderer
-  adapterRoot: string
-  adapterFileName: string
-  resourceRoot: string
-  resourceFileName: string
-  pageLoadFunc: PageLoadFunc
-}
 
 export function arrangeFormInput(ctx: MutableActionContext, sources: readonly string[], schema: z.AnyZodObject) {
   return parseFormBody(ctx.mergeInputs(sources), createZodTraverseArrangerCreator(schema))
@@ -475,12 +435,12 @@ function hasRoutingMethod(router: unknown, method: HttpMethod): router is Routin
   return router instanceof Object && (router as RoutingMethodHolder)[method] instanceof Function
 }
 
-export class ServerRouter extends BasicRouter {
+export class ServerRouterImpl extends BasicRouter implements ServerRouter {
   readonly router: express.Router
   private routeObjectPickupper: RouteObjectPickupper
 
   constructor(
-    serverRouterConfig: ServerRouterConfigCustom,
+    serverRouterConfig: ServerRouterConfig,
     httpPath = '/',
     private routeObject: RouteObject = {},
     readonly routerCore: RouterCore = {
@@ -499,7 +459,7 @@ export class ServerRouter extends BasicRouter {
   sub(rpath: string, ...handlers: RequestHandler[]) {
     const subRouteObject = this.routeObjectPickupper.addNewSub(rpath)
     // TODO: impl class SubServerRouter without build
-    const subRouter = new ServerRouter(
+    const subRouter = new ServerRouterImpl(
       this.serverRouterConfig,
       path.join(this.httpPath, rpath),
       subRouteObject,
@@ -517,9 +477,15 @@ export class ServerRouter extends BasicRouter {
     const layoutRouteObject: RouteObject | undefined = this.routeObjectPickupper.addNewLayout(props)
 
     if (layoutRouteObject) {
-      const subRouter = new ServerRouter(this.serverRouterConfig, this.httpPath, layoutRouteObject, this.routerCore, {
-        ...this.routerOptions,
-      })
+      const subRouter = new ServerRouterImpl(
+        this.serverRouterConfig,
+        this.httpPath,
+        layoutRouteObject,
+        this.routerCore,
+        {
+          ...this.routerOptions,
+        },
+      )
 
       this.router.use(subRouter.router)
 

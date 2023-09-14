@@ -1,5 +1,5 @@
 import { ActionContext, Responder } from './action-context'
-import { ServerRouter } from './server-router'
+import { ServerRouterImpl } from './server-router-impl'
 import { JsonFormatter, StandardJsonFormatter, ValidationError } from './shared'
 
 type ContextHolder = {
@@ -51,7 +51,7 @@ type FatalHandler = (ctx: ActionContext, err: Error) => void
 
 export class SmartResponder<Opt = undefined, Out = unknown, Src = unknown> implements Responder<Opt, Out, Src> {
   constructor(
-    private router: ServerRouter,
+    private router: ServerRouterImpl,
     private fatalHandler: FatalHandler,
     private jsonResonder = new StandardJsonResponder(),
   ) {}

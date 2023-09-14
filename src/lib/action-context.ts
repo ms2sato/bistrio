@@ -8,8 +8,8 @@ import {
   RouteConfig,
   NamedResources,
   HandlerBuildRunner,
-  ResourceProxyCreateFunc,
 } from '..'
+import { ResourceProxyCreateFunc } from './server-router-impl'
 
 export { z }
 

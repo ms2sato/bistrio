@@ -5,7 +5,7 @@ import createDebug from 'debug'
 import webpack, { Configuration } from 'webpack'
 import { TsconfigPathsPlugin } from 'tsconfig-paths-webpack-plugin'
 
-import { Config, ConfigCustom, fillConfig, config, StructureConfig } from '../'
+import { Config, ConfigCustom, initConfig, config, StructureConfig } from '../'
 
 const debug = createDebug('bistrio:webpack')
 
@@ -83,7 +83,7 @@ export const generateWebpackConfig = ({
   debug('NODE_ENV=%s', process.env.NODE_ENV)
   debug('WEBPACK_MODE=%s', process.env.WEBPACK_MODE)
 
-  const config = fillConfig(custom)
+  const config = initConfig(custom)
 
   let env: Mode
   const webpackMode = process.env.WEBPACK_MODE

@@ -1,6 +1,6 @@
 import express from 'express'
 import { ServerRenderSupport } from './server-render-support'
-import { ServerRouter, ServerRouterConfigCustom } from './server-router'
+import { ServerRouterImpl } from './server-router-impl'
 import {
   ActionDescriptor,
   IdNumberParams,
@@ -11,9 +11,10 @@ import {
   opt,
 } from './shared'
 import { Adapter, CreateActionOptionFunction } from './action-context'
-import { ConstructViewFunc, Resource, idNumberSchema } from '..'
+import { ConstructViewFunc, Resource, ServerRouterConfig, idNumberSchema } from '..'
 import { buildActionContextCreator } from './build-action-context-creator'
 import { Outlet } from 'react-router-dom'
+import { initServerRouterConfig } from './init-server-router-config'
 
 type ActionOption = { test: number }
 type VirtualRequest = { url: string; method: string; headers: Record<string, string> }
@@ -33,7 +34,7 @@ type VirtualResponse = { statusCode: number; data: TestReturn }
 
 const checkHandlable = (router: unknown): router is Handlable => 'handle' in (router as Handlable)
 
-const virtualRequest = (router: ServerRouter, req: VirtualRequest): Promise<VirtualResponse> =>
+const virtualRequest = (router: ServerRouterImpl, req: VirtualRequest): Promise<VirtualResponse> =>
   new Promise<VirtualResponse>((resolve, reject) => {
     const expressRouter = router.router
     if (!checkHandlable(expressRouter)) {
@@ -78,9 +79,9 @@ const dummyResource = {
   },
 } as const satisfies Resource
 
-class TestServerRouter<R extends Resource> extends ServerRouter {
+class TestServerRouter<R extends Resource> extends ServerRouterImpl {
   constructor(
-    props: ServerRouterConfigCustom,
+    props: ServerRouterConfig,
     private resource: R,
     private adapter: Adapter = {},
   ) {
@@ -102,9 +103,12 @@ const pageLoadFunc: PageLoadFunc = () => DummyComponent
 const buildRouter = async ({
   serverRouterConfig,
 }: {
-  serverRouterConfig?: ServerRouterConfigCustom
+  serverRouterConfig?: ServerRouterConfig
 }): Promise<TestServerRouter<typeof dummyResource>> => {
-  const router = new TestServerRouter(serverRouterConfig || { baseDir: './', pageLoadFunc }, dummyResource)
+  const router = new TestServerRouter(
+    serverRouterConfig || initServerRouterConfig({ baseDir: './', pageLoadFunc }),
+    dummyResource,
+  )
   router.resources('/test', {
     name: 'test_resource',
     actions: [
@@ -118,7 +122,7 @@ const buildRouter = async ({
   return router
 }
 
-const createDummyActionContext = async (params: { serverRouterConfig?: ServerRouterConfigCustom }) => {
+const createDummyActionContext = async (params: { serverRouterConfig?: ServerRouterConfig }) => {
   const router = await buildRouter(params)
 
   const constructView: ConstructViewFunc = () => <>TestView</>
@@ -133,7 +137,7 @@ const createDummyActionContext = async (params: { serverRouterConfig?: ServerRou
 
 describe('ServerRouter', () => {
   describe('in SSR', () => {
-    const createServerRenderSupport = async (params: { serverRouterConfig?: ServerRouterConfigCustom } = {}) => {
+    const createServerRenderSupport = async (params: { serverRouterConfig?: ServerRouterConfig } = {}) => {
       const ctx = await createDummyActionContext(params)
       return new ServerRenderSupport(ctx)
     }
@@ -151,7 +155,7 @@ describe('ServerRouter', () => {
     test('access resources with actionOptions', async () => {
       const createActionOptions: CreateActionOptionFunction = () => ({ test: 321 })
       const rs = await createServerRenderSupport({
-        serverRouterConfig: { createActionOptions, baseDir: './', pageLoadFunc },
+        serverRouterConfig: initServerRouterConfig({ createActionOptions, baseDir: './', pageLoadFunc }),
       })
       expect(await rs.resources().test_resource.hasOption()).toStrictEqual({ msg: 'ret hasOption', opt: { test: 321 } })
     })
@@ -172,7 +176,7 @@ describe('ServerRouter', () => {
     test('access suspendedResources with actionOptions', async () => {
       const createActionOptions: CreateActionOptionFunction = () => ({ test: 321 })
       const rs = await createServerRenderSupport({
-        serverRouterConfig: { createActionOptions, baseDir: './', pageLoadFunc },
+        serverRouterConfig: initServerRouterConfig({ createActionOptions, baseDir: './', pageLoadFunc }),
       })
 
       // expect.assertions(2)
@@ -206,7 +210,11 @@ describe('ServerRouter', () => {
     test('requests with actionOpitons', async () => {
       const createActionOptions: CreateActionOptionFunction = () => ({ test: 321 })
       const router = await buildRouter({
-        serverRouterConfig: { createActionOptions, baseDir: './', pageLoadFunc: () => DummyComponent },
+        serverRouterConfig: initServerRouterConfig({
+          createActionOptions,
+          baseDir: './',
+          pageLoadFunc: () => DummyComponent,
+        }),
       })
 
       const ret = await virtualRequest(router, {
@@ -226,7 +234,7 @@ describe('ServerRouter', () => {
   describe('adapter', () => {
     test('no args', async () => {
       const router = new TestServerRouter(
-        { baseDir: './', pageLoadFunc },
+        initServerRouterConfig({ baseDir: './', pageLoadFunc }),
         {
           get() {
             throw new Error('Unexpected called resource method')
@@ -257,7 +265,7 @@ describe('ServerRouter', () => {
 
     test('an arg', async () => {
       const router = new TestServerRouter(
-        { baseDir: './', pageLoadFunc },
+        initServerRouterConfig({ baseDir: './', pageLoadFunc }),
         {
           get(_params: IdNumberParams) {
             throw new Error('Unexpected called resource method')
@@ -295,7 +303,7 @@ describe('ServerRouter', () => {
     )
 
     test('simple', async () => {
-      const router = new TestServerRouter({ baseDir: './', pageLoadFunc }, dummyResource)
+      const router = new TestServerRouter(initServerRouterConfig({ baseDir: './', pageLoadFunc }), dummyResource)
       router.layout({ Component: DummyLayout }).resources('/test', {
         name: 'test_resource',
         actions: [{ action: 'page', method: 'get', path: '/:id', page: true }],
@@ -321,7 +329,7 @@ describe('ServerRouter', () => {
     })
 
     test('nested', async () => {
-      const router = new TestServerRouter({ baseDir: './', pageLoadFunc }, dummyResource)
+      const router = new TestServerRouter(initServerRouterConfig({ baseDir: './', pageLoadFunc }), dummyResource)
       const layoutRouter = router.layout({ Component: DummyLayout })
       const subRouter = layoutRouter.sub('/sub')
       const subLayoutRouter = subRouter.layout({ Component: DummyLayout })
