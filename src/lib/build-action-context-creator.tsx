@@ -12,15 +12,11 @@ import createDebug from 'debug'
 
 const debug = createDebug('bistrio:debug:build-action-context-creator')
 
-export function buildActionContextCreator(
-  viewRoot: string,
-  constructView: ConstructViewFunc,
-  failText = '',
-): ActionContextCreator {
+export function buildActionContextCreator(constructView: ConstructViewFunc): ActionContextCreator {
   return ({ router, req, res, descriptor, httpPath }) => {
     const ctx = new ActionContextImpl(router, req, res, descriptor, httpPath)
     const routes = toRoutes(router.routerCore.routeObject)
-    ctx.render = createRenderFunc(constructView, routes, failText)
+    ctx.render = createRenderFunc(constructView, routes)
     return ctx
   }
 }
@@ -71,7 +67,6 @@ function renderReactViewStream<RS extends NamedResources>(
   res: express.Response,
   node: React.ReactNode,
   rs: ServerRenderSupport<RS>,
-  failText = '',
 ) {
   let didError = false
   const scriptInserter = new ScriptInserter(rs)
@@ -86,7 +81,7 @@ function renderReactViewStream<RS extends NamedResources>(
 
       res.statusCode = 500
       res.setHeader('Content-type', 'text/html; charset=UTF-8')
-      res.send(`<h1>Error on server(Status: 500)</h1><p>${failText}</p>`)
+      res.send('<h1>Error on server(Status: 500)</h1>')
     },
     onAllReady() {
       // TODO: for crawlers and static generation
@@ -99,7 +94,7 @@ function renderReactViewStream<RS extends NamedResources>(
   })
 }
 
-function createRenderFunc(constructView: ConstructViewFunc, routes: JSX.Element, failText = '') {
+function createRenderFunc(constructView: ConstructViewFunc, routes: JSX.Element) {
   function render(
     this: ActionContextImpl,
     view: string,
@@ -125,7 +120,7 @@ function createRenderFunc(constructView: ConstructViewFunc, routes: JSX.Element,
         </StaticRouter>
       )
 
-      renderReactViewStream(this.res, viewNode, rs, failText)
+      renderReactViewStream(this.res, viewNode, rs)
     })().catch((err) => {
       let message
       if (isErrorWithCode(err) && err.code == 'ERR_MODULE_NOT_FOUND') {

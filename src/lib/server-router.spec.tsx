@@ -131,7 +131,7 @@ const createDummyActionContext = async (params: { serverRouterConfig?: ServerRou
   const httpPath = '/test/build'
 
   const descriptor: ActionDescriptor = { action: 'build', method: 'get', path: '/build' }
-  const ctxCreator = buildActionContextCreator('', constructView, 'failure text')
+  const ctxCreator = buildActionContextCreator(constructView)
   return ctxCreator({ router, req, res, descriptor, httpPath })
 }
 
