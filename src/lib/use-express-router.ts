@@ -1,6 +1,5 @@
-import path from 'path'
 import { Application } from 'express'
-import { ConstructViewFunc, Middlewares, NormalRouterSupport, Router, RouterSupport, ServerRouterConfig } from '..'
+import { ConstructViewFunc, Middlewares, NormalRouterSupport, Router, RouterSupport, ServerRouterConfig, config } from '..'
 import { ActionContextCreator } from './common'
 import { ServerRouterImpl } from './server-router-impl'
 import { buildActionContextCreator } from './build-action-context-creator'
@@ -20,16 +19,7 @@ export const useExpressRouter = async <M extends Middlewares>({
   routes,
   serverRouterConfig,
 }: ExpressRouterConfig<M>) => {
-  let viewRoot
-  if (process.env.NODE_ENV == 'development') {
-    // TODO: customizable
-    viewRoot = path.join(serverRouterConfig.baseDir, '../dist/isomorphic/views')
-  } else {
-    // TODO: customizable
-    viewRoot = path.join(serverRouterConfig.baseDir, '../isomorphic/views')
-  }
-
-  const createActionContext: ActionContextCreator = buildActionContextCreator(viewRoot, constructView, '')
+  const createActionContext: ActionContextCreator = buildActionContextCreator(constructView)
   const serverConfig: ServerRouterConfig = { ...serverRouterConfig, createActionContext }
 
   const router: ServerRouterImpl = new ServerRouterImpl(serverConfig)
