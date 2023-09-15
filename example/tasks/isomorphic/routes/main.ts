@@ -52,7 +52,7 @@ export function routes(router: Router, support: RouterSupport<Middlewares>) {
       actions: [
         { action: 'user', path: '/user', method: 'get' },
         { action: 'create', path: '/', method: 'post' },
-        { action: 'verify', path: '/session', method: 'put' },
+        { action: 'verify', path: '/session', method: 'patch' },
         { action: 'logout', path: '/session', method: 'delete' },
       ],
     })
