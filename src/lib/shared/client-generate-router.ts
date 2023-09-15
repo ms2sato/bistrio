@@ -191,7 +191,7 @@ const createFetcher: CreateFetcherFunc = (): Fetcher => {
   return {
     async fetch(url: string, method: HttpMethod, body?: BodyInit | null) {
       const res = await fetch(url, {
-        method,
+        method: method.toUpperCase(),
         headers: {
           'Content-Type': 'application/json',
           'X-Requested-With': 'XMLHttpRequest',
