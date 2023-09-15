@@ -11,6 +11,7 @@ const pageLoadFunc: PageLoadFunc = () => DummyComponent
 test('standard', async () => {
   const holder: Record<string, Resource> = {}
   const router = new ResourceHolderCreateRouter(holder, initServerRouterConfig({ baseDir: './', pageLoadFunc }))
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const spy = jest.spyOn(router as any, 'loadResource').mockImplementation(() =>
     Promise.resolve({
       build: () => ({ msg: 'ret build' }),
@@ -37,6 +38,7 @@ test('with actionOption', async () => {
     holder,
     initServerRouterConfig({ baseDir: './', createActionOptions, pageLoadFunc }),
   )
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const spy = jest.spyOn(router as any, 'loadResource').mockImplementation(() =>
     Promise.resolve({
       hasOption: (ao: opt<ActionOption>) => ({ msg: 'ret hasOption', opt: ao.body }),
@@ -61,6 +63,7 @@ test('with actionOption', async () => {
 test('page only', async () => {
   const holder: Record<string, Resource> = {}
   const router = new ResourceHolderCreateRouter(holder, initServerRouterConfig({ baseDir: './', pageLoadFunc }))
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const spy = jest.spyOn(router as any, 'loadResource').mockImplementation(() => {
     throw new FileNotFoundError('Resource Not Found') // but handled if page only
   })
