@@ -1,6 +1,7 @@
 import { NamedResources, opt, Resource, ResourceMethod } from '../../client'
 import { Localizer } from '../shared/locale'
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type SuspendedResourceMethod = (input?: any, ...args: any[]) => any
 export type SuspendedResource = Record<string, SuspendedResourceMethod>
 export type SuspendedNamedResources = {
@@ -52,6 +53,7 @@ export type StubMethodParams<P> = {
   [K in keyof P]: P[K] extends opt<unknown> ? ResourceMethodOptions : P[K]
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type StubMethodArguments<T extends ResourceMethod> = T extends (...args: infer P) => any
   ? StubMethodParams<P>
   : never
@@ -193,6 +195,7 @@ export class ResourceMethodOptions<SO = unknown, CO = RequestInit> {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ProxyResource = { [methodName: string]: any } & { $purge: () => void }
 
 type ProxyResources = {
@@ -214,6 +217,7 @@ export function createSuspendedResourcesProxy<RS extends NamedResources>(rs: Ren
       // 2. input
       // 3. options
       // 4. input, options
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       proxy[resourceName][methodName] = function (...args: any[]) {
         let methodArgs: unknown[]
         let methodKey = `${resourceName}#${methodName}?${JSON.stringify(args)}`

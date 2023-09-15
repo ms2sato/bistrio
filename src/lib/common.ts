@@ -6,6 +6,7 @@ export type ConstructViewFunc = (props: {
   routes: JSX.Element
   hydrate: boolean
   options: unknown
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   rs: RenderSupport<any>
   ctx: ActionContext
 }) => Promise<JSX.Element> | JSX.Element

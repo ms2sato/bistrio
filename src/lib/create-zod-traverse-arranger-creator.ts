@@ -42,6 +42,7 @@ export class ZodArranger implements TraverseArranger {
       this.schema = strip(pathSchema)
 
       if (pathSchema instanceof z.ZodDefault) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return { type: 'default', value: (pathSchema as z.ZodDefault<any>)._def.defaultValue() }
       }
     } else {

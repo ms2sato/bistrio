@@ -22,8 +22,9 @@ export function buildActionContextCreator(constructView: ConstructViewFunc): Act
 }
 
 type Stringable = { toString: () => string }
-function isStringable(obj: any): obj is Stringable {
-  return 'toString' in obj && (obj as Stringable).toString instanceof Function
+function isStringable(obj: unknown): obj is Stringable {
+  const str = obj as Stringable
+  return 'toString' in str && str.toString instanceof Function
 }
 
 class ScriptInserter<RS extends NamedResources> extends Transform {
@@ -35,7 +36,7 @@ class ScriptInserter<RS extends NamedResources> extends Transform {
     super(options)
   }
 
-  _transform(chunk: any, encoding: BufferEncoding, callback: TransformCallback) {
+  _transform(chunk: unknown, encoding: BufferEncoding, callback: TransformCallback) {
     if (isStringable(chunk)) {
       const chnkStr = chunk.toString()
       if (chnkStr.endsWith('</script>')) {
