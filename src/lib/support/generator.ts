@@ -113,42 +113,42 @@ export async function generate<M extends Middlewares>({
   const config = initConfig(configCustom)
   const entriesConfig = config.entries
 
-  const bistrioRoot = config.structure.generatedDir
-  if (!fs.existsSync(bistrioRoot)) {
-    fs.mkdirSync(bistrioRoot)
+  const generatedDir = config.structure.generatedDir
+  if (!fs.existsSync(generatedDir)) {
+    fs.mkdirSync(generatedDir)
   }
 
-  const bistrioGenRoot = path.join(bistrioRoot, 'routes')
-  if (!fs.existsSync(bistrioGenRoot)) {
-    fs.mkdirSync(bistrioGenRoot)
+  const generatedRoutesDir = path.join(generatedDir, 'routes')
+  if (!fs.existsSync(generatedRoutesDir)) {
+    fs.mkdirSync(generatedRoutesDir)
   }
 
   await Promise.all(
     Object.entries(entriesConfig).map(([name, { routes }]) => {
-      return generateForEntry(bistrioGenRoot, name, routes, config)
+      return generateForEntry(generatedRoutesDir, name, routes, config)
     }),
   )
 
-  generateForAll(bistrioGenRoot, allRoutes, config)
+  generateForAll(generatedRoutesDir, allRoutes, config)
 
   const ret = {
     generatedAt: new Date(),
   }
-  fs.writeFileSync(path.join(bistrioGenRoot, '.generated.json'), JSON.stringify(ret))
+  fs.writeFileSync(path.join(generatedRoutesDir, '.generated.json'), JSON.stringify(ret))
 
   console.log('Generated!')
 }
 
 const router = new NameToPathRouter()
 function generateForEntry<M extends Middlewares>(
-  bistrioGenRoot: string,
+  generatedRoutesDir: string,
   name: string,
   routes: (router: Router, support: RouterSupport<M>) => void,
   config: Config,
 ) {
   routes(router, nullRouterSupport as RouterSupport<M>)
 
-  const genRoot = path.join(bistrioGenRoot, name)
+  const genRoot = path.join(generatedRoutesDir, name)
   if (!fs.existsSync(genRoot)) {
     fs.mkdirSync(genRoot)
   }
@@ -160,7 +160,7 @@ function generateForEntry<M extends Middlewares>(
 }
 
 function generateForAll<M extends Middlewares>(
-  bistrioGenRoot: string,
+  generatedRoutesDir: string,
   routes: (router: Router, support: RouterSupport<M>) => void,
   config: Config,
 ) {
@@ -169,7 +169,7 @@ function generateForAll<M extends Middlewares>(
   const router = new NameToPathRouter()
   routes(router, nullRouterSupport as RouterSupport<M>)
 
-  const genRoot = path.join(bistrioGenRoot, name)
+  const genRoot = path.join(generatedRoutesDir, name)
   if (!fs.existsSync(genRoot)) {
     fs.mkdirSync(genRoot)
   }
