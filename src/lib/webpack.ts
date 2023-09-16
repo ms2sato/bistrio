@@ -42,10 +42,9 @@ class URLMapPlugin {
         compilation.chunks.forEach((chunk) => {
           chunk.files.forEach((file) => {
             if (file.endsWith('.js')) {
-              if (chunk.name === undefined) {
-                throw new Error('Unexpected: chunk.name is undefined')
+              if (chunk.name) {
+                jsMap[chunk.name] = file
               }
-              jsMap[chunk.name] = file
             }
           })
         })
