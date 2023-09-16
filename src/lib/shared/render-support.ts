@@ -32,8 +32,8 @@ export function readable<T>(promise: Promise<T>): SuspendedReader<T> {
   )
   return {
     read: () => {
-      if (_result) return _result
-      if (_error) throw _error
+      if (_result !== undefined) return _result
+      if (_error !== undefined) throw _error
       throw suspender
     },
     get result() {

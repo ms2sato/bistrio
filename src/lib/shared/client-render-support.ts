@@ -21,7 +21,7 @@ class CacheReadableSuspenseDecorator implements Suspendable {
 
   suspend<T>(asyncProcess: () => Promise<T>, key: string): T {
     const data = window.BISTRIO.cache[key] // TODO: type checking by zod?
-    if (data) {
+    if (data !== undefined) {
       return this.body.suspend(
         () =>
           Promise.resolve<T>(data as T).then((ret) => {

@@ -10,8 +10,8 @@ export default defineResource((_support, _options) => ({
   verify: (_params: SessionCreateParams): Promise<User> => {
     throw new Error('override by adapter')
   },
-  user: (option?: opt<CustomMethodOption>): User => {
-    return option?.body.user || { username: 'unknown', id: 0, role: -1, createdAt: new Date(), updatedAt: new Date() }
+  user: (option?: opt<CustomMethodOption>): User | null => {
+    return option?.body.user || null
   },
   logout: () => {
     throw new Error('override by adapter')
