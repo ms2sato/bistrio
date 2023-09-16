@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { Link, Outlet } from 'react-router-dom'
 import { useUIEvent, useNavigate } from 'bistrio/client'
 import { useRenderSupport } from '../../.bistrio/routes/main'
@@ -6,7 +7,9 @@ import { FlashMessage } from './FlashMessage'
 export default function UserLayout() {
   return (
     <div>
-      <Header />
+      <Suspense fallback={<div>...</div>}>
+        <Header />
+      </Suspense>
       <FlashMessage />
       <Outlet />
       <footer>for user</footer>
@@ -27,7 +30,7 @@ function Header() {
     <header>
       {pending ? (
         '...'
-      ) : user.role === -1 ? (
+      ) : user === null ? (
         <Link to="/auth/login">Login</Link>
       ) : (
         <>
