@@ -7,14 +7,11 @@ import {
   ActionContext,
   ActionDescriptor,
   ConstructDescriptor,
-  CreateActionOptionFunction,
   Handler,
   Adapter,
   RouteConfig,
   RouterError,
   RequestCallback,
-  parseFormBody,
-  createZodTraverseArrangerCreator,
   SchemaUtil,
   Responder,
   HandlerBuildRunner,
@@ -26,7 +23,6 @@ import {
   choiceSchema,
   choiseSources,
   blankSchema,
-  PartialWithRequired,
   FileNotFoundError,
   toErrorString,
   RouterCore,
@@ -34,7 +30,6 @@ import {
   ServerRouterConfig,
   ServerRouter,
   ResourceMethodHandlerParams,
-  ActionContextCreator,
 } from '..'
 import { HttpMethod, RouterOptions, opt } from './shared'
 import { RouteObject } from 'react-router-dom'
@@ -44,47 +39,6 @@ import { BasicRouter } from './basic-router'
 const log = debug('restrant2')
 const routeLog = log.extend('route')
 const handlerLog = log.extend('handler')
-
-export function arrangeFormInput(ctx: MutableActionContext, sources: readonly string[], schema: z.AnyZodObject) {
-  return parseFormBody(ctx.mergeInputs(sources), createZodTraverseArrangerCreator(schema))
-}
-
-export function arrangeJsonInput(ctx: MutableActionContext, sources: readonly string[], schema: z.AnyZodObject) {
-  const pred = (input: Record<string, unknown>, source: string) => {
-    return source === 'body' ? input : SchemaUtil.deepCast(schema, input)
-  }
-  return ctx.mergeInputs(sources, pred)
-}
-
-export type ContentArranger = {
-  (ctx: MutableActionContext, sources: readonly string[], schema: z.AnyZodObject): unknown
-}
-
-type ContentType2Arranger = Record<string, ContentArranger>
-
-export type ServerRouterConfigCustom = PartialWithRequired<ServerRouterConfig, 'baseDir' | 'pageLoadFunc'>
-
-export const defaultContentType2Arranger: ContentType2Arranger = {
-  'application/json': arrangeJsonInput,
-  'application/x-www-form-urlencoded': arrangeFormInput,
-  'multipart/form-data': arrangeFormInput,
-  '': arrangeFormInput,
-}
-
-export const createSmartInputArranger = (contentType2Arranger: ContentType2Arranger = defaultContentType2Arranger) => {
-  return (ctx: MutableActionContext, sources: readonly string[], schema: z.AnyZodObject) => {
-    const requestedContentType = ctx.req.headers['content-type']
-    if (requestedContentType) {
-      for (const [contentType, contentArranger] of Object.entries<ContentArranger>(contentType2Arranger)) {
-        if (contentType === '') continue
-        if (requestedContentType.indexOf(contentType) >= 0) {
-          return contentArranger(ctx, sources, schema)
-        }
-      }
-    }
-    return contentType2Arranger[''](ctx, sources, schema) // TODO: overwritable
-  }
-}
 
 const createResourceMethodHandler = (params: ResourceMethodHandlerParams): express.Handler => {
   const {
@@ -213,22 +167,6 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
   }
 }
 
-export const createNullActionOption: CreateActionOptionFunction = (_ctx, _ad) => {
-  return Promise.resolve(undefined)
-}
-
-export function renderDefault(ctx: ActionContext, options: unknown = undefined) {
-  if (!ctx.descriptor.page) {
-    return false
-  }
-
-  const viewPath = ctx.httpFilePath.replace(/^\//, '')
-  handlerLog('renderDefault: %s', viewPath)
-
-  // as object for Express
-  ctx.render(viewPath, options as object)
-}
-
 export const importAndSetup = async <S, R>(
   fileRoot: string,
   modulePath: string,
@@ -288,10 +226,6 @@ export const importAndSetup = async <S, R>(
       }
     }
   }
-}
-
-export const createDefaultActionContext: ActionContextCreator = ({ router, req, res, descriptor, httpPath }) => {
-  return new ActionContextImpl(router, req, res, descriptor, httpPath)
 }
 
 export class ActionContextImpl implements MutableActionContext {

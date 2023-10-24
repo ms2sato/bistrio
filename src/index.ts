@@ -2,6 +2,7 @@ export * from './client'
 
 export * from './lib/config'
 export * from './lib/server-router-config'
+export * from './lib/server-router-config-defaults'
 export * from './lib/init-server-router-config'
 export * from './lib/common'
 export * from './lib/action-context'

@@ -10,6 +10,7 @@ import {
 import { ActionContextCreator } from './common'
 import { ServerRouterImpl } from './server-router-impl'
 import { ActionDescriptor, ConstructConfig, ConstructSource, PageLoadFunc, Resource, ResourceMethod } from './shared'
+import { PartialWithRequired } from './type-util'
 
 export type ResourceMethodHandlerParams = {
   resourceMethod: ResourceMethod
@@ -39,3 +40,5 @@ export type ServerRouterConfig = {
   resourceFileName: string
   pageLoadFunc: PageLoadFunc
 }
+
+export type ServerRouterConfigCustom = PartialWithRequired<ServerRouterConfig, 'baseDir' | 'pageLoadFunc'>
