@@ -58,7 +58,7 @@ export class ResourceHolderCreateRouter extends BasicRouter {
     return this
   }
 
-  protected createHandlerBuildRunner(rpath: string, routeConfig: RouteConfig): HandlerBuildRunner {
+  protected createHandlerBuildRunner(rpath: string, routeConfig: RouteConfig, _pages: boolean): HandlerBuildRunner {
     debugLog('createHandlerBuildRunner: %s', rpath)
     const isPageOnly = routeConfig.actions?.every((action) => action.page) && true
 

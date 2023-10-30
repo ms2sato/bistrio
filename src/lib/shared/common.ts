@@ -57,6 +57,7 @@ export interface Router {
   sub(...args: unknown[]): Router
   layout(props: RouterLayoutType): Router
   resources(path: string, config: RouteConfig): void
+  resources(path: string, config: RouteConfig, pages: boolean): void
   options(value: RouterOptions): Router
 }
 

@@ -19,16 +19,13 @@ export function routes(router: Router, support: RouterSupport<Middlewares>) {
   router.resources('/', {
     name: 'page_root',
     actions: Actions.page({ only: ['index'] }),
-  })
+  }, true)
 
   scope(router, '/', (pageRouter) => {
     pageRouter.resources('/auth', {
       name: 'page_auth',
       actions: [{ action: 'login', path: '/login', method: 'get', page: true }],
-      construct: {
-        login: { schema: blankSchema },
-      },
-    })
+    }, true)
 
     scope(pageRouter, '/', (pageRouter) => {
       pageRouter = pageRouter.sub('/', support.middlewares.checkLoggedIn())
@@ -36,7 +33,7 @@ export function routes(router: Router, support: RouterSupport<Middlewares>) {
       pageRouter.layout({ element: TaskLayout }).resources('/tasks', {
         name: 'page_task',
         actions: Actions.page(),
-      })
+      }, true)
     })
   })
 

@@ -443,15 +443,34 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
     return ret
   }
 
-  protected createHandlerBuildRunner(rpath: string, routeConfig: RouteConfig): HandlerBuildRunner {
+  protected createHandlerBuildRunner(rpath: string, routeConfig: RouteConfig, pages: boolean): HandlerBuildRunner {
     const isPageOnly = routeConfig.actions?.every((action) => action.page) && true
 
     const hasPages = routeConfig.actions?.some((ad) => ad.page) ?? false
     const subRouteObject = hasPages ? this.routeObjectPickupper.addNewSub(rpath) : undefined
     const pageActionDescriptors: ActionDescriptor[] = []
+    const fullResourceRoutePath = this.getHttpPath(rpath)
+
+    const pickPageToSubRouteObject = () => {
+      routeLog("routeObject: %s", JSON.stringify(this.routeObject))
+      if (subRouteObject) {
+        this.routeObjectPickupper.pushPageRouteObjectsToSub(
+          fullResourceRoutePath,
+          subRouteObject,
+          pageActionDescriptors
+        )
+      }
+    }
 
     return async () => {
       handlerLog('buildHandler: %s', path.join(this.httpPath, rpath))
+      const actionDescriptors: readonly ActionDescriptor[] = routeConfig.actions || this.serverRouterConfig.actions
+
+      if (pages) {
+        this.buildPagesHandler(rpath, actionDescriptors, pageActionDescriptors, fullResourceRoutePath)
+        pickPageToSubRouteObject()
+        return
+      }
 
       const resourcePath = this.getResourcePath(rpath)
       const resourceName = routeConfig.name
@@ -494,12 +513,31 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
         }
       }
 
-      const actionDescriptors: readonly ActionDescriptor[] = routeConfig.actions || this.serverRouterConfig.actions
-      const fullResourceRoutePath = this.getHttpPath(rpath)
-
       for (const actionDescriptor of actionDescriptors) {
         if (actionDescriptor.page && actionDescriptor.hydrate === undefined) {
           actionDescriptor.hydrate = this.routerOptions.hydrate
+        }
+
+        const urlPath = path.join(rpath, actionDescriptor.path)
+        const httpMethod = actionDescriptor.method
+        if (pages) {
+          if (!actionDescriptor.page) {
+            throw new Error('Called pages context but actionDescriptor.page is not set')
+          }
+          if (Array.isArray(httpMethod)) {
+            if (httpMethod.length !== 1) {
+              throw new Error('Called pages context but actionDescriptor.method is not "get" or ["get"]')
+            }
+          }
+
+          if (httpMethod !== 'get') {
+            throw new Error('Called pages context but actionDescriptor.page is not set')
+          }
+
+          this.appendRoute(urlPath, actionDescriptor, [
+            this.createPageHandler(actionDescriptor, fullResourceRoutePath, pageActionDescriptors),
+          ])
+          continue
         }
 
         const actionName = actionDescriptor.action
@@ -528,7 +566,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
             ? undefined
             : choiceSchema(this.serverRouterConfig.constructConfig, constructDescriptor, actionName)
 
-        let params
+        let handlers
         if (actionOverride) {
           handlerLog('%s#%s without construct middleware', adapterPath, actionName)
           const handler: express.Handler = (req, res, next) => {
@@ -550,31 +588,19 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
             }
           }
 
-          params = [handler]
+          handlers = [handler]
         } else {
           if (!resourceMethod) {
             if (!actionDescriptor.page) {
               throw new Error('Unreachable: resourceMethod is undefined and action.page not set')
             }
 
-            const handler: express.Handler = (req, res, next) => {
-              const ctx = this.serverRouterConfig.createActionContext({
-                router: this,
-                req,
-                res,
-                descriptor: actionDescriptor,
-                httpPath: fullResourceRoutePath,
-              })
-              try {
-                handlerLog('page: %s', ctx.httpFilePath)
-                this.serverRouterConfig.renderDefault(ctx)
-              } catch (err) {
-                next(err)
-              }
-            }
-
-            pageActionDescriptors.push(actionDescriptor)
-            params = [handler]
+            const handler: express.Handler = this.createPageHandler(
+              actionDescriptor,
+              fullResourceRoutePath,
+              pageActionDescriptors,
+            )
+            handlers = [handler]
           } else {
             if (!schema) {
               throw new Error('Unreachable: schema is undefined')
@@ -605,14 +631,13 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
               responder: actionFunc,
               adapter,
             })
-            params = [handler]
+            handlers = [handler]
           }
         }
 
-        const urlPath = path.join(rpath, actionDescriptor.path)
         routeLog(
           '%s %s\t%s\t{actionOverride:%s, resourceMethod:%s, page: %s, hydrate: %s}',
-          actionDescriptor.method instanceof Array ? actionDescriptor.method.join(',') : actionDescriptor.method,
+          httpMethod instanceof Array ? httpMethod.join(',') : httpMethod,
           path.join(this.httpPath, urlPath),
           actionName,
           actionOverride,
@@ -621,33 +646,97 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
           actionDescriptor.hydrate,
         )
 
-        const urlPathWithExt = `${urlPath.replace(/\/$/, '')}.:format?`
-        if (actionDescriptor.method instanceof Array) {
-          for (const method of actionDescriptor.method) {
-            const router = this.router as unknown
-            if (hasRoutingMethod(router, method)) {
-              router[method](urlPathWithExt, ...params)
-            } else {
-              throw new Error(`Unreachable: router is not Object or router[${method}] is not Function`)
-            }
-          }
-        } else {
-          const router = this.router as unknown
-          if (hasRoutingMethod(router, actionDescriptor.method)) {
-            router[actionDescriptor.method](urlPathWithExt, ...params)
-          } else {
-            throw new Error(`Unreachable: router is not Object or router[${actionDescriptor.method}] is not Function`)
-          }
+        this.appendRoute(urlPath, actionDescriptor, handlers)
+      }
+
+      pickPageToSubRouteObject()
+    }
+  }
+
+  private buildPagesHandler(
+    rpath: string,
+    actionDescriptors: readonly ActionDescriptor[],
+    pageActionDescriptors: ActionDescriptor[],
+    fullResourceRoutePath: string,
+  ) {
+    for (const actionDescriptor of actionDescriptors) {
+      if (actionDescriptor.page && actionDescriptor.hydrate === undefined) {
+        actionDescriptor.hydrate = this.routerOptions.hydrate
+      }
+
+      const urlPath = path.join(rpath, actionDescriptor.path)
+      const httpMethod = actionDescriptor.method
+      if (!actionDescriptor.page) {
+        throw new Error('Called pages context but actionDescriptor.page is not set')
+      }
+      if (Array.isArray(httpMethod)) {
+        if (httpMethod.length !== 1) {
+          throw new Error('Called pages context but actionDescriptor.method is not "get" or ["get"]')
         }
       }
 
-      if (subRouteObject) {
-        this.routeObjectPickupper.pushPageRouteObjectsToSub(
-          fullResourceRoutePath,
-          subRouteObject,
-          pageActionDescriptors,
-        )
+      if (httpMethod !== 'get') {
+        throw new Error('Called pages context but actionDescriptor.page is not set')
+      }
+
+      routeLog(
+        '%s %s\t%s\t{page: %s, hydrate: %s}',
+        Array.isArray(httpMethod) ? httpMethod.join(',') : httpMethod,
+        path.join(this.httpPath, urlPath),
+        actionDescriptor.action,
+        actionDescriptor.page,
+        actionDescriptor.hydrate,
+      )
+
+      this.appendRoute(urlPath, actionDescriptor, [
+        this.createPageHandler(actionDescriptor, fullResourceRoutePath, pageActionDescriptors),
+      ])
+    }
+  }
+
+  private appendRoute(urlPath: string, actionDescriptor: ActionDescriptor, handlers: express.Handler[]) {
+    const router = this.router as unknown
+
+    const append = (method: HttpMethod, urlPathWithExt: string) => {
+      if (hasRoutingMethod(router, method)) {
+        router[method](urlPathWithExt, ...handlers)
+      } else {
+        throw new Error(`Unreachable: router is not Object or router[${method}] is not Function`)
       }
     }
+
+    const urlPathWithExt = `${urlPath.replace(/\/$/, '')}.:format?`
+    if (actionDescriptor.method instanceof Array) {
+      for (const method of actionDescriptor.method) {
+        append(method, urlPathWithExt)
+      }
+    } else {
+      append(actionDescriptor.method, urlPathWithExt)
+    }
+  }
+
+  private createPageHandler(
+    actionDescriptor: ActionDescriptor,
+    fullResourceRoutePath: string,
+    pageActionDescriptors: ActionDescriptor[],
+  ) {
+    const handler: express.Handler = (req, res, next) => {
+      const ctx = this.serverRouterConfig.createActionContext({
+        router: this,
+        req,
+        res,
+        descriptor: actionDescriptor,
+        httpPath: fullResourceRoutePath,
+      })
+      try {
+        handlerLog('page: %s', ctx.httpFilePath)
+        this.serverRouterConfig.renderDefault(ctx)
+      } catch (err) {
+        next(err)
+      }
+    }
+
+    pageActionDescriptors.push(actionDescriptor)
+    return handler
   }
 }

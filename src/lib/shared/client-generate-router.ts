@@ -274,7 +274,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
     return this
   }
 
-  resources(rpath: string, routeConfig: RouteConfig): void {
+  resources(rpath: string, routeConfig: RouteConfig, pages = false): void {
     const fetcher = this.config.createFetcher()
 
     const createStubMethod = (
@@ -349,14 +349,19 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
 
     this.core.handlerBuildRunners.push(() => {
       const fullResourceRoutePath = pathJoin(this.httpPath, rpath)
-      const resource = createResourceProxy(fullResourceRoutePath)
-      debug('pageAd: %o', pageActionDescriptors)
 
-      const pathInfo: ResourceInfo = {
-        httpPath: fullResourceRoutePath,
-        resource,
+      if (pages && routeConfig.actions) {
+        pageActionDescriptors.push(...routeConfig.actions)
+      } else {
+        const resource = createResourceProxy(fullResourceRoutePath)
+        const pathInfo: ResourceInfo = {
+          httpPath: fullResourceRoutePath,
+          resource,
+        }
+        this.core.resourceNameToInfo.set(routeConfig.name, pathInfo)
       }
-      this.core.resourceNameToInfo.set(routeConfig.name, pathInfo)
+
+      debug('pageAd: %o', pageActionDescriptors)
 
       if (subRouteObject) {
         this.routeObjectPickupper.pushPageRouteObjectsToSub(
