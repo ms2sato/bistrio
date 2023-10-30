@@ -25,10 +25,14 @@ export abstract class BasicRouter implements Router {
   abstract layout(props: RouterLayoutType): Router
   abstract options(value: RouterOptions): Router
 
-  protected abstract createHandlerBuildRunner(rpath: string, routeConfig: RouteConfig): HandlerBuildRunner
+  protected abstract createHandlerBuildRunner(
+    rpath: string,
+    routeConfig: RouteConfig,
+    pages: boolean,
+  ): HandlerBuildRunner
 
-  resources(rpath: string, config: RouteConfig): void {
-    this.routerCore.handlerBuildRunners.push(this.createHandlerBuildRunner(rpath, config))
+  resources(rpath: string, config: RouteConfig, pages = false): void {
+    this.routerCore.handlerBuildRunners.push(this.createHandlerBuildRunner(rpath, config, pages))
   }
 
   async build() {
