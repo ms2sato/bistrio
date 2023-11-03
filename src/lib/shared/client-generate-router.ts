@@ -19,6 +19,7 @@ import {
   ValidationError,
   createValidationError,
   RouterLayoutType,
+  pageActionDescriptor,
 } from '../../client'
 import { filterWithoutKeys, toURLSearchParams } from './object-util'
 import { pathJoin } from './path-util'
@@ -362,6 +363,25 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
       }
 
       debug('pageAd: %o', pageActionDescriptors)
+
+      if (subRouteObject) {
+        this.routeObjectPickupper.pushPageRouteObjectsToSub(
+          fullResourceRoutePath,
+          subRouteObject,
+          pageActionDescriptors,
+        )
+      }
+    })
+  }
+
+  pages(rpath: string, children: string[]): void {
+    const subRouteObject = this.routeObjectPickupper.addNewSub(rpath)
+    const pageActionDescriptors: ActionDescriptor[] = []
+
+    this.core.handlerBuildRunners.push(() => {
+      const fullResourceRoutePath = pathJoin(this.httpPath, rpath)
+
+      pageActionDescriptors.push(...children.map((child) => pageActionDescriptor(child)))
 
       if (subRouteObject) {
         this.routeObjectPickupper.pushPageRouteObjectsToSub(

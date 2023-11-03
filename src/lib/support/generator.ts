@@ -33,6 +33,10 @@ class NameToPathRouter implements Router {
     this.nameToPath[config.name] = path.join(this.httpPath, rpath)
   }
 
+  pages(_rpath: string, _children: string[]): void {
+    /* nop */
+  }
+
   createNameToPath({ out }: { out: string }) {
     const text = `export type NameToPath = {
   ${Object.keys(this.nameToPath)

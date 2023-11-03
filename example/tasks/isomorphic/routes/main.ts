@@ -16,24 +16,14 @@ const UserLayout = lazy(() => import('../components/UserLayout'))
 export function routes(router: Router, support: RouterSupport<Middlewares>) {
   router = router.layout({ Component: UserLayout }).options({ hydrate: true })
 
-  router.resources('/', {
-    name: 'page_root',
-    actions: Actions.page({ only: ['index'] }),
-  }, true)
+  router.pages('/', ['/'])
 
   scope(router, '/', (pageRouter) => {
-    pageRouter.resources('/auth', {
-      name: 'page_auth',
-      actions: [{ action: 'login', path: '/login', method: 'get', page: true }],
-    }, true)
+    pageRouter.pages('/auth', ['login'])
 
     scope(pageRouter, '/', (pageRouter) => {
       pageRouter = pageRouter.sub('/', support.middlewares.checkLoggedIn())
-
-      pageRouter.layout({ element: TaskLayout }).resources('/tasks', {
-        name: 'page_task',
-        actions: Actions.page(),
-      }, true)
+      pageRouter.layout({ element: TaskLayout }).pages('/tasks', ['/', ':id', 'build', '/:id/edit'])
     })
   })
 
