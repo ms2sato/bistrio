@@ -62,4 +62,3 @@ export function renderDefault(ctx: ActionContext, options: unknown = undefined) 
 export const createDefaultActionContext: ActionContextCreator = ({ router, req, res, descriptor, httpPath }) => {
   return new ActionContextImpl(router, req, res, descriptor, httpPath)
 }
-
