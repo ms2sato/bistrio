@@ -67,7 +67,7 @@ export class ResourceHolderCreateRouter extends BasicRouter {
       const resourceLocalPath = this.getResourceLocalPath(rpath)
       let resource
       try {
-        resource = await this.loadResource(resourceLocalPath, routeConfig)
+        resource = await this.loadLocalResource(resourceLocalPath, routeConfig)
       } catch (err) {
         if (!(err instanceof FileNotFoundError) || !isPageOnly) {
           throw err

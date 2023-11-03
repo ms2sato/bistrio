@@ -168,13 +168,13 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
   }
 }
 
-export const importAndSetup = async <S, R>(
+export const importLocalAndSetup = async <S, R>(
   fileRoot: string,
-  modulePath: string,
+  moduleLocalPath: string,
   support: S,
   config: ResourceRouteConfig,
 ): Promise<R> => {
-  let fullPath = path.join(fileRoot, modulePath)
+  let fullPath = path.join(fileRoot, moduleLocalPath)
 
   if (process.env.NODE_ENV == 'development') {
     let ret
@@ -198,7 +198,7 @@ export const importAndSetup = async <S, R>(
       return ret.default(support, config)
     } catch (err) {
       if (err instanceof Error) {
-        throw new RouterError(`Error occured "${err.message}" on calling default function in "${modulePath}"`, {
+        throw new RouterError(`Error occured "${err.message}" on calling default function in "${moduleLocalPath}"`, {
           cause: err,
         })
       } else {
@@ -219,7 +219,7 @@ export const importAndSetup = async <S, R>(
       return ret.default(support, config)
     } catch (err) {
       if (err instanceof Error) {
-        throw new RouterError(`Error occured "${err.message}" on calling default function in "${modulePath}"`, {
+        throw new RouterError(`Error occured "${err.message}" on calling default function in "${moduleLocalPath}"`, {
           cause: err,
         })
       } else {
@@ -478,7 +478,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
 
       let resource
       try {
-        resource = await this.loadResource(resourceLocalPath, routeConfig)
+        resource = await this.loadLocalResource(resourceLocalPath, routeConfig)
       } catch (err) {
         if (!(err instanceof FileNotFoundError) || !isPageOnly) {
           throw err
@@ -498,7 +498,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
       let adapter: Adapter
 
       try {
-        adapter = await this.loadAdapter(adapterLocalPath, routeConfig)
+        adapter = await this.loadLocalAdapter(adapterLocalPath, routeConfig)
       } catch (err) {
         if (err instanceof FileNotFoundError) {
           adapter = {}
@@ -657,15 +657,15 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
     const router = this.router as unknown
 
     for (const child of children) {
-      const urlPath = path.join(rpath, child)
-      routeLog('%s', path.join(this.routePath, urlPath))
+      const childRoutePath = path.join(rpath, child)
+      routeLog('%s', path.join(this.routePath, childRoutePath))
 
       if (!hasRoutingMethod(router, 'get')) {
         throw new Error(`Unreachable: router is not Object or router[get] is not Function`)
       }
 
       router.get(
-        this.createUrlPathWithExt(urlPath),
+        this.generateRoutePath(childRoutePath),
         this.createPageHandler(
           pageActionDescriptor(child, this.routerOptions.hydrate),
           fullResourceRoutePath,
@@ -675,7 +675,8 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
     }
   }
 
-  private createUrlPathWithExt(urlPath: string) {
+  // TODO: extract to ServerRouterConfig
+  private generateRoutePath(urlPath: string) {
     return `${urlPath.replace(/\/$/, '')}.:format?`
   }
 
@@ -690,7 +691,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
       }
     }
 
-    const urlPathWithExt = this.createUrlPathWithExt(urlPath)
+    const urlPathWithExt = this.generateRoutePath(urlPath)
     if (actionDescriptor.method instanceof Array) {
       for (const method of actionDescriptor.method) {
         append(method, urlPathWithExt)
