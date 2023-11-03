@@ -6,7 +6,7 @@ import { CreateActionOptionFunction } from './action-context'
 import { ConstructViewFunc, Resource, ServerRouterConfig, idNumberSchema } from '..'
 import { buildActionContextCreator } from './build-action-context-creator'
 import { initServerRouterConfig } from './init-server-router-config'
-import { RoutesFunction, buildRouter, fakeRequest } from '../misc/spec-util'
+import { RoutesFunction, buildRouter, fakeRequest, getEndpoints } from '../misc/spec-util'
 
 type ActionOption = { test: number }
 type TestReturn = { msg: string; opt?: opt<ActionOption> }
@@ -72,6 +72,27 @@ describe('ServerRouter', () => {
       <Outlet />
     </div>
   )
+
+  describe('endpoints', () => {
+    test('simple', async () => {
+      const router = await buildRouter(dummyProps)
+      const endpoints = getEndpoints(router)
+      expect(endpoints).toStrictEqual([
+        {
+          methods: ['GET'],
+          path: '/test/build.:format?',
+        },
+        {
+          methods: ['GET'],
+          path: '/test/has_option.:format?',
+        },
+        {
+          methods: ['GET'],
+          path: '/test/:id.:format?',
+        },
+      ])
+    })
+  })
 
   describe('in SSR', () => {
     const createServerRenderSupport = async (params: CreateDummyActionContextProps<DummyResource> = dummyProps) => {
@@ -326,6 +347,17 @@ describe('ServerRouter', () => {
         resource: dummyResource,
         pageLoadFunc,
       })
+
+      expect(getEndpoints(router)).toStrictEqual([
+        {
+          methods: ['GET'],
+          path: '/sub/test/:id.:format?',
+        },
+        {
+          methods: ['GET'],
+          path: '.:format?',
+        },
+      ])
 
       const routeObject = router.routerCore.routeObject
       expect(routeObject).toStrictEqual({

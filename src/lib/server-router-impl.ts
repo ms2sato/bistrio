@@ -453,7 +453,6 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
     const fullResourceRoutePath = this.getHttpPath(rpath)
 
     const pickPageToSubRouteObject = () => {
-      routeLog('routeObject: %s', JSON.stringify(this.routeObject))
       if (subRouteObject) {
         this.routeObjectPickupper.pushPageRouteObjectsToSub(
           fullResourceRoutePath,
@@ -634,7 +633,6 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
     const fullResourceRoutePath = this.getHttpPath(rpath)
 
     const pickPageToSubRouteObject = () => {
-      routeLog('routeObject: %s', JSON.stringify(this.routeObject))
       if (subRouteObject) {
         this.routeObjectPickupper.pushPageRouteObjectsToSub(
           fullResourceRoutePath,
