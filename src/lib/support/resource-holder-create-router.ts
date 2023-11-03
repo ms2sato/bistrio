@@ -58,7 +58,7 @@ export class ResourceHolderCreateRouter extends BasicRouter {
     return this
   }
 
-  protected createHandlerBuildRunner(rpath: string, routeConfig: RouteConfig, _pages: boolean): HandlerBuildRunner {
+  protected createResourcesHandlerBuildRunner(rpath: string, routeConfig: ResourceRouteConfig): HandlerBuildRunner {
     debugLog('createHandlerBuildRunner: %s', rpath)
     const isPageOnly = routeConfig.actions?.every((action) => action.page) && true
 
@@ -87,6 +87,12 @@ export class ResourceHolderCreateRouter extends BasicRouter {
 
       this.resourcesHolder[name] = resourceProxy
       this.routerCore.nameToPath.set(name, resourcePath)
+    }
+  }
+
+  protected createPagesHandlerBuildRunner(_rpath: string, _children: string[]): HandlerBuildRunner {
+    return () => {
+      /* nop */
     }
   }
 }

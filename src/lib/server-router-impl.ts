@@ -30,6 +30,7 @@ import {
   ServerRouterConfig,
   ServerRouter,
   ResourceMethodHandlerParams,
+  pageActionDescriptor,
 } from '..'
 import { HttpMethod, RouterOptions, opt } from './shared'
 import { RouteObject } from 'react-router-dom'
@@ -443,7 +444,11 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
     return ret
   }
 
-  protected createHandlerBuildRunner(rpath: string, routeConfig: RouteConfig, pages: boolean): HandlerBuildRunner {
+  protected createResourcesHandlerBuildRunner(
+    rpath: string,
+    routeConfig: ResourceRouteConfig,
+    pages: boolean,
+  ): HandlerBuildRunner {
     const isPageOnly = routeConfig.actions?.every((action) => action.page) && true
 
     const hasPages = routeConfig.actions?.some((ad) => ad.page) ?? false
@@ -465,12 +470,6 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
     return async () => {
       handlerLog('buildHandler: %s', path.join(this.httpPath, rpath))
       const actionDescriptors: readonly ActionDescriptor[] = routeConfig.actions || this.serverRouterConfig.actions
-
-      if (pages) {
-        this.buildPagesHandler(rpath, actionDescriptors, pageActionDescriptors, fullResourceRoutePath)
-        pickPageToSubRouteObject()
-        return
-      }
 
       const resourcePath = this.getResourcePath(rpath)
       const resourceName = routeConfig.name
@@ -653,45 +652,57 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
     }
   }
 
+  protected createPagesHandlerBuildRunner(rpath: string, children: string[]): HandlerBuildRunner {
+    const subRouteObject = this.routeObjectPickupper.addNewSub(rpath)
+    const pageActionDescriptors: ActionDescriptor[] = []
+    const fullResourceRoutePath = this.getHttpPath(rpath)
+
+    const pickPageToSubRouteObject = () => {
+      routeLog('routeObject: %s', JSON.stringify(this.routeObject))
+      if (subRouteObject) {
+        this.routeObjectPickupper.pushPageRouteObjectsToSub(
+          fullResourceRoutePath,
+          subRouteObject,
+          pageActionDescriptors,
+        )
+      }
+    }
+
+    return () => {
+      this.buildPagesHandler(rpath, children, pageActionDescriptors, fullResourceRoutePath)
+      pickPageToSubRouteObject()
+    }
+  }
+
   private buildPagesHandler(
     rpath: string,
-    actionDescriptors: readonly ActionDescriptor[],
+    children: string[],
     pageActionDescriptors: ActionDescriptor[],
     fullResourceRoutePath: string,
   ) {
-    for (const actionDescriptor of actionDescriptors) {
-      if (actionDescriptor.page && actionDescriptor.hydrate === undefined) {
-        actionDescriptor.hydrate = this.routerOptions.hydrate
+    const router = this.router as unknown
+
+    for (const child of children) {
+      const urlPath = path.join(rpath, child)
+      routeLog('%s', path.join(this.httpPath, urlPath))
+
+      if (!hasRoutingMethod(router, 'get')) {
+        throw new Error(`Unreachable: router is not Object or router[get] is not Function`)
       }
 
-      const urlPath = path.join(rpath, actionDescriptor.path)
-      const httpMethod = actionDescriptor.method
-      if (!actionDescriptor.page) {
-        throw new Error('Called pages context but actionDescriptor.page is not set')
-      }
-      if (Array.isArray(httpMethod)) {
-        if (httpMethod.length !== 1) {
-          throw new Error('Called pages context but actionDescriptor.method is not "get" or ["get"]')
-        }
-      }
-
-      if (httpMethod !== 'get') {
-        throw new Error('Called pages context but actionDescriptor.page is not set')
-      }
-
-      routeLog(
-        '%s %s\t%s\t{page: %s, hydrate: %s}',
-        Array.isArray(httpMethod) ? httpMethod.join(',') : httpMethod,
-        path.join(this.httpPath, urlPath),
-        actionDescriptor.action,
-        actionDescriptor.page,
-        actionDescriptor.hydrate,
+      router.get(
+        this.createUrlPathWithExt(urlPath),
+        this.createPageHandler(
+          pageActionDescriptor(child, this.routerOptions.hydrate),
+          fullResourceRoutePath,
+          pageActionDescriptors,
+        ),
       )
-
-      this.appendRoute(urlPath, actionDescriptor, [
-        this.createPageHandler(actionDescriptor, fullResourceRoutePath, pageActionDescriptors),
-      ])
     }
+  }
+
+  private createUrlPathWithExt(urlPath: string) {
+    return `${urlPath.replace(/\/$/, '')}.:format?`
   }
 
   private appendRoute(urlPath: string, actionDescriptor: ActionDescriptor, handlers: express.Handler[]) {
@@ -705,7 +716,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
       }
     }
 
-    const urlPathWithExt = `${urlPath.replace(/\/$/, '')}.:format?`
+    const urlPathWithExt = this.createUrlPathWithExt(urlPath)
     if (actionDescriptor.method instanceof Array) {
       for (const method of actionDescriptor.method) {
         append(method, urlPathWithExt)

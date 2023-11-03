@@ -30,6 +30,7 @@ describe('createPath', () => {
 
 const pageNameToDummyComponent: Record<string, PageNode> = {
   '/users/:id': () => <div></div>,
+  '/sub/tasks/:id': () => <div></div>,
 }
 
 const DummyLayout = () => (
@@ -119,6 +120,39 @@ describe('ClientGenretateRouter', () => {
       children: [
         { path: 'users', children: [{ path: ':id', Component: pageNameToDummyComponent['/users/:id'] }] },
         { path: 'sub', children: [{ Component: DummyLayout }] },
+      ],
+    })
+  })
+
+  test('pages', async () => {
+    const routes = (router: Router) => {
+      const layoutRouter = router.layout({ Component: DummyLayout })
+
+      layoutRouter.pages('/users', ['/:id'])
+
+      const subRouter = layoutRouter.sub('sub')
+      const subLayoutRouter = subRouter.layout({ Component: DummyLayout })
+      subLayoutRouter.pages('/tasks', ['/:id'])
+    }
+
+    const router = await buildRouter(routes)
+    const core = router.getCore()
+
+    expect(core.routeObject).toStrictEqual({
+      Component: DummyLayout,
+      children: [
+        { path: 'users', children: [{ path: ':id', Component: pageNameToDummyComponent['/users/:id'] }] },
+        {
+          path: 'sub',
+          children: [
+            {
+              Component: DummyLayout,
+              children: [
+                { path: 'tasks', children: [{ path: ':id', Component: pageNameToDummyComponent['/sub/tasks/:id'] }] },
+              ],
+            },
+          ],
+        },
       ],
     })
   })

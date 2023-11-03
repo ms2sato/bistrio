@@ -57,7 +57,7 @@ export interface Router {
   sub(...args: unknown[]): Router
   layout(props: RouterLayoutType): Router
   resources(path: string, config: ResourceRouteConfig): void
-  resources(path: string, config: RouteConfig, pages: boolean): void
+  pages(rpath: string, children: string[]): void
   options(value: RouterOptions): Router
 }
 
@@ -98,6 +98,14 @@ export const choiceSchema = (
     return constructDescriptor.schema
   }
 }
+
+export const pageActionDescriptor = (path: string, hydrate = true): ActionDescriptor => ({
+  page: true,
+  action: path,
+  path,
+  method: 'get',
+  hydrate,
+})
 
 export const choiseSources = (
   defaultConstructConfig: ConstructConfig,

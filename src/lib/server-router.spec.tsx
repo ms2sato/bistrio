@@ -67,6 +67,12 @@ const createDummyActionContext = async <R extends Resource>(params: CreateDummyA
 }
 
 describe('ServerRouter', () => {
+  const DummyLayout = () => (
+    <div className="dummy-layout">
+      <Outlet />
+    </div>
+  )
+
   describe('in SSR', () => {
     const createServerRenderSupport = async (params: CreateDummyActionContextProps<DummyResource> = dummyProps) => {
       const ctx = await createDummyActionContext(params)
@@ -232,12 +238,6 @@ describe('ServerRouter', () => {
   })
 
   describe('layout', () => {
-    const DummyLayout = () => (
-      <div className="dummy-layout">
-        <Outlet />
-      </div>
-    )
-
     test('simple', async () => {
       const router = await buildRouter({
         routes: (router) => {
@@ -288,6 +288,58 @@ describe('ServerRouter', () => {
       expect(routeObject).toStrictEqual({
         Component: DummyLayout,
         children: [
+          {
+            path: 'sub',
+            children: [
+              {
+                Component: DummyLayout,
+                children: [
+                  {
+                    children: [
+                      {
+                        Component: DummyComponent,
+                        path: ':id',
+                      },
+                    ],
+                    path: 'test',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      })
+    })
+  })
+
+  describe('pages', () => {
+    test('senario', async () => {
+      const router = await buildRouter({
+        routes: (router) => {
+          router.pages('/', ['/'])
+
+          const layoutRouter = router.layout({ Component: DummyLayout })
+          const subRouter = layoutRouter.sub('/sub')
+          const subLayoutRouter = subRouter.layout({ Component: DummyLayout })
+          subLayoutRouter.pages('/test', ['/:id'])
+        },
+        resource: dummyResource,
+        pageLoadFunc,
+      })
+
+      const routeObject = router.routerCore.routeObject
+      expect(routeObject).toStrictEqual({
+        Component: DummyLayout,
+        children: [
+          {
+            path: '',
+            children: [
+              {
+                path: '',
+                Component: DummyComponent,
+              },
+            ],
+          },
           {
             path: 'sub',
             children: [
