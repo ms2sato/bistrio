@@ -40,7 +40,7 @@ export type ConstructConfig = {
   [action: string]: ConstructDescriptor
 }
 
-export type RouteConfig = {
+export type ResourceRouteConfig = {
   name: string
   construct?: ConstructConfig
   actions?: readonly ActionDescriptor[]
@@ -56,7 +56,7 @@ export type RouterLayoutType = { element: ReactNode } | { Component: ComponentTy
 export interface Router {
   sub(...args: unknown[]): Router
   layout(props: RouterLayoutType): Router
-  resources(path: string, config: RouteConfig): void
+  resources(path: string, config: ResourceRouteConfig): void
   resources(path: string, config: RouteConfig, pages: boolean): void
   options(value: RouterOptions): Router
 }

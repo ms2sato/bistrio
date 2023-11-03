@@ -5,7 +5,7 @@ import {
   HandlerBuildRunner,
   Resource,
   ResourceSupport,
-  RouteConfig,
+  ResourceRouteConfig,
   Router,
   RouterCoreLight,
   RouterLayoutType,
@@ -25,9 +25,9 @@ export abstract class BasicRouter implements Router {
   abstract layout(props: RouterLayoutType): Router
   abstract options(value: RouterOptions): Router
 
-  protected abstract createHandlerBuildRunner(
+  protected abstract createResourcesHandlerBuildRunner(
     rpath: string,
-    routeConfig: RouteConfig,
+    routeConfig: ResourceRouteConfig,
     pages: boolean,
   ): HandlerBuildRunner
 
@@ -62,7 +62,7 @@ export abstract class BasicRouter implements Router {
   }
 
   // protected for test
-  protected async loadResource(resourcePath: string, routeConfig: RouteConfig) {
+  protected async loadResource(resourcePath: string, routeConfig: ResourceRouteConfig) {
     const fileRoot = this.serverRouterConfig.baseDir
     return await importAndSetup<ResourceSupport, Resource>(
       fileRoot,
@@ -73,7 +73,7 @@ export abstract class BasicRouter implements Router {
   }
 
   // protected for test
-  protected async loadAdapter(adapterPath: string, routeConfig: RouteConfig) {
+  protected async loadAdapter(adapterPath: string, routeConfig: ResourceRouteConfig) {
     const fileRoot = this.serverRouterConfig.baseDir
     return await importAndSetup<ActionSupport, Adapter>(fileRoot, adapterPath, new ActionSupport(fileRoot), routeConfig)
   }

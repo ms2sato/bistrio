@@ -6,7 +6,7 @@ import {
   HandlerBuildRunner,
   opt,
   Resource,
-  RouteConfig,
+  ResourceRouteConfig,
   RouterCoreLight,
   RouterLayoutType,
   RouterOptions,
@@ -91,7 +91,7 @@ export class ResourceHolderCreateRouter extends BasicRouter {
   }
 }
 
-const createLocalResourceProxy = (config: RouteConfig, resource: Resource): Resource => {
+const createLocalResourceProxy = (config: ResourceRouteConfig, resource: Resource): Resource => {
   const resourceProxy: Resource = {}
   for (const actionName in resource) {
     const resourceMethod = resource[actionName]

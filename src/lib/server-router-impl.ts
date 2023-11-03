@@ -9,7 +9,7 @@ import {
   ConstructDescriptor,
   Handler,
   Adapter,
-  RouteConfig,
+  ResourceRouteConfig,
   RouterError,
   RequestCallback,
   SchemaUtil,
@@ -171,7 +171,7 @@ export const importAndSetup = async <S, R>(
   fileRoot: string,
   modulePath: string,
   support: S,
-  config: RouteConfig,
+  config: ResourceRouteConfig,
 ): Promise<R> => {
   let fullPath = path.join(fileRoot, modulePath)
 
@@ -311,7 +311,7 @@ class ResourceMethodCallingError extends Error {
 
 const createLocalResourceProxy = (
   serverRouterConfig: ServerRouterConfig,
-  config: RouteConfig,
+  config: ResourceRouteConfig,
   resource: Resource,
 ): ResourceProxyCreateFunc => {
   return (ctx) => {
@@ -452,12 +452,12 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
     const fullResourceRoutePath = this.getHttpPath(rpath)
 
     const pickPageToSubRouteObject = () => {
-      routeLog("routeObject: %s", JSON.stringify(this.routeObject))
+      routeLog('routeObject: %s', JSON.stringify(this.routeObject))
       if (subRouteObject) {
         this.routeObjectPickupper.pushPageRouteObjectsToSub(
           fullResourceRoutePath,
           subRouteObject,
-          pageActionDescriptors
+          pageActionDescriptors,
         )
       }
     }
