@@ -50,7 +50,7 @@ export abstract class BasicRouter implements Router {
     return path.join(this.routePath, rpath)
   }
 
-  protected getResourcePath(rpath: string) {
+  protected getResourceLocalPath(rpath: string) {
     return path.join(
       this.serverRouterConfig.resourceRoot,
       this.getRoutePath(rpath),
@@ -58,7 +58,7 @@ export abstract class BasicRouter implements Router {
     )
   }
 
-  protected getAdapterPath(rpath: string) {
+  protected getAdapterLocalPath(rpath: string) {
     return path.join(
       this.serverRouterConfig.adapterRoot,
       this.getRoutePath(rpath),
