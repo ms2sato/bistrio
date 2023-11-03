@@ -444,11 +444,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
     return ret
   }
 
-  protected createResourcesHandlerBuildRunner(
-    rpath: string,
-    routeConfig: ResourceRouteConfig,
-    pages: boolean,
-  ): HandlerBuildRunner {
+  protected createResourcesHandlerBuildRunner(rpath: string, routeConfig: ResourceRouteConfig): HandlerBuildRunner {
     const isPageOnly = routeConfig.actions?.every((action) => action.page) && true
 
     const hasPages = routeConfig.actions?.some((ad) => ad.page) ?? false
@@ -519,26 +515,6 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
 
         const urlPath = path.join(rpath, actionDescriptor.path)
         const httpMethod = actionDescriptor.method
-        if (pages) {
-          if (!actionDescriptor.page) {
-            throw new Error('Called pages context but actionDescriptor.page is not set')
-          }
-          if (Array.isArray(httpMethod)) {
-            if (httpMethod.length !== 1) {
-              throw new Error('Called pages context but actionDescriptor.method is not "get" or ["get"]')
-            }
-          }
-
-          if (httpMethod !== 'get') {
-            throw new Error('Called pages context but actionDescriptor.page is not set')
-          }
-
-          this.appendRoute(urlPath, actionDescriptor, [
-            this.createPageHandler(actionDescriptor, fullResourceRoutePath, pageActionDescriptors),
-          ])
-          continue
-        }
-
         const actionName = actionDescriptor.action
 
         const resourceMethod: ResourceMethod | undefined = resource?.[actionName]

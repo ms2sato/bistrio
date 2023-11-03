@@ -28,13 +28,12 @@ export abstract class BasicRouter implements Router {
   protected abstract createResourcesHandlerBuildRunner(
     rpath: string,
     routeConfig: ResourceRouteConfig,
-    pages: boolean,
   ): HandlerBuildRunner
 
   protected abstract createPagesHandlerBuildRunner(rpath: string, children: string[]): HandlerBuildRunner
 
-  resources(rpath: string, config: ResourceRouteConfig, pages = false): void {
-    this.routerCore.handlerBuildRunners.push(this.createResourcesHandlerBuildRunner(rpath, config, pages))
+  resources(rpath: string, config: ResourceRouteConfig): void {
+    this.routerCore.handlerBuildRunners.push(this.createResourcesHandlerBuildRunner(rpath, config))
   }
 
   pages(rpath: string, children: string[]): void {
