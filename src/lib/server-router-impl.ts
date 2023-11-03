@@ -466,11 +466,11 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
       handlerLog('buildHandler: %s', path.join(this.routePath, rpath))
       const actionDescriptors: readonly ActionDescriptor[] = routeConfig.actions || this.serverRouterConfig.actions
 
-      const resourcePath = this.getResourcePath(rpath)
+      const resourceLocalPath = this.getResourceLocalPath(rpath)
       const resourceName = routeConfig.name
       if (this.routerCore.nameToResource.get(resourceName)) {
         throw new Error(
-          `Duplicated Resource Name: ${resourceName}; path: ${resourcePath}, with: ${
+          `Duplicated Resource Name: ${resourceName}; path: ${resourceLocalPath}, with: ${
             this.routerCore.nameToPath.get(resourceName) ?? 'unknown'
           }`,
         )
@@ -478,7 +478,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
 
       let resource
       try {
-        resource = await this.loadResource(resourcePath, routeConfig)
+        resource = await this.loadResource(resourceLocalPath, routeConfig)
       } catch (err) {
         if (!(err instanceof FileNotFoundError) || !isPageOnly) {
           throw err
@@ -492,13 +492,13 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
         )
       }
 
-      this.routerCore.nameToPath.set(resourceName, resourcePath)
+      this.routerCore.nameToPath.set(resourceName, resourceLocalPath)
 
-      const adapterPath = this.getAdapterPath(rpath)
+      const adapterLocalPath = this.getAdapterLocalPath(rpath)
       let adapter: Adapter
 
       try {
-        adapter = await this.loadAdapter(adapterPath, routeConfig)
+        adapter = await this.loadAdapter(adapterLocalPath, routeConfig)
       } catch (err) {
         if (err instanceof FileNotFoundError) {
           adapter = {}
@@ -524,14 +524,14 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
         if (!actionOverride) {
           if (resourceMethod === undefined && !actionDescriptor.page) {
             throw new RouterError(
-              `Logic not found! define action.page option on routes, or define ${resourcePath}#${actionName} or/and ${adapterPath}#${actionName}`,
+              `Logic not found! define action.page option on routes, or define ${resourceLocalPath}#${actionName} or/and ${adapterLocalPath}#${actionName}`,
             )
           }
         }
 
         if (actionOverride && resourceMethod !== undefined) {
           routeLog.extend('warn')(
-            `${resourcePath}#${actionName} is defined but will not be called auto. Responder support auto call; proposal: 'Remove ${resourcePath}#${actionName}' or 'Change to Responder(not Function) ${adapterPath}/#${actionName}' or 'Remove ${adapterPath}/#${actionName}'`,
+            `${resourceLocalPath}#${actionName} is defined but will not be called auto. Responder support auto call; proposal: 'Remove ${resourceLocalPath}#${actionName}' or 'Change to Responder(not Function) ${adapterLocalPath}/#${actionName}' or 'Remove ${adapterLocalPath}/#${actionName}'`,
           )
         }
 
@@ -542,7 +542,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
 
         let handlers
         if (actionOverride) {
-          handlerLog('%s#%s without construct middleware', adapterPath, actionName)
+          handlerLog('%s#%s without construct middleware', adapterLocalPath, actionName)
           const handler: express.Handler = (req, res, next) => {
             const ctx = this.serverRouterConfig.createActionContext({
               router: this,
@@ -552,7 +552,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
               httpPath: fullResourceRoutePath,
             })
             try {
-              handlerLog('%s#%s as Handler', adapterPath, actionName)
+              handlerLog('%s#%s as Handler', adapterLocalPath, actionName)
               const ret = actionFunc(ctx)
               if (isThenable(ret)) {
                 ret.catch(next)
@@ -587,7 +587,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
             const sources = choiseSources(this.serverRouterConfig.constructConfig, constructDescriptor, actionName)
             handlerLog(
               '%s#%s  with construct middleware; schema: %s, sources: %o',
-              adapterPath,
+              adapterLocalPath,
               actionName,
               schema.constructor.name,
               sources,
@@ -600,7 +600,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
               router: this,
               httpPath: fullResourceRoutePath,
               schema,
-              adapterPath,
+              adapterPath: adapterLocalPath,
               actionDescriptor,
               responder: actionFunc,
               adapter,

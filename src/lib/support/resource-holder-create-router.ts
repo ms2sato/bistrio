@@ -64,10 +64,10 @@ export class ResourceHolderCreateRouter extends BasicRouter {
 
     return async () => {
       debugLog('%s', rpath)
-      const resourcePath = this.getResourcePath(rpath)
+      const resourceLocalPath = this.getResourceLocalPath(rpath)
       let resource
       try {
-        resource = await this.loadResource(resourcePath, routeConfig)
+        resource = await this.loadResource(resourceLocalPath, routeConfig)
       } catch (err) {
         if (!(err instanceof FileNotFoundError) || !isPageOnly) {
           throw err
@@ -79,14 +79,14 @@ export class ResourceHolderCreateRouter extends BasicRouter {
       const name = routeConfig.name
       if (this.resourcesHolder[name]) {
         throw new Error(
-          `Duplicated Resource name: ${name}; path: ${resourcePath}, with: ${
+          `Duplicated Resource name: ${name}; path: ${resourceLocalPath}, with: ${
             this.routerCore.nameToPath.get(name) || 'unknown'
           }`,
         )
       }
 
       this.resourcesHolder[name] = resourceProxy
-      this.routerCore.nameToPath.set(name, resourcePath)
+      this.routerCore.nameToPath.set(name, resourceLocalPath)
     }
   }
 
