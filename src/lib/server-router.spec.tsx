@@ -1,71 +1,15 @@
 import express from 'express'
+import { Outlet } from 'react-router-dom'
 import { ServerRenderSupport } from './server-render-support'
-import { ServerRouterImpl } from './server-router-impl'
-import {
-  ActionDescriptor,
-  IdNumberParams,
-  PageLoadFunc,
-  RouteConfig,
-  StandardJsonSuccess,
-  blankSchema,
-  opt,
-} from './shared'
-import { Adapter, CreateActionOptionFunction } from './action-context'
+import { ActionDescriptor, IdNumberParams, PageLoadFunc, blankSchema, opt } from './shared'
+import { CreateActionOptionFunction } from './action-context'
 import { ConstructViewFunc, Resource, ServerRouterConfig, idNumberSchema } from '..'
 import { buildActionContextCreator } from './build-action-context-creator'
-import { Outlet } from 'react-router-dom'
 import { initServerRouterConfig } from './init-server-router-config'
+import { RoutesFunction, buildRouter, fakeRequest } from '../misc/spec-util'
 
 type ActionOption = { test: number }
-type VirtualRequest = { url: string; method: string; headers: Record<string, string> }
-type Handle = (
-  req: VirtualRequest,
-  res: {
-    render: () => void
-    redirect: () => void
-    status: (value: number) => void
-    json: (ret: StandardJsonSuccess) => void
-  },
-  out: () => void,
-) => void
-type Handlable = { handle: Handle }
 type TestReturn = { msg: string; opt?: opt<ActionOption> }
-type VirtualResponse = { statusCode: number; data: TestReturn }
-
-const checkHandlable = (router: unknown): router is Handlable => 'handle' in (router as Handlable)
-
-const virtualRequest = (router: ServerRouterImpl, req: VirtualRequest): Promise<VirtualResponse> =>
-  new Promise<VirtualResponse>((resolve, reject) => {
-    const expressRouter = router.router
-    if (!checkHandlable(expressRouter)) {
-      throw new Error('Unexpexted router type')
-    }
-
-    let statusCode: number
-    // @see https://stackoverflow.com/questions/33090091/is-it-possible-to-call-express-router-directly-from-code-with-a-fake-request
-    expressRouter.handle(
-      req,
-      {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        render() {},
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        redirect() {},
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        status(value: number) {
-          statusCode = value
-          return this
-        },
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        json(ret: StandardJsonSuccess) {
-          const data = ret.data as VirtualResponse['data']
-          resolve({ statusCode, data })
-        },
-      },
-      (...args: unknown[]) => {
-        reject(args[0])
-      },
-    )
-  })
 
 const dummyResource = {
   build: () => {
@@ -79,36 +23,9 @@ const dummyResource = {
   },
 } as const satisfies Resource
 
-class TestServerRouter<R extends Resource> extends ServerRouterImpl {
-  constructor(
-    props: ServerRouterConfig,
-    private resource: R,
-    private adapter: Adapter = {},
-  ) {
-    super(props)
-  }
+type DummyResource = typeof dummyResource
 
-  protected async loadResource(_resourcePath: string, _routeConfig: RouteConfig) {
-    return Promise.resolve(this.resource)
-  }
-
-  protected loadAdapter(_adapterPath: string, _routeConfig: RouteConfig) {
-    return Promise.resolve(this.adapter)
-  }
-}
-
-const DummyComponent = () => <div>test</div>
-const pageLoadFunc: PageLoadFunc = () => DummyComponent
-
-const buildRouter = async ({
-  serverRouterConfig,
-}: {
-  serverRouterConfig?: ServerRouterConfig
-}): Promise<TestServerRouter<typeof dummyResource>> => {
-  const router = new TestServerRouter(
-    serverRouterConfig || initServerRouterConfig({ baseDir: './', pageLoadFunc }),
-    dummyResource,
-  )
+const dummyRoutes: RoutesFunction<DummyResource> = (router) => {
   router.resources('/test', {
     name: 'test_resource',
     actions: [
@@ -118,11 +35,25 @@ const buildRouter = async ({
     ],
     construct: { build: { schema: blankSchema }, hasOption: { schema: blankSchema } },
   })
-  await router.build()
-  return router
 }
 
-const createDummyActionContext = async (params: { serverRouterConfig?: ServerRouterConfig }) => {
+const DummyComponent = () => <div>test</div>
+const pageLoadFunc: PageLoadFunc = () => DummyComponent
+
+const dummyProps = {
+  routes: dummyRoutes,
+  resource: dummyResource,
+  pageLoadFunc,
+}
+
+type CreateDummyActionContextProps<R extends Resource> = {
+  routes: RoutesFunction<R>
+  resource: R
+  serverRouterConfig?: ServerRouterConfig
+  pageLoadFunc: PageLoadFunc
+}
+
+const createDummyActionContext = async <R extends Resource>(params: CreateDummyActionContextProps<R>) => {
   const router = await buildRouter(params)
 
   const constructView: ConstructViewFunc = () => <>TestView</>
@@ -137,7 +68,7 @@ const createDummyActionContext = async (params: { serverRouterConfig?: ServerRou
 
 describe('ServerRouter', () => {
   describe('in SSR', () => {
-    const createServerRenderSupport = async (params: { serverRouterConfig?: ServerRouterConfig } = {}) => {
+    const createServerRenderSupport = async (params: CreateDummyActionContextProps<DummyResource> = dummyProps) => {
       const ctx = await createDummyActionContext(params)
       return new ServerRenderSupport(ctx)
     }
@@ -155,6 +86,7 @@ describe('ServerRouter', () => {
     test('access resources with actionOptions', async () => {
       const createActionOptions: CreateActionOptionFunction = () => ({ test: 321 })
       const rs = await createServerRenderSupport({
+        ...dummyProps,
         serverRouterConfig: initServerRouterConfig({ createActionOptions, baseDir: './', pageLoadFunc }),
       })
       expect(await rs.resources().test_resource.hasOption()).toStrictEqual({ msg: 'ret hasOption', opt: { test: 321 } })
@@ -176,6 +108,7 @@ describe('ServerRouter', () => {
     test('access suspendedResources with actionOptions', async () => {
       const createActionOptions: CreateActionOptionFunction = () => ({ test: 321 })
       const rs = await createServerRenderSupport({
+        ...dummyProps,
         serverRouterConfig: initServerRouterConfig({ createActionOptions, baseDir: './', pageLoadFunc }),
       })
 
@@ -195,9 +128,9 @@ describe('ServerRouter', () => {
 
   describe('as API', () => {
     test('requests', async () => {
-      const router = await buildRouter({})
+      const router = await buildRouter(dummyProps)
 
-      const ret = await virtualRequest(router, {
+      const ret = await fakeRequest<TestReturn>(router, {
         url: '/test/build',
         method: 'GET',
         headers: { 'content-type': 'application/json' },
@@ -210,6 +143,7 @@ describe('ServerRouter', () => {
     test('requests with actionOpitons', async () => {
       const createActionOptions: CreateActionOptionFunction = () => ({ test: 321 })
       const router = await buildRouter({
+        ...dummyProps,
         serverRouterConfig: initServerRouterConfig({
           createActionOptions,
           baseDir: './',
@@ -217,7 +151,7 @@ describe('ServerRouter', () => {
         }),
       })
 
-      const ret = await virtualRequest(router, {
+      const ret = await fakeRequest(router, {
         url: '/test/has_option',
         method: 'GET',
         headers: { 'content-type': 'application/json' },
@@ -233,27 +167,28 @@ describe('ServerRouter', () => {
 
   describe('adapter', () => {
     test('no args', async () => {
-      const router = new TestServerRouter(
-        initServerRouterConfig({ baseDir: './', pageLoadFunc }),
-        {
+      const router = await buildRouter({
+        routes: (router) => {
+          router.resources('/test', {
+            name: 'test_resource',
+            actions: [{ action: 'get', method: 'get', path: '/get' }],
+            construct: { get: { schema: blankSchema } },
+          })
+        },
+        resource: {
           get() {
             throw new Error('Unexpected called resource method')
           },
         },
-        {
+        adapter: {
           get: {
             override: () => ({ msg: 'ret adapter get' }),
           },
         },
-      )
-      router.resources('/test', {
-        name: 'test_resource',
-        actions: [{ action: 'get', method: 'get', path: '/get' }],
-        construct: { get: { schema: blankSchema } },
+        pageLoadFunc,
       })
-      await router.build()
 
-      const ret = await virtualRequest(router, {
+      const ret = await fakeRequest(router, {
         url: '/test/get',
         method: 'GET',
         headers: { 'content-type': 'application/json' },
@@ -264,27 +199,28 @@ describe('ServerRouter', () => {
     })
 
     test('an arg', async () => {
-      const router = new TestServerRouter(
-        initServerRouterConfig({ baseDir: './', pageLoadFunc }),
-        {
+      const router = await buildRouter({
+        routes: (router) => {
+          router.resources('/test', {
+            name: 'test_resource',
+            actions: [{ action: 'get', method: 'get', path: '/:id' }],
+            construct: { get: { schema: idNumberSchema } },
+          })
+        },
+        resource: {
           get(_params: IdNumberParams) {
             throw new Error('Unexpected called resource method')
           },
         },
-        {
+        adapter: {
           get: {
             override: (_ctx, _params: IdNumberParams) => ({ msg: 'ret adapter get' }),
           },
         },
-      )
-      router.resources('/test', {
-        name: 'test_resource',
-        actions: [{ action: 'get', method: 'get', path: '/:id' }],
-        construct: { get: { schema: idNumberSchema } },
+        pageLoadFunc,
       })
-      await router.build()
 
-      const ret = await virtualRequest(router, {
+      const ret = await fakeRequest(router, {
         url: '/test/1',
         method: 'GET',
         headers: { 'content-type': 'application/json' },
@@ -303,13 +239,17 @@ describe('ServerRouter', () => {
     )
 
     test('simple', async () => {
-      const router = new TestServerRouter(initServerRouterConfig({ baseDir: './', pageLoadFunc }), dummyResource)
-      router.layout({ Component: DummyLayout }).resources('/test', {
-        name: 'test_resource',
-        actions: [{ action: 'page', method: 'get', path: '/:id', page: true }],
-        construct: { show: { schema: blankSchema } },
+      const router = await buildRouter({
+        routes: (router) => {
+          router.layout({ Component: DummyLayout }).resources('/test', {
+            name: 'test_resource',
+            actions: [{ action: 'page', method: 'get', path: '/:id', page: true }],
+            construct: { show: { schema: blankSchema } },
+          })
+        },
+        resource: dummyResource,
+        pageLoadFunc,
       })
-      await router.build()
 
       const routeObject = router.routerCore.routeObject
       expect(routeObject).toStrictEqual({
@@ -329,16 +269,20 @@ describe('ServerRouter', () => {
     })
 
     test('nested', async () => {
-      const router = new TestServerRouter(initServerRouterConfig({ baseDir: './', pageLoadFunc }), dummyResource)
-      const layoutRouter = router.layout({ Component: DummyLayout })
-      const subRouter = layoutRouter.sub('/sub')
-      const subLayoutRouter = subRouter.layout({ Component: DummyLayout })
-      subLayoutRouter.resources('/test', {
-        name: 'test_resource',
-        actions: [{ action: 'page', method: 'get', path: '/:id', page: true }],
-        construct: { show: { schema: blankSchema } },
+      const router = await buildRouter({
+        routes: (router) => {
+          const layoutRouter = router.layout({ Component: DummyLayout })
+          const subRouter = layoutRouter.sub('/sub')
+          const subLayoutRouter = subRouter.layout({ Component: DummyLayout })
+          subLayoutRouter.resources('/test', {
+            name: 'test_resource',
+            actions: [{ action: 'page', method: 'get', path: '/:id', page: true }],
+            construct: { show: { schema: blankSchema } },
+          })
+        },
+        resource: dummyResource,
+        pageLoadFunc,
       })
-      await router.build()
 
       const routeObject = router.routerCore.routeObject
       expect(routeObject).toStrictEqual({

@@ -1,6 +1,6 @@
 import path from 'path'
 import fs from 'fs'
-import { RouteConfig, Router, RouterOptions } from '../../client'
+import { ResourceRouteConfig, Router, RouterOptions } from '../../client'
 import {
   Config,
   ConfigCustom,
@@ -29,7 +29,7 @@ class NameToPathRouter implements Router {
     return this
   }
 
-  resources(rpath: string, config: RouteConfig): void {
+  resources(rpath: string, config: ResourceRouteConfig): void {
     this.nameToPath[config.name] = path.join(this.httpPath, rpath)
   }
 

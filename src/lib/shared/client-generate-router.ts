@@ -4,7 +4,7 @@ import { type RouteObject } from 'react-router-dom'
 import {
   ConstructDescriptor,
   Resource,
-  RouteConfig,
+  ResourceRouteConfig,
   Router,
   HandlerBuildRunner,
   NamedResources,
@@ -274,7 +274,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
     return this
   }
 
-  resources(rpath: string, routeConfig: RouteConfig, pages = false): void {
+  resources(rpath: string, routeConfig: ResourceRouteConfig, pages = false): void {
     const fetcher = this.config.createFetcher()
 
     const createStubMethod = (

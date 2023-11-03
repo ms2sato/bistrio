@@ -1,7 +1,14 @@
 import express from 'express'
 import { z } from 'zod'
 import { RouteObject } from 'react-router-dom'
-import { ValidationError, Resource, ActionDescriptor, RouteConfig, NamedResources, HandlerBuildRunner } from '..'
+import {
+  ValidationError,
+  Resource,
+  ActionDescriptor,
+  ResourceRouteConfig,
+  NamedResources,
+  HandlerBuildRunner,
+} from '..'
 import { ResourceProxyCreateFunc } from './server-router-impl'
 
 export { z }
@@ -78,6 +85,6 @@ export class ResourceSupport {
   constructor(readonly rootPath: string) {}
 }
 
-export type EndpointFunc<S, R> = (support: S, config: RouteConfig) => R
+export type EndpointFunc<S, R> = (support: S, config: ResourceRouteConfig) => R
 export type ResourceFunc = EndpointFunc<ResourceSupport, Resource>
 export type ActionFunc = EndpointFunc<ActionSupport, Adapter>

@@ -5,15 +5,17 @@ import {
   ResourceFunc,
   ResourceSupport,
   Responder,
-  RouteConfig,
+  ResourceRouteConfig,
   Handler,
 } from '..'
 
-export function defineResource<R extends Resource>(callback: (support: ResourceSupport, config: RouteConfig) => R) {
+export function defineResource<R extends Resource>(
+  callback: (support: ResourceSupport, config: ResourceRouteConfig) => R,
+) {
   return callback
 }
 
-export function defineAdapter<AR>(callback: (support: ActionSupport, config: RouteConfig) => AR) {
+export function defineAdapter<AR>(callback: (support: ActionSupport, config: ResourceRouteConfig) => AR) {
   return callback
 }
 
