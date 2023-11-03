@@ -62,11 +62,11 @@ export class TestServerRouter<R extends Resource> extends ServerRouterImpl {
     super(props)
   }
 
-  protected async loadResource(_resourcePath: string, _routeConfig: ResourceRouteConfig) {
+  protected async loadLocalResource(_resourcePath: string, _routeConfig: ResourceRouteConfig) {
     return Promise.resolve(this.resource)
   }
 
-  protected loadAdapter(_adapterPath: string, _routeConfig: ResourceRouteConfig) {
+  protected loadLocalAdapter(_adapterPath: string, _routeConfig: ResourceRouteConfig) {
     return Promise.resolve(this.adapter)
   }
 }

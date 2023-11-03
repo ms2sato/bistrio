@@ -12,7 +12,7 @@ import {
   RouterOptions,
 } from '..'
 import { ServerRouterConfig } from './server-router-config'
-import { importAndSetup } from './server-router-impl'
+import { importLocalAndSetup as loadLocalModuleAndSetup } from './server-router-impl'
 
 export abstract class BasicRouter implements Router {
   constructor(
@@ -67,19 +67,24 @@ export abstract class BasicRouter implements Router {
   }
 
   // protected for test
-  protected async loadResource(resourcePath: string, routeConfig: ResourceRouteConfig) {
+  protected async loadLocalResource(resourceLocalPath: string, routeConfig: ResourceRouteConfig) {
     const fileRoot = this.serverRouterConfig.baseDir
-    return await importAndSetup<ResourceSupport, Resource>(
+    return await loadLocalModuleAndSetup<ResourceSupport, Resource>(
       fileRoot,
-      resourcePath,
+      resourceLocalPath,
       new ResourceSupport(fileRoot),
       routeConfig,
     )
   }
 
   // protected for test
-  protected async loadAdapter(adapterPath: string, routeConfig: ResourceRouteConfig) {
+  protected async loadLocalAdapter(adapterLocalPath: string, routeConfig: ResourceRouteConfig) {
     const fileRoot = this.serverRouterConfig.baseDir
-    return await importAndSetup<ActionSupport, Adapter>(fileRoot, adapterPath, new ActionSupport(fileRoot), routeConfig)
+    return await loadLocalModuleAndSetup<ActionSupport, Adapter>(
+      fileRoot,
+      adapterLocalPath,
+      new ActionSupport(fileRoot),
+      routeConfig,
+    )
   }
 }
