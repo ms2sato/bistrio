@@ -12,7 +12,7 @@ test('standard', async () => {
   const holder: Record<string, Resource> = {}
   const router = new ResourceHolderCreateRouter(holder, initServerRouterConfig({ baseDir: './', pageLoadFunc }))
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const spy = jest.spyOn(router as any, 'loadResource').mockImplementation(() =>
+  const spy = jest.spyOn(router as any, 'loadLocalResource').mockImplementation(() =>
     Promise.resolve({
       build: () => ({ msg: 'ret build' }),
     }),
@@ -39,7 +39,7 @@ test('with actionOption', async () => {
     initServerRouterConfig({ baseDir: './', createActionOptions, pageLoadFunc }),
   )
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const spy = jest.spyOn(router as any, 'loadResource').mockImplementation(() =>
+  const spy = jest.spyOn(router as any, 'loadLocalResource').mockImplementation(() =>
     Promise.resolve({
       hasOption: (ao: opt<ActionOption>) => ({ msg: 'ret hasOption', opt: ao.body }),
     }),
@@ -64,7 +64,7 @@ test('page only', async () => {
   const holder: Record<string, Resource> = {}
   const router = new ResourceHolderCreateRouter(holder, initServerRouterConfig({ baseDir: './', pageLoadFunc }))
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const spy = jest.spyOn(router as any, 'loadResource').mockImplementation(() => {
+  const spy = jest.spyOn(router as any, 'loadLocalResource').mockImplementation(() => {
     throw new FileNotFoundError('Resource Not Found') // but handled if page only
   })
 
