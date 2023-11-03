@@ -17,7 +17,7 @@ import { importAndSetup } from './server-router-impl'
 export abstract class BasicRouter implements Router {
   constructor(
     readonly serverRouterConfig: ServerRouterConfig,
-    readonly httpPath: string = '/',
+    readonly routePath: string = '/',
     protected readonly routerCore: RouterCoreLight,
   ) {}
 
@@ -46,14 +46,14 @@ export abstract class BasicRouter implements Router {
     }
   }
 
-  protected getHttpPath(rpath: string) {
-    return path.join(this.httpPath, rpath)
+  protected getRoutePath(rpath: string) {
+    return path.join(this.routePath, rpath)
   }
 
   protected getResourcePath(rpath: string) {
     return path.join(
       this.serverRouterConfig.resourceRoot,
-      this.getHttpPath(rpath),
+      this.getRoutePath(rpath),
       this.serverRouterConfig.resourceFileName,
     )
   }
@@ -61,7 +61,7 @@ export abstract class BasicRouter implements Router {
   protected getAdapterPath(rpath: string) {
     return path.join(
       this.serverRouterConfig.adapterRoot,
-      this.getHttpPath(rpath),
+      this.getRoutePath(rpath),
       this.serverRouterConfig.adapterFileName,
     )
   }
