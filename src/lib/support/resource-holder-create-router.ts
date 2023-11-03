@@ -37,7 +37,7 @@ export class ResourceHolderCreateRouter extends BasicRouter {
     return new ResourceHolderCreateRouter(
       this.resourcesHolder,
       this.serverRouterConfig,
-      path.join(this.httpPath, rpath),
+      path.join(this.routePath, rpath),
       this.routerCore,
       { ...this.routerOptions },
     )
@@ -47,7 +47,7 @@ export class ResourceHolderCreateRouter extends BasicRouter {
     return new ResourceHolderCreateRouter(
       this.resourcesHolder,
       this.serverRouterConfig,
-      this.httpPath,
+      this.routePath,
       this.routerCore,
       { ...this.routerOptions },
     )

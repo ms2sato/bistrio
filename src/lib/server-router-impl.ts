@@ -396,7 +396,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
     // TODO: impl class SubServerRouter without build
     const subRouter = new ServerRouterImpl(
       this.serverRouterConfig,
-      path.join(this.httpPath, rpath),
+      path.join(this.routePath, rpath),
       subRouteObject,
       this.routerCore,
       {
@@ -414,7 +414,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
     if (layoutRouteObject) {
       const subRouter = new ServerRouterImpl(
         this.serverRouterConfig,
-        this.httpPath,
+        this.routePath,
         layoutRouteObject,
         this.routerCore,
         {
@@ -450,7 +450,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
     const hasPages = routeConfig.actions?.some((ad) => ad.page) ?? false
     const subRouteObject = hasPages ? this.routeObjectPickupper.addNewSub(rpath) : undefined
     const pageActionDescriptors: ActionDescriptor[] = []
-    const fullResourceRoutePath = this.getHttpPath(rpath)
+    const fullResourceRoutePath = this.getRoutePath(rpath)
 
     const pickPageToSubRouteObject = () => {
       if (subRouteObject) {
@@ -463,7 +463,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
     }
 
     return async () => {
-      handlerLog('buildHandler: %s', path.join(this.httpPath, rpath))
+      handlerLog('buildHandler: %s', path.join(this.routePath, rpath))
       const actionDescriptors: readonly ActionDescriptor[] = routeConfig.actions || this.serverRouterConfig.actions
 
       const resourcePath = this.getResourcePath(rpath)
@@ -612,7 +612,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
         routeLog(
           '%s %s\t%s\t{actionOverride:%s, resourceMethod:%s, page: %s, hydrate: %s}',
           httpMethod instanceof Array ? httpMethod.join(',') : httpMethod,
-          path.join(this.httpPath, urlPath),
+          path.join(this.routePath, urlPath),
           actionName,
           actionOverride,
           !!resourceMethod,
@@ -630,7 +630,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
   protected createPagesHandlerBuildRunner(rpath: string, children: string[]): HandlerBuildRunner {
     const subRouteObject = this.routeObjectPickupper.addNewSub(rpath)
     const pageActionDescriptors: ActionDescriptor[] = []
-    const fullResourceRoutePath = this.getHttpPath(rpath)
+    const fullResourceRoutePath = this.getRoutePath(rpath)
 
     const pickPageToSubRouteObject = () => {
       if (subRouteObject) {
@@ -658,7 +658,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
 
     for (const child of children) {
       const urlPath = path.join(rpath, child)
-      routeLog('%s', path.join(this.httpPath, urlPath))
+      routeLog('%s', path.join(this.routePath, urlPath))
 
       if (!hasRoutingMethod(router, 'get')) {
         throw new Error(`Unreachable: router is not Object or router[get] is not Function`)
