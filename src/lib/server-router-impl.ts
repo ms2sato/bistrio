@@ -31,6 +31,7 @@ import {
   ServerRouter,
   ResourceMethodHandlerParams,
   pageActionDescriptor,
+  ClientConfig,
 } from '..'
 import { HttpMethod, RouterOptions, opt } from './shared'
 import { RouteObject } from 'react-router-dom'
@@ -376,6 +377,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
 
   constructor(
     serverRouterConfig: ServerRouterConfig,
+    private clientConfig: ClientConfig,
     httpPath = '/',
     private routeObject: RouteObject = {},
     readonly routerCore: RouterCore = {
@@ -388,7 +390,11 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
   ) {
     super(serverRouterConfig, httpPath, routerCore)
     this.router = express.Router({ mergeParams: true })
-    this.routeObjectPickupper = new RouteObjectPickupper(routeObject, this.serverRouterConfig.pageLoadFunc)
+    this.routeObjectPickupper = new RouteObjectPickupper(
+      clientConfig,
+      routeObject,
+      this.serverRouterConfig.pageLoadFunc,
+    )
   }
 
   sub(rpath: string, ...handlers: RequestHandler[]) {
@@ -396,6 +402,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
     // TODO: impl class SubServerRouter without build
     const subRouter = new ServerRouterImpl(
       this.serverRouterConfig,
+      this.clientConfig,
       path.join(this.routePath, rpath),
       subRouteObject,
       this.routerCore,
@@ -414,6 +421,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
     if (layoutRouteObject) {
       const subRouter = new ServerRouterImpl(
         this.serverRouterConfig,
+        this.clientConfig,
         this.routePath,
         layoutRouteObject,
         this.routerCore,
@@ -677,7 +685,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
 
   // TODO: extract to ServerRouterConfig
   private generateRoutePath(urlPath: string) {
-    return `${urlPath.replace(/\/$/, '')}.:format?`
+    return `${this.serverRouterConfig.formatPlaceholderForRouter(urlPath.replace(/\/$/, ''))}.:format?`
   }
 
   private appendRoute(urlPath: string, actionDescriptor: ActionDescriptor, handlers: express.Handler[]) {

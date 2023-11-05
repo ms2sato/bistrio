@@ -25,6 +25,8 @@ export type ResourceMethodHandlerParams = {
   adapter: Adapter
 }
 
+export type FormatPlaceholderForServerRouterFunc = (routePath: string) => string
+
 export type ServerRouterConfig = {
   baseDir: string
   actions: readonly ActionDescriptor[]
@@ -39,6 +41,7 @@ export type ServerRouterConfig = {
   resourceRoot: string
   resourceFileName: string
   pageLoadFunc: PageLoadFunc
+  formatPlaceholderForRouter: FormatPlaceholderForServerRouterFunc
 }
 
 export type ServerRouterConfigCustom = PartialWithRequired<ServerRouterConfig, 'baseDir' | 'pageLoadFunc'>

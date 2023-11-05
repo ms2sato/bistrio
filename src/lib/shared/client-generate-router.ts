@@ -20,6 +20,7 @@ import {
   createValidationError,
   RouterLayoutType,
   pageActionDescriptor,
+  routerPlaceholderRegex,
 } from '../../client'
 import { filterWithoutKeys, toURLSearchParams } from './object-util'
 import { pathJoin } from './path-util'
@@ -29,10 +30,24 @@ import createDebug from 'debug'
 
 const debug = createDebug('bistrio:debug:client')
 
-export const createPath = (resourceUrl: string, pathFormat: string, option: Record<string, string | number>) => {
+export type FillInPlaceholdersFunc = (routePath: string, callback: (attr: string) => string) => string
+
+const fillInPlaceholders: FillInPlaceholdersFunc = (routePath, callback) =>
+  routePath.replace(routerPlaceholderRegex, (ma) => callback(ma.substring(1)))
+
+export type FormatPlaceholderForClientRouterFunc = (routePath: string) => string
+
+const formatPlaceholderForRouter: FormatPlaceholderForClientRouterFunc = (routePath: string) =>
+  routePath.replace(routerPlaceholderRegex, ':$1')
+
+export const createPath = (
+  config: ClientConfig,
+  resourceUrl: string,
+  pathFormat: string,
+  option: Record<string, string | number>,
+) => {
   const keys: string[] = []
-  const apath = pathJoin(resourceUrl, pathFormat).replace(/:[a-z][\w_]+/g, (ma) => {
-    const attr = ma.substring(1)
+  const apath = config.fillInPlaceholders(pathJoin(resourceUrl, pathFormat), (attr: string) => {
     const param = option[attr]
     if (param === undefined || param === null) {
       throw new Error(`Unexpected param name: ${attr}`)
@@ -64,6 +79,8 @@ export type ClientConfig = {
   createFetcher: CreateFetcherFunc
   sharedBundlePrefix: string
   jsRoot: string
+  fillInPlaceholders: FillInPlaceholdersFunc
+  formatPlaceholderForRouter: FormatPlaceholderForClientRouterFunc
 }
 
 export type ClientConfigCustom = Partial<ClientConfig>
@@ -213,6 +230,8 @@ export const defaultClientConfig = (): ClientConfig => {
     createFetcher,
     sharedBundlePrefix: 'shared--',
     jsRoot: 'js',
+    fillInPlaceholders,
+    formatPlaceholderForRouter,
   }
 }
 
@@ -224,20 +243,20 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
   private routeObjectPickupper: RouteObjectPickupper
 
   constructor(
-    private config: ClientConfig,
+    private clientConfig: ClientConfig,
     private pageLoadFunc: PageLoadFunc,
     private httpPath = '/',
     routeObject: RouteObject = {},
     private core: ClientGenretateRouterCore = {
-      host: config.host(),
-      constructConfig: config.constructConfig,
+      host: clientConfig.host(),
+      constructConfig: clientConfig.constructConfig,
       pageLoadFunc,
       resourceNameToInfo: new Map<string, ResourceInfo>(),
       handlerBuildRunners: [],
       routeObject,
     },
   ) {
-    this.routeObjectPickupper = new RouteObjectPickupper(routeObject, pageLoadFunc)
+    this.routeObjectPickupper = new RouteObjectPickupper(clientConfig, routeObject, pageLoadFunc)
   }
 
   sub(rpath: string, ..._args: unknown[]): Router {
@@ -245,7 +264,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
 
     // TODO: args and middlewares
     return new ClientGenretateRouter<RS>(
-      this.config,
+      this.clientConfig,
       this.pageLoadFunc,
       pathJoin(this.httpPath, rpath),
       subRouteObject,
@@ -262,7 +281,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
 
     if (layoutRouteObject) {
       const layoutRouter = new ClientGenretateRouter(
-        this.config,
+        this.clientConfig,
         this.pageLoadFunc,
         this.httpPath,
         layoutRouteObject,
@@ -276,7 +295,8 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
   }
 
   resources(rpath: string, routeConfig: ResourceRouteConfig): void {
-    const fetcher = this.config.createFetcher()
+    const config = this.clientConfig
+    const fetcher = this.clientConfig.createFetcher()
 
     const createStubMethod = (
       ad: ActionDescriptor,
@@ -287,7 +307,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
       if (schema === blankSchema) {
         return async function (...options: unknown[]) {
           const option = options.length > 0 ? (options[0] as Record<string, string | number>) : {}
-          const { httpPath } = createPath(resourceUrl, ad.path, option)
+          const { httpPath } = createPath(config, resourceUrl, ad.path, option)
           return fetcher.fetch(httpPath, method)
         }
       } else {
@@ -295,7 +315,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
           // TODO: catch error and rethrow with custom error type
           const parsedInput = schema.parse(input)
 
-          const { httpPath, keys } = createPath(resourceUrl, ad.path, input as Record<string, string | number>)
+          const { httpPath, keys } = createPath(config, resourceUrl, ad.path, input as Record<string, string | number>)
 
           const body = filterWithoutKeys(parsedInput, keys)
           if (Object.keys(body).length > 0) {

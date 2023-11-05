@@ -4,7 +4,14 @@ import { Adapter } from '../lib/action-context'
 import { initServerRouterConfig } from '../lib/init-server-router-config'
 import { ServerRouterConfig } from '../lib/server-router-config'
 import { ServerRouterImpl } from '../lib/server-router-impl'
-import { PageLoadFunc, Resource, ResourceRouteConfig, StandardJsonSuccess } from '../lib/shared'
+import {
+  ClientConfig,
+  PageLoadFunc,
+  Resource,
+  ResourceRouteConfig,
+  StandardJsonSuccess,
+  defaultClientConfig,
+} from '../lib/shared'
 
 type VirtualResponse<R> = { statusCode: number; data: R }
 type VirtualRequest = { url: string; method: string; headers: Record<string, string> }
@@ -56,10 +63,11 @@ export const fakeRequest = <R>(router: ServerRouterImpl, req: VirtualRequest): P
 export class TestServerRouter<R extends Resource> extends ServerRouterImpl {
   constructor(
     props: ServerRouterConfig,
+    clientConfig: ClientConfig,
     private resource: R,
     private adapter: Adapter = {},
   ) {
-    super(props)
+    super(props, clientConfig)
   }
 
   protected async loadLocalResource(_resourcePath: string, _routeConfig: ResourceRouteConfig) {
@@ -88,6 +96,7 @@ export const buildRouter = async <R extends Resource, A extends Adapter>({
 }): Promise<TestServerRouter<R>> => {
   const router = new TestServerRouter<R>(
     serverRouterConfig || initServerRouterConfig({ baseDir: './', pageLoadFunc }),
+    defaultClientConfig(),
     resource,
     adapter,
   )

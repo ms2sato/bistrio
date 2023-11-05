@@ -4,6 +4,7 @@ import {
   createDefaultActionContext,
   createNullActionOption,
   createSmartInputArranger,
+  formatPlaceholderForRouter,
   renderDefault,
 } from './server-router-config-defaults'
 import { SmartResponder, StandardJsonResponder } from './smart-responder'
@@ -27,6 +28,7 @@ function defaultServerRouterConfig(): Omit<ServerRouterConfig, 'baseDir' | 'page
     constructConfig: Actions.defaultConstructConfig(),
     createDefaultResponder: createSmartResponder,
     renderDefault: renderDefault,
+    formatPlaceholderForRouter,
     adapterRoot: './endpoint',
     adapterFileName: 'adapter',
     resourceRoot: './endpoint',
