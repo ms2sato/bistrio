@@ -31,7 +31,7 @@ const dummyRoutes: RoutesFunction<DummyResource> = (router) => {
     actions: [
       { action: 'build', method: 'get', path: '/build' },
       { action: 'hasOption', method: 'get', path: '/has_option' },
-      { action: 'show', method: 'get', path: '/:id' },
+      { action: 'show', method: 'get', path: '/$id' },
     ],
     construct: { build: { schema: blankSchema }, hasOption: { schema: blankSchema } },
   })
@@ -230,7 +230,7 @@ describe('ServerRouter', () => {
         routes: (router) => {
           router.resources('/test', {
             name: 'test_resource',
-            actions: [{ action: 'get', method: 'get', path: '/:id' }],
+            actions: [{ action: 'get', method: 'get', path: '/$id' }],
             construct: { get: { schema: idNumberSchema } },
           })
         },
@@ -264,7 +264,7 @@ describe('ServerRouter', () => {
         routes: (router) => {
           router.layout({ Component: DummyLayout }).resources('/test', {
             name: 'test_resource',
-            actions: [{ action: 'page', method: 'get', path: '/:id', page: true }],
+            actions: [{ action: 'page', method: 'get', path: '/$id', page: true }],
             construct: { show: { schema: blankSchema } },
           })
         },
@@ -297,7 +297,7 @@ describe('ServerRouter', () => {
           const subLayoutRouter = subRouter.layout({ Component: DummyLayout })
           subLayoutRouter.resources('/test', {
             name: 'test_resource',
-            actions: [{ action: 'page', method: 'get', path: '/:id', page: true }],
+            actions: [{ action: 'page', method: 'get', path: '/$id', page: true }],
             construct: { show: { schema: blankSchema } },
           })
         },
@@ -342,7 +342,7 @@ describe('ServerRouter', () => {
           const layoutRouter = router.layout({ Component: DummyLayout })
           const subRouter = layoutRouter.sub('/sub')
           const subLayoutRouter = subRouter.layout({ Component: DummyLayout })
-          subLayoutRouter.pages('/test', ['/:id'])
+          subLayoutRouter.pages('/test', ['/$id'])
         },
         resource: dummyResource,
         pageLoadFunc,

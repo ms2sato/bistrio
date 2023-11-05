@@ -2,15 +2,17 @@ import { RouteObject } from 'react-router-dom'
 import { ActionDescriptor, RouterLayoutType } from './common'
 import { PageLoadFunc } from './entry'
 import { pathJoin } from './path-util'
+import { ClientConfig } from './client-generate-router'
 
 export class RouteObjectPickupper {
   constructor(
+    private clientConfig: ClientConfig,
     private routeObject: RouteObject,
     private pageLoadFunc: PageLoadFunc,
   ) {}
 
   addNewSub(rpath?: string) {
-    return addNewSubRouteObject(this.routeObject, rpath)
+    return this.addNewSubRouteObject(this.routeObject, rpath)
   }
 
   willAddNewLayout() {
@@ -39,30 +41,13 @@ export class RouteObjectPickupper {
     return newObject ? layoutRouteObject : undefined
   }
 
-  pushPageRouteObjects(httpPath: string, rpath: string, pageActionDescriptors: ActionDescriptor[]) {
-    if (pageActionDescriptors.length === 0) {
-      return
-    }
-
-    const subRouteObject = addNewSubRouteObject(this.routeObject, rpath)
-
-    for (const ad of pageActionDescriptors) {
-      if (ad.page !== true) {
-        throw new Error(`Unexpected pageActionDescriptors, MUST page = true: ${JSON.stringify(ad)}`)
-      }
-
-      const actionRouteObject = addNewSubRouteObject(subRouteObject, ad.path)
-      actionRouteObject.Component = this.pageLoadFunc(pathJoin(httpPath, ad.path))
-    }
-  }
-
   pushPageRouteObjectsToSub(httpPath: string, subRouteObject: RouteObject, pageActionDescriptors: ActionDescriptor[]) {
     for (const ad of pageActionDescriptors) {
       if (ad.page !== true) {
         throw new Error(`Unexpected pageActionDescriptors, MUST page = true: ${JSON.stringify(ad)}`)
       }
 
-      const actionRouteObject = addNewSubRouteObject(subRouteObject, ad.path)
+      const actionRouteObject = this.addNewSubRouteObject(subRouteObject, ad.path)
       const fullPath = pathJoin(httpPath, ad.path)
       const Component = this.pageLoadFunc(fullPath)
       if (!Component) {
@@ -71,13 +56,13 @@ export class RouteObjectPickupper {
       actionRouteObject.Component = Component
     }
   }
-}
 
-function addNewSubRouteObject(routeObject: RouteObject, rpath?: string): RouteObject {
-  const subRouteObject = rpath ? { path: rpath.replace(/^\//, '') } : {} // force absolute route
-  if (!routeObject.children) {
-    routeObject.children = []
+  private addNewSubRouteObject(routeObject: RouteObject, rpath?: string): RouteObject {
+    const subRouteObject = rpath ? { path: this.clientConfig.formatPlaceholderForRouter(rpath.replace(/^\//, '')) } : {} // force absolute route
+    if (!routeObject.children) {
+      routeObject.children = []
+    }
+    routeObject.children.push(subRouteObject)
+    return subRouteObject
   }
-  routeObject.children.push(subRouteObject)
-  return subRouteObject
 }

@@ -23,7 +23,7 @@ export function routes(router: Router, support: RouterSupport<Middlewares>) {
 
     scope(pageRouter, '/', (pageRouter) => {
       pageRouter = pageRouter.sub('/', support.middlewares.checkLoggedIn())
-      pageRouter.layout({ element: TaskLayout }).pages('/tasks', ['/', ':id', 'build', '/:id/edit'])
+      pageRouter.layout({ element: TaskLayout }).pages('/tasks', ['/', '$id', 'build', '/$id/edit'])
     })
   })
 
@@ -52,10 +52,10 @@ export function routes(router: Router, support: RouterSupport<Middlewares>) {
         done: { schema: idNumberSchema },
       },
       name: 'task',
-      actions: [...Actions.api(), { action: 'done', path: '/:id/done', method: 'post' }],
+      actions: [...Actions.api(), { action: 'done', path: '/$id/done', method: 'post' }],
     })
 
-    scope(apiRouter, '/tasks/:taskId', (taskRouter) => {
+    scope(apiRouter, '/tasks/$taskId', (taskRouter) => {
       taskRouter.resources('/comments', {
         construct: {
           index: { schema: taskIdSchema },

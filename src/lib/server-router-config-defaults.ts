@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { ActionContextCreator, SchemaUtil } from '..'
+import { ActionContextCreator, SchemaUtil, routerPlaceholderRegex } from '..'
 import { ActionContext, CreateActionOptionFunction, MutableActionContext } from './action-context'
 import { createZodTraverseArrangerCreator } from './create-zod-traverse-arranger-creator'
 import { parseFormBody } from './parse-form-body'
@@ -62,3 +62,5 @@ export function renderDefault(ctx: ActionContext, options: unknown = undefined) 
 export const createDefaultActionContext: ActionContextCreator = ({ router, req, res, descriptor, httpPath }) => {
   return new ActionContextImpl(router, req, res, descriptor, httpPath)
 }
+
+export const formatPlaceholderForRouter = (routePath: string) => routePath.replace(routerPlaceholderRegex, ':$1')

@@ -12,14 +12,14 @@ const build = {
 
 const edit = {
   action: 'edit',
-  path: '/:id/edit',
+  path: '/$id/edit',
   method: 'get',
   page: true,
 } as const satisfies ActionDescriptor
 
 const show = {
   action: 'show',
-  path: '/:id',
+  path: '/$id',
   method: 'get',
   page: true,
 } as const satisfies ActionDescriptor
@@ -39,19 +39,19 @@ const create = {
 
 const update = {
   action: 'update',
-  path: '/:id',
+  path: '/$id',
   method: ['put', 'patch'],
 } as const satisfies ActionDescriptor
 
 const destroy = {
   action: 'destroy',
-  path: '/:id',
+  path: '/$id',
   method: 'delete',
 } as const satisfies ActionDescriptor
 
 const apiShow = {
   action: 'show',
-  path: '/:id',
+  path: '/$id',
   method: 'get',
 } as const satisfies ActionDescriptor
 

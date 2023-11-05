@@ -123,3 +123,5 @@ export function scope(router: Router, subPath: string, scopeFun: Scope): Router 
   scopeFun(subRouter)
   return subRouter
 }
+
+export const routerPlaceholderRegex = /\$([a-z_][0-9a-zA-Z_]+)/g
