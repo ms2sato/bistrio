@@ -6,7 +6,7 @@ import { CreateActionOptionFunction } from './action-context'
 import { ConstructViewFunc, Resource, ServerRouterConfig, idNumberSchema } from '..'
 import { buildActionContextCreator } from './build-action-context-creator'
 import { initServerRouterConfig } from './init-server-router-config'
-import { RoutesFunction, buildRouter, fakeRequest, getEndpoints } from '../misc/spec-util'
+import { RoutesFunction, buildRouter, fakeRequest, getEndpoints, MockResources } from '../misc/spec-util'
 
 type ActionOption = { test: number }
 type TestReturn = { msg: string; opt?: opt<ActionOption> }
@@ -23,9 +23,9 @@ const dummyResource = {
   },
 } as const satisfies Resource
 
-type DummyResource = typeof dummyResource
+const mockResources = { 'endpoint/test/resource': dummyResource }
 
-const dummyRoutes: RoutesFunction<DummyResource> = (router) => {
+const dummyRoutes: RoutesFunction = (router) => {
   router.resources('/test', {
     name: 'test_resource',
     actions: [
@@ -42,18 +42,18 @@ const pageLoadFunc: PageLoadFunc = () => DummyComponent
 
 const dummyProps = {
   routes: dummyRoutes,
-  resource: dummyResource,
+  mockResources: mockResources,
   pageLoadFunc,
 }
 
-type CreateDummyActionContextProps<R extends Resource> = {
-  routes: RoutesFunction<R>
-  resource: R
+type CreateDummyActionContextProps = {
+  routes: RoutesFunction
+  mockResources: MockResources
   serverRouterConfig?: ServerRouterConfig
   pageLoadFunc: PageLoadFunc
 }
 
-const createDummyActionContext = async <R extends Resource>(params: CreateDummyActionContextProps<R>) => {
+const createDummyActionContext = async (params: CreateDummyActionContextProps) => {
   const router = await buildRouter(params)
 
   const constructView: ConstructViewFunc = () => <>TestView</>
@@ -95,7 +95,7 @@ describe('ServerRouter', () => {
   })
 
   describe('in SSR', () => {
-    const createServerRenderSupport = async (params: CreateDummyActionContextProps<DummyResource> = dummyProps) => {
+    const createServerRenderSupport = async (params: CreateDummyActionContextProps = dummyProps) => {
       const ctx = await createDummyActionContext(params)
       return new ServerRenderSupport(ctx)
     }
@@ -167,6 +167,27 @@ describe('ServerRouter', () => {
       expect(ret.data).toStrictEqual({ msg: 'ret build' })
     })
 
+    // test('requests nested', async () => {
+    //   const router = await buildRouter({
+    //     ...dummyProps,
+    //     routes: (router) => {
+    //       router.sub('/users/$userId').resources('/items', {
+    //         name: 'items',
+    //         actions: [{ action: 'index', method: 'get', path: '/' }],
+    //       })
+    //     }
+    //   })
+
+    //   const ret = await fakeRequest<TestReturn>(router, {
+    //     url: '/users/1/items',
+    //     method: 'GET',
+    //     headers: { 'content-type': 'application/json' },
+    //   })
+
+    //   expect(ret.statusCode).toBe(200)
+    //   expect(ret.data).toStrictEqual({ msg: 'ret build' })
+    // })
+
     test('requests with actionOpitons', async () => {
       const createActionOptions: CreateActionOptionFunction = () => ({ test: 321 })
       const router = await buildRouter({
@@ -202,9 +223,11 @@ describe('ServerRouter', () => {
             construct: { get: { schema: blankSchema } },
           })
         },
-        resource: {
-          get() {
-            throw new Error('Unexpected called resource method')
+        mockResources: {
+          'endpoint/test/resource': {
+            get() {
+              throw new Error('Unexpected called resource method')
+            },
           },
         },
         adapter: {
@@ -234,9 +257,11 @@ describe('ServerRouter', () => {
             construct: { get: { schema: idNumberSchema } },
           })
         },
-        resource: {
-          get(_params: IdNumberParams) {
-            throw new Error('Unexpected called resource method')
+        mockResources: {
+          'endpoint/test/resource': {
+            get(_params: IdNumberParams) {
+              throw new Error('Unexpected called resource method')
+            },
           },
         },
         adapter: {
@@ -268,7 +293,7 @@ describe('ServerRouter', () => {
             construct: { show: { schema: blankSchema } },
           })
         },
-        resource: dummyResource,
+        mockResources,
         pageLoadFunc,
       })
 
@@ -301,7 +326,7 @@ describe('ServerRouter', () => {
             construct: { show: { schema: blankSchema } },
           })
         },
-        resource: dummyResource,
+        mockResources,
         pageLoadFunc,
       })
 
@@ -344,7 +369,7 @@ describe('ServerRouter', () => {
           const subLayoutRouter = subRouter.layout({ Component: DummyLayout })
           subLayoutRouter.pages('/test', ['/$id'])
         },
-        resource: dummyResource,
+        mockResources,
         pageLoadFunc,
       })
 

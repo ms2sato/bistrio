@@ -377,16 +377,16 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
 
   constructor(
     serverRouterConfig: ServerRouterConfig,
-    private clientConfig: ClientConfig,
+    protected readonly clientConfig: ClientConfig, // protected for test
     httpPath = '/',
-    private routeObject: RouteObject = {},
+    routeObject: RouteObject = {},
     readonly routerCore: RouterCore = {
       handlerBuildRunners: [],
       nameToResource: new Map(),
       nameToPath: new Map(),
       routeObject,
     },
-    private routerOptions: RouterOptions = { hydrate: false },
+    protected routerOptions: RouterOptions = { hydrate: false }, // protected for test
   ) {
     super(serverRouterConfig, httpPath, routerCore)
     this.router = express.Router({ mergeParams: true })
@@ -399,8 +399,16 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
 
   sub(rpath: string, ...handlers: RequestHandler[]) {
     const subRouteObject = this.routeObjectPickupper.addNewSub(rpath)
+    const subRouter = this.buildSubRouter(rpath, subRouteObject)
+
+    this.router.use(rpath, ...[...handlers, subRouter.router])
+    return subRouter
+  }
+
+  // protected for test
+  protected buildSubRouter(rpath: string, subRouteObject: RouteObject): ServerRouter {
     // TODO: impl class SubServerRouter without build
-    const subRouter = new ServerRouterImpl(
+    return new ServerRouterImpl(
       this.serverRouterConfig,
       this.clientConfig,
       path.join(this.routePath, rpath),
@@ -410,9 +418,6 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
         ...this.routerOptions,
       },
     )
-
-    this.router.use(rpath, ...[...handlers, subRouter.router])
-    return subRouter
   }
 
   layout(props: RouterLayoutType) {
