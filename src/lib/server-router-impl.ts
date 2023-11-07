@@ -401,7 +401,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
     const subRouteObject = this.routeObjectPickupper.addNewSub(rpath)
     const subRouter = this.buildSubRouter(rpath, subRouteObject)
 
-    this.router.use(rpath, ...[...handlers, subRouter.router])
+    this.router.use(this.formatPlaceholder(rpath), ...[...handlers, subRouter.router])
     return subRouter
   }
 
@@ -688,12 +688,15 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
     }
   }
 
-  // TODO: extract to ServerRouterConfig
-  private generateRoutePath(urlPath: string) {
-    return `${this.serverRouterConfig.formatPlaceholderForRouter(urlPath.replace(/\/$/, ''))}.:format?`
+  private formatPlaceholder(routePath: string) {
+    return this.serverRouterConfig.formatPlaceholderForRouter(routePath.replace(/\/$/, ''))
   }
 
-  private appendRoute(urlPath: string, actionDescriptor: ActionDescriptor, handlers: express.Handler[]) {
+  private generateRoutePath(routePath: string) {
+    return `${this.formatPlaceholder(routePath)}.:format?`
+  }
+
+  private appendRoute(routePath: string, actionDescriptor: ActionDescriptor, handlers: express.Handler[]) {
     const router = this.router as unknown
 
     const append = (method: HttpMethod, urlPathWithExt: string) => {
@@ -704,7 +707,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
       }
     }
 
-    const urlPathWithExt = this.generateRoutePath(urlPath)
+    const urlPathWithExt = this.generateRoutePath(routePath)
     if (actionDescriptor.method instanceof Array) {
       for (const method of actionDescriptor.method) {
         append(method, urlPathWithExt)

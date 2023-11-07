@@ -12,15 +12,9 @@ type ActionOption = { test: number }
 type TestReturn = { msg: string; opt?: opt<ActionOption> }
 
 const dummyResource = {
-  build: () => {
-    return { msg: 'ret build' }
-  },
-  show: ({ id }: IdNumberParams) => {
-    return { msg: `ret show ${id}` }
-  },
-  hasOption: (ao: opt<ActionOption>) => {
-    return { msg: 'ret hasOption', opt: ao.body }
-  },
+  build: () => ({ msg: 'ret build' }),
+  show: ({ id }: IdNumberParams) => ({ msg: `ret show ${id}` }),
+  hasOption: (ao: opt<ActionOption>) => ({ msg: 'ret hasOption', opt: ao.body }),
 } as const satisfies Resource
 
 const mockResources = { 'endpoint/test/resource': dummyResource }
@@ -42,7 +36,7 @@ const pageLoadFunc: PageLoadFunc = () => DummyComponent
 
 const dummyProps = {
   routes: dummyRoutes,
-  mockResources: mockResources,
+  mockResources,
   pageLoadFunc,
 }
 
@@ -76,8 +70,7 @@ describe('ServerRouter', () => {
   describe('endpoints', () => {
     test('simple', async () => {
       const router = await buildRouter(dummyProps)
-      const endpoints = getEndpoints(router)
-      expect(endpoints).toStrictEqual([
+      expect(getEndpoints(router)).toStrictEqual([
         {
           methods: ['GET'],
           path: '/test/build.:format?',
@@ -167,26 +160,38 @@ describe('ServerRouter', () => {
       expect(ret.data).toStrictEqual({ msg: 'ret build' })
     })
 
-    // test('requests nested', async () => {
-    //   const router = await buildRouter({
-    //     ...dummyProps,
-    //     routes: (router) => {
-    //       router.sub('/users/$userId').resources('/items', {
-    //         name: 'items',
-    //         actions: [{ action: 'index', method: 'get', path: '/' }],
-    //       })
-    //     }
-    //   })
+    test('requests nested', async () => {
+      const router = await buildRouter({
+        mockResources: {
+          'endpoint/users/$userId/items/resource': {
+            index: () => ({ msg: 'ret user item' }),
+          },
+        },
+        routes: (router) => {
+          router.sub('/users/$userId').resources('/items', {
+            name: 'items',
+            actions: [{ action: 'index', method: 'get', path: '/' }],
+          })
+        },
+        pageLoadFunc,
+      })
 
-    //   const ret = await fakeRequest<TestReturn>(router, {
-    //     url: '/users/1/items',
-    //     method: 'GET',
-    //     headers: { 'content-type': 'application/json' },
-    //   })
+      expect(getEndpoints(router)).toStrictEqual([
+        {
+          methods: ['GET'],
+          path: '/users/:userId/items.:format?',
+        },
+      ])
 
-    //   expect(ret.statusCode).toBe(200)
-    //   expect(ret.data).toStrictEqual({ msg: 'ret build' })
-    // })
+      const ret = await fakeRequest<TestReturn>(router, {
+        url: '/users/1/items',
+        method: 'GET',
+        headers: { 'content-type': 'application/json' },
+      })
+
+      expect(ret.statusCode).toBe(200)
+      expect(ret.data).toStrictEqual({ msg: 'ret user item' })
+    })
 
     test('requests with actionOpitons', async () => {
       const createActionOptions: CreateActionOptionFunction = () => ({ test: 321 })
