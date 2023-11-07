@@ -1,6 +1,7 @@
+import path from 'path'
 import express from 'express'
 import listEndpoints from 'express-list-endpoints'
-import { Adapter } from '../lib/action-context'
+import { Adapter, RouterCore } from '../lib/action-context'
 import { initServerRouterConfig } from '../lib/init-server-router-config'
 import { ServerRouterConfig } from '../lib/server-router-config'
 import { ServerRouterImpl } from '../lib/server-router-impl'
@@ -9,9 +10,11 @@ import {
   PageLoadFunc,
   Resource,
   ResourceRouteConfig,
+  RouterOptions,
   StandardJsonSuccess,
   defaultClientConfig,
 } from '../lib/shared'
+import { RouteObject } from 'react-router-dom'
 
 type VirtualResponse<R> = { statusCode: number; data: R }
 type VirtualRequest = { url: string; method: string; headers: Record<string, string> }
@@ -60,18 +63,35 @@ export const fakeRequest = <R>(router: ServerRouterImpl, req: VirtualRequest): P
     )
   })
 
-export class TestServerRouter<R extends Resource> extends ServerRouterImpl {
+export class TestServerRouter extends ServerRouterImpl {
   constructor(
     props: ServerRouterConfig,
     clientConfig: ClientConfig,
-    private resource: R,
+    routePath: string,
+    routeObject: RouteObject,
+    routerCore: RouterCore,
+    routerOptions: RouterOptions,
+    private mockResources: MockResources,
     private adapter: Adapter = {},
   ) {
-    super(props, clientConfig)
+    super(props, clientConfig, routePath, routeObject, routerCore, routerOptions)
   }
 
-  protected async loadLocalResource(_resourcePath: string, _routeConfig: ResourceRouteConfig) {
-    return Promise.resolve(this.resource)
+  protected buildSubRouter(rpath: string, subRouteObject: RouteObject): ServerRouterImpl {
+    return new TestServerRouter(
+      this.serverRouterConfig,
+      this.clientConfig,
+      path.join(this.routePath, rpath),
+      subRouteObject,
+      this.routerCore,
+      this.routerOptions,
+      this.mockResources,
+      this.adapter,
+    )
+  }
+
+  protected async loadLocalResource(resourcePath: string, _routeConfig: ResourceRouteConfig) {
+    return Promise.resolve(this.mockResources[resourcePath])
   }
 
   protected loadLocalAdapter(_adapterPath: string, _routeConfig: ResourceRouteConfig) {
@@ -79,25 +99,41 @@ export class TestServerRouter<R extends Resource> extends ServerRouterImpl {
   }
 }
 
-export type RoutesFunction<R extends Resource> = (router: TestServerRouter<R>) => void
+export type MockResources = Record<string, Resource>
 
-export const buildRouter = async <R extends Resource, A extends Adapter>({
+export type RoutesFunction = (router: ServerRouterImpl) => void
+
+export const buildRouter = async ({
   routes,
-  resource,
+  mockResources,
   adapter,
   serverRouterConfig,
   pageLoadFunc,
 }: {
-  routes: RoutesFunction<R>
-  resource: R
-  adapter?: A
+  routes: RoutesFunction
+  mockResources: MockResources
+  adapter?: Adapter
   serverRouterConfig?: ServerRouterConfig
   pageLoadFunc: PageLoadFunc
-}): Promise<TestServerRouter<R>> => {
-  const router = new TestServerRouter<R>(
+}): Promise<TestServerRouter> => {
+  const routePath = '/'
+  const routeObject: RouteObject = {}
+  const routerCore: RouterCore = {
+    handlerBuildRunners: [],
+    nameToResource: new Map(),
+    nameToPath: new Map(),
+    routeObject,
+  }
+  const routerOptions: RouterOptions = { hydrate: false }
+
+  const router = new TestServerRouter(
     serverRouterConfig || initServerRouterConfig({ baseDir: './', pageLoadFunc }),
     defaultClientConfig(),
-    resource,
+    routePath,
+    routeObject,
+    routerCore,
+    routerOptions,
+    mockResources,
     adapter,
   )
   routes(router)
