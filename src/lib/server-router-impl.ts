@@ -94,16 +94,19 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
   return (req, res, next) => {
     ;(async () => {
       const ctx = serverRouterConfig.createActionContext({ router, req, res, descriptor: actionDescriptor, httpPath })
+      if (responder && 'override' in responder && responder.override) {
+        const output = await responder.override.call(responder, ctx)
+        await respond(ctx, output, undefined)
+        return
+      }
+
       const option = await serverRouterConfig.createActionOptions(ctx)
 
       const wrappedOption = new opt(option)
       if (schema == blankSchema) {
         // TODO: typesafe
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const output =
-          responder && 'override' in responder
-            ? await responder.override?.apply(responder, [ctx, wrappedOption])
-            : await resourceMethod.apply(resource, [wrappedOption])
+        const output = await resourceMethod.apply(resource, [wrappedOption])
         await respond(ctx, output, option)
       } else {
         try {
@@ -115,24 +118,15 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
               source = await responder.beforeValidation?.(ctx, source, schema)
             }
 
-            let input: { [x: string]: unknown } = schema.parse(source)
+            let input = schema.parse(source)
             if (responder && 'afterValidation' in responder) {
               input = (await responder.afterValidation?.(ctx, input, schema)) as { [x: string]: unknown }
             }
 
             handlerLog('input', input)
 
-            let output
-            if (responder && 'override' in responder) {
-              output = input
-                ? await responder.override?.apply(responder, [ctx, input, wrappedOption])
-                : await responder.override?.apply(responder, [ctx, wrappedOption])
-            } else {
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-              output = input
-                ? await resourceMethod.apply(resource, [input, wrappedOption])
-                : await resourceMethod.apply(resource, [wrappedOption])
-            }
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            const output = await resourceMethod.apply(resource, input ? [input, wrappedOption] : [wrappedOption])
             await respond(ctx, output, option)
           } catch (err) {
             if (err instanceof z.ZodError) {
@@ -163,9 +157,7 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
           return await handleFatal(ctx, err as Error, option, next)
         }
       }
-    })().catch((err) => {
-      next(err)
-    })
+    })().catch((err) => next(err))
   }
 }
 
