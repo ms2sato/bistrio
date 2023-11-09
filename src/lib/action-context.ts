@@ -68,7 +68,7 @@ export type Adapter<Opt = unknown, In = unknown> = {
   [key: string]: Handler | Responder<Opt> | RequestCallback<In>
 }
 
-export type CreateActionOptionFunction = (ctx: ActionContext, ad: ActionDescriptor) => unknown | Promise<unknown>
+export type CreateActionOptionFunction = (ctx: ActionContext) => unknown | Promise<unknown>
 
 /**
  * @returns If not rendered return false.
