@@ -44,7 +44,7 @@ export const createSmartInputArranger = (contentType2Arranger: ContentType2Arran
   }
 }
 
-export const createNullActionOption: CreateActionOptionFunction = (_ctx, _ad) => {
+export const createNullActionOption: CreateActionOptionFunction = (_ctx) => {
   return Promise.resolve(undefined)
 }
 

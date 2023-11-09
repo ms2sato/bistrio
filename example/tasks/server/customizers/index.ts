@@ -12,7 +12,7 @@ export type CustomMethodOption = {
   }
 }
 
-export const createActionOptions: CreateActionOptionFunction = (ctx, _ad) => {
+export const createActionOptions: CreateActionOptionFunction = (ctx) => {
   debug('createOptions: req.params %s', ctx.params)
 
   const customMethodOption: CustomMethodOption = { user: ctx.req.user as User } // TODO: typesafe

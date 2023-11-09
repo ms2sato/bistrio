@@ -94,7 +94,7 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
   return (req, res, next) => {
     ;(async () => {
       const ctx = serverRouterConfig.createActionContext({ router, req, res, descriptor: actionDescriptor, httpPath })
-      const option = await serverRouterConfig.createActionOptions(ctx, actionDescriptor)
+      const option = await serverRouterConfig.createActionOptions(ctx)
 
       const wrappedOption = new opt(option)
       if (schema == blankSchema) {
@@ -329,7 +329,7 @@ const createLocalResourceProxy = (
       const schema = choiceSchema(serverRouterConfig.constructConfig, cad, actionName)
       resourceProxy[actionName] = async function (...args) {
         try {
-          const option = await serverRouterConfig.createActionOptions(ctx, actionDescriptor)
+          const option = await serverRouterConfig.createActionOptions(ctx)
           const wrappedOption = new opt(option)
 
           if (args.length === 0) {
