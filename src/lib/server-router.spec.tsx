@@ -271,7 +271,7 @@ describe('ServerRouter', () => {
         },
         adapter: {
           get: {
-            override: (_ctx, _params: IdNumberParams) => ({ msg: 'ret adapter get' }),
+            override: (_ctx) => ({ msg: 'ret adapter get' }),
           },
         },
         pageLoadFunc,
