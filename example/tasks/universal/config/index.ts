@@ -6,7 +6,7 @@ import { routes as adminRoutes } from '../routes/admin'
 
 export const pageLoadFunc = (pagePath: string) => {
   return lazy(() =>
-    import(/*webpackChunkName: "[request]" */ `../views${pagePath}`).then(({ Page }) => ({
+    import(/*webpackChunkName: "[request]" */ `../pages${pagePath}`).then(({ Page }) => ({
       default: Page,
     })),
   )

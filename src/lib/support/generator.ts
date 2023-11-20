@@ -50,7 +50,7 @@ class NameToPathRouter implements Router {
 
   createResources({ out, config }: { out: string; config: Config }) {
     const resourcePath = (name: string) =>
-      path.join(config.structure.serverDir, 'endpoint', this.nameToPath[name], 'resource.ts')
+      path.join(config.structure.serverDir, config.structure.serverResourcesPath, this.nameToPath[name], 'resource.ts')
     const existsResource = (name: string): boolean => fs.existsSync(resourcePath(name))
     const changeExt = (filePath: string) => filePath.replace(/\.ts$/, '')
     const getResourceFile = (name: string): string => path.relative(path.dirname(out), changeExt(resourcePath(name)))
@@ -84,8 +84,8 @@ export const useRenderSupport = useRenderSupportT<N2R>
 
   createEntry({ out, name, config }: { out: string; name: string; config: Config }) {
     const outDir = path.dirname(out)
-    const isomorphicConfigPath = path.relative(outDir, path.resolve(config.structure.isomorphicDir, 'config'))
-    const localesPath = path.relative(outDir, path.resolve(config.structure.isomorphicDir, 'locales'))
+    const isomorphicConfigPath = path.relative(outDir, path.resolve(config.structure.universalDir, 'config'))
+    const localesPath = path.relative(outDir, path.resolve(config.structure.universalDir, 'locales'))
     const ret = `import { entry } from 'bistrio/client'
 
 import { entriesConfig, clientConfig } from '${isomorphicConfigPath}'

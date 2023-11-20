@@ -1,6 +1,6 @@
 import { authenticate } from '@/server/lib/passport-util'
 import { defineAdapter, AdapterOf, HttpResponseError } from 'bistrio'
-import { userSchema } from '@/isomorphic/params'
+import { userSchema } from '@/universal/params'
 import type resource from './resource'
 
 type Adapter = AdapterOf<typeof resource>

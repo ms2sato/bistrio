@@ -1,7 +1,7 @@
 import z from 'zod'
 import { UseSubmitProps as TUseSubmitProps, useSubmit } from 'bistrio/client'
 
-import { taskCreateWithTagsSchema } from '@/isomorphic/params'
+import { taskCreateWithTagsSchema } from '@/universal/params'
 import { ErrorPanel } from '../ErrorPanel'
 import { Task } from '@prisma/client'
 import { useRef, useState } from 'react'

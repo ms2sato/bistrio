@@ -1,4 +1,4 @@
-import { User } from '@/isomorphic/params'
+import { User } from '@/universal/params'
 import { CreateActionOptionFunction } from 'bistrio'
 import createDebug from 'debug'
 

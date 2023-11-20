@@ -5,9 +5,9 @@
     "paths": {
       "@/*": ["*"],
       "@bistrio/*": [".bistrio/*"],
-      "@isomorphic/*": ["isomorphic/*"]
+      "@universal/*": ["universal/*"]
     },
     "outDir": "dist/public"
   },
-  "include": ["../../.bistrio/**/*", "../../isomorphic/**/*"]
+  "include": ["../../.bistrio/**/*", "../../universal/**/*"]
 }

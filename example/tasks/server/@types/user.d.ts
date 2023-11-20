@@ -1,4 +1,4 @@
-import { User as TUser } from '@isomorphic/params'
+import { User as TUser } from '@universal/params'
 
 declare global {
   namespace Express {

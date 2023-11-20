@@ -11,7 +11,7 @@
     "prewatch": "npm run bistrio:gen",
     "watch": "run-p watch:**",
     "watch:server": "npm-watch",
-    "watch:livereload": "livereload -w 1500 -ee 'tsx,ts' 'dist/isomorphic,public'",
+    "watch:livereload": "livereload -w 1500 -ee 'tsx,ts' 'dist/universal,public'",
     "watch:client": "webpack --watch --config ./config/client/webpack.config.ts",
     "copy-assets": "cpx 'public/**' dist/public && cpx 'config/**' dist/config",
     "build": "npm run copy-assets && npm run bistrio:gen && npm run build:client && npm run build:server",
@@ -38,30 +38,30 @@
     "db:truncate:test": "NODE_ENV=test dotenv -e .env.test -- ts-node prisma/truncate.ts",
     "build:client": "webpack build --config ./config/client/webpack.config.ts",
     "build:server": "cpx .bistrio/filemap.json dist/.bistrio/ && tsc && tsc-alias",
-    "build:isomorphic": "tsc --project ./config/tsconfig.isomorphic.json && tsc-alias --project ./config/tsconfig.isomorphic.json",
+    "build:universal": "tsc --project ./config/tsconfig.universal.json && tsc-alias --project ./config/tsconfig.universal.json",
     "bistrio:gen": "node -r ./server/support/tsnode_register bin/generate.ts",
     "bistrio:gen:clean": "rimraf .bistrio"
   },
   "watch": {
     "bistrio:gen": {
       "patterns": [
-        "isomorphic/routes",
+        "universal/routes",
         "server/endpoint"
       ],
       "runOnChangeOnly": true,
       "extensions": "ts,tsx"
     },
-    "build:isomorphic": {
+    "build:universal": {
       "patterns": [
         ".bistrio",
-        "isomorphic"
+        "universal"
       ],
       "extensions": "ts,tsx"
     },
     "dev:server": {
       "patterns": [
         ".bistrio/filemap.json",
-        "isomorphic",
+        "universal",
         "server"
       ],
       "quiet": true,
