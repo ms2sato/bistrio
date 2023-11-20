@@ -84,11 +84,11 @@ export const useRenderSupport = useRenderSupportT<N2R>
 
   createEntry({ out, name, config }: { out: string; name: string; config: Config }) {
     const outDir = path.dirname(out)
-    const isomorphicConfigPath = path.relative(outDir, path.resolve(config.structure.universalDir, 'config'))
+    const configPath = path.relative(outDir, path.resolve(config.structure.universalDir, 'config'))
     const localesPath = path.relative(outDir, path.resolve(config.structure.universalDir, 'locales'))
     const ret = `import { entry } from 'bistrio/client'
 
-import { entriesConfig, clientConfig } from '${isomorphicConfigPath}'
+import { entriesConfig, clientConfig } from '${configPath}'
 import { N2R } from './index'
 import { localeMap } from '${localesPath}'
 
