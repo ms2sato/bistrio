@@ -1,6 +1,6 @@
 import path from 'path'
 import { ConfigCustom } from 'bistrio'
-import { entriesConfig, clientConfig } from '../isomorphic/config'
+import { entriesConfig, clientConfig } from '../universal/config'
 
 export const config: ConfigCustom = {
   structure: {

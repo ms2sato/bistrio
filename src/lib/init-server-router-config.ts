@@ -29,9 +29,9 @@ function defaultServerRouterConfig(): Omit<ServerRouterConfig, 'baseDir' | 'page
     createDefaultResponder: createSmartResponder,
     renderDefault: renderDefault,
     formatPlaceholderForRouter,
-    adapterRoot: './endpoint',
+    adapterRoot: './resources',
     adapterFileName: 'adapter',
-    resourceRoot: './endpoint',
+    resourceRoot: './resources',
     resourceFileName: 'resource',
   }
 }

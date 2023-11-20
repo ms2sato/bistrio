@@ -3,8 +3,8 @@ import { Link, useParams } from 'react-router-dom'
 
 import { UseSubmitProps, useNavigate, useSubmit } from 'bistrio/client'
 import { useRenderSupport } from '@bistrio/routes/main'
-import { ErrorPanel } from '@/isomorphic/components/ErrorPanel'
-import { commentCreateSchema } from '@/isomorphic/params'
+import { ErrorPanel } from '@/universal/components/ErrorPanel'
+import { commentCreateSchema } from '@/universal/params'
 import { Comment } from '@prisma/client'
 
 export function Page() {

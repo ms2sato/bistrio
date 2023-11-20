@@ -1,6 +1,6 @@
 import { defineResource } from 'bistrio'
 import { getPrismaCilent } from '@server/lib/prisma-util'
-import { CommentCreateParams, CommentUpdateParams, TaskIdParams } from '@/isomorphic/params'
+import { CommentCreateParams, CommentUpdateParams, TaskIdParams } from '@/universal/params'
 
 const prisma = getPrismaCilent()
 

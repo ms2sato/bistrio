@@ -7,8 +7,9 @@ export type StructureConfig = {
   generatedDir: string
   publicDir: string
   distDir: string
-  isomorphicDir: string
+  universalDir: string
   serverDir: string
+  serverResourcesPath: string
   configDir: string
   cacheDir: string
 }
@@ -32,16 +33,18 @@ export function fillStrucrureConfig(strucrureConfig: StructureConfigCustom): Str
   const generatedDir = path.resolve(baseDir, '.bistrio')
   const publicDir = path.resolve(baseDir, 'dist', 'public')
   const distDir = path.resolve(baseDir, 'dist')
-  const isomorphicDir = path.resolve(baseDir, 'isomorphic')
+  const universalDir = path.resolve(baseDir, 'universal')
   const serverDir = path.resolve(baseDir, 'server')
+  const serverResourcesPath = 'resources'
   const cacheDir = path.resolve(baseDir, '.cache')
 
   return {
     generatedDir,
     publicDir,
     distDir,
-    isomorphicDir,
+    universalDir,
     serverDir,
+    serverResourcesPath,
     cacheDir,
     ...strucrureConfig,
     baseDir,

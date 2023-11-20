@@ -4,7 +4,7 @@
     "../server/**/*.ts",
     "../server/**/*.tsx",
     "../server/**/*.js",
-    "../isomorphic/**/*.tsx",
+    "../universal/**/*.tsx",
     "../prisma/**/*.ts",
     "../bin/**/*.ts",
     "../bin/**/*.js",

@@ -17,7 +17,7 @@ const dummyResource = {
   hasOption: (ao: opt<ActionOption>) => ({ msg: 'ret hasOption', opt: ao.body }),
 } as const satisfies Resource
 
-const mockResources = { 'endpoint/test/resource': dummyResource }
+const mockResources = { 'resources/test/resource': dummyResource }
 
 const dummyRoutes: RoutesFunction = (router) => {
   router.resources('/test', {
@@ -163,7 +163,7 @@ describe('ServerRouter', () => {
     test('requests nested', async () => {
       const router = await buildRouter({
         mockResources: {
-          'endpoint/users/$userId/items/resource': {
+          'resources/users/$userId/items/resource': {
             index: () => ({ msg: 'ret user item' }),
           },
         },
@@ -229,7 +229,7 @@ describe('ServerRouter', () => {
           })
         },
         mockResources: {
-          'endpoint/test/resource': {
+          'resources/test/resource': {
             get() {
               throw new Error('Unexpected called resource method')
             },
@@ -263,7 +263,7 @@ describe('ServerRouter', () => {
           })
         },
         mockResources: {
-          'endpoint/test/resource': {
+          'resources/test/resource': {
             get(_params: IdNumberParams) {
               throw new Error('Unexpected called resource method')
             },

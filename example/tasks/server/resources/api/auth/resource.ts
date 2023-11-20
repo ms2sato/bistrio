@@ -1,7 +1,7 @@
 import { defineResource, opt } from 'bistrio'
 import { CustomMethodOption } from '@/server/customizers'
-import { User } from '@/isomorphic/params'
-import { SessionCreateParams } from '@/isomorphic/params'
+import { User } from '@/universal/params'
+import { SessionCreateParams } from '@/universal/params'
 
 export default defineResource((_support, _options) => ({
   create: (_params: SessionCreateParams): Promise<User> => {

@@ -4,7 +4,7 @@ import { PaginationAttrs, usePagination, useUIEvent } from 'bistrio/client'
 
 import { useRenderSupport } from '@bistrio/routes/main'
 import { Task } from '@prisma/client'
-import { Pagination } from '@/isomorphic/components/Pagination'
+import { Pagination } from '@/universal/components/Pagination'
 
 export function Index() {
   const rs = useRenderSupport()

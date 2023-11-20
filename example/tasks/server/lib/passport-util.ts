@@ -4,7 +4,7 @@ import { IVerifyOptions, Strategy, VerifyFunction } from 'passport-local'
 import { ActionContext } from 'bistrio'
 import { compare } from './crypter'
 import { getPrismaCilent } from './prisma-util'
-import { User, userSchema } from '@isomorphic/params'
+import { User, userSchema } from '@universal/params'
 
 // @see https://www.passportjs.org/tutorials/password/
 
