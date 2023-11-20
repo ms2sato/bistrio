@@ -23,7 +23,7 @@
     "eslint:fix": "eslint . --fix",
     "format": "prettier --write './**/*.{js,ts,tsx,json,prisma}'",
     "check-types": "tsc --noEmit",
-    "test": "PORT=4569 start-server-and-test test:server http://localhost:4569/tasks test:start",
+    "test": "PUPPETEER_DISABLE_HEADLESS_WARNING=true PORT=4569 start-server-and-test test:server http://localhost:4569/tasks test:start",
     "pretest:server": "npm run db:truncate:test && npm run db:seed:test",
     "test:start": "NODE_ENV=test dotenv -e .env.test -- jest --runInBand .",
     "test:server": "NODE_ENV=test dotenv -e .env.test -- node ./bin/server",
