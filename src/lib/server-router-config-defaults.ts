@@ -1,5 +1,8 @@
+import { existsSync } from 'fs'
 import { z } from 'zod'
 import { ActionContextCreator, SchemaUtil, routerPlaceholderRegex } from '..'
+import { FileNotFoundError } from './shared/common'
+import { LoadFunc } from './server-router-config'
 import { ActionContext, CreateActionOptionFunction, MutableActionContext } from './action-context'
 import { createZodTraverseArrangerCreator } from './create-zod-traverse-arranger-creator'
 import { parseFormBody } from './parse-form-body'
@@ -64,3 +67,34 @@ export const createDefaultActionContext: ActionContextCreator = ({ router, req, 
 }
 
 export const formatPlaceholderForRouter = (routePath: string) => routePath.replace(routerPlaceholderRegex, ':$1')
+
+export const importLocal: LoadFunc = async (filePath) => {
+  if (process.env.NODE_ENV == 'development') {
+    try {
+      // for ts-node dynamic import
+      // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-return
+      return require(filePath)
+    } catch (err) {
+      if (
+        !existsSync(filePath) &&
+        !existsSync(`${filePath}.ts`) &&
+        !existsSync(`${filePath}.tsx`) &&
+        !existsSync(`${filePath}.js`)
+      ) {
+        throw new FileNotFoundError(`module: '${filePath}' is not found`)
+      }
+      throw err
+    }
+  } else {
+    if (!filePath.endsWith('.js')) {
+      filePath = `${filePath}.js`
+    }
+
+    if (!existsSync(filePath)) {
+      throw new FileNotFoundError(`module: '${filePath}' is not found`)
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return await import(filePath)
+  }
+}

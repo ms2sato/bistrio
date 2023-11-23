@@ -1,4 +1,5 @@
 import path from 'path'
+import { RouterError } from './shared'
 import {
   ActionSupport,
   Adapter,
@@ -10,9 +11,28 @@ import {
   RouterCoreLight,
   RouterLayoutType,
   RouterOptions,
+  EndpointFunc,
 } from '..'
 import { ServerRouterConfig } from './server-router-config'
-import { importLocalAndSetup as loadLocalModuleAndSetup } from './server-router-impl'
+
+const setup = <S, R>(
+  ret: { default: EndpointFunc<S, R> },
+  moduleLocalPath: string,
+  support: S,
+  config: ResourceRouteConfig,
+): R => {
+  try {
+    return ret.default(support, config)
+  } catch (err) {
+    if (err instanceof Error) {
+      throw new RouterError(`Error occured "${err.message}" on calling default function in "${moduleLocalPath}"`, {
+        cause: err,
+      })
+    } else {
+      throw new TypeError(`Unexpected Error Object: ${err as string}`, { cause: err })
+    }
+  }
+}
 
 export abstract class BasicRouter implements Router {
   constructor(
@@ -69,22 +89,24 @@ export abstract class BasicRouter implements Router {
   // protected for test
   protected async loadLocalResource(resourceLocalPath: string, routeConfig: ResourceRouteConfig) {
     const fileRoot = this.serverRouterConfig.baseDir
-    return await loadLocalModuleAndSetup<ResourceSupport, Resource>(
-      fileRoot,
-      resourceLocalPath,
-      new ResourceSupport(fileRoot),
-      routeConfig,
-    )
+    const fullPath = path.join(fileRoot, resourceLocalPath)
+
+    const ret = (await this.serverRouterConfig.importLocal(fullPath)) as {
+      default: EndpointFunc<ResourceSupport, Resource>
+    }
+
+    return setup<ResourceSupport, Resource>(ret, resourceLocalPath, new ResourceSupport(fileRoot), routeConfig)
   }
 
   // protected for test
   protected async loadLocalAdapter(adapterLocalPath: string, routeConfig: ResourceRouteConfig) {
     const fileRoot = this.serverRouterConfig.baseDir
-    return await loadLocalModuleAndSetup<ActionSupport, Adapter>(
-      fileRoot,
-      adapterLocalPath,
-      new ActionSupport(fileRoot),
-      routeConfig,
-    )
+    const fullPath = path.join(fileRoot, adapterLocalPath)
+
+    const ret = (await this.serverRouterConfig.importLocal(fullPath)) as {
+      default: EndpointFunc<ResourceSupport, Adapter>
+    }
+
+    return setup<ResourceSupport, Adapter>(ret, adapterLocalPath, new ActionSupport(fileRoot), routeConfig)
   }
 }
