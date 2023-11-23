@@ -7,16 +7,16 @@
     "dev:start": "NODE_ENV=production dotenv -e .env.development -- npm start",
     "prepare": "npm run bistrio:gen",
     "dev": "npm run watch",
-    "dev:server": "NODE_ENV=development dotenv -e .env.development -- node -r ./server/support/tsnode_register ./bin/dev",
+    "dev:server": "cpx '.bistrio/filemap.json' dist/.bistrio && tsc --project ./config/tsconfig.tsnode.json && tsc-alias && NODE_ENV=development dotenv -e .env.development -- node ./bin/server.js",
     "prewatch": "npm run bistrio:gen",
     "watch": "run-p watch:**",
-    "watch:server": "npm-watch",
-    "watch:livereload": "livereload -w 1500 -ee 'tsx,ts' 'dist/universal,public'",
-    "watch:client": "webpack --watch --config ./config/client/webpack.config.ts",
+    "watch:server": "NODE_ENV=development dotenv -e .env.development -- npm-watch",
+    "watch:livereload": "NODE_ENV=development dotenv -e .env.development -- livereload -w 1500 -ee 'tsx,ts' 'dist/universal,public'",
+    "watch:client": "NODE_ENV=development dotenv -e .env.development -- webpack --watch --config ./config/client/webpack.config.ts",
     "copy-assets": "cpx 'public/**' dist/public && cpx 'config/**' dist/config",
     "build": "npm run copy-assets && npm run bistrio:gen && npm run build:client && npm run build:server",
     "clean": "rimraf dist .cache .bistrio",
-    "console": "NODE_ENV=development dotenv -e .env.development -- node  -r ./server/support/tsnode_register -r ./server/support/console.ts",
+    "console": "NODE_ENV=development dotenv -e .env.development -- node  -r ./bin/console.js",
     "lint": "npm run eslint && npm run check-types",
     "lint:fix": "npm run eslint:fix && npm run check-types && npm run format",
     "eslint": "eslint .",
@@ -38,7 +38,6 @@
     "db:truncate:test": "NODE_ENV=test dotenv -e .env.test -- ts-node prisma/truncate.ts",
     "build:client": "webpack build --config ./config/client/webpack.config.ts",
     "build:server": "cpx .bistrio/filemap.json dist/.bistrio/ && tsc && tsc-alias",
-    "build:universal": "tsc --project ./config/tsconfig.universal.json && tsc-alias --project ./config/tsconfig.universal.json",
     "bistrio:gen": "node -r ./server/support/tsnode_register bin/generate.ts",
     "bistrio:gen:clean": "rimraf .bistrio"
   },
@@ -46,16 +45,9 @@
     "bistrio:gen": {
       "patterns": [
         "universal/routes",
-        "server/endpoint"
+        "server/resources"
       ],
       "runOnChangeOnly": true,
-      "extensions": "ts,tsx"
-    },
-    "build:universal": {
-      "patterns": [
-        ".bistrio",
-        "universal"
-      ],
       "extensions": "ts,tsx"
     },
     "dev:server": {
@@ -66,7 +58,7 @@
       ],
       "quiet": true,
       "inherit": true,
-      "extensions": "ts,tsx"
+      "extensions": "ts,tsx,json"
     }
   },
   "prisma": {

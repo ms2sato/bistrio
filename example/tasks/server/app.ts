@@ -37,7 +37,7 @@ export async function setup() {
   app.use(express.static(path.join(__dirname, '../public')))
 
   if (process.env.NODE_ENV == 'development') {
-    const staticPathDev = path.join(__dirname, '../dist/public')
+    const staticPathDev = path.join(__dirname, '../../public')
     app.use(express.static(staticPathDev))
   }
 
