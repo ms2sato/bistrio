@@ -5,6 +5,7 @@ import {
   createNullActionOption,
   createSmartInputArranger,
   formatPlaceholderForRouter,
+  importLocal,
   renderDefault,
 } from './server-router-config-defaults'
 import { SmartResponder, StandardJsonResponder } from './smart-responder'
@@ -33,6 +34,7 @@ function defaultServerRouterConfig(): Omit<ServerRouterConfig, 'baseDir' | 'page
     adapterFileName: 'adapter',
     resourceRoot: './resources',
     resourceFileName: 'resource',
+    importLocal,
   }
 }
 

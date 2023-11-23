@@ -8,7 +8,12 @@
       "@server/*": ["server/*"],
       "@bistrio/*": [".bistrio/*"],
       "@universal/*": ["universal/*"]
-    }
+    },
   },
-  "exclude": ["dist", "node_modules"]
+  "exclude": ["dist", "node_modules"],
+  "ts-node": {
+    "compilerOptions": {
+      "module": "CommonJS"
+    }
+  }
 }
