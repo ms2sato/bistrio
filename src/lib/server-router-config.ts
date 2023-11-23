@@ -27,6 +27,8 @@ export type ResourceMethodHandlerParams = {
 
 export type FormatPlaceholderForServerRouterFunc = (routePath: string) => string
 
+export type LoadFunc = (path: string) => Promise<unknown>
+
 export type ServerRouterConfig = {
   baseDir: string
   actions: readonly ActionDescriptor[]
@@ -41,6 +43,7 @@ export type ServerRouterConfig = {
   resourceRoot: string
   resourceFileName: string
   pageLoadFunc: PageLoadFunc
+  importLocal: LoadFunc
   formatPlaceholderForRouter: FormatPlaceholderForServerRouterFunc
 }
 

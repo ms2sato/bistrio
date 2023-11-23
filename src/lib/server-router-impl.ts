@@ -1,6 +1,5 @@
 import express, { NextFunction, RequestHandler } from 'express'
 import path from 'path'
-import fs from 'fs'
 import { z } from 'zod'
 import debug from 'debug'
 import {
@@ -16,7 +15,6 @@ import {
   Responder,
   HandlerBuildRunner,
   Resource,
-  EndpointFunc,
   ResourceMethod,
   MutableActionContext,
   NamedResources,
@@ -158,67 +156,6 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
         }
       }
     })().catch((err) => next(err))
-  }
-}
-
-export const importLocalAndSetup = async <S, R>(
-  fileRoot: string,
-  moduleLocalPath: string,
-  support: S,
-  config: ResourceRouteConfig,
-): Promise<R> => {
-  let fullPath = path.join(fileRoot, moduleLocalPath)
-
-  if (process.env.NODE_ENV == 'development') {
-    let ret
-    try {
-      // for ts-node dynamic import
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      ret = require(fullPath) as { default: EndpointFunc<S, R> }
-    } catch (err) {
-      if (
-        !fs.existsSync(fullPath) &&
-        !fs.existsSync(`${fullPath}.ts`) &&
-        !fs.existsSync(`${fullPath}.tsx`) &&
-        !fs.existsSync(`${fullPath}.js`)
-      ) {
-        throw new FileNotFoundError(`module: '${fullPath}' is not found`)
-      }
-      throw err
-    }
-
-    try {
-      return ret.default(support, config)
-    } catch (err) {
-      if (err instanceof Error) {
-        throw new RouterError(`Error occured "${err.message}" on calling default function in "${moduleLocalPath}"`, {
-          cause: err,
-        })
-      } else {
-        throw new TypeError(`Unexpected Error Object: ${err as string}`, { cause: err })
-      }
-    }
-  } else {
-    if (!fullPath.endsWith('.js')) {
-      fullPath = `${fullPath}.js`
-    }
-
-    if (!fs.existsSync(fullPath)) {
-      throw new FileNotFoundError(`module: '${fullPath}' is not found`)
-    }
-
-    const ret = (await import(fullPath)) as { default: EndpointFunc<S, R> }
-    try {
-      return ret.default(support, config)
-    } catch (err) {
-      if (err instanceof Error) {
-        throw new RouterError(`Error occured "${err.message}" on calling default function in "${moduleLocalPath}"`, {
-          cause: err,
-        })
-      } else {
-        throw new TypeError(`Unexpected Error Object: ${err as string}`)
-      }
-    }
   }
 }
 
