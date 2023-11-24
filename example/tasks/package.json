@@ -27,7 +27,7 @@
     "test": "PUPPETEER_DISABLE_HEADLESS_WARNING=true PORT=4569 start-server-and-test test:server http://localhost:4569/tasks test:start",
     "pretest:server": "npm run db:truncate:test && npm run db:seed:test",
     "test:start": "NODE_ENV=test dotenv -e .env.test -- jest --runInBand .",
-    "test:server": "NODE_ENV=test dotenv -e .env.test -- node ./bin/server",
+    "test:server": "NODE_ENV=test dotenv -e .env.test -- node ./dist/server/server.js",
     "db:migrate": "dotenv -e .env.development -- prisma migrate dev",
     "db:reset": "dotenv -e .env.development -- prisma migrate reset",
     "db:rollback": "dotenv -e .env.development -- prisma migrate resolve --rolled-back",
