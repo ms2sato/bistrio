@@ -6,6 +6,7 @@
     "moduleResolution": "Node10",
   },
   "ts-node": {
+    "esm": true,
     "require": ["tsconfig-paths/register"],
     "transpileOnly": true,
     "files": true

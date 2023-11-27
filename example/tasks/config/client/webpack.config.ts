@@ -1,5 +1,5 @@
-import { config } from '../../config'
 import { generateWebpackConfig } from 'bistrio'
+import { config } from '../../config'
 
 const webpackConfig = generateWebpackConfig({
   config,

@@ -1,5 +1,5 @@
 import express, { NextFunction, RequestHandler } from 'express'
-import path from 'path'
+import path from 'node:path'
 import { z } from 'zod'
 import debug from 'debug'
 import {
@@ -30,11 +30,12 @@ import {
   ResourceMethodHandlerParams,
   pageActionDescriptor,
   ClientConfig,
-} from '..'
-import { HttpMethod, RouterOptions, opt } from './shared'
+  Router,
+} from '../index.js'
+import { HttpMethod, RouterOptions, opt } from './shared/index.js'
 import { RouteObject } from 'react-router-dom'
-import { RouteObjectPickupper } from './shared/route-object-pickupper'
-import { BasicRouter } from './basic-router'
+import { RouteObjectPickupper } from './shared/route-object-pickupper.js'
+import { BasicRouter } from './basic-router.js'
 
 const log = debug('restrant2')
 const routeLog = log.extend('route')
@@ -326,12 +327,12 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
     )
   }
 
-  sub(rpath: string, ...handlers: RequestHandler[]) {
+  sub(rpath: string, ...handlers: RequestHandler[]): Router {
     const subRouteObject = this.routeObjectPickupper.addNewSub(rpath)
     const subRouter = this.buildSubRouter(rpath, subRouteObject)
 
     this.router.use(this.formatPlaceholder(rpath), ...[...handlers, subRouter.router])
-    return subRouter
+    return subRouter as unknown as Router // TODO: fix type
   }
 
   // protected for test

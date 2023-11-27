@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom'
-import { NamedResources, PageNode, Router } from '../..'
-import { ClientGenretateRouter, createPath, defaultClientConfig } from './client-generate-router'
+import { NamedResources, PageNode, Router } from '../../index.js'
+import { ClientGenretateRouter, createPath, defaultClientConfig } from './client-generate-router.js'
 
 const clientConfig = defaultClientConfig()
 

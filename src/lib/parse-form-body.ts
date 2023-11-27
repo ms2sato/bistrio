@@ -1,4 +1,4 @@
-import { ArrangeResult, nullArrangeResult } from './shared/zod-util'
+import { ArrangeResult, nullArrangeResult } from './shared/zod-util.js'
 
 export interface NextRet {
   type: 'default'

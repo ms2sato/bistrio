@@ -1,5 +1,5 @@
-import { Actions } from '..'
-import { ResourceMethodHandlerParams, ServerRouterConfig, ServerRouterConfigCustom } from './server-router-config'
+import { Actions } from '../index.js'
+import { ResourceMethodHandlerParams, ServerRouterConfig, ServerRouterConfigCustom } from './server-router-config.js'
 import {
   createDefaultActionContext,
   createNullActionOption,
@@ -7,8 +7,8 @@ import {
   formatPlaceholderForRouter,
   importLocal,
   renderDefault,
-} from './server-router-config-defaults'
-import { SmartResponder, StandardJsonResponder } from './smart-responder'
+} from './server-router-config-defaults.js'
+import { SmartResponder, StandardJsonResponder } from './smart-responder.js'
 
 const createSmartResponder = ({ router }: ResourceMethodHandlerParams) => {
   return new SmartResponder(
