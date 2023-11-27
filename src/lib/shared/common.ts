@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { blankSchema } from './schemas'
+import { blankSchema } from './schemas.js'
 import { ComponentType, ReactNode } from 'react'
 
 const optType = Symbol('opt<>')

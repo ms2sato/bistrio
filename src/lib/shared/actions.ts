@@ -1,4 +1,4 @@
-import { ActionDescriptor, blankSchema, ConstructConfig, idNumberSchema, RouterError } from '../../client'
+import { ActionDescriptor, blankSchema, ConstructConfig, idNumberSchema, RouterError } from '../../client.js'
 import { z } from 'zod'
 
 export type ActionName = 'build' | 'edit' | 'show' | 'index' | 'create' | 'update' | 'destroy'

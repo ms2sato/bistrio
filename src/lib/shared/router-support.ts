@@ -1,5 +1,5 @@
 import * as express from 'express'
-import { nullMiddlewares } from './null-middlewares'
+import { nullMiddlewares } from './null-middlewares.js'
 
 type Callback = express.RequestHandler | (() => void)
 

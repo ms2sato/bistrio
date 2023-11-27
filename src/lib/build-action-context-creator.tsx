@@ -1,13 +1,13 @@
 import express from 'express'
 import internal, { Transform, TransformCallback } from 'stream'
-import { StaticRouter } from 'react-router-dom/server'
+import { StaticRouter } from 'react-router-dom/server.js'
 
-import { ServerRenderSupport } from './server-render-support'
-import { ActionContextImpl } from './server-router-impl'
+import { ServerRenderSupport } from './server-render-support.js'
+import { ActionContextImpl } from './server-router-impl.js'
 import { renderToPipeableStream } from 'react-dom/server'
-import { isErrorWithCode, isError } from './shared/is-error'
-import { NamedResources, RenderSupportContext, toRoutes } from './shared'
-import { ActionContextCreator, ConstructViewFunc } from './common'
+import { isErrorWithCode, isError } from './shared/is-error.js'
+import { NamedResources, RenderSupportContext, toRoutes } from './shared/index.js'
+import { ActionContextCreator, ConstructViewFunc } from './common.js'
 import createDebug from 'debug'
 
 const debug = createDebug('bistrio:debug:build-action-context-creator')

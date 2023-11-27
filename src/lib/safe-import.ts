@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
-import fs from 'fs'
-import { isErrorWithCode } from './shared/is-error'
+import fs from 'node:fs'
+import { isErrorWithCode } from './shared/is-error.js'
 import createDebug from 'debug'
 
 const debug = createDebug('bistrio:debug:view')
@@ -11,7 +11,7 @@ const forceImportAsJs = async (filePath: string) => {
   const jsPath = `${filePath}.js`
   if (fs.existsSync(jsPath)) {
     debug(`require: %s`, jsPath)
-    return await require(jsPath)
+    return await import(jsPath)
   }
 }
 
@@ -23,7 +23,7 @@ export const safeImport = async (filePath: string): Promise<unknown> => {
 
   try {
     debug(`require: %s`, filePath)
-    return await require(filePath)
+    return await import(filePath)
   } catch (err) {
     if (isErrorWithCode(err) && err.code === 'ERR_MODULE_NOT_FOUND') {
       debug(`error hooked, import force as js`)

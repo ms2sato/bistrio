@@ -1,6 +1,6 @@
-import path from 'path'
-import fs from 'fs'
-import { ResourceRouteConfig, Router, RouterOptions } from '../../client'
+import path from 'node:path'
+import fs from 'node:fs'
+import { ResourceRouteConfig, Router, RouterOptions } from '../../client.js'
 import {
   Config,
   ConfigCustom,
@@ -9,7 +9,7 @@ import {
   nullRouterSupport,
   RouterLayoutType,
   RouterSupport,
-} from '../..'
+} from '../../index.js'
 
 class NameToPathRouter implements Router {
   constructor(

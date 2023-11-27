@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { z } from 'zod'
-import { ValidationError, isValidationError } from '.'
-import { parseFormBody } from '../parse-form-body'
-import { createZodTraverseArrangerCreator } from '../create-zod-traverse-arranger-creator'
+import { ValidationError, isValidationError } from './index.js'
+import { parseFormBody } from '../parse-form-body.js'
+import { createZodTraverseArrangerCreator } from '../create-zod-traverse-arranger-creator.js'
 
 export interface UseSubmitPropEventOptions<O> {
   el: HTMLFormElement
