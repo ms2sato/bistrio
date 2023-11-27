@@ -4,7 +4,7 @@ import { useUIEvent, useNavigate } from 'bistrio/client'
 import { useRenderSupport } from '../../.bistrio/routes/main'
 import { FlashMessage } from './FlashMessage'
 
-export default function UserLayout() {
+export default function UserLayout(): JSX.Element {
   return (
     <div>
       <Suspense fallback={<div>...</div>}>
