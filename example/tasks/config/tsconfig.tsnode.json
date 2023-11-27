@@ -3,7 +3,7 @@
   "compilerOptions": {
     "jsx": "react-jsxdev",
     "typeRoots": ["../server/types"],
-    "moduleResolution": "Node16",
+    "moduleResolution": "Node10",
   },
   "ts-node": {
     "require": ["tsconfig-paths/register"],
