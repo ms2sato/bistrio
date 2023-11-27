@@ -1,5 +1,5 @@
-import { Resource, NamedResources } from '../../client'
-import { LocaleSelector, Localizer } from './locale'
+import { Resource, NamedResources } from '../../client.js'
+import { LocaleSelector, Localizer } from './locale.js'
 import {
   createSuspendedResourcesProxy,
   ParamsDictionary,
@@ -9,8 +9,8 @@ import {
   Suspendable,
   suspense,
   SuspensePurgeOptions,
-} from './render-support'
-import { ClientGenretateRouterCore, ResourceInfo } from './client-generate-router'
+} from './render-support.js'
+import { ClientGenretateRouterCore, ResourceInfo } from './client-generate-router.js'
 
 class CacheReadableSuspenseDecorator implements Suspendable {
   constructor(private body: Suspendable) {}

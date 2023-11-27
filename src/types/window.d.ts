@@ -1,4 +1,4 @@
-import { CacheRecord } from '../client'
+import { CacheRecord } from '../client.js'
 
 export {}
 

@@ -1,5 +1,5 @@
-import path from 'path'
-import { RouterError } from './shared'
+import path from 'node:path'
+import { RouterError } from './shared/index.js'
 import {
   ActionSupport,
   Adapter,
@@ -12,8 +12,9 @@ import {
   RouterLayoutType,
   RouterOptions,
   EndpointFunc,
-} from '..'
-import { ServerRouterConfig } from './server-router-config'
+} from '../index.js'
+import { ServerRouterConfig } from './server-router-config.js'
+import { RequestHandler } from 'express'
 
 const setup = <S, R>(
   ret: { default: EndpointFunc<S, R> },
@@ -41,7 +42,7 @@ export abstract class BasicRouter implements Router {
     protected readonly routerCore: RouterCoreLight,
   ) {}
 
-  abstract sub(...args: unknown[]): Router
+  abstract sub(rpath: string, ...handlers: RequestHandler[]): Router
   abstract layout(props: RouterLayoutType): Router
   abstract options(value: RouterOptions): Router
 

@@ -21,11 +21,11 @@ import {
   RouterLayoutType,
   pageActionDescriptor,
   routerPlaceholderRegex,
-} from '../../client'
-import { filterWithoutKeys, toURLSearchParams } from './object-util'
-import { pathJoin } from './path-util'
-import { PageNode } from './render-support'
-import { RouteObjectPickupper } from './route-object-pickupper'
+} from '../../client.js'
+import { filterWithoutKeys, toURLSearchParams } from './object-util.js'
+import { pathJoin } from './path-util.js'
+import { PageNode } from './render-support.js'
+import { RouteObjectPickupper } from './route-object-pickupper.js'
 import createDebug from 'debug'
 
 const debug = createDebug('bistrio:debug:client')

@@ -6,11 +6,11 @@ import {
   Adapter,
   RequestCallback,
   z,
-} from './action-context'
-import { ActionContextCreator } from './common'
-import { ServerRouterImpl } from './server-router-impl'
-import { ActionDescriptor, ConstructConfig, ConstructSource, PageLoadFunc, Resource, ResourceMethod } from './shared'
-import { PartialWithRequired } from './type-util'
+} from './action-context.js'
+import { ActionContextCreator } from './common.js'
+import { ServerRouterImpl } from './server-router-impl.js'
+import { ActionDescriptor, ConstructConfig, ConstructSource, PageLoadFunc, Resource, ResourceMethod } from './shared/index.js'
+import { PartialWithRequired } from './type-util.js'
 
 export type ResourceMethodHandlerParams = {
   resourceMethod: ResourceMethod

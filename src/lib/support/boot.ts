@@ -1,5 +1,5 @@
 import createDebug from 'debug'
-import http from 'http'
+import http from 'node:http'
 import type express from 'express'
 
 export function boot(app: express.Application) {

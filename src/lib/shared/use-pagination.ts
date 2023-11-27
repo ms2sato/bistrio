@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { PageParams } from './schemas'
-import { usePager } from './use-pager'
-import { toURLSearchParams } from './object-util'
+import { PageParams } from './schemas.js'
+import { usePager } from './use-pager.js'
+import { toURLSearchParams } from './object-util.js'
 import { useEffect } from 'react'
 
 export function usePageLink() {

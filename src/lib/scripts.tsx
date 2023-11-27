@@ -1,4 +1,4 @@
-import { ScriptProps, generateScripts } from '..'
+import { ScriptProps, generateScripts } from '../index.js'
 
 const cacheScripts = `
 const isClient = typeof window !== 'undefined'

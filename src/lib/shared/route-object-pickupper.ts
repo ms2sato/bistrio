@@ -1,8 +1,8 @@
 import { RouteObject } from 'react-router-dom'
-import { ActionDescriptor, RouterLayoutType } from './common'
-import { PageLoadFunc } from './entry'
-import { pathJoin } from './path-util'
-import { ClientConfig } from './client-generate-router'
+import { ActionDescriptor, RouterLayoutType } from './common.js'
+import { PageLoadFunc } from './entry.js'
+import { pathJoin } from './path-util.js'
+import { ClientConfig } from './client-generate-router.js'
 
 export class RouteObjectPickupper {
   constructor(

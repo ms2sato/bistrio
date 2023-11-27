@@ -1,12 +1,12 @@
-import { existsSync } from 'fs'
+import { existsSync } from 'node:fs'
 import { z } from 'zod'
-import { ActionContextCreator, SchemaUtil, routerPlaceholderRegex } from '..'
-import { FileNotFoundError } from './shared/common'
-import { LoadFunc } from './server-router-config'
-import { ActionContext, CreateActionOptionFunction, MutableActionContext } from './action-context'
-import { createZodTraverseArrangerCreator } from './create-zod-traverse-arranger-creator'
-import { parseFormBody } from './parse-form-body'
-import { ActionContextImpl } from './server-router-impl'
+import { ActionContextCreator, SchemaUtil, routerPlaceholderRegex } from '../index.js'
+import { FileNotFoundError } from './shared/common.js'
+import { LoadFunc } from './server-router-config.js'
+import { ActionContext, CreateActionOptionFunction, MutableActionContext } from './action-context.js'
+import { createZodTraverseArrangerCreator } from './create-zod-traverse-arranger-creator.js'
+import { parseFormBody } from './parse-form-body.js'
+import { ActionContextImpl } from './server-router-impl.js'
 
 export function arrangeFormInput(ctx: MutableActionContext, sources: readonly string[], schema: z.AnyZodObject) {
   return parseFormBody(ctx.mergeInputs(sources), createZodTraverseArrangerCreator(schema))
@@ -72,8 +72,7 @@ export const importLocal: LoadFunc = async (filePath) => {
   if (process.env.NODE_ENV == 'development') {
     try {
       // for ts-node dynamic import
-      // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-return
-      return require(filePath)
+      return import(filePath)
     } catch (err) {
       if (
         !existsSync(filePath) &&
