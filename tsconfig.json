@@ -1,9 +1,8 @@
 {
   "compilerOptions": {
     "sourceMap": true,
-    "module": "CommonJS",
-    "moduleResolution": "node",
-    "outDir": "dist",
+    "module": "Node16",
+    "moduleResolution": "Node16",
     "strict": true,
     "lib": [
       "ES2022",
@@ -16,7 +15,8 @@
     "resolveJsonModule": true,
     "jsx": "react-jsx"
   },
-  "include": [
-    "src"
-, "jest.config.js"  ]
+  "include": ["src", "jest.config.cjs"],
+  "exclude": [
+    "node_modules", "cjs", "esm"
+  ]
 }

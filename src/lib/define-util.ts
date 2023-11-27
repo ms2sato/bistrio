@@ -7,7 +7,7 @@ import {
   Responder,
   ResourceRouteConfig,
   Handler,
-} from '..'
+} from '../index.js'
 
 export function defineResource<R extends Resource>(
   callback: (support: ResourceSupport, config: ResourceRouteConfig) => R,

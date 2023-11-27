@@ -1,7 +1,7 @@
-import { CreateActionOptionFunction } from '../action-context'
-import { initServerRouterConfig } from '../init-server-router-config'
-import { FileNotFoundError, PageLoadFunc, Resource, blankSchema, opt } from '../shared'
-import { ResourceHolderCreateRouter } from './resource-holder-create-router'
+import { CreateActionOptionFunction } from '../action-context.js'
+import { initServerRouterConfig } from '../init-server-router-config.js'
+import { FileNotFoundError, PageLoadFunc, Resource, blankSchema, opt } from '../shared/index.js'
+import { ResourceHolderCreateRouter } from './resource-holder-create-router.js'
 
 type ActionOption = { test: number }
 

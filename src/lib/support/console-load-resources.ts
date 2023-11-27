@@ -1,5 +1,5 @@
-import { Middlewares, nullRouterSupport, Resource, Router, RouterSupport, ServerRouterConfig } from '../../'
-import { ResourceHolderCreateRouter } from './resource-holder-create-router'
+import { Middlewares, nullRouterSupport, Resource, Router, RouterSupport, ServerRouterConfig } from "../../index.js"
+import { ResourceHolderCreateRouter } from './resource-holder-create-router.js'
 
 declare global {
   // eslint-disable-next-line no-var

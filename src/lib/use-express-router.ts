@@ -7,10 +7,10 @@ import {
   Router,
   RouterSupport,
   ServerRouterConfig,
-} from '..'
-import { ActionContextCreator } from './common'
-import { ServerRouterImpl } from './server-router-impl'
-import { buildActionContextCreator } from './build-action-context-creator'
+} from '../index.js'
+import { ActionContextCreator } from './common.js'
+import { ServerRouterImpl } from './server-router-impl.js'
+import { buildActionContextCreator } from './build-action-context-creator.js'
 
 export type ExpressRouterConfig<M extends Middlewares> = {
   app: Application

@@ -1,6 +1,6 @@
-import { ActionContext, Responder } from './action-context'
-import { ServerRouterImpl } from './server-router-impl'
-import { JsonFormatter, StandardJsonFormatter, ValidationError } from './shared'
+import { ActionContext, Responder } from './action-context.js'
+import { ServerRouterImpl } from './server-router-impl.js'
+import { JsonFormatter, StandardJsonFormatter, ValidationError } from './shared/index.js'
 
 type ContextHolder = {
   ctx: ActionContext

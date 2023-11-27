@@ -1,4 +1,5 @@
-dist/**/*
+esm/**/*
+cjs/**/*
 example/**/*
 jest.config.js
 client.d.ts

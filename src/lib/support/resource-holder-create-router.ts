@@ -1,4 +1,4 @@
-import path from 'path'
+import path from 'node:path'
 import debug from 'debug'
 import {
   ConstructDescriptor,
@@ -11,8 +11,8 @@ import {
   RouterLayoutType,
   RouterOptions,
   ServerRouterConfig,
-} from '../../'
-import { BasicRouter } from '../basic-router'
+} from "../../index.js"
+import { BasicRouter } from '../basic-router.js'
 
 const log = debug('bistrio')
 const debugLog = log.extend('console')
