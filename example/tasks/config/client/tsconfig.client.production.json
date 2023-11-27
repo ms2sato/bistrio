@@ -7,7 +7,12 @@
       "@bistrio/*": [".bistrio/*"],
       "@universal/*": ["universal/*"]
     },
-    "outDir": "dist/public"
+    "outDir": "dist/public",
+    "module": "es2022",
+    "moduleResolution": "Bundler",
+    "target": "es2020",
+    "noEmit": true,
+    "allowImportingTsExtensions": true
   },
   "include": ["../../.bistrio/**/*", "../../universal/**/*"]
 }
