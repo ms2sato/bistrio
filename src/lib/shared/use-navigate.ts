@@ -5,7 +5,7 @@ import {
   isFlashMessageState,
   SuspensePurgeOptions,
   isSuspensePurgeOptions,
-} from '.'
+} from './index.js'
 
 export type PurgeOption = {
   purge: SuspensePurgeOptions

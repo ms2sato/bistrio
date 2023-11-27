@@ -1,5 +1,5 @@
-import { NamedResources, opt, Resource, ResourceMethod } from '../../client'
-import { Localizer } from '../shared/locale'
+import { NamedResources, opt, Resource, ResourceMethod } from '../../client.js'
+import { Localizer } from "./locale.js"
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type SuspendedResourceMethod = (input?: any, ...args: any[]) => any

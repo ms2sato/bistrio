@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { fillDefault, deepCast } from './zod-util'
+import { fillDefault, deepCast } from './zod-util.js'
 
 const itemSchema = z.object({
   type: z.string().default('test'),

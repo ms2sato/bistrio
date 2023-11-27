@@ -1,4 +1,4 @@
-import { parseFormBody } from './parse-form-body'
+import { parseFormBody } from './parse-form-body.js'
 
 describe('simple', () => {
   test('value', () => {

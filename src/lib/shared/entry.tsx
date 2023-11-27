@@ -13,8 +13,8 @@ import {
   initLocale,
   LocaleDictionary,
   PageNode,
-} from './index'
-import { toRoutes } from './react-router-util'
+} from './index.js'
+import { toRoutes } from './react-router-util.js'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type PageLoadFunc = (pagePath: string) => PageNode | LazyExoticComponent<any>

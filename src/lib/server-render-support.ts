@@ -1,14 +1,14 @@
 import React from 'react'
-import { ActionContext, NamedResources } from '..'
-import { safeImport } from './safe-import'
-import { Localizer } from './shared/locale'
+import { ActionContext, NamedResources } from '../index.js'
+import { safeImport } from './safe-import.js'
+import { Localizer } from './shared/locale.js'
 import {
   RenderSupport,
   suspense,
   createSuspendedResourcesProxy,
   StubResources,
   StubSuspendedResources,
-} from './shared/render-support'
+} from './shared/render-support.js'
 
 // import createDebug from 'debug'
 // const debug = createDebug('bistrio:react-render-support')

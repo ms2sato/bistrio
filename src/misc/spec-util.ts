@@ -1,10 +1,10 @@
-import path from 'path'
+import path from 'node:path'
 import express from 'express'
 import listEndpoints from 'express-list-endpoints'
-import { Adapter, RouterCore } from '../lib/action-context'
-import { initServerRouterConfig } from '../lib/init-server-router-config'
-import { ServerRouterConfig } from '../lib/server-router-config'
-import { ServerRouterImpl } from '../lib/server-router-impl'
+import { Adapter, RouterCore } from '../lib/action-context.js'
+import { initServerRouterConfig } from '../lib/init-server-router-config.js'
+import { ServerRouterConfig } from '../lib/server-router-config.js'
+import { ServerRouterImpl } from '../lib/server-router-impl.js'
 import {
   ClientConfig,
   PageLoadFunc,
@@ -13,7 +13,7 @@ import {
   RouterOptions,
   StandardJsonSuccess,
   defaultClientConfig,
-} from '../lib/shared'
+} from '../lib/shared/index.js'
 import { RouteObject } from 'react-router-dom'
 
 type VirtualResponse<R> = { statusCode: number; data: R }
