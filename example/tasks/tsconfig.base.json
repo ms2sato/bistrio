@@ -9,6 +9,10 @@
       "@bistrio/*": [".bistrio/*"],
       "@universal/*": ["universal/*"]
     },
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "noEmit": true,
+    "allowImportingTsExtensions": true
   },
   "exclude": ["dist", "node_modules"],
   "ts-node": {
