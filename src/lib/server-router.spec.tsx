@@ -1,12 +1,12 @@
 import express from 'express'
 import { Outlet } from 'react-router-dom'
-import { ServerRenderSupport } from './server-render-support'
-import { ActionDescriptor, IdNumberParams, PageLoadFunc, blankSchema, opt } from './shared'
-import { CreateActionOptionFunction } from './action-context'
-import { ConstructViewFunc, Resource, ServerRouterConfig, idNumberSchema } from '..'
-import { buildActionContextCreator } from './build-action-context-creator'
-import { initServerRouterConfig } from './init-server-router-config'
-import { RoutesFunction, buildRouter, fakeRequest, getEndpoints, MockResources } from '../misc/spec-util'
+import { ServerRenderSupport } from './server-render-support.js'
+import { ActionDescriptor, IdNumberParams, PageLoadFunc, blankSchema, opt } from './shared/index.js'
+import { CreateActionOptionFunction } from './action-context.js'
+import { ConstructViewFunc, Resource, ServerRouterConfig, idNumberSchema } from '../index.js'
+import { buildActionContextCreator } from './build-action-context-creator.js'
+import { initServerRouterConfig } from './init-server-router-config.js'
+import { RoutesFunction, buildRouter, fakeRequest, getEndpoints, MockResources } from '../misc/spec-util.js'
 
 type ActionOption = { test: number }
 type TestReturn = { msg: string; opt?: opt<ActionOption> }

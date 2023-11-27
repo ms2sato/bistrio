@@ -1,5 +1,5 @@
-import { parseFormBody } from './parse-form-body'
-import { createZodTraverseArrangerCreator } from './create-zod-traverse-arranger-creator'
+import { parseFormBody } from './parse-form-body.js'
+import { createZodTraverseArrangerCreator } from './create-zod-traverse-arranger-creator.js'
 import { z } from 'zod'
 
 const itemSchema = z.object({

@@ -1,5 +1,5 @@
 import express from 'express'
-import { NamedResources, ActionContext, ActionDescriptor, RouterCore } from '..'
+import { NamedResources, ActionContext, ActionDescriptor, RouterCore } from '../index.js'
 
 export class NullActionContext implements ActionContext {
   private errorMessage = 'Cannot access this ActionContext(May not request context)'

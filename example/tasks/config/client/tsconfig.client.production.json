@@ -8,7 +8,7 @@
       "@universal/*": ["universal/*"]
     },
     "outDir": "dist/public",
-    "module": "es2022",
+    "module": "ESNext",
     "moduleResolution": "Bundler",
     "target": "es2020",
     "noEmit": true,

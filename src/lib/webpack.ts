@@ -1,11 +1,11 @@
-import path from 'path'
-import { existsSync, mkdirSync, readFileSync } from 'fs'
-import { writeFile, chmod } from 'fs/promises'
+import path from 'node:path'
+import { existsSync, mkdirSync, readFileSync } from 'node:fs'
+import { writeFile, chmod } from 'node:fs/promises'
 import createDebug from 'debug'
 import webpack, { Configuration } from 'webpack'
 import { TsconfigPathsPlugin } from 'tsconfig-paths-webpack-plugin'
 
-import { Config, ConfigCustom, initConfig, config, StructureConfig } from '../'
+import { Config, ConfigCustom, initConfig, config, StructureConfig } from "../index.js"
 
 const debug = createDebug('bistrio:webpack')
 

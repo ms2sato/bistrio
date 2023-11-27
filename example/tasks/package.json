@@ -2,6 +2,7 @@
   "name": "tasks",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "start": "node ./bin/server",
     "dev:start": "NODE_ENV=production dotenv -e .env.development -- npm start",
@@ -37,8 +38,8 @@
     "db:reset:test": "NODE_ENV=test dotenv -e .env.test -- prisma migrate reset --force",
     "db:seed:test": "NODE_ENV=test dotenv -e .env.test -- prisma db seed",
     "db:truncate:test": "NODE_ENV=test dotenv -e .env.test -- ts-node prisma/truncate.ts",
-    "build:client": "webpack build --config ./config/client/webpack.config.ts",
-    "build:server": "cpx .bistrio/filemap.json dist/.bistrio/ && webpack build --config ./config/server/webpack.config.ts",
+    "build:client": "node --loader ts-node/esm node_modules/.bin/webpack build --config ./config/client/webpack.config.ts",
+    "build:server": "cpx .bistrio/filemap.json dist/.bistrio/ && node --loader ts-node/esm node_modules/.bin/webpack build --config ./config/server/webpack.config.ts",
     "bistrio:gen": "node -r ./server/support/tsnode_register bin/generate.ts",
     "bistrio:gen:clean": "rimraf .bistrio"
   },

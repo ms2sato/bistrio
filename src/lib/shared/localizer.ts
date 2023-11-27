@@ -1,4 +1,4 @@
-import { Localizer, Template, LocaleSelector } from './locale'
+import { Localizer, Template, LocaleSelector } from './locale.js'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type LocaleItemFunc = (...args: any[]) => string
