@@ -3,10 +3,11 @@
   "compilerOptions": {
     "jsx": "react-jsxdev",
     "typeRoots": ["../server/types"],
-    "moduleResolution": "Node10",
+    "moduleResolution": "Node16"
   },
   "ts-node": {
     "esm": true,
+    "experimentalSpecifierResolution": "node",
     "require": ["tsconfig-paths/register"],
     "transpileOnly": true,
     "files": true
