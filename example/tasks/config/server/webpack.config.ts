@@ -1,10 +1,10 @@
-import { resolve } from 'node:path'
+import { resolve, dirname } from 'node:path'
 import * as webpack from 'webpack'
 import { TsconfigPathsPlugin } from 'tsconfig-paths-webpack-plugin'
-const nodeExternals = require('webpack-node-externals')
-//import { fileURLToPath } from 'url';
+import nodeExternals from 'webpack-node-externals'
+import { fileURLToPath } from 'node:url'
 
-// const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const __dirname = dirname(fileURLToPath(import.meta.url))
 
 const configFile = resolve(__dirname, '../../tsconfig.json')
 
@@ -16,7 +16,7 @@ const config: webpack.Configuration = {
   entry: resolve(__dirname, '../../server/server.ts'),
   output: {
     path: resolve(__dirname, '../../dist/server'),
-    filename: 'server.js',
+    filename: 'server.cjs',
   },
   module: {
     rules: [
