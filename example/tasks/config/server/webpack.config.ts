@@ -1,15 +1,20 @@
 import { resolve, dirname } from 'node:path'
-import * as webpack from 'webpack'
+import { fileURLToPath } from 'node:url'
+import { Configuration } from 'webpack'
 import { TsconfigPathsPlugin } from 'tsconfig-paths-webpack-plugin'
 import nodeExternals from 'webpack-node-externals'
-import { fileURLToPath } from 'node:url'
+import { initConfig } from 'bistrio'
+import { config } from '../../config/index.ts'
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 const configFile = resolve(__dirname, '../../tsconfig.json')
+const bistrioConfig = initConfig(config)
+const structureConfig = bistrioConfig.structure
 
-const config: webpack.Configuration = {
-  target: 'node',
+const webpackConfig: Configuration = {
+  target: 'node20.10',
   externalsPresets: { node: true },
   externals: [nodeExternals()],
   mode: 'development', // TODO: fix later
@@ -35,8 +40,15 @@ const config: webpack.Configuration = {
   },
   resolve: {
     plugins: [new TsconfigPathsPlugin({ configFile, extensions: ['.tsx', '.ts', '.js'] })],
-    extensions: ['.*', '.js', '.jsx', '.json', '.ts', '.tsx'],
+    extensions: ['', '.js', '.jsx', '.json', '.ts', '.tsx'],
+  },
+  cache: {
+    type: 'filesystem',
+    buildDependencies: {
+      config: [__filename],
+    },
+    cacheDirectory: resolve(structureConfig.cacheDir, 'webpack-server'),
   },
 }
 
-export default config
+export default webpackConfig
