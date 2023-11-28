@@ -225,7 +225,7 @@ const createFetcher: CreateFetcherFunc = (): Fetcher => {
 
 export const defaultClientConfig = (): ClientConfig => {
   return {
-    host: () => global.location.origin,
+    host: () => location.origin,
     constructConfig: Actions.defaultConstructConfig(),
     createFetcher,
     sharedBundlePrefix: 'shared--',
