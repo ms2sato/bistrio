@@ -1,4 +1,4 @@
-import { Middlewares, nullRouterSupport, Resource, Router, RouterSupport, ServerRouterConfig } from "../../index.js"
+import { Middlewares, nullRouterSupport, Resource, Router, RouterSupport, ServerRouterConfig } from '../../index.js'
 import { ResourceHolderCreateRouter } from './resource-holder-create-router.js'
 
 declare global {
