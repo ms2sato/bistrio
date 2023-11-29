@@ -1,6 +1,4 @@
 esm/**/*
 cjs/**/*
 example/**/*
-jest.config.js
-client.d.ts
-client.js
+jest.config.cjs

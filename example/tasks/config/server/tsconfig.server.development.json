@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.server.production.json",
+  "compilerOptions": {
+    "sourceMap": true,
+    "jsx": "react-jsxdev"
+  }
+}
