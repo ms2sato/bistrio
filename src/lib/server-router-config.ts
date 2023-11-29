@@ -9,7 +9,14 @@ import {
 } from './action-context.js'
 import { ActionContextCreator } from './common.js'
 import { ServerRouterImpl } from './server-router-impl.js'
-import { ActionDescriptor, ConstructConfig, ConstructSource, PageLoadFunc, Resource, ResourceMethod } from './shared/index.js'
+import {
+  ActionDescriptor,
+  ConstructConfig,
+  ConstructSource,
+  PageLoadFunc,
+  Resource,
+  ResourceMethod,
+} from './shared/index.js'
 import { PartialWithRequired } from './type-util.js'
 
 export type ResourceMethodHandlerParams = {

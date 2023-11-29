@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
 import { NamedResources } from '../../index.js'
-import { RenderSupport } from "./index.js"
+import { RenderSupport } from './index.js'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const RenderSupportContext: React.Context<RenderSupport<any>> = createContext<RenderSupport<any>>(
