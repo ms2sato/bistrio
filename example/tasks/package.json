@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node ./bin/server",
+    "start": "node ./dist/server/boot.cjs",
     "dev:start": "NODE_ENV=production dotenv -e .env.development -- npm start",
     "prepare": "npm run bistrio:gen",
     "dev": "npm run watch",
