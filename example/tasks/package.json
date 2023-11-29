@@ -60,7 +60,6 @@
       ],
       "quiet": true,
       "inherit": true,
-      "runOnChangeOnly": true,
       "extensions": "ts,tsx"
     }
   },
