@@ -18,10 +18,10 @@ const webpackConfig: Configuration = {
   externalsPresets: { node: true },
   externals: [nodeExternals()],
   mode: 'development', // TODO: fix later
-  entry: resolve(__dirname, '../../server/server.ts'),
+  entry: resolve(__dirname, '../../server/boot.ts'),
   output: {
     path: resolve(__dirname, '../../dist/server'),
-    filename: 'server.cjs',
+    filename: 'boot.cjs',
   },
   module: {
     rules: [
