@@ -11,7 +11,7 @@ import {
   RouterLayoutType,
   RouterOptions,
   ServerRouterConfig,
-} from "../../index.js"
+} from '../../index.js'
 import { BasicRouter } from '../basic-router.js'
 
 const log = debug('bistrio')

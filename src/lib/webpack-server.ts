@@ -1,6 +1,6 @@
 import { resolve } from 'node:path'
 import createDebug from 'debug'
-import { Config, ConfigCustom, initConfig } from './config.js'
+import { ConfigCustom, initConfig } from './config.js'
 import { GenerateProductionConfigFunc, generateWebpackConfig } from './webpack-base.js'
 import { TsconfigPathsPlugin } from 'tsconfig-paths-webpack-plugin'
 import nodeExternals from 'webpack-node-externals'
