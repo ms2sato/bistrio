@@ -1,50 +1,12 @@
 import { resolve } from 'node:path'
 import createDebug from 'debug'
 import { ConfigCustom, initConfig } from './config.js'
-import { GenerateProductionConfigFunc, generateWebpackConfig } from './webpack-base.js'
+import { generateWebpackConfig } from './webpack-base.js'
 import { TsconfigPathsPlugin } from 'tsconfig-paths-webpack-plugin'
 import nodeExternals from 'webpack-node-externals'
+import { Configuration } from 'webpack'
 
 const debug = createDebug('bistrio:webpack')
-
-const generateServerProductionConfig: GenerateProductionConfigFunc = ({ config, env, entry }) => {
-  const structureConfig = config.structure
-  const configFile = resolve(structureConfig.configDir, 'server', `tsconfig.server.${env}.json`)
-  if (env === 'development') {
-    debug('tsconfig: %s', configFile)
-  }
-
-  return {
-    target: 'node20.10',
-    externalsPresets: { node: true },
-    externals: [nodeExternals()],
-    mode: env,
-    entry,
-    output: {
-      path: resolve(structureConfig.distDir, 'server'),
-      filename: 'boot.cjs',
-    },
-    module: {
-      rules: [
-        {
-          test: /\.tsx?$/,
-          use: {
-            loader: 'ts-loader',
-            options: {
-              transpileOnly: true,
-              configFile,
-            },
-          },
-          exclude: /node_modules/,
-        },
-      ],
-    },
-    resolve: {
-      plugins: [new TsconfigPathsPlugin({ configFile, extensions: ['.tsx', '.ts', '.js'] })],
-      extensions: ['', '.tsx', '.ts', '.js'],
-    },
-  }
-}
 
 export const generateServerWebpackConfig = ({
   config: custom,
@@ -54,14 +16,55 @@ export const generateServerWebpackConfig = ({
   bundlerConfigPath: string
 }) => {
   const config = initConfig(custom)
-  const entry = resolve(config.structure.serverDir, 'boot.ts')
   const cacheName = 'webpack-server'
+
+  const entry: Configuration['entry'] = {
+    boot: resolve(config.structure.serverDir, 'boot.ts'),
+    console: resolve(config.structure.serverDir, 'console.ts'),
+  }
+  const output = {
+    path: resolve(config.structure.distDir, 'server'),
+    filename: '[name].cjs',
+  }
 
   return generateWebpackConfig({
     config,
     bundlerConfigPath,
     entry,
     cacheName,
-    generateProductionConfig: generateServerProductionConfig,
+    generateProductionConfig: ({ env, entry }) => {
+      const configFile = resolve(config.structure.configDir, 'server', `tsconfig.${env}.json`)
+      if (env === 'development') {
+        debug('tsconfig: %s', configFile)
+      }
+
+      return {
+        target: 'node20.10',
+        externalsPresets: { node: true },
+        externals: [nodeExternals()],
+        mode: env,
+        entry,
+        output,
+        module: {
+          rules: [
+            {
+              test: /\.tsx?$/,
+              use: {
+                loader: 'ts-loader',
+                options: {
+                  transpileOnly: true,
+                  configFile,
+                },
+              },
+              exclude: /node_modules/,
+            },
+          ],
+        },
+        resolve: {
+          plugins: [new TsconfigPathsPlugin({ configFile, extensions: ['.tsx', '.ts', '.js'] })],
+          extensions: ['', '.tsx', '.ts', '.js'],
+        },
+      }
+    },
   })
 }

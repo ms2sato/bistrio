@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { hash } from '../../server/lib/crypter'
+import { hash } from '../../server/lib/crypter.js'
 
 const env = process.env.NODE_ENV || 'development'
 
