@@ -14,7 +14,7 @@
     "watch": "run-p watch:**",
     "watch:server": "NODE_ENV=development dotenv -e .env.development -- npm-watch",
     "watch:livereload": "NODE_ENV=development dotenv -e .env.development -- livereload -w 1500 -ee 'tsx,ts' 'dist/universal,public'",
-    "watch:client": "NODE_ENV=development dotenv -e .env.development -- node --loader ts-node/esm node_modules/.bin/webpack --watch --config ./config/client/webpack.config.ts",
+    "watch:client": "NODE_ENV=development dotenv -e .env.development -- tsx node_modules/.bin/webpack --watch --config ./config/client/webpack.config.ts",
     "copy-assets": "cpx 'public/**' dist/public && cpx 'config/**' dist/config",
     "build": "npm run copy-assets && npm run bistrio:gen && npm run build:client && npm run build:server",
     "clean": "rimraf dist .cache .bistrio",
@@ -33,14 +33,14 @@
     "db:reset": "dotenv -e .env.development -- prisma migrate reset",
     "db:rollback": "dotenv -e .env.development -- prisma migrate resolve --rolled-back",
     "db:seed": "dotenv -e .env.development -- prisma db seed",
-    "db:truncate": "dotenv -e .env.development -- node --import=tsimp/import prisma/truncate.ts",
+    "db:truncate": "dotenv -e .env.development -- tsx prisma/truncate.ts",
     "db:migrate:test": "NODE_ENV=test dotenv -e .env.test -- prisma migrate dev",
     "db:reset:test": "NODE_ENV=test dotenv -e .env.test -- prisma migrate reset --force",
     "db:seed:test": "NODE_ENV=test dotenv -e .env.test -- prisma db seed",
-    "db:truncate:test": "NODE_ENV=test dotenv -e .env.test -- node --import=tsimp/import prisma/truncate.ts",
-    "build:client": "node --loader ts-node/esm node_modules/.bin/webpack build --config ./config/client/webpack.config.ts",
-    "build:server": "cpx .bistrio/filemap.json dist/.bistrio/ && node --loader ts-node/esm node_modules/.bin/webpack build --config ./config/server/webpack.config.ts",
-    "bistrio:gen": "node --loader ts-node/esm bin/generate.ts",
+    "db:truncate:test": "NODE_ENV=test dotenv -e .env.test -- tsx prisma/truncate.ts",
+    "build:client": "tsx node_modules/.bin/webpack build --config ./config/client/webpack.config.ts",
+    "build:server": "cpx .bistrio/filemap.json dist/.bistrio/ && tsx node_modules/.bin/webpack build --config ./config/server/webpack.config.ts",
+    "bistrio:gen": "tsx bin/generate.ts",
     "bistrio:gen:clean": "rimraf .bistrio"
   },
   "watch": {
@@ -64,7 +64,7 @@
     }
   },
   "prisma": {
-    "seed": "node --import=tsimp/import prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^4.9.0",
@@ -82,7 +82,7 @@
     "react-dom": "^18.2.0",
     "react-error-boundary": "^4.0.10",
     "ts-jest": "^29.0.5",
-    "ts-node": "^10.9.1"
+    "tsx": "^4.6.1"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",
@@ -122,7 +122,6 @@
     "tsc-alias": "^1.8.2",
     "tsconfig-paths": "^4.1.2",
     "tsconfig-paths-webpack-plugin": "^4.0.0",
-    "tsimp": "^2.0.9",
     "typescript": "^5.1.3",
     "webpack": ">=5.76.0",
     "webpack-cli": "^5.1.1",
