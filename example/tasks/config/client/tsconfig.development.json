@@ -1,5 +1,5 @@
 {
-  "extends": "./tsconfig.client.production.json",
+  "extends": "./tsconfig.production.json",
   "compilerOptions": {
     "sourceMap": true,
     "target": "es2022",
