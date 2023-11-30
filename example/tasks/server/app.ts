@@ -55,7 +55,7 @@ export async function setup() {
       store: new RedisStore({ client: redis, prefix: 'taskssess:' }),
       cookie: {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: process.env.SECURE ? process.env.SECURE === 'true' : app.get('env') === 'production',
         sameSite: true,
       },
     }),
