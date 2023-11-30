@@ -1,7 +1,6 @@
 node_modules
 dist
 .cache
-.tsimp
 
 .env.development
 .env.test
