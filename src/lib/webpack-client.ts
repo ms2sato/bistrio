@@ -30,7 +30,7 @@ const getFilemapPath = (structureConfig: StructureConfig) => resolve(structureCo
 
 const generateClientProductionConfig: GenerateProductionConfigFunc = ({ config, env, entry }) => {
   const structureConfig = config.structure
-  const configFile = resolve(structureConfig.configDir, 'client', `tsconfig.client.${env}.json`)
+  const configFile = resolve(structureConfig.configDir, 'client', `tsconfig.${env}.json`)
   if (env === 'development') {
     debug('tsconfig: %s', configFile)
   }

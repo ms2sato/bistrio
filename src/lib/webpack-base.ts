@@ -8,7 +8,7 @@ const debug = createDebug('bistrio:webpack')
 
 const dev = 'development'
 const prod = 'production'
-type Mode = 'development' | 'production'
+export type Mode = 'development' | 'production'
 
 function isWebpackMode(webpackMode: string | undefined): webpackMode is Mode {
   return webpackMode !== undefined && [prod, dev].includes(webpackMode)

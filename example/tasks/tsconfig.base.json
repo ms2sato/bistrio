@@ -20,5 +20,12 @@
     "compilerOptions": {
       "module": "ESNext"
     }
+  },
+  "tsimp": {
+    "compilerOptions": {
+      "skipLibCheck": true,
+      "strict": false,
+      "jsx": "react-jsxdev"
+    }
   }
 }
