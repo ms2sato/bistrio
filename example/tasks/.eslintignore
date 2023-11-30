@@ -1,3 +1,5 @@
+.cache
+
 dist
 node_modules
 bin
@@ -6,5 +8,5 @@ public
 prisma
 config
 
-.eslintrc.js
+.eslintrc.cjs
 jest.config.js
