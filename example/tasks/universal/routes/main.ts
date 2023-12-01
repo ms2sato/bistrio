@@ -7,9 +7,9 @@ import {
   taskCreateWithTagsSchema,
   taskIdSchema,
   taskUpdateWithTagsSchema,
-} from '../params.ts'
-import { Middlewares } from './middlewares.ts'
-import TaskLayout from '../components/tasks/TaskLayout.tsx'
+} from '../params'
+import { Middlewares } from './middlewares'
+import TaskLayout from '../components/tasks/TaskLayout'
 
 const UserLayout = lazy(() => import('../components/UserLayout'))
 
