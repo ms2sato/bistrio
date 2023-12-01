@@ -18,7 +18,7 @@
     "copy-assets": "cpx 'public/**' dist/public && cpx 'config/**' dist/config",
     "build": "npm run copy-assets && npm run bistrio:gen && npm run build:client && npm run build:server",
     "clean": "rimraf dist .cache .bistrio",
-    "console": "NODE_ENV=development dotenv -e .env.development -- node -r ./dist/server/console.cjs",
+    "console": "DEBUG=-bistrio:console NODE_ENV=development dotenv -e .env.development -- node -r ./dist/server/console.cjs",
     "lint": "npm run eslint && npm run check-types",
     "lint:fix": "npm run eslint:fix && npm run check-types && npm run format",
     "eslint": "eslint .",
