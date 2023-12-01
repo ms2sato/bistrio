@@ -1,1 +1,1 @@
-export * from './admin.ts'
+export * from './admin'
