@@ -1,6 +1,6 @@
 import { resolve, dirname } from 'node:path'
 import { ConfigCustom } from 'bistrio'
-import { entriesConfig, clientConfig } from '../universal/config/index.ts'
+import { entriesConfig, clientConfig } from '../universal/config'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))

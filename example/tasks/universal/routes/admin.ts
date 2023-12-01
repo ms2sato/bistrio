@@ -1,7 +1,7 @@
 import { Router, Actions, RouterSupport } from 'bistrio/client'
-import { routes as mainRoutes } from './main.ts'
-import { Middlewares } from './middlewares.ts'
-import AdminLayout from '../components/AdminLayout.tsx'
+import { routes as mainRoutes } from './main'
+import { Middlewares } from './middlewares'
+import AdminLayout from '../components/AdminLayout'
 
 export function routes(router: Router, support: RouterSupport<Middlewares>) {
   const adminRouter = router.options({ hydrate: true }).sub('/admins/$adminId')
