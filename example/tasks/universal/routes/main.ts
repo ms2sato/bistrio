@@ -11,7 +11,7 @@ import {
 import { Middlewares } from './middlewares'
 import TaskLayout from '../components/tasks/TaskLayout'
 
-const UserLayout = lazy(() => import('../components/UserLayout'))
+const UserLayout = lazy(() => import(/* webpackMode: "eager" */'../components/UserLayout'))
 
 export function routes(router: Router, support: RouterSupport<Middlewares>) {
   router = router.layout({ Component: UserLayout }).options({ hydrate: true })
