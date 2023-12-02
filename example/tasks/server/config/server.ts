@@ -6,7 +6,7 @@ import { ComponentType, lazy } from 'react'
 async function importLocal(this: ServerRouterConfig, filePath: string) {
   try {
     const relativePath = relative(resolve(this.baseDir, 'resources'), filePath)
-    return await import(/* webpackMode: "eager" */`../resources/${relativePath}`)
+    return await import(/* webpackMode: "eager" */ `../resources/${relativePath}`)
   } catch (err) {
     throw new FileNotFoundError(filePath, { cause: err })
   }
@@ -15,7 +15,7 @@ async function importLocal(this: ServerRouterConfig, filePath: string) {
 function pageLoadFunc(filePath: string) {
   try {
     return lazy(async () => {
-      const { Page } = await import(/* webpackMode: "eager" */`../../universal/pages${filePath}`)
+      const { Page } = await import(/* webpackMode: "eager" */ `../../universal/pages${filePath}`)
       return Promise.resolve({ default: Page as ComponentType<any> })
     })
   } catch (err) {
