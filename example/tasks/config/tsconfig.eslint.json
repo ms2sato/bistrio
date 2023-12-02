@@ -7,8 +7,8 @@
     "../universal/**/*.tsx",
     "../prisma/**/*.ts",
     "../bin/**/*.ts",
-    "../bin/**/*.js",
     "../__tests__/**/*.ts",
-    "./client/webpack.config.ts",
+    "./config/client/webpack.config.ts",
+    "./config/server/webpack.config.ts",
   ]
 }
