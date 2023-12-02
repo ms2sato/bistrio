@@ -1,4 +1,15 @@
 {
-  "extends": "./tsconfig.base.json",
+  "extends": "./node_modules/bistrio/config/tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "outDir": "dist",
+    "paths": {
+      "@/*": ["*"],
+      "@server/*": ["server/*"],
+      "@bistrio/*": [".bistrio/*"],
+      "@universal/*": ["universal/*"]
+    },
+  },
+  "exclude": ["dist", "node_modules"],
   "include": ["server/**/*", "universal/**/*"],
 }
