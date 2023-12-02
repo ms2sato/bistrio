@@ -7,7 +7,7 @@
       "@bistrio/*": [".bistrio/*"],
       "@universal/*": ["universal/*"]
     },
-    "outDir": "dist/public",
+    "outDir": "dist/public"
   },
   "include": ["../../.bistrio/**/*", "../../universal/**/*"]
 }
