@@ -1,16 +1,8 @@
-import { lazy } from 'react'
 import { EntriesConfig, defaultClientConfig } from 'bistrio/client'
+import { loadPage } from '../../config/client/imports'
 import { RoutesWrapper } from '../components/RoutesWrapper'
 import { routes as mainRoutes } from '../routes/main'
 import { routes as adminRoutes } from '../routes/admin'
-
-export const loadPage = (pagePath: string) => {
-  return lazy(() =>
-    import(/*webpackChunkName: "[request]" */ `../pages${pagePath}`).then(({ Page }) => ({
-      default: Page,
-    })),
-  )
-}
 
 const el = 'app'
 
