@@ -16,7 +16,7 @@ function loadPage(filePath: string) {
   try {
     return lazy(async () => {
       const { Page } = await import(/* webpackMode: "eager" */ `../../universal/pages${filePath}`)
-      return Promise.resolve({ default: Page as ComponentType<any> })
+      return { default: Page as ComponentType<any> }
     })
   } catch (err) {
     throw new FileNotFoundError(filePath, { cause: err })
