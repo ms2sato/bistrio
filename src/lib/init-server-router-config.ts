@@ -20,7 +20,7 @@ const createSmartResponder = ({ router }: ResourceMethodHandlerParams) => {
   )
 }
 
-function defaultServerRouterConfig(): Omit<ServerRouterConfig, 'baseDir' | 'pageLoadFunc'> {
+function defaultServerRouterConfig(): Omit<ServerRouterConfig, 'baseDir' | 'loadPage'> {
   return {
     actions: Actions.page(),
     inputArranger: createSmartInputArranger(),

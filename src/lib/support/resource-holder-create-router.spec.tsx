@@ -1,16 +1,16 @@
 import { CreateActionOptionFunction } from '../action-context.js'
 import { initServerRouterConfig } from '../init-server-router-config.js'
-import { FileNotFoundError, PageLoadFunc, Resource, blankSchema, opt } from '../shared/index.js'
+import { FileNotFoundError, LoadPageFunc, Resource, blankSchema, opt } from '../shared/index.js'
 import { ResourceHolderCreateRouter } from './resource-holder-create-router.js'
 
 type ActionOption = { test: number }
 
 const DummyComponent = () => <div>test</div>
-const pageLoadFunc: PageLoadFunc = () => DummyComponent
+const loadPage: LoadPageFunc = () => DummyComponent
 
 test('standard', async () => {
   const holder: Record<string, Resource> = {}
-  const router = new ResourceHolderCreateRouter(holder, initServerRouterConfig({ baseDir: './', pageLoadFunc }))
+  const router = new ResourceHolderCreateRouter(holder, initServerRouterConfig({ baseDir: './', loadPage: loadPage }))
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const spy = jest.spyOn(router as any, 'loadLocalResource').mockImplementation(() =>
     Promise.resolve({
@@ -36,7 +36,7 @@ test('with actionOption', async () => {
   const holder: Record<string, Resource> = {}
   const router = new ResourceHolderCreateRouter(
     holder,
-    initServerRouterConfig({ baseDir: './', createActionOptions, pageLoadFunc }),
+    initServerRouterConfig({ baseDir: './', createActionOptions, loadPage: loadPage }),
   )
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const spy = jest.spyOn(router as any, 'loadLocalResource').mockImplementation(() =>
@@ -62,7 +62,7 @@ test('with actionOption', async () => {
 
 test('page only', async () => {
   const holder: Record<string, Resource> = {}
-  const router = new ResourceHolderCreateRouter(holder, initServerRouterConfig({ baseDir: './', pageLoadFunc }))
+  const router = new ResourceHolderCreateRouter(holder, initServerRouterConfig({ baseDir: './', loadPage: loadPage }))
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const spy = jest.spyOn(router as any, 'loadLocalResource').mockImplementation(() => {
     throw new FileNotFoundError('Resource Not Found') // but handled if page only

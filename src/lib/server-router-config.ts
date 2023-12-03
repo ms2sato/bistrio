@@ -13,7 +13,7 @@ import {
   ActionDescriptor,
   ConstructConfig,
   ConstructSource,
-  PageLoadFunc,
+  LoadPageFunc,
   Resource,
   ResourceMethod,
 } from './shared/index.js'
@@ -49,9 +49,9 @@ export type ServerRouterConfig = {
   adapterFileName: string
   resourceRoot: string
   resourceFileName: string
-  pageLoadFunc: PageLoadFunc
+  loadPage: LoadPageFunc
   importLocal: LoadFunc
   formatPlaceholderForRouter: FormatPlaceholderForServerRouterFunc
 }
 
-export type ServerRouterConfigCustom = PartialWithRequired<ServerRouterConfig, 'baseDir' | 'pageLoadFunc'>
+export type ServerRouterConfigCustom = PartialWithRequired<ServerRouterConfig, 'baseDir' | 'loadPage'>

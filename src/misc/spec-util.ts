@@ -7,7 +7,7 @@ import { ServerRouterConfig } from '../lib/server-router-config.js'
 import { ServerRouterImpl } from '../lib/server-router-impl.js'
 import {
   ClientConfig,
-  PageLoadFunc,
+  LoadPageFunc,
   Resource,
   ResourceRouteConfig,
   RouterOptions,
@@ -108,13 +108,13 @@ export const buildRouter = async ({
   mockResources,
   adapter,
   serverRouterConfig,
-  pageLoadFunc,
+  loadPage,
 }: {
   routes: RoutesFunction
   mockResources: MockResources
   adapter?: Adapter
   serverRouterConfig?: ServerRouterConfig
-  pageLoadFunc: PageLoadFunc
+  loadPage: LoadPageFunc
 }): Promise<TestServerRouter> => {
   const routePath = '/'
   const routeObject: RouteObject = {}
@@ -127,7 +127,7 @@ export const buildRouter = async ({
   const routerOptions: RouterOptions = { hydrate: false }
 
   const router = new TestServerRouter(
-    serverRouterConfig || initServerRouterConfig({ baseDir: './', pageLoadFunc }),
+    serverRouterConfig || initServerRouterConfig({ baseDir: './', loadPage: loadPage }),
     defaultClientConfig(),
     routePath,
     routeObject,

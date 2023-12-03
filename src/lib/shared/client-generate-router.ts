@@ -15,7 +15,7 @@ import {
   ActionDescriptor,
   HttpMethod,
   RouterOptions,
-  PageLoadFunc,
+  LoadPageFunc,
   ValidationError,
   createValidationError,
   RouterLayoutType,
@@ -67,7 +67,7 @@ export type PathPageMap = Map<string, PageNode | React.LazyExoticComponent<any>>
 export type ClientGenretateRouterCore = {
   host: string
   constructConfig: ConstructConfig
-  pageLoadFunc: PageLoadFunc
+  loadPage: LoadPageFunc
   handlerBuildRunners: HandlerBuildRunner[]
   resourceNameToInfo: ResourceNameToInfo
   routeObject: RouteObject
@@ -244,19 +244,19 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
 
   constructor(
     private clientConfig: ClientConfig,
-    private pageLoadFunc: PageLoadFunc,
+    private loadPage: LoadPageFunc,
     private httpPath = '/',
     routeObject: RouteObject = {},
     private core: ClientGenretateRouterCore = {
       host: clientConfig.host(),
       constructConfig: clientConfig.constructConfig,
-      pageLoadFunc,
+      loadPage,
       resourceNameToInfo: new Map<string, ResourceInfo>(),
       handlerBuildRunners: [],
       routeObject,
     },
   ) {
-    this.routeObjectPickupper = new RouteObjectPickupper(clientConfig, routeObject, pageLoadFunc)
+    this.routeObjectPickupper = new RouteObjectPickupper(clientConfig, routeObject, loadPage)
   }
 
   sub(rpath: string, ..._args: unknown[]): Router {
@@ -265,7 +265,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
     // TODO: args and middlewares
     return new ClientGenretateRouter<RS>(
       this.clientConfig,
-      this.pageLoadFunc,
+      this.loadPage,
       pathJoin(this.httpPath, rpath),
       subRouteObject,
       this.core,
@@ -282,7 +282,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
     if (layoutRouteObject) {
       const layoutRouter = new ClientGenretateRouter(
         this.clientConfig,
-        this.pageLoadFunc,
+        this.loadPage,
         this.httpPath,
         layoutRouteObject,
         this.core,
