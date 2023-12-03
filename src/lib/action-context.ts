@@ -77,13 +77,9 @@ export type Renderer = (ctx: ActionContext, options?: unknown) => false | undefi
 
 export type InputArranger = (ctx: MutableActionContext, sources: readonly string[], schema: z.AnyZodObject) => unknown
 
-export class ActionSupport {
-  constructor(readonly rootPath: string) {}
-}
+export class ActionSupport {}
 
-export class ResourceSupport {
-  constructor(readonly rootPath: string) {}
-}
+export class ResourceSupport {}
 
 export type EndpointFunc<S, R> = (support: S, config: ResourceRouteConfig) => R
 export type ResourceFunc = EndpointFunc<ResourceSupport, Resource>

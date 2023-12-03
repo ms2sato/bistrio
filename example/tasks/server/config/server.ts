@@ -1,12 +1,11 @@
-import { resolve, relative } from 'path'
+import { resolve } from 'path'
 import { ServerRouterConfig, initServerRouterConfig, FileNotFoundError } from 'bistrio'
 import { createActionOptions } from '../customizers/index'
 import { ComponentType, lazy } from 'react'
 
-async function importLocal(this: ServerRouterConfig, filePath: string) {
+async function importLocal(filePath: string) {
   try {
-    const relativePath = relative(resolve(this.baseDir, 'resources'), filePath)
-    return await import(/* webpackMode: "eager" */ `../resources/${relativePath}`)
+    return await import(/* webpackMode: "eager" */ `../resources${filePath}`)
   } catch (err) {
     throw new FileNotFoundError(filePath, { cause: err })
   }

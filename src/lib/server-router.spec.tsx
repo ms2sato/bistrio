@@ -17,7 +17,7 @@ const dummyResource = {
   hasOption: (ao: opt<ActionOption>) => ({ msg: 'ret hasOption', opt: ao.body }),
 } as const satisfies Resource
 
-const mockResources = { 'resources/test/resource': dummyResource }
+const mockResources = { '/test/resource': dummyResource }
 
 const dummyRoutes: RoutesFunction = (router) => {
   router.resources('/test', {
@@ -107,7 +107,7 @@ describe('ServerRouter', () => {
       const createActionOptions: CreateActionOptionFunction = () => ({ test: 321 })
       const rs = await createServerRenderSupport({
         ...dummyProps,
-        serverRouterConfig: initServerRouterConfig({ createActionOptions, baseDir: './', loadPage: loadPage }),
+        serverRouterConfig: initServerRouterConfig({ createActionOptions, baseDir: './', loadPage }),
       })
       expect(await rs.resources().test_resource.hasOption()).toStrictEqual({ msg: 'ret hasOption', opt: { test: 321 } })
     })
@@ -129,7 +129,7 @@ describe('ServerRouter', () => {
       const createActionOptions: CreateActionOptionFunction = () => ({ test: 321 })
       const rs = await createServerRenderSupport({
         ...dummyProps,
-        serverRouterConfig: initServerRouterConfig({ createActionOptions, baseDir: './', loadPage: loadPage }),
+        serverRouterConfig: initServerRouterConfig({ createActionOptions, baseDir: './', loadPage }),
       })
 
       // expect.assertions(2)
@@ -163,7 +163,7 @@ describe('ServerRouter', () => {
     test('requests nested', async () => {
       const router = await buildRouter({
         mockResources: {
-          'resources/users/$userId/items/resource': {
+          '/users/$userId/items/resource': {
             index: () => ({ msg: 'ret user item' }),
           },
         },
@@ -173,7 +173,7 @@ describe('ServerRouter', () => {
             actions: [{ action: 'index', method: 'get', path: '/' }],
           })
         },
-        loadPage: loadPage,
+        loadPage,
       })
 
       expect(getEndpoints(router)).toStrictEqual([
@@ -229,7 +229,7 @@ describe('ServerRouter', () => {
           })
         },
         mockResources: {
-          'resources/test/resource': {
+          '/test/resource': {
             get() {
               throw new Error('Unexpected called resource method')
             },
@@ -240,7 +240,7 @@ describe('ServerRouter', () => {
             override: () => ({ msg: 'ret adapter get' }),
           },
         },
-        loadPage: loadPage,
+        loadPage,
       })
 
       const ret = await fakeRequest(router, {
@@ -263,7 +263,7 @@ describe('ServerRouter', () => {
           })
         },
         mockResources: {
-          'resources/test/resource': {
+          '/test/resource': {
             get(_params: IdNumberParams) {
               throw new Error('Unexpected called resource method')
             },
@@ -274,7 +274,7 @@ describe('ServerRouter', () => {
             override: (_ctx) => ({ msg: 'ret adapter get' }),
           },
         },
-        loadPage: loadPage,
+        loadPage,
       })
 
       const ret = await fakeRequest(router, {
@@ -299,7 +299,7 @@ describe('ServerRouter', () => {
           })
         },
         mockResources,
-        loadPage: loadPage,
+        loadPage,
       })
 
       const routeObject = router.routerCore.routeObject
@@ -332,7 +332,7 @@ describe('ServerRouter', () => {
           })
         },
         mockResources,
-        loadPage: loadPage,
+        loadPage,
       })
 
       const routeObject = router.routerCore.routeObject
@@ -375,7 +375,7 @@ describe('ServerRouter', () => {
           subLayoutRouter.pages('/test', ['/$id'])
         },
         mockResources,
-        loadPage: loadPage,
+        loadPage,
       })
 
       expect(getEndpoints(router)).toStrictEqual([
