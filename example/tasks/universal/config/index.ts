@@ -4,7 +4,7 @@ import { RoutesWrapper } from '../components/RoutesWrapper'
 import { routes as mainRoutes } from '../routes/main'
 import { routes as adminRoutes } from '../routes/admin'
 
-export const pageLoadFunc = (pagePath: string) => {
+export const loadPage = (pagePath: string) => {
   return lazy(() =>
     import(/*webpackChunkName: "[request]" */ `../pages${pagePath}`).then(({ Page }) => ({
       default: Page,
@@ -15,8 +15,8 @@ export const pageLoadFunc = (pagePath: string) => {
 const el = 'app'
 
 export const entriesConfig: EntriesConfig = {
-  main: { routes: mainRoutes, el, pageLoadFunc, RoutesWrapper },
-  admin: { routes: adminRoutes, el, pageLoadFunc, RoutesWrapper },
+  main: { routes: mainRoutes, el, loadPage, RoutesWrapper },
+  admin: { routes: adminRoutes, el, loadPage, RoutesWrapper },
 }
 
 export const clientConfig = defaultClientConfig()

@@ -320,11 +320,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
   ) {
     super(serverRouterConfig, httpPath, routerCore)
     this.router = express.Router({ mergeParams: true })
-    this.routeObjectPickupper = new RouteObjectPickupper(
-      clientConfig,
-      routeObject,
-      this.serverRouterConfig.pageLoadFunc,
-    )
+    this.routeObjectPickupper = new RouteObjectPickupper(clientConfig, routeObject, this.serverRouterConfig.loadPage)
   }
 
   sub(rpath: string, ...handlers: RequestHandler[]): Router {

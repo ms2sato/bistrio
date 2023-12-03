@@ -1,7 +1,7 @@
 import express from 'express'
 import { Outlet } from 'react-router-dom'
 import { ServerRenderSupport } from './server-render-support.js'
-import { ActionDescriptor, IdNumberParams, PageLoadFunc, blankSchema, opt } from './shared/index.js'
+import { ActionDescriptor, IdNumberParams, LoadPageFunc, blankSchema, opt } from './shared/index.js'
 import { CreateActionOptionFunction } from './action-context.js'
 import { ConstructViewFunc, Resource, ServerRouterConfig, idNumberSchema } from '../index.js'
 import { buildActionContextCreator } from './build-action-context-creator.js'
@@ -32,19 +32,19 @@ const dummyRoutes: RoutesFunction = (router) => {
 }
 
 const DummyComponent = () => <div>test</div>
-const pageLoadFunc: PageLoadFunc = () => DummyComponent
+const loadPage: LoadPageFunc = () => DummyComponent
 
 const dummyProps = {
   routes: dummyRoutes,
   mockResources,
-  pageLoadFunc,
+  loadPage,
 }
 
 type CreateDummyActionContextProps = {
   routes: RoutesFunction
   mockResources: MockResources
   serverRouterConfig?: ServerRouterConfig
-  pageLoadFunc: PageLoadFunc
+  loadPage: LoadPageFunc
 }
 
 const createDummyActionContext = async (params: CreateDummyActionContextProps) => {
@@ -107,7 +107,7 @@ describe('ServerRouter', () => {
       const createActionOptions: CreateActionOptionFunction = () => ({ test: 321 })
       const rs = await createServerRenderSupport({
         ...dummyProps,
-        serverRouterConfig: initServerRouterConfig({ createActionOptions, baseDir: './', pageLoadFunc }),
+        serverRouterConfig: initServerRouterConfig({ createActionOptions, baseDir: './', loadPage: loadPage }),
       })
       expect(await rs.resources().test_resource.hasOption()).toStrictEqual({ msg: 'ret hasOption', opt: { test: 321 } })
     })
@@ -129,7 +129,7 @@ describe('ServerRouter', () => {
       const createActionOptions: CreateActionOptionFunction = () => ({ test: 321 })
       const rs = await createServerRenderSupport({
         ...dummyProps,
-        serverRouterConfig: initServerRouterConfig({ createActionOptions, baseDir: './', pageLoadFunc }),
+        serverRouterConfig: initServerRouterConfig({ createActionOptions, baseDir: './', loadPage: loadPage }),
       })
 
       // expect.assertions(2)
@@ -173,7 +173,7 @@ describe('ServerRouter', () => {
             actions: [{ action: 'index', method: 'get', path: '/' }],
           })
         },
-        pageLoadFunc,
+        loadPage: loadPage,
       })
 
       expect(getEndpoints(router)).toStrictEqual([
@@ -200,7 +200,7 @@ describe('ServerRouter', () => {
         serverRouterConfig: initServerRouterConfig({
           createActionOptions,
           baseDir: './',
-          pageLoadFunc: () => DummyComponent,
+          loadPage: () => DummyComponent,
         }),
       })
 
@@ -240,7 +240,7 @@ describe('ServerRouter', () => {
             override: () => ({ msg: 'ret adapter get' }),
           },
         },
-        pageLoadFunc,
+        loadPage: loadPage,
       })
 
       const ret = await fakeRequest(router, {
@@ -274,7 +274,7 @@ describe('ServerRouter', () => {
             override: (_ctx) => ({ msg: 'ret adapter get' }),
           },
         },
-        pageLoadFunc,
+        loadPage: loadPage,
       })
 
       const ret = await fakeRequest(router, {
@@ -299,7 +299,7 @@ describe('ServerRouter', () => {
           })
         },
         mockResources,
-        pageLoadFunc,
+        loadPage: loadPage,
       })
 
       const routeObject = router.routerCore.routeObject
@@ -332,7 +332,7 @@ describe('ServerRouter', () => {
           })
         },
         mockResources,
-        pageLoadFunc,
+        loadPage: loadPage,
       })
 
       const routeObject = router.routerCore.routeObject
@@ -375,7 +375,7 @@ describe('ServerRouter', () => {
           subLayoutRouter.pages('/test', ['/$id'])
         },
         mockResources,
-        pageLoadFunc,
+        loadPage: loadPage,
       })
 
       expect(getEndpoints(router)).toStrictEqual([

@@ -1,6 +1,6 @@
 import { RouteObject } from 'react-router-dom'
 import { ActionDescriptor, RouterLayoutType } from './common.js'
-import { PageLoadFunc } from './entry.js'
+import { LoadPageFunc } from './entry.js'
 import { pathJoin } from './path-util.js'
 import { ClientConfig } from './client-generate-router.js'
 
@@ -8,7 +8,7 @@ export class RouteObjectPickupper {
   constructor(
     private clientConfig: ClientConfig,
     private routeObject: RouteObject,
-    private pageLoadFunc: PageLoadFunc,
+    private loadPage: LoadPageFunc,
   ) {}
 
   addNewSub(rpath?: string) {
@@ -49,7 +49,7 @@ export class RouteObjectPickupper {
 
       const actionRouteObject = this.addNewSubRouteObject(subRouteObject, ad.path)
       const fullPath = pathJoin(httpPath, ad.path)
-      const Component = this.pageLoadFunc(fullPath)
+      const Component = this.loadPage(fullPath)
       if (!Component) {
         throw new Error(`Component not found: ${fullPath}`)
       }

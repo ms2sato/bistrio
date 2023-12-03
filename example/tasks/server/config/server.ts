@@ -12,7 +12,7 @@ async function importLocal(this: ServerRouterConfig, filePath: string) {
   }
 }
 
-function pageLoadFunc(filePath: string) {
+function loadPage(filePath: string) {
   try {
     return lazy(async () => {
       const { Page } = await import(/* webpackMode: "eager" */ `../../universal/pages${filePath}`)
@@ -28,7 +28,7 @@ export function serverRouterConfig(): ServerRouterConfig {
   return initServerRouterConfig({
     baseDir: resolve(__dirname, '../'),
     createActionOptions,
-    pageLoadFunc,
+    loadPage,
     importLocal,
   })
 }

@@ -17,12 +17,12 @@ import {
 import { toRoutes } from './react-router-util.js'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type PageLoadFunc = (pagePath: string) => PageNode | LazyExoticComponent<any>
+export type LoadPageFunc = (pagePath: string) => PageNode | LazyExoticComponent<any>
 
 type EntryConfig = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   routes: (router: Router, routerSupport: RouterSupport<any>) => void
-  pageLoadFunc: PageLoadFunc
+  loadPage: LoadPageFunc
   el: (() => HTMLElement) | string
   RoutesWrapper: (props: { children: ReactNode }) => JSX.Element
 }
@@ -68,7 +68,7 @@ export async function entry<R extends NamedResources>({
     throw new Error('container not found')
   }
 
-  const cgr = new ClientGenretateRouter<R>(clientConfig, entryConfig.pageLoadFunc, '/', {}) // TODO: remove test code
+  const cgr = new ClientGenretateRouter<R>(clientConfig, entryConfig.loadPage, '/', {}) // TODO: remove test code
   entryConfig.routes(cgr, nullRouterSupport) // routerSupport and Middleware is not working on client side
   await cgr.build()
   const core = cgr.getCore()
