@@ -1,5 +1,5 @@
 import path from 'node:path'
-import express from 'express'
+import { Express } from 'express'
 import listEndpoints from 'express-list-endpoints'
 import { Adapter, RouterCore } from '../lib/action-context.js'
 import { initServerRouterConfig } from '../lib/init-server-router-config.js'
@@ -144,6 +144,6 @@ export const buildRouter = async ({
 }
 
 export const getEndpoints = (router: ServerRouterImpl) => {
-  const endpoints = listEndpoints(router.router as express.Express)
+  const endpoints = listEndpoints(router.router as Express)
   return endpoints.map(({ methods, path }) => ({ methods, path }))
 }
