@@ -1,5 +1,5 @@
-import { blankSchema } from "../shared/schemas.js"
-import { GenerateRouter } from "./generate-router.js"
+import { blankSchema } from '../shared/schemas.js'
+import { GenerateRouter } from './generate-router.js'
 
 test('resources', () => {
   const router = new GenerateRouter()
@@ -10,7 +10,8 @@ test('resources', () => {
     construct: { build: { schema: blankSchema } },
   })
 
-  expect(router.links.test_resource_build).toEqual({ link: '/test/build', optionNames: [] })
+  expect(router.links.named.test_resource__build).toEqual({ link: '/test/build', optionNames: [] })
+  expect(router.links.path.test__build).toEqual({ link: '/test/build', optionNames: [] })
 })
 
 test('resources with options', () => {
@@ -22,23 +23,22 @@ test('resources with options', () => {
     construct: { build: { schema: blankSchema } },
   })
 
-  expect(router.links.test_resource_build).toEqual({ link: '/test/$testId/$id', optionNames: ['testId', 'id'] })
+  expect(router.links.named.test_resource__build).toEqual({ link: '/test/$testId/$id', optionNames: ['testId', 'id'] })
+  expect(router.links.path.test__$__$).toEqual({ link: '/test/$testId/$id', optionNames: ['testId', 'id'] })
 })
 
 test('pages', () => {
   const router = new GenerateRouter()
 
   router.pages('/test', ['build'])
-  console.log(router.links)
 
-  expect(router.links.test_build).toEqual({ link: '/test/build', optionNames: [] })
+  expect(router.links.path.test__build).toEqual({ link: '/test/build', optionNames: [] })
 })
 
 test('pages with options', () => {
   const router = new GenerateRouter()
 
   router.pages('/test/$testId', ['$id'])
-  console.log(router.links)
 
-  expect(router.links.test_$testId_$id).toEqual({ link: '/test/$testId/$id', optionNames: ['testId', 'id'] })
+  expect(router.links.path.test__$__$).toEqual({ link: '/test/$testId/$id', optionNames: ['testId', 'id'] })
 })
