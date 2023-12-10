@@ -12,7 +12,10 @@ export class GenerateRouter implements Router {
   constructor(
     private httpPath: string = '/',
     readonly nameToPath: { [path: string]: string } = {},
-    readonly links: { [name: string]: LinkFunctionInfo } = {},
+    readonly links: { named: { [name: string]: LinkFunctionInfo }; path: { [name: string]: LinkFunctionInfo } } = {
+      named: {},
+      path: {},
+    },
   ) {}
 
   sub(rpath: string, ..._args: unknown[]): Router {
@@ -41,7 +44,7 @@ export class GenerateRouter implements Router {
       }
 
       const linkPath = join(routePath, ad.path)
-      this.registerLink(`${config.name}_${ad.action}`, linkPath)
+      this.registerLink(linkPath, `${config.name}__${ad.action}`)
     }
   }
 
@@ -49,8 +52,7 @@ export class GenerateRouter implements Router {
     const routePath = join(this.httpPath, rpath)
     for (const child of children) {
       const linkPath = join(routePath, child)
-      const name = linkPath.replace(/^\//, '').replace(/\//g, '_')
-      this.registerLink(name, linkPath)
+      this.registerLink(linkPath)
     }
   }
 
@@ -121,9 +123,15 @@ entry<N2R>({
     writeFileSync(out, ret)
   }
 
-  private registerLink(name: string, linkPath: string) {
+  private registerLink(linkPath: string, name?: string) {
     const optionTokens = linkPath.match(/\$\w+/g)
     const optionNames: string[] = optionTokens ? optionTokens.map((part) => part.replace('$', '')) : []
-    this.links[name] = { link: linkPath, optionNames }
+    const info = { link: linkPath, optionNames }
+    const pathName = linkPath.replace(/^\//, '').replace(/\$\w+/g, '$').replace(/\//g, '__')
+    this.links.path[pathName] = info
+
+    if (name) {
+      this.links.named[name] = info
+    }
   }
 }
