@@ -10,7 +10,7 @@ export * from './lib/null-action-context.js'
 export * from './lib/use-express-router.js'
 export * from './lib/parse-form-body.js'
 export * from './lib/create-zod-traverse-arranger-creator.js'
-export * from './lib/type-util.js'
+export * from './lib/shared/type-util.js'
 export * from './lib/define-util.js'
 
 export * from './lib/locale-express.js'

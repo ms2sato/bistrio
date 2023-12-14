@@ -1,6 +1,6 @@
 import path from 'node:path'
 import { ClientConfig, ClientConfigCustom, EntriesConfig, fillClientConfig } from './shared/index.js'
-import { PartialWithRequired } from './type-util.js'
+import { PartialWithRequired } from './shared/type-util.js'
 
 export type StructureConfig = {
   baseDir: string
