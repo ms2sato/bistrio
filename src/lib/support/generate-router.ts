@@ -1,20 +1,58 @@
 import { join, resolve, relative, dirname } from 'node:path'
 import { writeFileSync, existsSync } from 'node:fs'
-import { ResourceRouteConfig, Router, RouterOptions } from '../../client.js'
-import { Config, RouterLayoutType } from '../../index.js'
+
+import { HttpMethod, ResourceRouteConfig, Router, RouterLayoutType, RouterOptions } from '../../lib/shared/common.js'
+import { Config } from '../config.js'
+import { isArray } from '../shared/type-util.js'
 
 export type LinkFunctionInfo = {
+  name: string
   link: string
   optionNames: string[]
+  method: HttpMethod | readonly HttpMethod[]
+}
+
+type GetFunctionStringFunc = (
+  name: string,
+  link: string,
+  optionsStr: string,
+  method: HttpMethod | readonly HttpMethod[],
+) => string
+
+const getNamedFunctionString: GetFunctionStringFunc = (
+  name: string,
+  link: string,
+  optionsStr: string,
+  method: HttpMethod | readonly HttpMethod[],
+) => {
+  const methodStr = isArray(method) ? `[${method.map((m) => `'${m}'`).join(', ')}]` : `'${method as HttpMethod}'`
+
+  return `export const ${name} = Object.freeze({ path: (${optionsStr}) => { return \`${link}\` }, method: ${methodStr} })`
+}
+
+const getUnnamedFunctionString: GetFunctionStringFunc = (
+  name: string,
+  link: string,
+  optionsStr: string,
+  method: HttpMethod | readonly HttpMethod[],
+) => {
+  const output = (method: HttpMethod) =>
+    `export const ${method}__${name} = Object.freeze({ path: (${optionsStr}) => { return \`${link}\` }, method: '${method}' })`
+
+  if (isArray(method)) {
+    return method.map((m) => output(m)).join('\n')
+  } else {
+    return output(method as HttpMethod)
+  }
 }
 
 export class GenerateRouter implements Router {
   constructor(
     private httpPath: string = '/',
     readonly nameToPath: { [path: string]: string } = {},
-    readonly links: { named: { [name: string]: LinkFunctionInfo }; path: { [name: string]: LinkFunctionInfo } } = {
-      named: {},
-      path: {},
+    readonly links: { named: LinkFunctionInfo[]; unnamed: LinkFunctionInfo[] } = {
+      named: [],
+      unnamed: [],
     },
   ) {}
 
@@ -39,12 +77,8 @@ export class GenerateRouter implements Router {
     }
 
     for (const ad of config.actions) {
-      if (!ad.page) {
-        continue
-      }
-
       const linkPath = join(routePath, ad.path)
-      this.registerLink(linkPath, `${config.name}__${ad.action}`)
+      this.registerLink(linkPath, ad.method, `${config.name}__${ad.action}`)
     }
   }
 
@@ -52,7 +86,7 @@ export class GenerateRouter implements Router {
     const routePath = join(this.httpPath, rpath)
     for (const child of children) {
       const linkPath = join(routePath, child)
-      this.registerLink(linkPath)
+      this.registerLink(linkPath, 'get')
     }
   }
 
@@ -123,15 +157,52 @@ entry<N2R>({
     writeFileSync(out, ret)
   }
 
-  private registerLink(linkPath: string, name?: string) {
+  createNamedEndpoints({ out }: { out: string }) {
+    writeFileSync(out, this.generateNamedEndpoints())
+  }
+
+  createUnnamedEndpoints({ out }: { out: string }) {
+    writeFileSync(out, this.generateUnnamedEndpoints())
+  }
+
+  // public for test
+  generateNamedEndpoints() {
+    return this.generateEndpoints('named', this.links.named, getNamedFunctionString)
+  }
+
+  generateUnnamedEndpoints() {
+    return this.generateEndpoints('unnamed', this.links.unnamed, getUnnamedFunctionString)
+  }
+
+  private generateEndpoints(
+    valiableName: string,
+    endpoints: LinkFunctionInfo[],
+    getFunctionString: GetFunctionStringFunc,
+  ) {
+    return `${endpoints
+      .flatMap(({ optionNames, link, method, name }) => {
+        const optionsStr =
+          optionNames.length === 0
+            ? ''
+            : `{ ${optionNames.join(', ')} }: { ${optionNames
+                .map((optName) => `${optName}: string|number`)
+                .join(', ')} }`
+        return getFunctionString(name, link, optionsStr, method)
+      })
+      .join('\n')}
+`
+  }
+
+  private registerLink(linkPath: string, method: HttpMethod | readonly HttpMethod[], name?: string) {
     const optionTokens = linkPath.match(/\$\w+/g)
     const optionNames: string[] = optionTokens ? optionTokens.map((part) => part.replace('$', '')) : []
-    const info = { link: linkPath, optionNames }
     const pathName = linkPath.replace(/^\//, '').replace(/\$\w+/g, '$').replace(/\//g, '__')
-    this.links.path[pathName] = info
+
+    const link = linkPath.replace(/\$(\w+)/g, '${$1}')
+    this.links.unnamed.push({ name: pathName, link, optionNames, method })
 
     if (name) {
-      this.links.named[name] = info
+      this.links.named.push({ name, link: link, optionNames, method })
     }
   }
 }

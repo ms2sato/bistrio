@@ -59,6 +59,8 @@ function generateForEntry<M extends Middlewares>(
   router.createNameToPath({ out: join(genRoot, '_name_to_path.ts') })
   router.createResources({ out: join(genRoot, '_resources.ts'), config })
   router.createTypes({ out: join(genRoot, 'index.ts') })
+  router.createNamedEndpoints({ out: join(genRoot, 'named_endpoints.ts') })
+  router.createUnnamedEndpoints({ out: join(genRoot, 'unnamed_endpoints.ts') })
   router.createEntry({ out: join(genRoot, '_entry.ts'), name, config })
 }
 
@@ -80,4 +82,6 @@ function generateForAll<M extends Middlewares>(
   router.createNameToPath({ out: join(genRoot, '_name_to_path.ts') })
   router.createResources({ out: join(genRoot, '_resources.ts'), config })
   router.createTypes({ out: join(genRoot, 'index.ts') })
+  router.createNamedEndpoints({ out: join(genRoot, 'named_endpoints.ts') })
+  router.createUnnamedEndpoints({ out: join(genRoot, 'unnamed_endpoints.ts') })
 }

@@ -17,7 +17,7 @@ import {
   Resource,
   ResourceMethod,
 } from './shared/index.js'
-import { PartialWithRequired } from './type-util.js'
+import { PartialWithRequired } from './shared/type-util.js'
 
 export type ResourceMethodHandlerParams = {
   resourceMethod: ResourceMethod
