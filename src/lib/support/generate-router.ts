@@ -9,23 +9,18 @@ export type LinkFunctionInfo = {
   name: string
   link: string
   optionNames: string[]
-  method: HttpMethod | readonly HttpMethod[]
+  methods: HttpMethod[]
 }
 
-type GetFunctionStringFunc = (
-  name: string,
-  link: string,
-  optionsStr: string,
-  method: HttpMethod | readonly HttpMethod[],
-) => string
+type GetFunctionStringFunc = (name: string, link: string, optionsStr: string, method: readonly HttpMethod[]) => string
 
 const getNamedFunctionString: GetFunctionStringFunc = (
   name: string,
   link: string,
   optionsStr: string,
-  method: HttpMethod | readonly HttpMethod[],
+  methods: readonly HttpMethod[],
 ) => {
-  const methodStr = isArray(method) ? `[${method.map((m) => `'${m}'`).join(', ')}]` : `'${method as HttpMethod}'`
+  const methodStr = methods.length == 1 ? `'${methods[0]}'` : `[${methods.map((m) => `'${m}'`).join(', ')}]`
 
   return `export const ${name} = Object.freeze({ path: (${optionsStr}) => { return \`${link}\` }, method: ${methodStr} })`
 }
@@ -34,16 +29,11 @@ const getUnnamedFunctionString: GetFunctionStringFunc = (
   name: string,
   link: string,
   optionsStr: string,
-  method: HttpMethod | readonly HttpMethod[],
+  methods: readonly HttpMethod[],
 ) => {
-  const output = (method: HttpMethod) =>
-    `export const ${method}__${name} = Object.freeze({ path: (${optionsStr}) => { return \`${link}\` }, method: '${method}' })`
+  const methodStr = methods.length == 1 ? `'${methods[0]}'` : `[${methods.map((m) => `'${m}'`).join(', ')}]`
 
-  if (isArray(method)) {
-    return method.map((m) => output(m)).join('\n')
-  } else {
-    return output(method as HttpMethod)
-  }
+  return `export const ${name} = Object.freeze({ path: (${optionsStr}) => { return \`${link}\` }, method: ${methodStr} })`
 }
 
 export class GenerateRouter implements Router {
@@ -78,7 +68,7 @@ export class GenerateRouter implements Router {
 
     for (const ad of config.actions) {
       const linkPath = join(routePath, ad.path)
-      this.registerLink(linkPath, ad.method, `${config.name}__${ad.action}`)
+      this.registerLink(linkPath, ad.method, `${config.name}_${ad.action}`)
     }
   }
 
@@ -180,14 +170,14 @@ entry<N2R>({
     getFunctionString: GetFunctionStringFunc,
   ) {
     return `${endpoints
-      .flatMap(({ optionNames, link, method, name }) => {
+      .flatMap(({ optionNames, link, methods, name }) => {
         const optionsStr =
           optionNames.length === 0
             ? ''
             : `{ ${optionNames.join(', ')} }: { ${optionNames
                 .map((optName) => `${optName}: string|number`)
                 .join(', ')} }`
-        return getFunctionString(name, link, optionsStr, method)
+        return getFunctionString(name, link, optionsStr, methods)
       })
       .join('\n')}
 `
@@ -197,12 +187,26 @@ entry<N2R>({
     const optionTokens = linkPath.match(/\$\w+/g)
     const optionNames: string[] = optionTokens ? optionTokens.map((part) => part.replace('$', '')) : []
     const pathName = linkPath.replace(/^\//, '').replace(/\$\w+/g, '$').replace(/\//g, '__')
-
     const link = linkPath.replace(/\$(\w+)/g, '${$1}')
-    this.links.unnamed.push({ name: pathName, link, optionNames, method })
+
+    const methods: HttpMethod[] = isArray(method) ? [...method] : [method as HttpMethod] // TODO: fix `as HttpMethod`
+    console.log('methods', methods, method)
+
+    const registerdInfo = this.links.unnamed.find((info) => info.name === pathName)
+    console.log(registerdInfo)
+    if (!registerdInfo) {
+      const info = { name: pathName, link, optionNames, methods }
+      console.log(info)
+      this.links.unnamed.push(info)
+    } else {
+      if (registerdInfo.link != link) {
+        throw new Error(`link path is duplicated: name: ${pathName}, link: ${linkPath}`)
+      }
+      registerdInfo.methods = [...registerdInfo.methods, ...methods]
+    }
 
     if (name) {
-      this.links.named.push({ name, link: link, optionNames, method })
+      this.links.named.push({ name, link: link, optionNames, methods })
     }
   }
 }
