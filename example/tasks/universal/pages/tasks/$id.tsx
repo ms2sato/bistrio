@@ -47,7 +47,7 @@ function Task({ id }: { id: number }) {
 
 function Comments({ taskId }: { taskId: number }) {
   const rs = useRenderSupport()
-  const comments = rs.suspendedResources().task_comment.index({ taskId })
+  const comments = rs.suspendedResources().taskComment.index({ taskId })
   return (
     <>
       <h3>Comments</h3>
@@ -70,7 +70,7 @@ function CommentCreateForm({ taskId }: { taskId: number }) {
   const submitProps: CommentSubmitProps = {
     source: { body: '' },
     action: {
-      modifier: async ({ body }) => rs.resources().task_comment.create({ taskId, body }),
+      modifier: async ({ body }) => rs.resources().taskComment.create({ taskId, body }),
       onSuccess: (_result, { custom }) => {
         custom.reset()
         navigate(location.pathname, { purge: true })

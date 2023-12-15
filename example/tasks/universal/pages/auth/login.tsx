@@ -3,6 +3,7 @@ import { useNavigate, useSubmit } from 'bistrio/client'
 import { sessionCreateSchema } from '@universal/params'
 import { ErrorPanel } from '@universal/components/ErrorPanel'
 import { useRenderSupport } from '@bistrio/routes/main'
+import { __tasks } from '@/.bistrio/routes/main/endpoints'
 
 export function Page() {
   const rs = useRenderSupport()
@@ -14,7 +15,10 @@ export function Page() {
     action: {
       modifier: (params) => rs.resources().auth.verify(params),
       onSuccess: (result) =>
-        navigate('/tasks', { purge: true, flashMessage: { text: `Logged in as ${result.username}`, type: 'info' } }),
+        navigate(__tasks.path(), {
+          purge: true,
+          flashMessage: { text: `Logged in as ${result.username}`, type: 'info' },
+        }),
       onFatal: (err) => setError(err),
     },
     schema: sessionCreateSchema,
