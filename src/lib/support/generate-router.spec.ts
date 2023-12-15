@@ -26,7 +26,7 @@ test('resources', () => {
     .toEqual(`export const named_testResource_build = Object.freeze({ path: () => { return \`/test/build\` }, method: 'get' })
 `)
   expect(router.generateUnnamedEndpoints())
-    .toEqual(`export const endpoint_test__build = Object.freeze({ path: () => { return \`/test/build\` }, method: 'get' })
+    .toEqual(`export const __test__build = Object.freeze({ path: () => { return \`/test/build\` }, method: 'get' })
 `)
 })
 
@@ -56,7 +56,7 @@ test('resources with options', () => {
     .toEqual(`export const named_testResource_build = Object.freeze({ path: ({ testId, id }: { testId: string|number, id: string|number }) => { return \`/test/\${testId}/\${id}\` }, method: 'get' })
 `)
   expect(router.generateUnnamedEndpoints())
-    .toEqual(`export const endpoint_test__$__$ = Object.freeze({ path: ({ testId, id }: { testId: string|number, id: string|number }) => { return \`/test/\${testId}/\${id}\` }, method: 'get' })
+    .toEqual(`export const __test__$__$ = Object.freeze({ path: ({ testId, id }: { testId: string|number, id: string|number }) => { return \`/test/\${testId}/\${id}\` }, method: 'get' })
 `)
 })
 
@@ -72,7 +72,7 @@ test('pages', () => {
     optionNames: [],
   })
   expect(router.generateUnnamedEndpoints()).toEqual(
-    `export const endpoint_test__build = Object.freeze({ path: () => { return \`/test/build\` }, method: 'get' })
+    `export const __test__build = Object.freeze({ path: () => { return \`/test/build\` }, method: 'get' })
 `,
   )
 })
@@ -89,7 +89,7 @@ test('pages root', () => {
     optionNames: [],
   })
   expect(router.generateUnnamedEndpoints()).toEqual(
-    `export const endpoint_root = Object.freeze({ path: () => { return \`/\` }, method: 'get' })
+    `export const __root = Object.freeze({ path: () => { return \`/\` }, method: 'get' })
 `,
   )
 })
@@ -106,7 +106,7 @@ test('pages with options', () => {
     optionNames: ['testId', 'id'],
   })
   expect(router.generateUnnamedEndpoints())
-    .toEqual(`export const endpoint_test__$__$ = Object.freeze({ path: ({ testId, id }: { testId: string|number, id: string|number }) => { return \`/test/\${testId}/\${id}\` }, method: 'get' })
+    .toEqual(`export const __test__$__$ = Object.freeze({ path: ({ testId, id }: { testId: string|number, id: string|number }) => { return \`/test/\${testId}/\${id}\` }, method: 'get' })
 `)
 })
 
@@ -143,7 +143,7 @@ export const named_testResource_update = Object.freeze({ path: ({ id }: { id: st
 export const named_testResource_delete = Object.freeze({ path: ({ id }: { id: string|number }) => { return \`/test/\${id}\` }, method: 'delete' })
 `)
   expect(router.generateUnnamedEndpoints())
-    .toEqual(`export const endpoint_test = Object.freeze({ path: () => { return \`/test/\` }, method: 'post' })
-export const endpoint_test__$ = Object.freeze({ path: ({ id }: { id: string|number }) => { return \`/test/\${id}\` }, method: ['patch', 'put', 'delete'] })
+    .toEqual(`export const __test = Object.freeze({ path: () => { return \`/test/\` }, method: 'post' })
+export const __test__$ = Object.freeze({ path: ({ id }: { id: string|number }) => { return \`/test/\${id}\` }, method: ['patch', 'put', 'delete'] })
 `)
 })

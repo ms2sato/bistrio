@@ -33,7 +33,7 @@ const getUnnamedFunctionString: GetFunctionStringFunc = (
 ) => {
   const methodStr = methods.length == 1 ? `'${methods[0]}'` : `[${methods.map((m) => `'${m}'`).join(', ')}]`
 
-  return `export const endpoint_${name} = Object.freeze({ path: (${optionsStr}) => { return \`${link}\` }, method: ${methodStr} })`
+  return `export const __${name} = Object.freeze({ path: (${optionsStr}) => { return \`${link}\` }, method: ${methodStr} })`
 }
 
 export class GenerateRouter implements Router {
@@ -151,24 +151,20 @@ entry<N2R>({
     writeFileSync(out, this.generateNamedEndpoints())
   }
 
-  createUnnamedEndpoints({ out }: { out: string }) {
+  createEndpoints({ out }: { out: string }) {
     writeFileSync(out, this.generateUnnamedEndpoints())
   }
 
   // public for test
   generateNamedEndpoints() {
-    return this.generateEndpoints('named', this.links.named, getNamedFunctionString)
+    return this.generateEndpoints(this.links.named, getNamedFunctionString)
   }
 
   generateUnnamedEndpoints() {
-    return this.generateEndpoints('unnamed', this.links.unnamed, getUnnamedFunctionString)
+    return this.generateEndpoints(this.links.unnamed, getUnnamedFunctionString)
   }
 
-  private generateEndpoints(
-    valiableName: string,
-    endpoints: LinkFunctionInfo[],
-    getFunctionString: GetFunctionStringFunc,
-  ) {
+  private generateEndpoints(endpoints: LinkFunctionInfo[], getFunctionString: GetFunctionStringFunc) {
     return `${endpoints
       .flatMap(({ optionNames, link, methods, name }) => {
         const optionsStr =

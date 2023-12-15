@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useNavigate } from 'bistrio/client'
 import { Form, UseSubmitProps, formSchema } from '../../components/tasks/Form'
 import { useRenderSupport } from '@bistrio/routes/main'
+import { __tasks } from '@bistrio/routes/main/endpoints'
 
 export function Build() {
   const navigate = useNavigate()
@@ -11,7 +12,7 @@ export function Build() {
     source: { title: '', description: '', tags: [] },
     action: {
       modifier: (params) => rs.resources().task.create(params),
-      onSuccess: () => navigate(`/tasks`, { purge: true }),
+      onSuccess: () => navigate(__tasks.path(), { purge: true }),
     },
     schema: formSchema,
   }
@@ -27,7 +28,7 @@ export function Build() {
       <h2>{l.t`Create new task`}</h2>
       <Form {...props}></Form>
       <button onClick={handleClick}>This is test button</button>
-      <Link to="/tasks">To Top</Link>
+      <Link to={__tasks.path()}>To Top</Link>
     </div>
   )
 }

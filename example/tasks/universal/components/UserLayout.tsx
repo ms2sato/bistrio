@@ -1,7 +1,8 @@
 import { Suspense } from 'react'
 import { Link, Outlet } from 'react-router-dom'
 import { useUIEvent, useNavigate } from 'bistrio/client'
-import { useRenderSupport } from '../../.bistrio/routes/main'
+import { useRenderSupport } from '@bistrio/routes/main'
+import { __auth__login } from '@bistrio/routes/main/endpoints'
 import { FlashMessage } from './FlashMessage'
 
 export default function UserLayout(): JSX.Element {
@@ -31,7 +32,7 @@ function Header() {
       {pending ? (
         '...'
       ) : user === null ? (
-        <Link to="/auth/login">Login</Link>
+        <Link to={__auth__login.path()}>Login</Link>
       ) : (
         <>
           <a href="#" onClick={handleLogout}>
