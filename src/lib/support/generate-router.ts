@@ -22,7 +22,7 @@ const getNamedFunctionString: GetFunctionStringFunc = (
 ) => {
   const methodStr = methods.length == 1 ? `'${methods[0]}'` : `[${methods.map((m) => `'${m}'`).join(', ')}]`
 
-  return `export const ${name} = Object.freeze({ path: (${optionsStr}) => { return \`${link}\` }, method: ${methodStr} })`
+  return `export const named_${name} = Object.freeze({ path: (${optionsStr}) => { return \`${link}\` }, method: ${methodStr} })`
 }
 
 const getUnnamedFunctionString: GetFunctionStringFunc = (
@@ -33,7 +33,7 @@ const getUnnamedFunctionString: GetFunctionStringFunc = (
 ) => {
   const methodStr = methods.length == 1 ? `'${methods[0]}'` : `[${methods.map((m) => `'${m}'`).join(', ')}]`
 
-  return `export const ${name} = Object.freeze({ path: (${optionsStr}) => { return \`${link}\` }, method: ${methodStr} })`
+  return `export const endpoint_${name} = Object.freeze({ path: (${optionsStr}) => { return \`${link}\` }, method: ${methodStr} })`
 }
 
 export class GenerateRouter implements Router {
@@ -186,17 +186,19 @@ entry<N2R>({
   private registerLink(linkPath: string, method: HttpMethod | readonly HttpMethod[], name?: string) {
     const optionTokens = linkPath.match(/\$\w+/g)
     const optionNames: string[] = optionTokens ? optionTokens.map((part) => part.replace('$', '')) : []
-    const pathName = linkPath.replace(/^\//, '').replace(/\$\w+/g, '$').replace(/\//g, '__')
     const link = linkPath.replace(/\$(\w+)/g, '${$1}')
 
+    let arrangedLinkPath = linkPath.replace(/^\//, '').replace(/\/$/, '')
+    if (arrangedLinkPath === '') {
+      arrangedLinkPath = 'root'
+    }
+    const pathName = arrangedLinkPath.replace(/\$\w+/g, '$').replace(/\//g, '__')
+
     const methods: HttpMethod[] = isArray(method) ? [...method] : [method as HttpMethod] // TODO: fix `as HttpMethod`
-    console.log('methods', methods, method)
 
     const registerdInfo = this.links.unnamed.find((info) => info.name === pathName)
-    console.log(registerdInfo)
     if (!registerdInfo) {
       const info = { name: pathName, link, optionNames, methods }
-      console.log(info)
       this.links.unnamed.push(info)
     } else {
       if (registerdInfo.link != link) {
