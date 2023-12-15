@@ -6,7 +6,7 @@ import AdminLayout from '../components/AdminLayout'
 export function routes(router: Router, support: RouterSupport<Middlewares>) {
   const adminRouter = router.options({ hydrate: true }).sub('/admins/$adminId')
   adminRouter.layout({ element: AdminLayout }).resources('/users', {
-    name: 'page_admin_user',
+    name: 'pageAdminUser',
     actions: Actions.page({ only: ['index'] }),
   })
 

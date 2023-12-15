@@ -1,10 +1,10 @@
 import { Suspense, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { PaginationAttrs, usePagination, useUIEvent } from 'bistrio/client'
-
-import { useRenderSupport } from '@bistrio/routes/main'
 import { Task } from '@prisma/client'
 import { Pagination } from '@/universal/components/Pagination'
+import { useRenderSupport } from '@bistrio/routes/main'
+import { __tasks__$, __tasks__$__edit, __tasks__build } from '@bistrio/routes/main/endpoints'
 
 export function Index() {
   const rs = useRenderSupport()
@@ -13,7 +13,7 @@ export function Index() {
   return (
     <>
       <h1>{l.t`Task list`}</h1>
-      <Link to="/tasks/build">{l.t`Create new task`}</Link>
+      <Link to={__tasks__build.path()}>{l.t`Create new task`}</Link>
       <Suspense fallback={<p>{l.t`Loading...`}</p>}>
         <TaskTable></TaskTable>
       </Suspense>
@@ -86,11 +86,11 @@ function TaskRecord({ task: src }: { task: Task }) {
         <DoneSelector task={task} setTask={setTask} />
       </td>
       <td>
-        <Link to={`/tasks/${task.id}`}>{task.title}</Link>
+        <Link to={__tasks__$.path({ id: task.id })}>{task.title}</Link>
       </td>
       <td>{task.description}</td>
       <td>
-        <Link to={`/tasks/${task.id}/edit`}>{l.t`Edit`}</Link>&nbsp;|&nbsp;
+        <Link to={__tasks__$__edit.path({ id: task.id })}>{l.t`Edit`}</Link>&nbsp;|&nbsp;
         <Remover task={task} />
       </td>
     </tr>
