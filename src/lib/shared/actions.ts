@@ -1,5 +1,5 @@
 import { ActionDescriptor, blankSchema, ConstructConfig, idNumberSchema, RouterError } from '../../client.js'
-import { z } from 'zod'
+import { type AnyZodObject } from 'zod'
 
 export type ActionName = 'build' | 'edit' | 'show' | 'index' | 'create' | 'update' | 'destroy'
 
@@ -61,7 +61,7 @@ const apiIndex = {
   method: 'get',
 } as const satisfies ActionDescriptor
 
-export function defaultConstructConfig(idSchema: z.AnyZodObject = idNumberSchema): ConstructConfig {
+export function defaultConstructConfig(idSchema: AnyZodObject = idNumberSchema): ConstructConfig {
   return {
     build: { schema: blankSchema, sources: ['params'] },
     edit: { schema: idSchema, sources: ['params'] },
@@ -74,6 +74,7 @@ export function defaultConstructConfig(idSchema: z.AnyZodObject = idNumberSchema
 }
 
 export type Option =
+  | readonly ActionName[]
   | {
       only: readonly ActionName[]
       except?: undefined
@@ -84,12 +85,76 @@ export type Option =
     }
 
 const pageActions = [build, edit, show, index]
+/**
+ * create page action descriptors from options
+ *
+ * @example
+ * # filter only specify actions
+ *
+ * ```ts
+ * api(['index', 'show'])
+ *   // => [
+ *   //  { action: 'show', path: '/$id', method: 'get', page: true }
+ *   //  { action: 'index', path: '/', method: 'get', page: true },
+ *   // ]
+ * ```
+ * ```ts
+ * api({ only: ['index', 'show'] })
+ *   // => [
+ *   //  { action: 'show', path: '/$id', method: 'get', page: true }
+ *   //  { action: 'index', path: '/', method: 'get', page: true },
+ *   // ]
+ * ```
+ *
+ * # filter except specify actions
+ * ```ts
+ * api({ except: ['biild', 'edit'] })
+ *   // => [
+ *   //  { action: 'show', path: '/$id', method: 'get', page: true }
+ *   //  { action: 'index', path: '/', method: 'get', page: true },
+ *   // ]
+ * ```
+ * @param option Option
+ * @returns ActionDescriptor[]
+ */
 export function page(option?: Option): readonly ActionDescriptor[] {
   const actions = pageActions.map((action) => ({ ...action }))
   return applyOption(actions, option)
 }
 
 const apiActions = [apiShow, apiIndex, create, update, destroy]
+
+/**
+ * create api action descriptors from options
+ *
+ * @example
+ * # filter only specify actions
+ * ```ts
+ * api(['index', 'show']) // short hand for { only ... }
+ *   // => [
+ *   //  { action: 'show', path: '/$id', method: 'get' }
+ *   //  { action: 'index', path: '/', method: 'get' },
+ *   // ]
+ * ```
+ * ```ts
+ * api({ only: ['index', 'show'] })
+ *   // => [
+ *   //  { action: 'show', path: '/$id', method: 'get' }
+ *   //  { action: 'index', path: '/', method: 'get' },
+ *   // ]
+ * ```
+ *
+ * # filter except specify actions
+ * ```ts
+ * api({ except: ['create', 'update', 'delete'] })
+ *   // => [
+ *   //  { action: 'show', path: '/$id', method: 'get' }
+ *   //  { action: 'index', path: '/', method: 'get' },
+ *   // ]
+ * ```
+ * @param option Option
+ * @returns ActionDescriptor[]
+ */
 export function api(option?: Option): readonly ActionDescriptor[] {
   const actions = apiActions.map((action) => ({ ...action }))
   return applyOption(actions, option)
@@ -98,6 +163,10 @@ export function api(option?: Option): readonly ActionDescriptor[] {
 function applyOption(actions: readonly ActionDescriptor[], option?: Option) {
   if (!option) {
     return actions
+  }
+
+  if (option instanceof Array) {
+    return only(option, actions)
   }
 
   if (option.only) {

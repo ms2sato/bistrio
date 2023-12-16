@@ -1,5 +1,5 @@
 import { lazy } from 'react'
-import { RouterSupport, Router, Actions, idNumberSchema, scope, pageSchema, blankSchema } from 'bistrio/client'
+import { RouterSupport, Router, api, idNumberSchema, scope, pageSchema, blankSchema } from 'bistrio/client'
 import {
   commentCreateSchema,
   commentUpdateSchema,
@@ -52,7 +52,7 @@ export function routes(router: Router, support: RouterSupport<Middlewares>) {
         done: { schema: idNumberSchema },
       },
       name: 'task',
-      actions: [...Actions.api(), { action: 'done', path: '/$id/done', method: 'post' }],
+      actions: [...api(), { action: 'done', path: '/$id/done', method: 'post' }],
     })
 
     scope(apiRouter, '/tasks/$taskId', (taskRouter) => {
@@ -63,7 +63,7 @@ export function routes(router: Router, support: RouterSupport<Middlewares>) {
           update: { schema: commentUpdateSchema },
         },
         name: 'taskComment',
-        actions: Actions.api({ only: ['index', 'create', 'update'] }),
+        actions: api(['index', 'create', 'update']),
       })
     })
   })
