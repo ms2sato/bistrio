@@ -2,6 +2,7 @@ export * from './common.js'
 export * from './schemas.js'
 export * as SchemaUtil from './zod-util.js'
 export * as Actions from './actions.js'
+export * from './actions.js'
 
 export * from './entry.js'
 export * from './client-generate-router.js'
