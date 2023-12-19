@@ -21,6 +21,7 @@ import {
   RouterLayoutType,
   pageActionDescriptor,
   routerPlaceholderRegex,
+  ActionType,
 } from '../../client.js'
 import { filterWithoutKeys, toURLSearchParams } from './object-util.js'
 import { pathJoin } from './path-util.js'
@@ -43,11 +44,14 @@ const formatPlaceholderForRouter: FormatPlaceholderForClientRouterFunc = (routeP
 export const createPath = (
   config: ClientConfig,
   resourceUrl: string,
-  pathFormat: string,
+  ad: { path: string; type?: ActionType },
   option: Record<string, string | number>,
 ) => {
   const keys: string[] = []
-  const apath = config.fillInPlaceholders(pathJoin(resourceUrl, pathFormat), (attr: string) => {
+  const pathFormat = ad.type
+    ? `${pathJoin(resourceUrl, ad.path).replace(/\/$/, '')}.${ad.type}`
+    : pathJoin(resourceUrl, ad.path)
+  const apath = config.fillInPlaceholders(pathFormat, (attr: string) => {
     const param = option[attr]
     if (param === undefined || param === null) {
       throw new Error(`Unexpected param name: ${attr}`)
@@ -307,7 +311,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
       if (schema === blankSchema) {
         return async function (...options: unknown[]) {
           const option = options.length > 0 ? (options[0] as Record<string, string | number>) : {}
-          const { httpPath } = createPath(config, resourceUrl, ad.path, option)
+          const { httpPath } = createPath(config, resourceUrl, ad, option)
           return fetcher.fetch(httpPath, method)
         }
       } else {
@@ -315,7 +319,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
           // TODO: catch error and rethrow with custom error type
           const parsedInput = schema.parse(input)
 
-          const { httpPath, keys } = createPath(config, resourceUrl, ad.path, input as Record<string, string | number>)
+          const { httpPath, keys } = createPath(config, resourceUrl, ad, input as Record<string, string | number>)
 
           const body = filterWithoutKeys(parsedInput, keys)
           if (Object.keys(body).length > 0) {

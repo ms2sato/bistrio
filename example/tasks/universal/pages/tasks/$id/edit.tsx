@@ -11,7 +11,7 @@ function MyForm() {
   const params = useParams()
   const rs = useRenderSupport()
   const id = Number(params.id)
-  const source = rs.suspendedResources().task.show({ id })
+  const source = rs.suspendedResources().task.load({ id })
 
   const props: UseSubmitProps = {
     source,

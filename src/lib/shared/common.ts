@@ -22,11 +22,13 @@ export type ValidationIssue = z.ZodIssue
 
 export type ConstructSource = 'body' | 'query' | 'params' | 'files'
 export type HttpMethod = 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head' | 'option'
+export type ActionType = 'json' | 'html'
 
-export type ActionDescriptor = {
+export interface ActionDescriptor {
   action: string
   path: string
   method: HttpMethod | readonly HttpMethod[]
+  type?: ActionType
   page?: boolean
   hydrate?: boolean
 }
