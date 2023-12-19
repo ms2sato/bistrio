@@ -117,7 +117,11 @@ const pageActions = [build, edit, show, index]
  * @param option Option
  * @returns ActionDescriptor[]
  */
-export function page(option?: Option): readonly ActionDescriptor[] {
+export function page(option?: Option | ActionName, ...args: ActionName[]): readonly ActionDescriptor[] {
+  if (typeof option == 'string') {
+    option = [option, ...args]
+  }
+
   const actions = pageActions.map((action) => ({ ...action }))
   return applyOption(actions, option)
 }
@@ -155,7 +159,11 @@ const apiActions = [apiShow, apiIndex, create, update, destroy]
  * @param option Option
  * @returns ActionDescriptor[]
  */
-export function api(option?: Option): readonly ActionDescriptor[] {
+export function api(option?: Option | ActionName, ...args: ActionName[]): readonly ActionDescriptor[] {
+  if (typeof option == 'string') {
+    option = [option, ...args]
+  }
+
   const actions = apiActions.map((action) => ({ ...action }))
   return applyOption(actions, option)
 }
