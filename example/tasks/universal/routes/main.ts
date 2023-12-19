@@ -63,7 +63,7 @@ export function routes(router: Router, support: RouterSupport<Middlewares>) {
           update: { schema: commentUpdateSchema },
         },
         name: 'taskComment',
-        actions: api(['index', 'create', 'update']),
+        actions: api('index', 'create', 'update'),
       })
     })
   })
