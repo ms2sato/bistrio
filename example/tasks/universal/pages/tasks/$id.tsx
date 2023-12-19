@@ -26,7 +26,7 @@ export function Page() {
 
 function Task({ id }: { id: number }) {
   const rs = useRenderSupport()
-  const task = rs.suspendedResources().task.show({ id })
+  const task = rs.suspendedResources().task.load({ id })
   return (
     <>
       <h2>

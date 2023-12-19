@@ -23,7 +23,28 @@ export function routes(router: Router, support: RouterSupport<Middlewares>) {
 
     scope(pageRouter, '/', (pageRouter) => {
       pageRouter = pageRouter.sub('/', support.middlewares.checkLoggedIn())
-      pageRouter.layout({ element: TaskLayout }).pages('/tasks', ['/', '$id', 'build', '/$id/edit'])
+      // pageRouter.layout({ element: TaskLayout }).pages('/tasks', ['/', '$id', 'build', '/$id/edit'])
+      pageRouter.layout({ element: TaskLayout }).resources('/tasks', {
+        construct: {
+          list: { schema: pageSchema, sources: ['query', 'params'] },
+          load: { schema: idNumberSchema },
+          create: { schema: taskCreateWithTagsSchema },
+          update: { schema: taskUpdateWithTagsSchema },
+          done: { schema: idNumberSchema },
+        },
+        name: 'task',
+        actions: [
+          { action: 'done', path: '/$id/done', method: 'post', type: 'json' },
+          { action: 'update', path: '/$id', method: ['patch', 'put'], type: 'json' },
+          { action: 'create', path: '/', method: 'post', type: 'json' },
+          { action: 'load', path: '/$id', method: 'get', type: 'json' },
+          { action: 'list', path: '/', method: 'get', type: 'json' },
+          { action: 'edit', page: true, method: 'get', path: '/$id/edit' },
+          { action: 'show', page: true, method: 'get', path: '/$id' },
+          { action: 'build', page: true, method: 'get', path: '/build' },
+          { action: 'index', page: true, method: 'get', path: '/' },
+        ],
+      })
     })
   })
 
@@ -44,16 +65,16 @@ export function routes(router: Router, support: RouterSupport<Middlewares>) {
       ],
     })
 
-    apiRouter.resources('/tasks', {
-      construct: {
-        index: { schema: pageSchema, sources: ['query', 'params'] },
-        create: { schema: taskCreateWithTagsSchema },
-        update: { schema: taskUpdateWithTagsSchema },
-        done: { schema: idNumberSchema },
-      },
-      name: 'task',
-      actions: [...api(), { action: 'done', path: '/$id/done', method: 'post' }],
-    })
+    // apiRouter.resources('/tasks', {
+    //   construct: {
+    //     index: { schema: pageSchema, sources: ['query', 'params'] },
+    //     create: { schema: taskCreateWithTagsSchema },
+    //     update: { schema: taskUpdateWithTagsSchema },
+    //     done: { schema: idNumberSchema },
+    //   },
+    //   name: 'task',
+    //   actions: [...api(), { action: 'done', path: '/$id/done', method: 'post' }],
+    // })
 
     scope(apiRouter, '/tasks/$taskId', (taskRouter) => {
       taskRouter.resources('/comments', {

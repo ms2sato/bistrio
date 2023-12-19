@@ -91,12 +91,10 @@ export class TestServerRouter extends ServerRouterImpl {
   }
 
   protected async loadLocalResource(resourcePath: string, _routeConfig: ResourceRouteConfig) {
-    console.log('loadLocalResource', resourcePath)
     return Promise.resolve(this.mockResources[resourcePath])
   }
 
   protected loadLocalAdapter(_adapterPath: string, _routeConfig: ResourceRouteConfig) {
-    console.log('loadLocalAdapter', _adapterPath)
     return Promise.resolve(this.adapter)
   }
 }

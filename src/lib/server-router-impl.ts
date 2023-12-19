@@ -31,6 +31,7 @@ import {
   pageActionDescriptor,
   ClientConfig,
   Router,
+  ActionType,
 } from '../index.js'
 import { HttpMethod, RouterOptions, opt } from './shared/index.js'
 import { RouteObject } from 'react-router-dom'
@@ -618,11 +619,15 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
     return this.serverRouterConfig.formatPlaceholderForRouter(routePath.replace(/\/$/, ''))
   }
 
-  private generateRoutePath(routePath: string) {
-    return `${this.formatPlaceholder(routePath)}.:format?`
+  private generateRoutePath(routePath: string, type?: ActionType) {
+    if(type) {
+      return `${this.formatPlaceholder(routePath)}.${type}`
+    } else {
+      return `${this.formatPlaceholder(routePath)}.:format?`
+    }
   }
 
-  private appendRoute(routePath: string, actionDescriptor: ActionDescriptor, handlers: express.Handler[]) {
+  private appendRoute(routePath: string, {method, type}: ActionDescriptor, handlers: express.Handler[]) {
     const router = this.router as unknown
 
     const append = (method: HttpMethod, urlPathWithExt: string) => {
@@ -633,13 +638,13 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
       }
     }
 
-    const urlPathWithExt = this.generateRoutePath(routePath)
-    if (actionDescriptor.method instanceof Array) {
-      for (const method of actionDescriptor.method) {
-        append(method, urlPathWithExt)
+    const urlPathWithExt = this.generateRoutePath(routePath, type)
+    if (method instanceof Array) {
+      for (const m of method) {
+        append(m, urlPathWithExt)
       }
     } else {
-      append(actionDescriptor.method, urlPathWithExt)
+      append(method, urlPathWithExt)
     }
   }
 

@@ -27,7 +27,7 @@ const TaskTable = () => {
   const limits = [3, 5, 10]
 
   const { data: tasks, ...paginationAttrs } = usePagination({
-    loader: (pageParams) => rs.suspendedResources().task.index(pageParams),
+    loader: (pageParams) => rs.suspendedResources().task.list(pageParams),
     limit: limits[1],
   })
 
