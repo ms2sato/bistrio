@@ -5,7 +5,7 @@ import { CommentCreateParams, CommentUpdateParams, TaskIdParams } from '@/univer
 const prisma = getPrismaCilent()
 
 export default defineResource((_support, _options) => ({
-  index: ({ taskId }: TaskIdParams) => prisma.comment.findMany({ where: { taskId } }),
+  list: ({ taskId }: TaskIdParams) => prisma.comment.findMany({ where: { taskId } }),
   create: (data: CommentCreateParams) => {
     return prisma.comment.create({ data })
   },

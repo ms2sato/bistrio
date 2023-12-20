@@ -47,7 +47,7 @@ function Task({ id }: { id: number }) {
 
 function Comments({ taskId }: { taskId: number }) {
   const rs = useRenderSupport()
-  const comments = rs.suspendedResources().taskComment.index({ taskId })
+  const comments = rs.suspendedResources().taskComment.list({ taskId })
   return (
     <>
       <h3>Comments</h3>
