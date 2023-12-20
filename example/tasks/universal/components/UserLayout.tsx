@@ -25,7 +25,7 @@ function Header() {
   const navigate = useNavigate()
   const { handleEvent: handleLogout, pending } = useUIEvent({
     modifier: () => rs.resources().auth.logout(),
-    onSuccess: () => navigate(__root.path(), { purge: true }),
+    onSuccess: () => navigate(__auth__login.path(), { purge: true }),
   })
   return (
     <header>
