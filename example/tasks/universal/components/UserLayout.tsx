@@ -2,7 +2,7 @@ import { Suspense } from 'react'
 import { Link, Outlet } from 'react-router-dom'
 import { useUIEvent, useNavigate } from 'bistrio/client'
 import { useRenderSupport } from '@bistrio/routes/main'
-import { __auth__login, __root } from '@bistrio/routes/main/endpoints'
+import { __auth__login } from '@bistrio/routes/main/endpoints'
 import { FlashMessage } from './FlashMessage'
 
 export default function UserLayout(): JSX.Element {
