@@ -1,5 +1,5 @@
 import { lazy } from 'react'
-import { RouterSupport, Router, api, idNumberSchema, scope, pageSchema, blankSchema } from 'bistrio/client'
+import { RouterSupport, Router, api, idNumberSchema, scope, pageSchema, blankSchema, crud } from 'bistrio/client'
 import {
   commentCreateSchema,
   commentUpdateSchema,
@@ -13,43 +13,43 @@ import TaskLayout from '../components/tasks/TaskLayout'
 
 const UserLayout = lazy(() => import(/* webpackMode: "eager" */ '../components/UserLayout'))
 
-export function routes(router: Router, support: RouterSupport<Middlewares>) {
-  router = router.layout({ Component: UserLayout }).options({ hydrate: true })
+export function routes(r: Router, support: RouterSupport<Middlewares>) {
+  r = r.layout({ Component: UserLayout }).options({ hydrate: true })
 
-  router.pages('/', ['/'])
+  r.pages('/', ['/'])
 
-  scope(router, '/', (pageRouter) => {
-    pageRouter.pages('/auth', ['login'])
+  scope(r, '/', (r) => {
+    r.pages('/auth', ['login'])
 
-    scope(pageRouter, '/', (pageRouter) => {
-      pageRouter = pageRouter.sub('/', support.middlewares.checkLoggedIn())
-      // pageRouter.layout({ element: TaskLayout }).pages('/tasks', ['/', '$id', 'build', '/$id/edit'])
-      pageRouter.layout({ element: TaskLayout }).resources('/tasks', {
+    scope(r, '/', (r) => {
+      r = r.sub('/', support.middlewares.checkLoggedIn())
+      r.layout({ element: TaskLayout }).resources('/tasks', {
         construct: {
           list: { schema: pageSchema, sources: ['query', 'params'] },
-          load: { schema: idNumberSchema },
           create: { schema: taskCreateWithTagsSchema },
           update: { schema: taskUpdateWithTagsSchema },
           done: { schema: idNumberSchema },
         },
         name: 'task',
-        actions: [
-          { action: 'done', path: '/$id/done', method: 'post', type: 'json' },
-          { action: 'update', path: '/$id', method: ['patch', 'put'], type: 'json' },
-          { action: 'create', path: '/', method: 'post', type: 'json' },
-          { action: 'load', path: '/$id', method: 'get', type: 'json' },
-          { action: 'list', path: '/', method: 'get', type: 'json' },
-          { action: 'edit', page: true, method: 'get', path: '/$id/edit' },
-          { action: 'show', page: true, method: 'get', path: '/$id' },
-          { action: 'build', page: true, method: 'get', path: '/build' },
-          { action: 'index', page: true, method: 'get', path: '/' },
-        ],
+        actions: [...crud(), { action: 'done', path: '/$id/done', method: 'post', type: 'json' }],
+      })
+
+      scope(r, '/tasks/$taskId', (r) => {
+        r.resources('/comments', {
+          construct: {
+            list: { schema: taskIdSchema },
+            create: { schema: commentCreateSchema },
+            update: { schema: commentUpdateSchema },
+          },
+          name: 'taskComment',
+          actions: api('list', 'create', 'update'),
+        })
       })
     })
   })
 
-  scope(router, '/api', (apiRouter) => {
-    apiRouter.resources('/auth', {
+  scope(r, '/api', (r) => {
+    r.resources('/auth', {
       name: 'auth',
       construct: {
         user: { schema: blankSchema },
@@ -63,29 +63,6 @@ export function routes(router: Router, support: RouterSupport<Middlewares>) {
         { action: 'verify', path: '/session', method: 'patch' },
         { action: 'logout', path: '/session', method: 'delete' },
       ],
-    })
-
-    // apiRouter.resources('/tasks', {
-    //   construct: {
-    //     index: { schema: pageSchema, sources: ['query', 'params'] },
-    //     create: { schema: taskCreateWithTagsSchema },
-    //     update: { schema: taskUpdateWithTagsSchema },
-    //     done: { schema: idNumberSchema },
-    //   },
-    //   name: 'task',
-    //   actions: [...api(), { action: 'done', path: '/$id/done', method: 'post' }],
-    // })
-
-    scope(apiRouter, '/tasks/$taskId', (taskRouter) => {
-      taskRouter.resources('/comments', {
-        construct: {
-          index: { schema: taskIdSchema },
-          create: { schema: commentCreateSchema },
-          update: { schema: commentUpdateSchema },
-        },
-        name: 'taskComment',
-        actions: api('index', 'create', 'update'),
-      })
     })
   })
 }

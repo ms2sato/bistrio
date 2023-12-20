@@ -1,7 +1,7 @@
 import { ActionDescriptor, blankSchema, ConstructConfig, idNumberSchema, RouterError } from '../../client.js'
 import { type AnyZodObject } from 'zod'
 
-export type ActionName = 'build' | 'edit' | 'show' | 'index' | 'create' | 'update' | 'destroy'
+export type ActionName = 'build' | 'edit' | 'show' | 'index' | 'load' | 'list' | 'create' | 'update' | 'destroy'
 
 const build = {
   action: 'build',
@@ -49,16 +49,18 @@ const destroy = {
   method: 'delete',
 } as const satisfies ActionDescriptor
 
-const apiShow = {
-  action: 'show',
+const load = {
+  action: 'load',
   path: '/$id',
   method: 'get',
+  type: 'json',
 } as const satisfies ActionDescriptor
 
-const apiIndex = {
-  action: 'index',
+const list = {
+  action: 'list',
   path: '/',
   method: 'get',
+  type: 'json',
 } as const satisfies ActionDescriptor
 
 export function defaultConstructConfig(idSchema: AnyZodObject = idNumberSchema): ConstructConfig {
@@ -67,6 +69,8 @@ export function defaultConstructConfig(idSchema: AnyZodObject = idNumberSchema):
     edit: { schema: idSchema, sources: ['params'] },
     show: { schema: idSchema, sources: ['params'] },
     index: { schema: blankSchema, sources: ['params'] },
+    load: { schema: idSchema, sources: ['params'] },
+    list: { schema: blankSchema, sources: ['params'] },
     create: { sources: ['body', 'files', 'params'] },
     update: { sources: ['body', 'files', 'params'] },
     destroy: { schema: idSchema, sources: ['params'] },
@@ -122,11 +126,11 @@ export function page(option?: Option | ActionName, ...args: ActionName[]): reado
     option = [option, ...args]
   }
 
-  const actions = pageActions.map((action) => ({ ...action }))
+  const actions = clone(pageActions)
   return applyOption(actions, option)
 }
 
-const apiActions = [apiShow, apiIndex, create, update, destroy]
+const apiActions = [load, list, create, update, destroy]
 
 /**
  * create api action descriptors from options
@@ -134,17 +138,17 @@ const apiActions = [apiShow, apiIndex, create, update, destroy]
  * @example
  * # filter only specify actions
  * ```ts
- * api(['index', 'show']) // short hand for { only ... }
+ * api(['list', 'load']) // short hand for { only ... }
  *   // => [
- *   //  { action: 'show', path: '/$id', method: 'get' }
- *   //  { action: 'index', path: '/', method: 'get' },
+ *   //  { action: 'load', path: '/$id', method: 'get' }
+ *   //  { action: 'list', path: '/', method: 'get' },
  *   // ]
  * ```
  * ```ts
- * api({ only: ['index', 'show'] })
+ * api({ only: ['list', 'load'] })
  *   // => [
- *   //  { action: 'show', path: '/$id', method: 'get' }
- *   //  { action: 'index', path: '/', method: 'get' },
+ *   //  { action: 'load', path: '/$id', method: 'get' }
+ *   //  { action: 'list', path: '/', method: 'get' },
  *   // ]
  * ```
  *
@@ -152,8 +156,8 @@ const apiActions = [apiShow, apiIndex, create, update, destroy]
  * ```ts
  * api({ except: ['create', 'update', 'delete'] })
  *   // => [
- *   //  { action: 'show', path: '/$id', method: 'get' }
- *   //  { action: 'index', path: '/', method: 'get' },
+ *   //  { action: 'load', path: '/$id', method: 'get' }
+ *   //  { action: 'list', path: '/', method: 'get' },
  *   // ]
  * ```
  * @param option Option
@@ -164,7 +168,50 @@ export function api(option?: Option | ActionName, ...args: ActionName[]): readon
     option = [option, ...args]
   }
 
-  const actions = apiActions.map((action) => ({ ...action }))
+  const actions = clone(apiActions)
+  return applyOption(actions, option)
+}
+
+const crudActions = [load, list, create, update, destroy, build, edit, show, index]
+
+/**
+ * create api action descriptors from options
+ *
+ * @example
+ * # filter only specify actions
+ * ```ts
+ * crud(['list', 'load']) // short hand for { only ... }
+ *   // => [
+ *   //  { action: 'load', path: '/$id', method: 'get' }
+ *   //  { action: 'list', path: '/', method: 'get' },
+ *   // ]
+ * ```
+ * ```ts
+ * crud({ only: ['list', 'load'] })
+ *   // => [
+ *   //  { action: 'load', path: '/$id', method: 'get' }
+ *   //  { action: 'list', path: '/', method: 'get' },
+ *   // ]
+ * ```
+ *
+ * # filter except specify actions
+ * ```ts
+ * crud({ except: ['create', 'update', 'delete', 'build', 'edit', 'show'] })
+ *   // => [
+ *   //  { action: 'load', path: '/$id', method: 'get' }
+ *   //  { action: 'list', path: '/', method: 'get' },
+ *   //  { action: 'index', path: '/', method: 'get', page: true },
+ *   // ]
+ * ```
+ * @param option Option
+ * @returns ActionDescriptor[]
+ */
+export function crud(option?: Option | ActionName, ...args: ActionName[]): readonly ActionDescriptor[] {
+  if (typeof option == 'string') {
+    option = [option, ...args]
+  }
+
+  const actions = clone(crudActions)
   return applyOption(actions, option)
 }
 
@@ -195,3 +242,5 @@ export function only(actions: readonly ActionName[], sources: readonly ActionDes
 export function except(actions: readonly ActionName[], sources: readonly ActionDescriptor[]) {
   return sources.filter((ad) => !actions.includes(ad.action as ActionName))
 }
+
+const clone = (ads: readonly ActionDescriptor[]) => ads.map((ad) => ({ ...ad }))
