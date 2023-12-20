@@ -22,8 +22,10 @@ export function routes(r: Router, support: RouterSupport<Middlewares>) {
     r.pages('/auth', ['login'])
 
     scope(r, '/', (r) => {
-      r = r.sub('/', support.middlewares.checkLoggedIn())
-      r.layout({ element: TaskLayout }).resources('/tasks', {
+      r = r.sub('/', support.middlewares.checkLoggedIn()) // add middleware and new router
+      r = r.layout({ element: TaskLayout }) // set layout
+
+      r.resources('/tasks', {
         construct: {
           list: { schema: pageSchema, sources: ['query', 'params'] },
           create: { schema: taskCreateWithTagsSchema },
