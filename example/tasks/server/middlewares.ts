@@ -3,7 +3,7 @@ import { type RequestHandler } from 'express'
 export const checkLoggedIn = (): RequestHandler => {
   return (req, res, next) => {
     if (!req.isAuthenticated()) {
-      if (req.xhr && !req.originalUrl.startsWith('/api/auth')) {
+      if (req.xhr && !req.originalUrl.startsWith('/auth')) {
         console.error('checkedLoggedIn! response 401')
         res.status(401).json({ message: 'Unauthorized' })
         return
