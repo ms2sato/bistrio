@@ -1,13 +1,14 @@
 import createError from 'http-errors'
 import express from 'express'
 import compression from 'compression'
-import { join } from 'node:path'
+import { join, dirname } from 'node:path'
 import cookieParser from 'cookie-parser'
 import logger from 'morgan'
 import createDebug from 'debug'
 import session from 'express-session'
 import Redis from 'ioredis'
 import RedisStore from 'connect-redis'
+import { fileURLToPath } from 'node:url'
 
 import { initConfig, localeMiddleware, useExpressRouter } from 'bistrio'
 import { checkAdmin, checkLoggedIn } from './middlewares'
@@ -18,6 +19,9 @@ import { Middlewares } from '@/universal/routes/middlewares'
 import { serverRouterConfig } from './config/server'
 import { config } from '../config'
 import { init as initPassport } from './lib/passport-util'
+
+console.log(fileURLToPath(import.meta.url))
+const __dirname = dirname(fileURLToPath(import.meta.url))
 
 if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = 'development'
@@ -41,12 +45,9 @@ export async function setup() {
   app.use(express.json())
   app.use(express.urlencoded({ extended: false }))
   app.use(cookieParser())
-  app.use(express.static(join(__dirname, '../public')))
 
-  if (process.env.NODE_ENV == 'development') {
-    const staticPathDev = join(__dirname, '../../public')
-    app.use(express.static(staticPathDev))
-  }
+  app.use(express.static(join(__dirname, '../public')))
+  app.use(express.static(join(__dirname, '../dist/public')))
 
   if (!process.env.SESSION_SECRET) {
     throw new Error('process.env.SESSION_SECRET is undefined')

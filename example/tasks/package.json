@@ -9,7 +9,7 @@
     "prepare": "npm run bistrio:gen",
     "dev": "npm run watch",
     "predev:server": "npm run build:server",
-    "dev:server": "cpx '.bistrio/filemap.json' dist/.bistrio && NODE_ENV=development dotenv -e .env.development -- node ./dist/server/boot.cjs",
+    "dev:server": "cpx '.bistrio/filemap.json' dist/.bistrio && NODE_ENV=development dotenv -e .env.development -- node ./dist/server/boot.js",
     "prewatch": "npm run bistrio:gen",
     "watch": "run-p watch:**",
     "watch:server": "NODE_ENV=development dotenv -e .env.development -- npm-watch",
