@@ -1,4 +1,4 @@
-import { resolve } from 'path'
+import { resolve } from 'node:path'
 import { ServerRouterConfig, initServerRouterConfig } from 'bistrio'
 import { loadPage, importLocal } from '../../config/server/imports'
 import { createActionOptions } from '../customizers/index'

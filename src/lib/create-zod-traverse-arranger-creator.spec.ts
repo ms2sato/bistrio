@@ -1,48 +1,48 @@
 import { parseFormBody } from './parse-form-body.js'
 import { createZodTraverseArrangerCreator } from './create-zod-traverse-arranger-creator.js'
-import { z } from 'zod'
+import { string, number, date, array, object } from 'zod'
 
-const itemSchema = z.object({
-  type: z.string(),
-  number: z.number(),
+const itemSchema = object({
+  type: string(),
+  number: number(),
 })
 
-const nameSchema = z.object({
-  name: z.string(),
+const nameSchema = object({
+  name: string(),
 })
 
-const numberSchema = z.object({
-  age: z.number(),
+const numberSchema = object({
+  age: number(),
 })
 
-const dateSchema = z.object({
-  createdAt: z.date(),
+const dateSchema = object({
+  createdAt: date(),
 })
 
-const stringArraySchema = z.object({
-  hobbies: z.array(z.string()),
+const stringArraySchema = object({
+  hobbies: array(string()),
 })
 
-const numberArraySchema = z.object({
-  numbers: z.array(z.number()),
+const numberArraySchema = object({
+  numbers: array(number()),
 })
 
-const itemArraySchema = z.object({
-  items: z.array(itemSchema),
+const itemArraySchema = object({
+  items: array(itemSchema),
 })
 
-const defaultArraySchema = z.object({
-  numbersHasDefault: z.array(z.number()).default([]),
+const defaultArraySchema = object({
+  numbersHasDefault: array(number()).default([]),
 })
 
-const userSchema = z.object({
-  name: z.string(),
-  age: z.number(),
-  createdAt: z.date(),
-  numbers: z.array(z.number()),
-  hobbies: z.array(z.string()),
-  items: z.array(itemSchema),
-  numbersHasDefault: z.array(z.number()).default([]),
+const userSchema = object({
+  name: string(),
+  age: number(),
+  createdAt: date(),
+  numbers: array(number()),
+  hobbies: array(string()),
+  items: array(itemSchema),
+  numbersHasDefault: array(number()).default([]),
 })
 
 const arrangerCreator = createZodTraverseArrangerCreator(userSchema)

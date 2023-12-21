@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { AnyZodObject } from 'zod'
 import { type RouteObject } from 'react-router-dom'
 
 import {
@@ -305,7 +305,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
     const createStubMethod = (
       ad: ActionDescriptor,
       resourceUrl: string,
-      schema: z.AnyZodObject,
+      schema: AnyZodObject,
       method: HttpMethod,
     ) => {
       if (schema === blankSchema) {

@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { AnyZodObject, ZodObject, ZodArray, ZodDefault } from 'zod'
 
 // alternatives for instanceOf, not match for transpiled code
 const isSchemaOf =
@@ -30,10 +30,10 @@ const nullArrangeResult = { arranged: false, result: undefined }
 export { nullArrangeResult }
 
 type WrapType = {
-  innerType: z.AnyZodObject
+  innerType: AnyZodObject
 }
 
-export function strip(schema: z.AnyZodObject): z.AnyZodObject {
+export function strip(schema: AnyZodObject): AnyZodObject {
   if (isZodDefault(schema) || isZodOptional(schema) || isZodNullable(schema)) {
     const wrapType = schema?._def as unknown as WrapType
     return strip(wrapType.innerType)
@@ -41,7 +41,7 @@ export function strip(schema: z.AnyZodObject): z.AnyZodObject {
   return schema
 }
 
-export function cast(schema: z.AnyZodObject, value: unknown): ArrangeResult {
+export function cast(schema: AnyZodObject, value: unknown): ArrangeResult {
   try {
     if (isZodBigInt(schema) && typeof value !== 'bigint') {
       return { arranged: true, result: BigInt(value as number) }
@@ -70,12 +70,12 @@ export function cast(schema: z.AnyZodObject, value: unknown): ArrangeResult {
 }
 
 type TraverseBlankValueCallback = {
-  (schema: z.AnyZodObject, obj: Record<string, unknown>, key: string): void
+  (schema: AnyZodObject, obj: Record<string, unknown>, key: string): void
 }
 
 // FIXME: draft implements
-function traverseBlankValue<S extends z.AnyZodObject>(schema: S, obj: unknown, callback: TraverseBlankValueCallback) {
-  const shape = schema.shape as Record<string, z.AnyZodObject>
+function traverseBlankValue<S extends AnyZodObject>(schema: S, obj: unknown, callback: TraverseBlankValueCallback) {
+  const shape = schema.shape as Record<string, AnyZodObject>
   for (const [key, subSchema] of Object.entries(shape)) {
     const record = obj as Record<string, unknown>
     if (key in record) {
@@ -83,11 +83,11 @@ function traverseBlankValue<S extends z.AnyZodObject>(schema: S, obj: unknown, c
         if (isZodArray(subSchema)) {
           for (const item of record[key] as unknown[]) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            traverseBlankValue((subSchema as unknown as z.ZodArray<any>).element, item, callback)
+            traverseBlankValue((subSchema as unknown as ZodArray<any>).element, item, callback)
           }
         }
       } else if (record[key] instanceof Object) {
-        if (subSchema instanceof z.ZodObject) {
+        if (subSchema instanceof ZodObject) {
           traverseBlankValue(subSchema, record[key], callback)
         }
       }
@@ -99,11 +99,11 @@ function traverseBlankValue<S extends z.AnyZodObject>(schema: S, obj: unknown, c
   }
 }
 
-export function fillDefault<S extends z.AnyZodObject>(schema: S, obj: unknown): unknown {
+export function fillDefault<S extends AnyZodObject>(schema: S, obj: unknown): unknown {
   traverseBlankValue(schema, obj, (schema, obj, key) => {
     if (isZodDefault(schema)) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const defSchema = schema as unknown as z.ZodDefault<any>
+      const defSchema = schema as unknown as ZodDefault<any>
       obj[key] = defSchema._def.defaultValue()
     }
   })
@@ -120,10 +120,10 @@ export function isValue(obj: unknown): boolean {
   )
 }
 
-export function deepCast<S extends z.AnyZodObject>(schema: S, obj: unknown): z.infer<S> {
+export function deepCast<S extends AnyZodObject>(schema: S, obj: unknown): Zod.infer<S> {
   if (isValue(obj)) {
     const ret = cast(strip(schema), obj)
-    return (ret.arranged ? ret.result : obj) as z.infer<S>
+    return (ret.arranged ? ret.result : obj) as Zod.infer<S>
   }
 
   if (obj instanceof Array) {
@@ -131,7 +131,7 @@ export function deepCast<S extends z.AnyZodObject>(schema: S, obj: unknown): z.i
     const arraySchema = strip(schema)
     if (isZodArray(arraySchema)) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const itemSchema = strip((arraySchema as unknown as z.ZodArray<any>).element as z.AnyZodObject)
+      const itemSchema = strip((arraySchema as unknown as ZodArray<any>).element as AnyZodObject)
       array.forEach((item, index) => {
         array[index] = deepCast(itemSchema, item)
       })
@@ -141,7 +141,7 @@ export function deepCast<S extends z.AnyZodObject>(schema: S, obj: unknown): z.i
 
   const record = obj as Record<string, unknown>
   for (const [key, val] of Object.entries<unknown>(record)) {
-    const shape = strip(schema).shape as Record<string, z.AnyZodObject>
+    const shape = strip(schema).shape as Record<string, AnyZodObject>
     const itemSchema = shape[key]
     if (itemSchema) {
       record[key] = deepCast(itemSchema, val)

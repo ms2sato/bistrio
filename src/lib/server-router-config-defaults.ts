@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs'
-import { z } from 'zod'
+import { AnyZodObject } from 'zod'
 import { ActionContextCreator, SchemaUtil, routerPlaceholderRegex } from '../index.js'
 import { FileNotFoundError } from './shared/common.js'
 import { LoadFunc } from './server-router-config.js'
@@ -8,11 +8,11 @@ import { createZodTraverseArrangerCreator } from './create-zod-traverse-arranger
 import { parseFormBody } from './parse-form-body.js'
 import { ActionContextImpl } from './server-router-impl.js'
 
-export function arrangeFormInput(ctx: MutableActionContext, sources: readonly string[], schema: z.AnyZodObject) {
+export function arrangeFormInput(ctx: MutableActionContext, sources: readonly string[], schema: AnyZodObject) {
   return parseFormBody(ctx.mergeInputs(sources), createZodTraverseArrangerCreator(schema))
 }
 
-export function arrangeJsonInput(ctx: MutableActionContext, sources: readonly string[], schema: z.AnyZodObject) {
+export function arrangeJsonInput(ctx: MutableActionContext, sources: readonly string[], schema: AnyZodObject) {
   const pred = (input: Record<string, unknown>, source: string) => {
     return source === 'body' ? input : SchemaUtil.deepCast(schema, input)
   }
@@ -20,7 +20,7 @@ export function arrangeJsonInput(ctx: MutableActionContext, sources: readonly st
 }
 
 export type ContentArranger = {
-  (ctx: MutableActionContext, sources: readonly string[], schema: z.AnyZodObject): unknown
+  (ctx: MutableActionContext, sources: readonly string[], schema: AnyZodObject): unknown
 }
 
 type ContentType2Arranger = Record<string, ContentArranger>
@@ -33,7 +33,7 @@ export const defaultContentType2Arranger: ContentType2Arranger = {
 }
 
 export const createSmartInputArranger = (contentType2Arranger: ContentType2Arranger = defaultContentType2Arranger) => {
-  return (ctx: MutableActionContext, sources: readonly string[], schema: z.AnyZodObject) => {
+  return (ctx: MutableActionContext, sources: readonly string[], schema: AnyZodObject) => {
     const requestedContentType = ctx.req.headers['content-type']
     if (requestedContentType) {
       for (const [contentType, contentArranger] of Object.entries<ContentArranger>(contentType2Arranger)) {

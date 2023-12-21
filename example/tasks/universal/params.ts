@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { union, literal, number, string, date, object, array, coerce } from 'zod'
 
 export const Role = {
   Unknown: -1,
@@ -8,41 +8,40 @@ export const Role = {
   [key: string]: number
 }
 
-const roleValuSchema = z.union([z.literal(Role.Unknown), z.literal(Role.Normal), z.literal(Role.Admin)])
+const roleValuSchema = union([literal(Role.Unknown), literal(Role.Normal), literal(Role.Admin)])
 
 const userCoreProps = {
-  id: z.number(),
-  username: z
-    .string()
+  id: number(),
+  username: string()
     .min(3)
     .max(255)
     .regex(/^[a-z][a-z0-9]+$/),
   role: roleValuSchema,
-  createdAt: z.date(),
-  updatedAt: z.date(),
+  createdAt: date(),
+  updatedAt: date(),
 }
 
-export const userSchema = z.object(userCoreProps)
-export type User = z.infer<typeof userSchema>
+export const userSchema = object(userCoreProps)
+export type User = Zod.infer<typeof userSchema>
 
 const userCreateProps = {
   username: userCoreProps['username'],
-  password: z.string().min(8).max(255),
+  password: string().min(8).max(255),
 }
 
-export const userCreateSchema = z.object(userCreateProps)
-export type UserCreateParams = z.infer<typeof userCreateSchema>
+export const userCreateSchema = object(userCreateProps)
+export type UserCreateParams = Zod.infer<typeof userCreateSchema>
 
-export const sessionCreateSchema = z.object(userCreateProps)
-export type SessionCreateParams = z.infer<typeof sessionCreateSchema>
+export const sessionCreateSchema = object(userCreateProps)
+export type SessionCreateParams = Zod.infer<typeof sessionCreateSchema>
 
 const taskCoreProps = {
-  title: z.string().min(3).max(255),
-  description: z.string().min(3).max(4096),
+  title: string().min(3).max(255),
+  description: string().min(3).max(4096),
 }
 
 const withTags = {
-  tags: z.array(z.string()).optional().default([]),
+  tags: array(string()).optional().default([]),
 }
 
 const taskWithTagsCoreProps = {
@@ -50,41 +49,41 @@ const taskWithTagsCoreProps = {
   ...withTags,
 }
 
-export const taskCreateSchema = z.object(taskCoreProps)
-export type TaskCreateParams = z.infer<typeof taskCreateSchema>
+export const taskCreateSchema = object(taskCoreProps)
+export type TaskCreateParams = Zod.infer<typeof taskCreateSchema>
 
-export const taskCreateWithTagsSchema = z.object(taskWithTagsCoreProps)
-export type TaskCreateWithTagsParams = z.infer<typeof taskCreateWithTagsSchema>
+export const taskCreateWithTagsSchema = object(taskWithTagsCoreProps)
+export type TaskCreateWithTagsParams = Zod.infer<typeof taskCreateWithTagsSchema>
 
-export const taskUpdateSchema = z.object({
-  id: z.number(),
+export const taskUpdateSchema = object({
+  id: number(),
   ...taskCoreProps,
-  done: z.coerce.boolean().default(false), // from view's value is string, change to boolean
+  done: coerce.boolean().default(false), // from view's value is string, change to boolean
 })
 
-export type TaskUpdateParams = z.infer<typeof taskUpdateSchema>
+export type TaskUpdateParams = Zod.infer<typeof taskUpdateSchema>
 
 export const taskUpdateWithTagsSchema = taskUpdateSchema.extend(withTags)
-export type TaskUpdateWithTagsParams = z.infer<typeof taskUpdateWithTagsSchema>
+export type TaskUpdateWithTagsParams = Zod.infer<typeof taskUpdateWithTagsSchema>
 
-export const taskIdSchema = z.object({
-  taskId: z.number(),
+export const taskIdSchema = object({
+  taskId: number(),
 })
 
-export type TaskIdParams = z.infer<typeof taskIdSchema>
+export type TaskIdParams = Zod.infer<typeof taskIdSchema>
 
 const commentCoreProps = {
-  taskId: z.number(),
-  body: z.string().min(3).max(255),
+  taskId: number(),
+  body: string().min(3).max(255),
 }
 
-export const commentCreateSchema = z.object(commentCoreProps)
+export const commentCreateSchema = object(commentCoreProps)
 
-export type CommentCreateParams = z.infer<typeof commentCreateSchema>
+export type CommentCreateParams = Zod.infer<typeof commentCreateSchema>
 
-export const commentUpdateSchema = z.object({
-  id: z.number(),
+export const commentUpdateSchema = object({
+  id: number(),
   ...commentCoreProps,
 })
 
-export type CommentUpdateParams = z.infer<typeof commentUpdateSchema>
+export type CommentUpdateParams = Zod.infer<typeof commentUpdateSchema>

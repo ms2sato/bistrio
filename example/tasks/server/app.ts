@@ -1,6 +1,6 @@
 import createError from 'http-errors'
 import express from 'express'
-import path from 'path'
+import { join } from 'node:path'
 import cookieParser from 'cookie-parser'
 import logger from 'morgan'
 import createDebug from 'debug'
@@ -34,10 +34,10 @@ export async function setup() {
   app.use(express.json())
   app.use(express.urlencoded({ extended: false }))
   app.use(cookieParser())
-  app.use(express.static(path.join(__dirname, '../public')))
+  app.use(express.static(join(__dirname, '../public')))
 
   if (process.env.NODE_ENV == 'development') {
-    const staticPathDev = path.join(__dirname, '../../public')
+    const staticPathDev = join(__dirname, '../../public')
     app.use(express.static(staticPathDev))
   }
 

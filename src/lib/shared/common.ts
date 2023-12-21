@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { ZodError, ZodIssue, AnyZodObject } from 'zod'
 import { blankSchema } from './schemas.js'
 import { ComponentType, ReactNode } from 'react'
 
@@ -17,8 +17,8 @@ export type NamedResources = {
   [name: string]: Resource
 }
 
-export type ValidationError = z.ZodError
-export type ValidationIssue = z.ZodIssue
+export type ValidationError = ZodError
+export type ValidationIssue = ZodIssue
 
 export type ConstructSource = 'body' | 'query' | 'params' | 'files'
 export type HttpMethod = 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head' | 'option'
@@ -34,7 +34,7 @@ export interface ActionDescriptor {
 }
 
 export type ConstructDescriptor = {
-  schema?: z.AnyZodObject | null
+  schema?: AnyZodObject | null
   sources?: readonly ConstructSource[]
 }
 
@@ -68,11 +68,11 @@ export class RouterError extends Error {}
 export type HandlerBuildRunner = () => Promise<void> | void
 
 export function createValidationError(issues: ValidationIssue[]) {
-  return new z.ZodError(issues)
+  return new ZodError(issues)
 }
 
 export function isValidationError(err: unknown): err is ValidationError {
-  if (err instanceof z.ZodError) {
+  if (err instanceof ZodError) {
     return true
   }
 

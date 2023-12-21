@@ -1,3 +1,4 @@
+import { AnyZodObject } from 'zod'
 import {
   InputArranger,
   CreateActionOptionFunction,
@@ -5,7 +6,6 @@ import {
   Renderer,
   Adapter,
   RequestCallback,
-  z,
 } from './action-context.js'
 import { ActionContextCreator } from './common.js'
 import { ServerRouterImpl } from './server-router-impl.js'
@@ -25,7 +25,7 @@ export type ResourceMethodHandlerParams = {
   sources: readonly ConstructSource[]
   router: ServerRouterImpl
   httpPath: string
-  schema: z.AnyZodObject
+  schema: AnyZodObject
   adapterPath: string
   actionDescriptor: ActionDescriptor
   responder: Responder | RequestCallback
