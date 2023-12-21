@@ -1,4 +1,4 @@
-import z from 'zod'
+import {coerce} from 'zod'
 import { UseSubmitProps as TUseSubmitProps, useSubmit } from 'bistrio/client'
 
 import { taskCreateWithTagsSchema } from '@/universal/params'
@@ -7,7 +7,7 @@ import { Task } from '@prisma/client'
 import { useRef, useState } from 'react'
 
 export const formSchema = taskCreateWithTagsSchema.extend({
-  done: z.coerce.boolean().optional(),
+  done: coerce.boolean().optional(),
 })
 
 export type FormAttrs = typeof formSchema

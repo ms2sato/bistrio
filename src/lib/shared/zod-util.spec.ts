@@ -1,21 +1,21 @@
-import { z } from 'zod'
+import { object, string, array, number, date } from 'zod'
 import { fillDefault, deepCast } from './zod-util.js'
 
-const itemSchema = z.object({
-  type: z.string().default('test'),
-  number: z.number(),
-  numbersHasDefault: z.array(z.number()).default([]),
+const itemSchema = object({
+  type: string().default('test'),
+  number: number(),
+  numbersHasDefault: array(number()).default([]),
 })
 
-const userSchema = z.object({
-  name: z.string(),
-  age: z.number().default(20),
-  createdAt: z.date(),
-  numbers: z.array(z.number()),
-  hobbies: z.array(z.string()),
+const userSchema = object({
+  name: string(),
+  age: number().default(20),
+  createdAt: date(),
+  numbers: array(number()),
+  hobbies: array(string()),
   item: itemSchema,
-  items: z.array(itemSchema),
-  numbersHasDefault: z.array(z.number()).default([]),
+  items: array(itemSchema),
+  numbersHasDefault: array(number()).default([]),
 })
 
 describe('fillDefault', () => {

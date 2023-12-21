@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { z } from 'zod'
+import { AnyZodObject } from 'zod'
 import { ValidationError, isValidationError } from './index.js'
 import { parseFormBody } from '../parse-form-body.js'
 import { createZodTraverseArrangerCreator } from '../create-zod-traverse-arranger-creator.js'
@@ -10,11 +10,11 @@ export interface UseSubmitPropEventOptions<O> {
 }
 
 export interface UseSubmitProps<
-  ZS extends z.AnyZodObject,
+  ZS extends AnyZodObject,
   R,
   O = unknown,
   E extends ValidationError = ValidationError,
-  S = z.infer<ZS>,
+  S = Zod.infer<ZS>,
 > {
   source: S
   action: {
@@ -36,11 +36,11 @@ export interface UseSubmitResult<S, R, E extends ValidationError = ValidationErr
 }
 
 export function useSubmit<
-  ZS extends z.AnyZodObject,
+  ZS extends AnyZodObject,
   R,
   O = undefined,
   E extends ValidationError = ValidationError,
-  S = z.infer<ZS>,
+  S = Zod.infer<ZS>,
 >(
   { source, action: { modifier, onSuccess, onInvalid, onFatal }, schema }: UseSubmitProps<ZS, R, O, E, S>,
   custom?: O,

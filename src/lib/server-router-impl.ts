@@ -1,6 +1,6 @@
 import express, { NextFunction, RequestHandler } from 'express'
 import path from 'node:path'
-import { z } from 'zod'
+import { ZodError, AnyZodObject } from 'zod'
 import debug from 'debug'
 import {
   ActionContext,
@@ -129,7 +129,7 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
             const output = await resourceMethod.apply(resource, input ? [input, wrappedOption] : [wrappedOption])
             await respond(ctx, output, option)
           } catch (err) {
-            if (err instanceof z.ZodError) {
+            if (err instanceof ZodError) {
               const validationError = err
               handlerLog.extend('debug')('%s#%s validationError %s', adapterPath, actionName, validationError.message)
               if (responder) {
@@ -475,7 +475,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
           )
         }
 
-        const schema: z.AnyZodObject | undefined =
+        const schema: AnyZodObject | undefined =
           resourceMethod === undefined
             ? undefined
             : choiceSchema(this.serverRouterConfig.constructConfig, constructDescriptor, actionName)
@@ -620,14 +620,14 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
   }
 
   private generateRoutePath(routePath: string, type?: ActionType) {
-    if(type) {
+    if (type) {
       return `${this.formatPlaceholder(routePath)}.${type}`
     } else {
       return `${this.formatPlaceholder(routePath)}.:format?`
     }
   }
 
-  private appendRoute(routePath: string, {method, type}: ActionDescriptor, handlers: express.Handler[]) {
+  private appendRoute(routePath: string, { method, type }: ActionDescriptor, handlers: express.Handler[]) {
     const router = this.router as unknown
 
     const append = (method: HttpMethod, urlPathWithExt: string) => {

@@ -1,39 +1,39 @@
-import { z } from 'zod'
+import { string, function as func, any, boolean, number, object, promise, void as void_ } from 'zod'
 
-export const blankSchema = z.object({})
-export type BlankParams = z.infer<typeof blankSchema>
+export const blankSchema = object({})
+export type BlankParams = Zod.infer<typeof blankSchema>
 
-export const idNumberSchema = z.object({
-  id: z.number(),
+export const idNumberSchema = object({
+  id: number(),
 })
 
-export type IdNumberParams = z.infer<typeof idNumberSchema>
+export type IdNumberParams = Zod.infer<typeof idNumberSchema>
 
 export type PrimaryKeyParams<T, N extends string = 'id'> = { [P in N]: T }
 
 // for express-fileupload
-export const uploadedFileSchema = z.object({
-  name: z.string(),
-  mv: z.function().args(z.string()).returns(z.promise(z.void())),
-  mimetype: z.string(),
-  data: z.any(),
-  tempFilePath: z.string(),
-  truncated: z.boolean(),
-  size: z.number(),
-  md5: z.string(),
+export const uploadedFileSchema = object({
+  name: string(),
+  mv: func().args(string()).returns(promise(void_())),
+  mimetype: string(),
+  data: any(),
+  tempFilePath: string(),
+  truncated: boolean(),
+  size: number(),
+  md5: string(),
 })
 
-export type UploadedFile = z.infer<typeof uploadedFileSchema>
+export type UploadedFile = Zod.infer<typeof uploadedFileSchema>
 
 // --- for pagination ---
 
 const pageCoreProps = {
-  page: z.number(),
-  limit: z.number(),
+  page: number(),
+  limit: number(),
 }
 
-export const pageSchema = z.object(pageCoreProps)
-export type PageParams = z.infer<typeof pageSchema>
+export const pageSchema = object(pageCoreProps)
+export type PageParams = Zod.infer<typeof pageSchema>
 
 export type Paginated<E> = {
   data: E[]

@@ -1,4 +1,4 @@
-import { AnyZodObject, z } from 'zod'
+import { AnyZodObject, ZodDefault } from 'zod'
 import { strip, cast, ArrangeResult, nullArrangeResult } from './shared/zod-util.js'
 import { NextRet, TraverseArranger, TraverseArrangerCreator } from './parse-form-body.js'
 
@@ -18,15 +18,15 @@ function isParentSchema(schema: unknown): schema is ParentSchema {
   return (schema as ParentSchema).element !== undefined && typeof (schema as ParentSchema).element === 'object'
 }
 
-export function createZodTraverseArrangerCreator(schema: z.AnyZodObject): TraverseArrangerCreator {
+export function createZodTraverseArrangerCreator(schema: AnyZodObject): TraverseArrangerCreator {
   return () => new ZodArranger(schema)
 }
 
 export class ZodArranger implements TraverseArranger {
-  private topSchema: z.AnyZodObject
-  private schema: z.AnyZodObject
+  private topSchema: AnyZodObject
+  private schema: AnyZodObject
 
-  constructor(schema: z.AnyZodObject) {
+  constructor(schema: AnyZodObject) {
     this.topSchema = schema
     this.schema = schema
   }
@@ -41,9 +41,9 @@ export class ZodArranger implements TraverseArranger {
 
       this.schema = strip(pathSchema)
 
-      if (pathSchema instanceof z.ZodDefault) {
+      if (pathSchema instanceof ZodDefault) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return { type: 'default', value: (pathSchema as z.ZodDefault<any>)._def.defaultValue() }
+        return { type: 'default', value: (pathSchema as ZodDefault<any>)._def.defaultValue() }
       }
     } else {
       throw new Error(`Unexpected Type: ${this.schema.toString()}`)
@@ -105,7 +105,7 @@ export class ZodArranger implements TraverseArranger {
     return this.schema.constructor.name === 'ZodArray'
   }
 
-  private castArray(elementSchema: z.AnyZodObject, value: unknown[]): ArrangeResult {
+  private castArray(elementSchema: AnyZodObject, value: unknown[]): ArrangeResult {
     return {
       arranged: true,
       result: value.map((item: unknown) => {
