@@ -32,7 +32,12 @@ export async function setup() {
   const app = express()
   app.use(compression())
 
-  app.use(logger('dev'))
+  const skipList = ['/js/', '/stylesheets/', '/favicon.ico']
+  app.use(
+    logger('dev', {
+      skip: (req) => skipList.some((path) => req.originalUrl.startsWith(path)),
+    }),
+  )
   app.use(express.json())
   app.use(express.urlencoded({ extended: false }))
   app.use(cookieParser())
