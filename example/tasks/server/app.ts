@@ -1,5 +1,6 @@
 import createError from 'http-errors'
 import express from 'express'
+import compression from 'compression'
 import { join } from 'node:path'
 import cookieParser from 'cookie-parser'
 import logger from 'morgan'
@@ -29,6 +30,7 @@ const redis = process.env.REDIS_URL ? new Redis(process.env.REDIS_URL) : new Red
 
 export async function setup() {
   const app = express()
+  app.use(compression())
 
   app.use(logger('dev'))
   app.use(express.json())
