@@ -1,20 +1,33 @@
-import { AnyZodObject, ZodObject, ZodArray, ZodDefault } from 'zod'
+import {
+  AnyZodObject,
+  ZodObject,
+  ZodArray,
+  ZodDefault,
+  ZodOptional,
+  ZodNullable,
+  ZodBoolean,
+  ZodString,
+  ZodBigInt,
+  ZodNumber,
+  ZodDate,
+} from 'zod'
 
-// alternatives for instanceOf, not match for transpiled code
 const isSchemaOf =
-  (nameOfZodType: string) =>
+  (
+    zodType: any, // eslint-disable-line @typescript-eslint/no-explicit-any
+  ) =>
   (schema: unknown): boolean =>
-    schema?.constructor?.name === nameOfZodType
+    schema instanceof zodType
 
-export const isZodDefault = isSchemaOf('ZodDefault')
-export const isZodOptional = isSchemaOf('ZodOptional')
-export const isZodNullable = isSchemaOf('ZodNullable')
-export const isZodBoolean = isSchemaOf('ZodBoolean')
-export const isZodString = isSchemaOf('ZodString')
-export const isZodBigInt = isSchemaOf('ZodBigInt')
-export const isZodNumber = isSchemaOf('ZodNumber')
-export const isZodDate = isSchemaOf('ZodDate')
-export const isZodArray = isSchemaOf('ZodArray')
+export const isZodDefault = isSchemaOf(ZodDefault)
+export const isZodOptional = isSchemaOf(ZodOptional)
+export const isZodNullable = isSchemaOf(ZodNullable)
+export const isZodBoolean = isSchemaOf(ZodBoolean)
+export const isZodString = isSchemaOf(ZodString)
+export const isZodBigInt = isSchemaOf(ZodBigInt)
+export const isZodNumber = isSchemaOf(ZodNumber)
+export const isZodDate = isSchemaOf(ZodDate)
+export const isZodArray = isSchemaOf(ZodArray)
 
 export type ArrangeResult =
   | {
