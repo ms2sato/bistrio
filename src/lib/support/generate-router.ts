@@ -22,7 +22,7 @@ const getNamedFunctionString: GetFunctionStringFunc = (
 ) => {
   const methodStr = methods.length == 1 ? `'${methods[0]}'` : `[${methods.map((m) => `'${m}'`).join(', ')}]`
 
-  return `export const named_${name} = Object.freeze({ path: (${optionsStr}) => { return \`${link}\` }, method: ${methodStr} })`
+  return `export const ${name} = Object.freeze({ path: (${optionsStr}) => { return \`${link}\` }, method: ${methodStr} })`
 }
 
 const getUnnamedFunctionString: GetFunctionStringFunc = (
@@ -59,6 +59,11 @@ export class GenerateRouter implements Router {
   }
 
   resources(rpath: string, config: ResourceRouteConfig): void {
+    const resourceRegex = /^[a-z][A-Za-z0-9]*$/
+    if (!resourceRegex.test(config.name)) {
+      throw new Error(`invalid resource name: "${config.name}": match to ${resourceRegex.toString()}`)
+    }
+
     const routePath = join(this.httpPath, rpath)
     this.nameToPath[config.name] = routePath
 
@@ -66,9 +71,13 @@ export class GenerateRouter implements Router {
       return
     }
 
+    const actionRegex = /^[a-z][_A-Za-z0-9]*$/
     for (const ad of config.actions) {
+      if (!actionRegex.test(ad.action)) {
+        throw new Error(`invalid action: "${ad.action}" in resource: "${config.name}": match to ${actionRegex.toString()}`)
+      }
       const linkPath = join(routePath, ad.path)
-      this.registerLink(linkPath, ad.method, `${config.name}_${ad.action}`)
+      this.registerLink(linkPath, ad.method, `${config.name}$${ad.action}`)
     }
   }
 
