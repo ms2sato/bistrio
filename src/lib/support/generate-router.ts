@@ -22,7 +22,7 @@ const getNamedFunctionString: GetFunctionStringFunc = (
 ) => {
   const methodStr = methods.length == 1 ? `'${methods[0]}'` : `[${methods.map((m) => `'${m}'`).join(', ')}]`
 
-  return `export const named_${name} = Object.freeze({ path: (${optionsStr}) => { return \`${link}\` }, method: ${methodStr} })`
+  return `export const ${name} = Object.freeze({ path: (${optionsStr}) => { return \`${link}\` }, method: ${methodStr} })`
 }
 
 const getUnnamedFunctionString: GetFunctionStringFunc = (
@@ -68,7 +68,7 @@ export class GenerateRouter implements Router {
 
     for (const ad of config.actions) {
       const linkPath = join(routePath, ad.path)
-      this.registerLink(linkPath, ad.method, `${config.name}_${ad.action}`)
+      this.registerLink(linkPath, ad.method, `${config.name}$${ad.action}`)
     }
   }
 
