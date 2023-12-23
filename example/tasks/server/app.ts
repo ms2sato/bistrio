@@ -20,7 +20,6 @@ import { serverRouterConfig } from './config/server'
 import { config } from '../config'
 import { init as initPassport } from './lib/passport-util'
 
-console.log(fileURLToPath(import.meta.url))
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
 if (!process.env.NODE_ENV) {
