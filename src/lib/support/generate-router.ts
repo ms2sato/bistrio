@@ -59,9 +59,9 @@ export class GenerateRouter implements Router {
   }
 
   resources(rpath: string, config: ResourceRouteConfig): void {
-    const regex = /^[a-z][A-Za-z0-9]*$/
-    if (!regex.test(config.name)) {
-      throw new Error(`invalid resource name: "${config.name}": match to ${regex.toString()}`)
+    const resourceRegex = /^[a-z][A-Za-z0-9]*$/
+    if (!resourceRegex.test(config.name)) {
+      throw new Error(`invalid resource name: "${config.name}": match to ${resourceRegex.toString()}`)
     }
 
     const routePath = join(this.httpPath, rpath)
@@ -71,7 +71,11 @@ export class GenerateRouter implements Router {
       return
     }
 
+    const actionRegex = /^[a-z][_A-Za-z0-9]*$/
     for (const ad of config.actions) {
+      if (!actionRegex.test(ad.action)) {
+        throw new Error(`invalid action: "${ad.action}" in resource: "${config.name}": match to ${actionRegex.toString()}`)
+      }
       const linkPath = join(routePath, ad.path)
       this.registerLink(linkPath, ad.method, `${config.name}$${ad.action}`)
     }

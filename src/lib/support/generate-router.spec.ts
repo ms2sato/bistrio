@@ -11,6 +11,24 @@ describe('validations', () => {
     const router = new GenerateRouter()
     expect(() => router.resources('/test', { name: 'TestResource1' })).toThrowError()
   })
+
+  test('Action MUST not include any marks except for "_"', () => {
+    const router = new GenerateRouter()
+    expect(() =>
+      router.resources('/test', { name: 'testResource1', actions: [{ action: 'test$1', method: 'get', path: '/' }] }),
+    ).toThrowError()
+
+    expect(() =>
+      router.resources('/test', { name: 'testResource1', actions: [{ action: 'test_1', method: 'get', path: '/' }] }),
+    ).not.toThrowError()
+  })
+
+  test('Action MUST start lowercase char', () => {
+    const router = new GenerateRouter()
+    expect(() =>
+      router.resources('/test', { name: 'testResource1', actions: [{ action: 'Test1', method: 'get', path: '/' }] }),
+    ).toThrowError()
+  })
 })
 
 test('resources', () => {
