@@ -9,7 +9,7 @@ export function Layout({ children, ctx, hydrate }: { children: ReactNode; ctx: A
     <html>
       <head>
         <title>Tasks</title>
-        <link type="text/css" rel="stylesheet" href="/stylesheets/style.css"></link>
+        <link type="text/css" rel="stylesheet" href="/css/style.css"></link>
         <Scripts {...scriptProps}></Scripts>
         <Livereload />
       </head>
