@@ -48,7 +48,7 @@ export function routes(r: Router, support: RouterSupport<Middlewares>) {
           update: { schema: taskUpdateWithTagsSchema },
           done: { schema: idNumberSchema },
         },
-        name: 'task',
+        name: 'tasks',
         actions: [...crud(), { action: 'done', path: '/$id/done', method: 'post', type: 'json' }],
       })
 
@@ -59,7 +59,7 @@ export function routes(r: Router, support: RouterSupport<Middlewares>) {
             create: { schema: commentCreateSchema },
             update: { schema: commentUpdateSchema },
           },
-          name: 'taskComment',
+          name: 'taskComments',
           actions: api('list', 'create', 'update'),
         })
       })
