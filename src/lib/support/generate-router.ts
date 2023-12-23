@@ -59,6 +59,11 @@ export class GenerateRouter implements Router {
   }
 
   resources(rpath: string, config: ResourceRouteConfig): void {
+    const regex = /^[a-z][A-Za-z0-9]*$/
+    if (!regex.test(config.name)) {
+      throw new Error(`invalid resource name: "${config.name}": match to ${regex.toString()}`)
+    }
+
     const routePath = join(this.httpPath, rpath)
     this.nameToPath[config.name] = routePath
 

@@ -1,6 +1,18 @@
 import { blankSchema } from '../shared/schemas.js'
 import { GenerateRouter } from './generate-router.js'
 
+describe('validations', () => {
+  test('Resource name MUST not include any marks', () => {
+    const router = new GenerateRouter()
+    expect(() => router.resources('/test', { name: 'test$Resource1' })).toThrowError()
+  })
+
+  test('Resource name MUST start lowercase char', () => {
+    const router = new GenerateRouter()
+    expect(() => router.resources('/test', { name: 'TestResource1' })).toThrowError()
+  })
+})
+
 test('resources', () => {
   const router = new GenerateRouter()
 
