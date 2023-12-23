@@ -24,7 +24,7 @@ export const generateServerWebpackConfig = ({
   }
   const output = {
     path: resolve(config.structure.distDir, 'server'),
-    filename: '[name].cjs',
+    filename: '[name].js',
   }
 
   return generateWebpackConfig({

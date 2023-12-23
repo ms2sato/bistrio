@@ -55,6 +55,18 @@ export const generateWebpackConfig = ({
 
   const webpackConfig = generateProductionConfig({ config, env, entry })
 
+  // for output esm
+  if (!webpackConfig.experiments) {
+    webpackConfig.experiments = {}
+  }
+  webpackConfig.experiments.outputModule = true
+
+  if (!webpackConfig.output) {
+    webpackConfig.output = {}
+  }
+  webpackConfig.output.module = true
+  webpackConfig.output.library = { type: 'module' }
+
   const devConfig: Configuration = {
     ...webpackConfig,
     devtool: 'inline-source-map',

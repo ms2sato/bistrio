@@ -9,10 +9,4 @@ const webpackConfig = generateClientWebpackConfig({
   bundlerConfigPath: __filename,
 })
 
-webpackConfig.experiments = {
-  outputModule: true,
-}
-webpackConfig.output!.module = true
-webpackConfig.output!.library = { type: 'module' }
-
 export default webpackConfig
