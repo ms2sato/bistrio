@@ -6,7 +6,7 @@ import { useRenderSupport } from '@bistrio/routes/main'
 import { ErrorPanel } from '@/universal/components/ErrorPanel'
 import { commentCreateSchema } from '@/universal/params'
 import { Comment } from '@prisma/client'
-import { __tasks } from '@/.bistrio/routes/main/endpoints'
+import { task$index } from '@/.bistrio/routes/main/named_endpoints'
 
 export function Page() {
   const params = useParams()
@@ -30,7 +30,7 @@ function Task({ id }: { id: number }) {
   return (
     <>
       <h2>
-        <Link to={__tasks.path()}>Task</Link> / {task.title}
+        <Link to={task$index.path()}>Task</Link> / {task.title}
       </h2>
       <div>
         tags:

@@ -4,7 +4,7 @@ import { useNavigate } from 'bistrio/client'
 import { useRenderSupport } from '@bistrio/routes/main'
 import { Form, UseSubmitProps, formSchema } from '@/universal/components/tasks/Form'
 import { useParams } from 'react-router-dom'
-import { __tasks } from '@/.bistrio/routes/main/endpoints'
+import { task$index } from '@/.bistrio/routes/main/named_endpoints'
 
 function MyForm() {
   const navigate = useNavigate()
@@ -17,7 +17,7 @@ function MyForm() {
     source,
     action: {
       modifier: (params) => rs.resources().task.update({ done: false, ...params, id }),
-      onSuccess: () => navigate(__tasks.path(), { purge: true }),
+      onSuccess: () => navigate(task$index.path(), { purge: true }),
     },
     schema: formSchema,
   }
