@@ -45,7 +45,6 @@ export async function setup() {
   app.use(express.urlencoded({ extended: false }))
   app.use(cookieParser())
 
-  app.use(express.static(join(__dirname, '../public')))
   app.use(express.static(join(__dirname, '../dist/public')))
 
   if (!process.env.SESSION_SECRET) {

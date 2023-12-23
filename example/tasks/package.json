@@ -15,7 +15,7 @@
     "watch:server": "NODE_ENV=development dotenv -e .env.development -- npm-watch",
     "watch:livereload": "NODE_ENV=development dotenv -e .env.development -- livereload -w 1500 -ee 'tsx,ts' 'dist/universal,public'",
     "watch:client": "NODE_ENV=development dotenv -e .env.development -- tsx node_modules/.bin/webpack --watch --config ./config/client/webpack.config.ts",
-    "copy-assets": "cpx 'public/**' dist/public && cpx 'config/**' dist/config",
+    "copy-assets": "cpx 'public/**' dist/public",
     "build": "npm run copy-assets && npm run bistrio:gen && npm run build:client && npm run build:server",
     "clean": "rimraf dist .cache .bistrio",
     "console": "DEBUG=-bistrio:console NODE_ENV=development dotenv -e .env.development -- node --import ./dist/server/console.js",
