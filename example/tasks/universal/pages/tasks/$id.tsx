@@ -6,7 +6,7 @@ import { useRenderSupport } from '@bistrio/routes/main'
 import { ErrorPanel } from '@/universal/components/ErrorPanel'
 import { commentCreateSchema } from '@/universal/params'
 import { Comment } from '@prisma/client'
-import { task$index } from '@/.bistrio/routes/main/named_endpoints'
+import { tasks$index } from '@/.bistrio/routes/main/named_endpoints'
 
 export function Page() {
   const params = useParams()
@@ -26,11 +26,11 @@ export function Page() {
 
 function Task({ id }: { id: number }) {
   const rs = useRenderSupport()
-  const task = rs.suspendedResources().task.load({ id })
+  const task = rs.suspendedResources().tasks.load({ id })
   return (
     <>
       <h2>
-        <Link to={task$index.path()}>Task</Link> / {task.title}
+        <Link to={tasks$index.path()}>Task</Link> / {task.title}
       </h2>
       <div>
         tags:
@@ -47,7 +47,7 @@ function Task({ id }: { id: number }) {
 
 function Comments({ taskId }: { taskId: number }) {
   const rs = useRenderSupport()
-  const comments = rs.suspendedResources().taskComment.list({ taskId })
+  const comments = rs.suspendedResources().taskComments.list({ taskId })
   return (
     <>
       <h3>Comments</h3>
@@ -70,7 +70,7 @@ function CommentCreateForm({ taskId }: { taskId: number }) {
   const submitProps: CommentSubmitProps = {
     source: { body: '' },
     action: {
-      modifier: async ({ body }) => rs.resources().taskComment.create({ taskId, body }),
+      modifier: async ({ body }) => rs.resources().taskComments.create({ taskId, body }),
       onSuccess: (_result, { custom }) => {
         custom.reset()
         navigate(location.pathname, { purge: true })

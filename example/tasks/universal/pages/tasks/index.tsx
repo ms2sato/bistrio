@@ -4,7 +4,7 @@ import { PaginationAttrs, usePagination, useUIEvent } from 'bistrio/client'
 import { Task } from '@prisma/client'
 import { Pagination } from '@/universal/components/Pagination'
 import { useRenderSupport } from '@bistrio/routes/main'
-import { task$show, task$edit, task$build } from '@bistrio/routes/main/named_endpoints'
+import { tasks$show, tasks$edit, tasks$build } from '@bistrio/routes/main/named_endpoints'
 
 export function Index() {
   const rs = useRenderSupport()
@@ -13,7 +13,7 @@ export function Index() {
   return (
     <>
       <h1>{l.t`Task list`}</h1>
-      <Link to={task$build.path()}>{l.t`Create new task`}</Link>
+      <Link to={tasks$build.path()}>{l.t`Create new task`}</Link>
       <Suspense fallback={<p>{l.t`Loading...`}</p>}>
         <TaskTable></TaskTable>
       </Suspense>
@@ -27,7 +27,7 @@ const TaskTable = () => {
   const limits = [3, 5, 10]
 
   const { data: tasks, ...paginationAttrs } = usePagination({
-    loader: (pageParams) => rs.suspendedResources().task.list(pageParams),
+    loader: (pageParams) => rs.suspendedResources().tasks.list(pageParams),
     limit: limits[1],
   })
 
@@ -86,11 +86,11 @@ function TaskRecord({ task: src }: { task: Task }) {
         <DoneSelector task={task} setTask={setTask} />
       </td>
       <td>
-        <Link to={task$show.path({ id: task.id })}>{task.title}</Link>
+        <Link to={tasks$show.path({ id: task.id })}>{task.title}</Link>
       </td>
       <td>{task.description}</td>
       <td>
-        <Link to={task$edit.path({ id: task.id })}>{l.t`Edit`}</Link>&nbsp;|&nbsp;
+        <Link to={tasks$edit.path({ id: task.id })}>{l.t`Edit`}</Link>&nbsp;|&nbsp;
         <Remover task={task} />
       </td>
     </tr>
@@ -102,7 +102,7 @@ function DoneSelector({ task, setTask }: { task: Task; setTask: (task: Task) => 
   const l = rs.getLocalizer()
 
   const { handleEvent: handleDoneClick, pending } = useUIEvent({
-    modifier: () => rs.resources().task.done(task),
+    modifier: () => rs.resources().tasks.done(task),
     onSuccess: () => setTask({ ...task, done: true }),
   })
 
@@ -126,7 +126,7 @@ function Remover({ task }: { task: Task }) {
   const l = rs.getLocalizer()
 
   const { handleEvent: handleDeleteClick, pending } = useUIEvent({
-    modifier: () => rs.resources().task.destroy(task),
+    modifier: () => rs.resources().tasks.destroy(task),
     onSuccess: () => (location.href = '/tasks'),
   })
 
