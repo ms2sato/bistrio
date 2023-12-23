@@ -131,6 +131,7 @@ export const generateClientWebpackConfig = ({
 
 export type ScriptProps = GenerateScriptsProps & {
   hydrate: boolean
+  type?: 'module'
 }
 
 export type GenerateScriptsProps = {
@@ -162,7 +163,7 @@ const getFilemapLoader = () => {
   return filemapLoader
 }
 
-export const generateScripts = (props: ScriptProps): string[] => {
+export const generateScripts = (props: GenerateScriptsProps): string[] => {
   const filemap = props.filemap || getFilemapLoader().load()
 
   const joinJsPath = (filePath: string) => {

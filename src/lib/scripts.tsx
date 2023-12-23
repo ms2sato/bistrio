@@ -12,8 +12,8 @@ if (isClient && !window.BISTRIO) {
 }
 `
 
-export function Scripts(props: ScriptProps): JSX.Element {
-  if (!props.hydrate) {
+export function Scripts({ hydrate, type = 'module', ...props }: ScriptProps): JSX.Element {
+  if (!hydrate) {
     return <></>
   }
 
@@ -27,7 +27,7 @@ export function Scripts(props: ScriptProps): JSX.Element {
         }}
       />
       {scripts.map((js) => {
-        return <script key={js} src={js} defer></script>
+        return <script key={js} src={js} defer type={type}></script>
       })}
     </>
   )

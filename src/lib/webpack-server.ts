@@ -24,7 +24,7 @@ export const generateServerWebpackConfig = ({
   }
   const output = {
     path: resolve(config.structure.distDir, 'server'),
-    filename: '[name].cjs',
+    filename: '[name].js',
   }
 
   return generateWebpackConfig({
@@ -41,7 +41,7 @@ export const generateServerWebpackConfig = ({
       return {
         target: 'node20.10',
         externalsPresets: { node: true },
-        externals: [nodeExternals()],
+        externals: [nodeExternals({ importType: 'module' })], // @see https://stackoverflow.com/questions/75758573/webpack-node-esm-generates-require-rather-import
         mode: env,
         entry,
         output,
