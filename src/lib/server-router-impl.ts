@@ -1,5 +1,5 @@
 import express, { NextFunction, RequestHandler } from 'express'
-import path from 'node:path'
+import { join } from 'node:path'
 import { ZodError, AnyZodObject } from 'zod'
 import debug from 'debug'
 import {
@@ -197,10 +197,10 @@ export class ActionContextImpl implements MutableActionContext {
   }
   get httpFilePath() {
     const filePath = this.descriptor.path.endsWith('/') ? `${this.descriptor.path}index` : this.descriptor.path
-    return path.join(this.httpPath, filePath)
+    return join(this.httpPath, filePath)
   }
   get routePath() {
-    return path.join(this.httpPath, this.descriptor.path)
+    return join(this.httpPath, this.descriptor.path)
   }
 
   resources(): NamedResources {
@@ -338,7 +338,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
     return new ServerRouterImpl(
       this.serverRouterConfig,
       this.clientConfig,
-      path.join(this.routePath, rpath),
+      join(this.routePath, rpath),
       subRouteObject,
       this.routerCore,
       {
@@ -403,7 +403,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
     }
 
     return async () => {
-      handlerLog('buildHandler: %s', path.join(this.routePath, rpath))
+      handlerLog('buildHandler: %s', join(this.routePath, rpath))
       const actionDescriptors: readonly ActionDescriptor[] = routeConfig.actions || this.serverRouterConfig.actions
 
       const resourceLocalPath = this.getResourceLocalPath(rpath)
@@ -452,7 +452,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
           actionDescriptor.hydrate = this.routerOptions.hydrate
         }
 
-        const urlPath = path.join(rpath, actionDescriptor.path)
+        const urlPath = join(rpath, actionDescriptor.path)
         const httpMethod = actionDescriptor.method
         const actionName = actionDescriptor.action
 
@@ -552,7 +552,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
         routeLog(
           '%s %s\t%s\t{actionOverride:%s, resourceMethod:%s, page: %s, hydrate: %s}',
           httpMethod instanceof Array ? httpMethod.join(',') : httpMethod,
-          path.join(this.routePath, urlPath),
+          join(this.routePath, urlPath),
           actionName,
           actionOverride,
           !!resourceMethod,
@@ -597,8 +597,8 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
     const router = this.router as unknown
 
     for (const child of children) {
-      const childRoutePath = path.join(rpath, child)
-      routeLog('%s', path.join(this.routePath, childRoutePath))
+      const childRoutePath = join(rpath, child)
+      routeLog('%s', join(this.routePath, childRoutePath))
 
       if (!hasRoutingMethod(router, 'get')) {
         throw new Error(`Unreachable: router is not Object or router[get] is not Function`)
