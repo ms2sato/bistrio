@@ -120,10 +120,21 @@ export const choiseSources = (
 
 export type Scope = (router: Router) => void
 
-export function scope(router: Router, subPath: string, scopeFun: Scope): Router {
+function scope(router: Router, scopeFun: Scope): Router
+function scope(router: Router, subPath: string, scopeFun: Scope): Router
+function scope(router: Router, subPath: string | Scope, scopeFun?: Scope): Router {
+  if (typeof subPath === 'function') {
+    scopeFun = subPath
+    subPath = '/'
+  }
+  if (!scopeFun) {
+    throw new Error('scopeFun is required')
+  }
   const subRouter = router.sub(subPath)
   scopeFun(subRouter)
   return subRouter
 }
+
+export { scope }
 
 export const routerPlaceholderRegex = /\$([a-z_][0-9a-zA-Z_]+)/g

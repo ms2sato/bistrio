@@ -18,50 +18,48 @@ export function routes(r: Router, support: RouterSupport<Middlewares>) {
 
   r.pages('/', ['/'])
 
-  scope(r, '/', (r) => {
-    r.resources('/auth', {
-      name: 'auth',
+  r.resources('auth', {
+    name: 'auth',
+    construct: {
+      login: { schema: blankSchema },
+      user: { schema: blankSchema },
+      verify: { schema: sessionCreateSchema, sources: ['body'] },
+      create: { schema: blankSchema },
+      logout: { schema: blankSchema },
+    },
+    actions: [
+      { action: 'login', path: 'login', method: 'get', page: true },
+      { action: 'user', path: 'user', method: 'get' },
+      { action: 'create', path: '/', method: 'post' },
+      { action: 'verify', path: 'session', method: 'patch' },
+      { action: 'logout', path: 'session', method: 'delete' },
+    ],
+  })
+
+  scope(r, (r) => {
+    r = r.sub('/', support.middlewares.checkLoggedIn()) // add middleware and new router
+    r = r.layout({ element: TaskLayout }) // set layout
+
+    r.resources('tasks', {
       construct: {
-        login: { schema: blankSchema },
-        user: { schema: blankSchema },
-        verify: { schema: sessionCreateSchema, sources: ['body'] },
-        create: { schema: blankSchema },
-        logout: { schema: blankSchema },
+        list: { schema: pageSchema, sources: ['query', 'params'] },
+        create: { schema: taskCreateWithTagsSchema },
+        update: { schema: taskUpdateWithTagsSchema },
+        done: { schema: idNumberSchema },
       },
-      actions: [
-        { action: 'login', path: '/login', method: 'get', page: true },
-        { action: 'user', path: '/user', method: 'get' },
-        { action: 'create', path: '/', method: 'post' },
-        { action: 'verify', path: '/session', method: 'patch' },
-        { action: 'logout', path: '/session', method: 'delete' },
-      ],
+      name: 'tasks',
+      actions: [...crud(), { action: 'done', path: '$id/done', method: 'post', type: 'json' }],
     })
 
-    scope(r, '/', (r) => {
-      r = r.sub('/', support.middlewares.checkLoggedIn()) // add middleware and new router
-      r = r.layout({ element: TaskLayout }) // set layout
-
-      r.resources('/tasks', {
+    scope(r, 'tasks/$taskId', (r) => {
+      r.resources('comments', {
         construct: {
-          list: { schema: pageSchema, sources: ['query', 'params'] },
-          create: { schema: taskCreateWithTagsSchema },
-          update: { schema: taskUpdateWithTagsSchema },
-          done: { schema: idNumberSchema },
+          list: { schema: taskIdSchema },
+          create: { schema: commentCreateSchema },
+          update: { schema: commentUpdateSchema },
         },
-        name: 'tasks',
-        actions: [...crud(), { action: 'done', path: '/$id/done', method: 'post', type: 'json' }],
-      })
-
-      scope(r, '/tasks/$taskId', (r) => {
-        r.resources('/comments', {
-          construct: {
-            list: { schema: taskIdSchema },
-            create: { schema: commentCreateSchema },
-            update: { schema: commentUpdateSchema },
-          },
-          name: 'taskComments',
-          actions: api('list', 'create', 'update'),
-        })
+        name: 'taskComments',
+        actions: api('list', 'create', 'update'),
       })
     })
   })
