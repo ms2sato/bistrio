@@ -193,6 +193,39 @@ describe('ServerRouter', () => {
       expect(ret.data).toStrictEqual({ msg: 'ret user item' })
     })
 
+    test('requests nested loose separator', async () => {
+      const router = await buildRouter({
+        mockResources: {
+          '/users/$userId/items/resource': {
+            index: () => ({ msg: 'ret user item' }),
+          },
+        },
+        routes: (router) => {
+          router.sub('/users/$userId').resources('items', {
+            name: 'items',
+            actions: [{ action: 'index', method: 'get', path: '/' }],
+          })
+        },
+        loadPage,
+      })
+
+      expect(getEndpoints(router)).toStrictEqual([
+        {
+          methods: ['GET'],
+          path: '/users/:userId/items.:format?',
+        },
+      ])
+
+      const ret = await fakeRequest<TestReturn>(router, {
+        url: '/users/1/items',
+        method: 'GET',
+        headers: { 'content-type': 'application/json' },
+      })
+
+      expect(ret.statusCode).toBe(200)
+      expect(ret.data).toStrictEqual({ msg: 'ret user item' })
+    })
+
     test('requests with actionOpitons', async () => {
       const createActionOptions: CreateActionOptionFunction = () => ({ test: 321 })
       const router = await buildRouter({

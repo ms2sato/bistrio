@@ -1,4 +1,4 @@
-import path from 'node:path'
+import { join } from 'node:path'
 import { Express } from 'express'
 import listEndpoints from 'express-list-endpoints'
 import { Adapter, RouterCore } from '../lib/action-context.js'
@@ -78,10 +78,11 @@ export class TestServerRouter extends ServerRouterImpl {
   }
 
   protected buildSubRouter(rpath: string, subRouteObject: RouteObject): ServerRouterImpl {
+    console.log('TestServerRouter#buildSubRouter', join(this.routePath, rpath))
     return new TestServerRouter(
       this.serverRouterConfig,
       this.clientConfig,
-      path.join(this.routePath, rpath),
+      join(this.routePath, rpath),
       subRouteObject,
       this.routerCore,
       this.routerOptions,
