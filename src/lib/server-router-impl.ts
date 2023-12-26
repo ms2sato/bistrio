@@ -330,7 +330,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
     console.log('rpath', rpath)
     const subRouter = this.buildSubRouter(rpath, subRouteObject)
 
-    this.router.use(this.formatPlaceholder(rpath), ...[...handlers, subRouter.router])
+    this.router.use(this.normalizeRoutePath(rpath), ...[...handlers, subRouter.router])
     return subRouter as unknown as Router // TODO: fix type
   }
 
@@ -620,15 +620,16 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
     }
   }
 
-  private formatPlaceholder(routePath: string) {
+  private normalizeRoutePath(routePath: string) {
+    routePath = routePath.startsWith('/') ? routePath : `/${routePath}`
     return this.serverRouterConfig.formatPlaceholderForRouter(routePath.replace(/\/$/, ''))
   }
 
   private generateRoutePath(routePath: string, type?: ActionType) {
     if (type) {
-      return `${this.formatPlaceholder(routePath)}.${type}`
+      return `${this.normalizeRoutePath(routePath)}.${type}`
     } else {
-      return `${this.formatPlaceholder(routePath)}.:format?`
+      return `${this.normalizeRoutePath(routePath)}.:format?`
     }
   }
 
