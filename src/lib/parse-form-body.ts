@@ -105,8 +105,6 @@ function createTraverser(arranger: TraverseArranger, key: string) {
         // TODO: FIX! ここで valueがundefinedなら値をbodyから受け取っていない。
         // その場合、default が指定されていたらその値をセットして終われる。
 
-        console.log(name, ret, value)
-
         if (value === undefined && ret && ret.type === 'default') {
           recordNode[name] = ret.value
           return

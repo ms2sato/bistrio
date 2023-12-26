@@ -78,7 +78,6 @@ export class TestServerRouter extends ServerRouterImpl {
   }
 
   protected buildSubRouter(rpath: string, subRouteObject: RouteObject): ServerRouterImpl {
-    console.log('TestServerRouter#buildSubRouter', join(this.routePath, rpath))
     return new TestServerRouter(
       this.serverRouterConfig,
       this.clientConfig,

@@ -327,7 +327,6 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
   sub(rpath: string, ...handlers: RequestHandler[]): Router {
     const subRouteObject = this.routeObjectPickupper.addNewSub(rpath)
 
-    console.log('rpath', rpath)
     const subRouter = this.buildSubRouter(rpath, subRouteObject)
 
     this.router.use(this.normalizeRoutePath(rpath), ...[...handlers, subRouter.router])
@@ -337,8 +336,6 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
   // protected for test
   protected buildSubRouter(rpath: string, subRouteObject: RouteObject): ServerRouter {
     // TODO: impl class SubServerRouter without build
-    console.log('buildSubRouter', rpath, join(this.routePath, rpath))
-
     return new ServerRouterImpl(
       this.serverRouterConfig,
       this.clientConfig,
@@ -395,7 +392,6 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
     const subRouteObject = hasPages ? this.routeObjectPickupper.addNewSub(rpath) : undefined
     const pageActionDescriptors: ActionDescriptor[] = []
     const fullResourceRoutePath = this.getRoutePath(rpath)
-    console.log('fullResourceRoutePath', fullResourceRoutePath)
 
     const pickPageToSubRouteObject = () => {
       if (subRouteObject) {
@@ -634,12 +630,10 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
   }
 
   private appendRoute(routePath: string, { method, type }: ActionDescriptor, handlers: express.Handler[]) {
-    console.log('appendRoute', routePath, method, type)
     const router = this.router as unknown
 
     const append = (method: HttpMethod, urlPathWithExt: string) => {
       if (hasRoutingMethod(router, method)) {
-        console.log('append', router)
         router[method](urlPathWithExt, ...handlers)
       } else {
         throw new Error(`Unreachable: router is not Object or router[${method}] is not Function`)
@@ -647,7 +641,6 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
     }
 
     const urlPathWithExt = this.generateRoutePath(routePath, type)
-    console.log('urlPathWithExt', urlPathWithExt)
     if (method instanceof Array) {
       for (const m of method) {
         append(m, urlPathWithExt)
