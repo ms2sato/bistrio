@@ -201,7 +201,7 @@ describe('ServerRouter', () => {
           },
         },
         routes: (router) => {
-          router.sub('/users/$userId').resources('items', {
+          router.sub('users/$userId').resources('items', {
             name: 'items',
             actions: [{ action: 'index', method: 'get', path: '/' }],
           })
