@@ -9,14 +9,11 @@ export const middlewares: Middlewares = {
         if (req.xhr) {
           console.error('checkedLoggedIn! response 401')
           res.status(401).json({ message: 'Unauthorized' })
-          return
-        }
-
-        if (!req.xhr) {
+        } else {
           console.log('checkedLoggedIn! redirect to /auth/login')
           res.redirect(auth$login.path()) // TODO: for flash message
-          return
         }
+        return
       }
 
       next()
