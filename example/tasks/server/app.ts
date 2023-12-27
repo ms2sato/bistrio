@@ -9,11 +9,10 @@ import Redis from 'ioredis'
 import RedisStore from 'connect-redis'
 
 import { initConfig, localeMiddleware, useExpressRouter } from 'bistrio'
-import { checkAdmin, checkLoggedIn } from './middlewares'
+import { middlewares } from './middlewares'
 import { localeMap } from '@universal/locales/index'
 import { constructView } from './customizers/construct-view'
 import { routes } from '@universal/routes/all'
-import { Middlewares } from '@/universal/routes/middlewares'
 import { serverRouterConfig } from './config/server'
 import { config } from '../config'
 import { init as initPassport } from './lib/passport-util'
@@ -82,11 +81,6 @@ export async function setup() {
       debug(`req.query: %o`, req.query)
     }
   })
-
-  const middlewares: Middlewares = {
-    checkAdmin,
-    checkLoggedIn,
-  }
 
   await useExpressRouter({ app, middlewares, routes, constructView, serverRouterConfig: serverRouterConfig() })
 

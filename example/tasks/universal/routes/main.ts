@@ -8,7 +8,7 @@ import {
   taskIdSchema,
   taskUpdateWithTagsSchema,
 } from '../params'
-import { Middlewares } from './middlewares'
+import { Middlewares } from '../middlewares'
 import TaskLayout from '../components/tasks/TaskLayout'
 
 const UserLayout = lazy(() => import(/* webpackMode: "eager" */ '../components/UserLayout'))
