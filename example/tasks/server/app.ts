@@ -30,7 +30,7 @@ export async function setup() {
   const app = express()
   app.use(compression())
 
-  const skipList = ['/js/', '/stylesheets/', '/favicon.ico']
+  const skipList = ['/js/', '/css/', '/favicon.ico']
   app.use(
     logger('dev', {
       skip: (req) => skipList.some((path) => req.originalUrl.startsWith(path)),
