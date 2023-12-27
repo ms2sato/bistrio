@@ -16,7 +16,7 @@ declare global {
   // eslint-disable-next-line no-var
   var resources: Record<string, Resource>
 
-  // eslint-disable-next-line no-var
+  // eslint-disable-next-line no-var, @typescript-eslint/no-explicit-any
   var routes: Record<string, any>
 }
 
