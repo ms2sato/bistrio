@@ -1,5 +1,5 @@
 import { type RequestHandler } from 'express'
-import { auth$login } from '@bistrio/routes/all/named_endpoints'
+import { auth$login } from '@bistrio/routes/main/named_endpoints'
 import { Middlewares } from '@/universal/middlewares'
 
 export const middlewares: Middlewares = {

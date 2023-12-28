@@ -16,7 +16,7 @@
     "watch:livereload": "NODE_ENV=development dotenv -e .env.development -- livereload -w 1500 -ee 'tsx,ts' 'dist/universal,public'",
     "watch:client": "NODE_ENV=development dotenv -e .env.development -- tsx node_modules/.bin/webpack --watch --config ./config/client/webpack.config.ts",
     "copy-assets": "cpx 'public/**' dist/public",
-    "build": "npm run copy-assets && npm run bistrio:gen && npm run build:client && npm run build:server",
+    "build": "npm run bistrio:gen && npm run build:client && npm run build:server",
     "clean": "rimraf dist .cache .bistrio",
     "console": "DEBUG=-bistrio:console NODE_ENV=development dotenv -e .env.development -- node --import ./dist/server/console.js",
     "lint": "npm run eslint && npm run check-types",
@@ -39,7 +39,7 @@
     "db:seed:test": "NODE_ENV=test dotenv -e .env.test -- prisma db seed",
     "db:truncate:test": "NODE_ENV=test dotenv -e .env.test -- tsx prisma/truncate.ts",
     "build:client": "tsx node_modules/.bin/webpack build --config ./config/client/webpack.config.ts",
-    "build:server": "cpx .bistrio/filemap.json dist/.bistrio/ && tsx node_modules/.bin/webpack build --config ./config/server/webpack.config.ts",
+    "build:server": "npm run copy-assets && cpx .bistrio/filemap.json dist/.bistrio/ && tsx node_modules/.bin/webpack build --config ./config/server/webpack.config.ts",
     "bistrio:gen": "tsx bin/generate.ts",
     "bistrio:gen:clean": "rimraf .bistrio"
   },
