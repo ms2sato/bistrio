@@ -4,8 +4,8 @@ import { ActionContextCreator, SchemaUtil, routerPlaceholderRegex } from '../ind
 import { FileNotFoundError } from './shared/common.js'
 import { LoadFunc } from './server-router-config.js'
 import { ActionContext, CreateActionOptionFunction, MutableActionContext } from './action-context.js'
-import { createZodTraverseArrangerCreator } from './create-zod-traverse-arranger-creator.js'
-import { parseFormBody } from './parse-form-body.js'
+import { createZodTraverseArrangerCreator } from './shared/create-zod-traverse-arranger-creator.js'
+import { parseFormBody } from './shared/parse-form-body.js'
 import { ActionContextImpl } from './server-router-impl.js'
 
 export function arrangeFormInput(ctx: MutableActionContext, sources: readonly string[], schema: AnyZodObject) {

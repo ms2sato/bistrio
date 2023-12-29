@@ -1,4 +1,5 @@
 esm/**/*
 cjs/**/*
+types/**/*
 example/**/*
 jest.config.cjs

@@ -4,17 +4,22 @@
   "files": [
     "esm",
     "cjs",
-    "config"
+    "config",
+    "types"
   ],
   "type": "module",
   "exports": {
     ".": {
+      "types": "./types/index.d.ts",
+      "require": "./cjs/index.js",
       "import": "./esm/index.js",
-      "require": "./cjs/index.js"
+      "default": "./esm/index.js"
     },
     "./client": {
+      "types": "./types/client.d.ts",
+      "require": "./cjs/client.js",
       "import": "./esm/client.js",
-      "require": "./cjs/client.js"
+      "default": "./esm/client.js"
     }
   },
   "main": "cjs/index.js",
@@ -22,10 +27,8 @@
   "scripts": {
     "watch": "npm run clean && npx tsc -w",
     "prebuild": "npm run clean",
-    "build": "npm run build:cjs && npm run build:esm && ./scripts/put-package-file",
-    "build:cjs": "tsc --project ./tsconfig.cjs.json",
-    "build:esm": "tsc --project ./tsconfig.esm.json",
-    "clean": "npx rimraf dist",
+    "build": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json && ./scripts/put-package-file",
+    "clean": "npx rimraf cjs esm types",
     "lint": "npm run eslint && npm run check-types",
     "lint:fix": "npm run eslint:fix && npm run check-types && npm run format",
     "eslint": "npx eslint .",

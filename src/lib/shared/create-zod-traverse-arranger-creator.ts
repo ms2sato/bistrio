@@ -1,5 +1,5 @@
 import { AnyZodObject, ZodDefault } from 'zod'
-import { strip, cast, ArrangeResult, nullArrangeResult, isZodArray } from './shared/zod-util.js'
+import { strip, cast, ArrangeResult, nullArrangeResult, isZodArray } from './zod-util.js'
 import { NextRet, TraverseArranger, TraverseArrangerCreator } from './parse-form-body.js'
 
 type ShapedSchema = {
