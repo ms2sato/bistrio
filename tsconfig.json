@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "sourceMap": true,
-    "module": "Node16",
-    "moduleResolution": "Node16",
+    "module": "ES2022",
+    "moduleResolution": "Bundler",
     "strict": true,
     "lib": [
       "ES2022",
@@ -17,6 +17,6 @@
   },
   "include": ["src", "jest.config.cjs"],
   "exclude": [
-    "node_modules", "cjs", "esm"
+    "node_modules", "cjs", "esm", "types"
   ]
 }
