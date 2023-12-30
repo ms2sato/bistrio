@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 cat >cjs/package.json <<!EOF
 {
     "type": "commonjs"
