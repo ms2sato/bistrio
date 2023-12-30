@@ -54,4 +54,5 @@ jobs:
           cache: 'npm'
       - run: npm run ci-all
       - run: WEBPACK_MODE=production npm run build-all
+      - run: npm run lint-all
       - run: npm test
