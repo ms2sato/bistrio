@@ -118,7 +118,7 @@ export type UseEventStatus = 'fulfilled' | 'pending' | 'rejected' | null
 
 export function useUIEvent<R, E = unknown>({ modifier, onSuccess, onError }: UseEventProps<R, E>) {
   const [result, setResult] = useState<R | undefined>(undefined)
-  const [err, setError] = useState<unknown | null>(null)
+  const [err, setError] = useState<unknown>(null)
   const [status, setStatus] = useState<UseEventStatus>(null)
   const pending = status === 'pending'
 

@@ -10,7 +10,7 @@ export class opt<T> {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ResourceMethod = (...args: any[]) => any | Promise<any>
+export type ResourceMethod = (...args: any[]) => any
 
 export type Resource = Record<string, ResourceMethod>
 export type NamedResources = {
