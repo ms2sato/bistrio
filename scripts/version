@@ -4,7 +4,7 @@
 # version [<newversion> | major | minor | patch | premajor | preminor | prepatch | prerelease | from-git]
 # args: newversion - semver string (default "patch")
 
-git checkout main
+git switch main
 
 current_version=`node -p "require('./package.json').version"`
 echo "from: $current_version"
@@ -23,3 +23,4 @@ git add .
 git commit -m "chore: update version to $new_version"
 
 git push origin $new_branch
+git switch main
