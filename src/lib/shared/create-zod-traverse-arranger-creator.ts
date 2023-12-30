@@ -46,7 +46,7 @@ export class ZodArranger implements TraverseArranger {
         return { type: 'default', value: (pathSchema as ZodDefault<any>)._def.defaultValue() }
       }
     } else {
-      throw new Error(`Unexpected Type: ${this.schema.toString()}`)
+      throw new Error(`Unexpected Type: ${JSON.stringify(this.schema)}`)
     }
   }
 
@@ -60,7 +60,7 @@ export class ZodArranger implements TraverseArranger {
       }
     }
 
-    throw new Error(`Unexpected Type: ${this.schema.toString()}`)
+    throw new Error(`Unexpected Type: ${JSON.stringify(this.schema)}`)
   }
 
   arrangeIndexedArrayItemOnLast(_name: string, _node: unknown, value: unknown, _pathIndex: number): ArrangeResult {
@@ -69,7 +69,7 @@ export class ZodArranger implements TraverseArranger {
       if (isParentSchema(arraySchema)) {
         return cast(arraySchema.element, value)
       }
-      throw new Error(`Unexpected Type: ${this.schema.toString()}`)
+      throw new Error(`Unexpected Type: ${JSON.stringify(this.schema)}`)
     }
     return nullArrangeResult
   }
@@ -83,7 +83,7 @@ export class ZodArranger implements TraverseArranger {
     }
 
     if (this.schema) {
-      throw new Error(`Unexpected Type: name=${_name}, ${this.schema.toString()}`)
+      throw new Error(`Unexpected Type: name=${_name}, ${JSON.stringify(this.schema)}`)
     } else {
       throw new Error(`Unexpected Type: name=${_name}, without schema`)
     }

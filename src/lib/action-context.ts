@@ -50,7 +50,7 @@ export type MutableActionContext = ActionContext & {
 export type Handler = (ctx: ActionContext) => void | Promise<void>
 
 export type Responder<Opt = unknown, Out = unknown, Src = unknown> = {
-  success?: (ctx: ActionContext, output: Out, option?: Opt) => unknown | Promise<unknown>
+  success?: (ctx: ActionContext, output: Out, option?: Opt) => unknown
   invalid?: (ctx: ActionContext, err: ValidationError, source: Src, option?: Opt) => void | Promise<void>
   fatal?: (ctx: ActionContext, err: Error, option?: Opt) => void | Promise<void>
 }
@@ -66,7 +66,7 @@ export type Adapter<Opt = unknown, In = unknown> = {
   [key: string]: Handler | Responder<Opt> | RequestCallback<In>
 }
 
-export type CreateActionOptionFunction = (ctx: ActionContext) => unknown | Promise<unknown>
+export type CreateActionOptionFunction = (ctx: ActionContext) => unknown
 
 /**
  * @returns If not rendered return false.
