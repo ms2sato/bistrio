@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+# Usage:
+# version [<newversion> | major | minor | patch | premajor | preminor | prepatch | prerelease | from-git]
+# args: newversion - semver string (default "patch")
+
+git switch main
+git pull origin main
+
+current_version=`node -p "require('./package.json').version"`
+echo "from: $current_version"
+
+version_type=${1:-patch}
+npm version $version_type --no-commit-hooks --no-git-tag-version
+new_version=`node -p "require('./package.json').version"`
+echo "to : $new_version"
+
+new_branch="version-$new_version"
+git switch -c $new_branch
+
+npm run renew
+
+git add .
+git commit -m "chore: update version to $new_version"
+
+git push origin $new_branch
+git switch main
