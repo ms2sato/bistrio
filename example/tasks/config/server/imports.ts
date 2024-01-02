@@ -19,4 +19,3 @@ export function loadPage(filePath: string) {
     throw new FileNotFoundError(filePath, { cause: err })
   }
 }
-
