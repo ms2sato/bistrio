@@ -53,16 +53,14 @@ export function routes(r: Router, support: RouterSupport<Middlewares>) {
       actions: [...crud(), { action: 'done', path: '$id/done', method: 'post', type: 'json' }],
     })
 
-    scope(r, 'tasks/$taskId', (r) => {
-      r.resources('comments', {
-        construct: {
-          list: { schema: taskIdSchema },
-          create: { schema: commentCreateSchema },
-          update: { schema: commentUpdateSchema },
-        },
-        name: 'taskComments',
-        actions: api('list', 'create', 'update'),
-      })
+    r.resources('tasks/$taskId/comments', {
+      construct: {
+        list: { schema: taskIdSchema },
+        create: { schema: commentCreateSchema },
+        update: { schema: commentUpdateSchema },
+      },
+      name: 'taskComments',
+      actions: api('list', 'create', 'update'),
     })
   })
 }

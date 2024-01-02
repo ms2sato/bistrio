@@ -160,6 +160,73 @@ describe('ServerRouter', () => {
       expect(ret.data).toStrictEqual({ msg: 'ret build' })
     })
 
+    // FIXME: not supported
+    xtest('blank resource', async () => {
+      const router = await buildRouter({
+        mockResources: {
+          '/resource': {
+            load: () => ({ msg: 'ret user item' }),
+          },
+        },
+        routes: (router) => {
+          router.resources('/', {
+            name: 'items',
+            actions: [{ action: 'load', method: 'get', path: '/', type: 'json' }],
+          })
+        },
+        loadPage,
+      })
+
+      expect(getEndpoints(router)).toStrictEqual([
+        {
+          methods: ['GET'],
+          path: '.json',
+        },
+      ])
+
+      const ret = await fakeRequest<TestReturn>(router, {
+        url: '.json',
+        method: 'GET',
+        headers: { 'content-type': 'application/json' },
+      })
+
+      expect(ret.statusCode).toBe(200)
+      expect(ret.data).toStrictEqual({ msg: 'ret user item' })
+    })
+
+    // FIXME: not supported
+    xtest('blank nested resource', async () => {
+      const router = await buildRouter({
+        mockResources: {
+          '/tasks/resource': {
+            load: () => ({ msg: 'ret user item' }),
+          },
+        },
+        routes: (router) => {
+          router.sub('/tasks').resources('/', {
+            name: 'items',
+            actions: [{ action: 'load', method: 'get', path: '/', type: 'json' }],
+          })
+        },
+        loadPage,
+      })
+
+      expect(getEndpoints(router)).toStrictEqual([
+        {
+          methods: ['GET'],
+          path: '/tasks.json',
+        },
+      ])
+
+      const ret = await fakeRequest<TestReturn>(router, {
+        url: 'tasks.json',
+        method: 'GET',
+        headers: { 'content-type': 'application/json' },
+      })
+
+      expect(ret.statusCode).toBe(200)
+      expect(ret.data).toStrictEqual({ msg: 'ret user item' })
+    })
     test('requests nested', async () => {
       const router = await buildRouter({
         mockResources: {
