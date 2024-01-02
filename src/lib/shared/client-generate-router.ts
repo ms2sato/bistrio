@@ -302,12 +302,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
     const config = this.clientConfig
     const fetcher = this.clientConfig.createFetcher()
 
-    const createStubMethod = (
-      ad: ActionDescriptor,
-      resourceUrl: string,
-      schema: AnyZodObject,
-      method: HttpMethod,
-    ) => {
+    const createStubMethod = (ad: ActionDescriptor, resourceUrl: string, schema: AnyZodObject, method: HttpMethod) => {
       if (schema === blankSchema) {
         return async function (...options: unknown[]) {
           const option = options.length > 0 ? (options[0] as Record<string, string | number>) : {}

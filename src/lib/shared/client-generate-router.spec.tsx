@@ -44,13 +44,23 @@ describe('createPath with type', () => {
   })
 
   test('replace success for multi placeholders on pathFormat', () => {
-    const ret = createPath(clientConfig, '/api', { path: '/parent/$parentId/test/$id', type: 'json' }, { parentId: 5, id: 3 })
+    const ret = createPath(
+      clientConfig,
+      '/api',
+      { path: '/parent/$parentId/test/$id', type: 'json' },
+      { parentId: 5, id: 3 },
+    )
     expect(ret.httpPath).toEqual('/api/parent/5/test/3.json')
     expect(ret.keys).toEqual(['parentId', 'id'])
   })
 
   test('replace success for a placeholder on resourceUrl', () => {
-    const ret = createPath(clientConfig, '/api/parent/$parentId/', { path: 'test/$id', type: 'json' }, { parentId: 5, id: 3 })
+    const ret = createPath(
+      clientConfig,
+      '/api/parent/$parentId/',
+      { path: 'test/$id', type: 'json' },
+      { parentId: 5, id: 3 },
+    )
     expect(ret.httpPath).toEqual('/api/parent/5/test/3.json')
     expect(ret.keys).toEqual(['parentId', 'id'])
   })

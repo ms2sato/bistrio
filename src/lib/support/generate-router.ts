@@ -74,7 +74,9 @@ export class GenerateRouter implements Router {
     const actionRegex = /^[a-z][_A-Za-z0-9]*$/
     for (const ad of config.actions) {
       if (!actionRegex.test(ad.action)) {
-        throw new Error(`invalid action: "${ad.action}" in resource: "${config.name}": match to ${actionRegex.toString()}`)
+        throw new Error(
+          `invalid action: "${ad.action}" in resource: "${config.name}": match to ${actionRegex.toString()}`,
+        )
       }
       const linkPath = join(routePath, ad.path)
       this.registerLink(linkPath, ad.method, `${config.name}$${ad.action}`)
