@@ -53,6 +53,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
       - run: npm run ci-all
+      - run: npm run format-all
       - run: WEBPACK_MODE=production npm run build-all
       - run: npm run lint-all
       - run: npm test
