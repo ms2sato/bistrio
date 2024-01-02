@@ -13,7 +13,7 @@
     "prewatch": "npm run bistrio:gen",
     "watch": "run-p watch:**",
     "watch:server": "NODE_ENV=development dotenv -e .env.development -- npm-watch",
-    "watch:livereload": "NODE_ENV=development dotenv -e .env.development -- livereload -w 1500 -ee 'tsx,ts' 'dist/universal,public'",
+    "watch:livereload": "NODE_ENV=development dotenv -e .env.development -- livereload -w 1500 -ee 'tsx,ts' 'dist'",
     "watch:client": "NODE_ENV=development dotenv -e .env.development -- tsx node_modules/.bin/webpack --watch --config ./config/client/webpack.config.ts",
     "copy-assets": "cpx 'public/**' dist/public",
     "build": "npm run bistrio:gen && npm run build:client && npm run build:server",
