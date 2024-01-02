@@ -4,11 +4,11 @@
     "../server/**/*.ts",
     "../server/**/*.tsx",
     "../server/**/*.js",
+    "../universal/**/*.ts",
     "../universal/**/*.tsx",
     "../prisma/**/*.ts",
     "../bin/**/*.ts",
     "../__tests__/**/*.ts",
-    "./config/client/webpack.config.ts",
-    "./config/server/webpack.config.ts",
+    "./**/*.ts",
   ]
 }
