@@ -42,6 +42,7 @@
     "build-all": "WEBPACK_MODE=production npm --prefix example/tasks run build",
     "ci-all": "npm ci && npm run package && npm --prefix example/tasks update bistrio && npm --prefix example/tasks i",
     "lint-all": "npm run lint && npm --prefix example/tasks run lint",
+    "format-all": "npm run format && npm --prefix example/tasks run format",
     "renew": "npm run package && npm --prefix example/tasks install file:./bistrio-$npm_package_version.tgz"
   },
   "dependencies": {
