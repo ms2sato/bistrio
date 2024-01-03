@@ -20,7 +20,7 @@
     "clean": "rimraf dist .cache .bistrio",
     "console": "DEBUG=-bistrio:console NODE_ENV=development dotenv -e .env.development -- node --import ./dist/server/console.js",
     "lint": "npm run eslint && npm run check-types",
-    "lint:fix": "npm run eslint:fix && npm run check-types && npm run format",
+    "lint:fix": "npm run eslint:fix && npm run check-types",
     "eslint": "eslint .",
     "eslint:fix": "eslint . --fix",
     "format": "prettier --check './**/*.{js,ts,tsx,json,prisma}'",

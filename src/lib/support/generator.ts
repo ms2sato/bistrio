@@ -42,13 +42,13 @@ export async function generate<M extends Middlewares>({
   console.log('Generated!')
 }
 
-const router = new GenerateRouter()
 function generateForEntry<M extends Middlewares>(
   generatedRoutesDir: string,
   name: string,
   routes: (router: Router, support: RouterSupport<M>) => void,
   config: Config,
 ) {
+  const router = new GenerateRouter()
   routes(router, nullRouterSupport as RouterSupport<M>)
 
   const genRoot = join(generatedRoutesDir, name)
