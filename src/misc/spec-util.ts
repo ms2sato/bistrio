@@ -103,7 +103,7 @@ export type MockResources = Record<string, Resource>
 
 export type RoutesFunction = (router: ServerRouterImpl) => void
 
-export const getDummyServerRouterImpl = ({loadPage}: {loadPage: LoadPageFunc}) => {
+export const getDummyServerRouterImpl = ({ loadPage }: { loadPage: LoadPageFunc }) => {
   const routePath = '/'
   const routeObject: RouteObject = {}
   const routerCore: RouterCore = {

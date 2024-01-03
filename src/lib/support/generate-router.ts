@@ -1,7 +1,14 @@
 import { join, resolve, relative, dirname } from 'node:path'
 import { writeFileSync, existsSync } from 'node:fs'
 
-import { HttpMethod, ResourceRouteConfig, Router, RouterLayoutType, RouterOptions, checkRpath } from '../../lib/shared/common.js'
+import {
+  HttpMethod,
+  ResourceRouteConfig,
+  Router,
+  RouterLayoutType,
+  RouterOptions,
+  checkRpath,
+} from '../../lib/shared/common.js'
 import { Config } from '../config.js'
 import { isArray } from '../shared/type-util.js'
 
