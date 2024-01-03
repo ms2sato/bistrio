@@ -138,3 +138,20 @@ function scope(router: Router, subPath: string | Scope, scopeFun?: Scope): Route
 export { scope }
 
 export const routerPlaceholderRegex = /\$([a-z_][0-9a-zA-Z_]+)/g
+
+export const checkRpath = (rpath: string): string => {
+  rpath = rpath.trim()
+  if (rpath === '') {
+    throw new Error('Router.resources() first argument cannnot be blank string')
+  }
+  if (rpath === '/') {
+    throw new Error('Router.resources() first argument cannnot be "/"')
+  }
+
+  const regex = /^[a-zA-Z0-9$/.]+$/
+  if (!regex.test(rpath)) {
+    throw new Error(`Router.resources() first argument is not match format ${regex}`)
+  }
+
+  return rpath
+}

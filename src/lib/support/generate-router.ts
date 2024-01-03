@@ -1,7 +1,7 @@
 import { join, resolve, relative, dirname } from 'node:path'
 import { writeFileSync, existsSync } from 'node:fs'
 
-import { HttpMethod, ResourceRouteConfig, Router, RouterLayoutType, RouterOptions } from '../../lib/shared/common.js'
+import { HttpMethod, ResourceRouteConfig, Router, RouterLayoutType, RouterOptions, checkRpath } from '../../lib/shared/common.js'
 import { Config } from '../config.js'
 import { isArray } from '../shared/type-util.js'
 
@@ -59,6 +59,8 @@ export class GenerateRouter implements Router {
   }
 
   resources(rpath: string, config: ResourceRouteConfig): void {
+    rpath = checkRpath(rpath)
+
     const resourceRegex = /^[a-z][A-Za-z0-9]*$/
     if (!resourceRegex.test(config.name)) {
       throw new Error(`invalid resource name: "${config.name}": match to ${resourceRegex.toString()}`)

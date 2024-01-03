@@ -103,6 +103,27 @@ export type MockResources = Record<string, Resource>
 
 export type RoutesFunction = (router: ServerRouterImpl) => void
 
+export const getDummyServerRouterImpl = ({loadPage}: {loadPage: LoadPageFunc}) => {
+  const routePath = '/'
+  const routeObject: RouteObject = {}
+  const routerCore: RouterCore = {
+    handlerBuildRunners: [],
+    nameToResource: new Map(),
+    nameToPath: new Map(),
+    routeObject,
+  }
+  const routerOptions: RouterOptions = { hydrate: false }
+
+  return new ServerRouterImpl(
+    initServerRouterConfig({ baseDir: './', loadPage }),
+    defaultClientConfig(),
+    routePath,
+    routeObject,
+    routerCore,
+    routerOptions,
+  )
+}
+
 export const buildRouter = async ({
   routes,
   mockResources,
