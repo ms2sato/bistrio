@@ -6,7 +6,15 @@ import { CreateActionOptionFunction } from './action-context.js'
 import { ConstructViewFunc, Resource, ServerRouterConfig, idNumberSchema } from '../index.js'
 import { buildActionContextCreator } from './build-action-context-creator.js'
 import { initServerRouterConfig } from './init-server-router-config.js'
-import { RoutesFunction, buildRouter, fakeRequest, getEndpoints, MockResources } from '../misc/spec-util.js'
+import {
+  RoutesFunction,
+  buildRouter,
+  fakeRequest,
+  getEndpoints,
+  MockResources,
+  getDummyServerRouterImpl,
+} from '../misc/spec-util.js'
+import { ServerRouterImpl } from './server-router-impl.js'
 
 type ActionOption = { test: number }
 type TestReturn = { msg: string; opt?: opt<ActionOption> }
@@ -66,6 +74,18 @@ describe('ServerRouter', () => {
       <Outlet />
     </div>
   )
+
+  describe('validations', () => {
+    test('Router.resources 1st argument is not blank string', () => {
+      const router = getDummyServerRouterImpl({ loadPage })
+      expect(() => {
+        router.resources('', {
+          name: 'test_resource',
+          actions: [{ action: 'build', method: 'get', path: '/build' }],
+        })
+      }).toThrow('Router.resources() first argument cannnot be blank string')
+    })
+  })
 
   describe('endpoints', () => {
     test('simple', async () => {

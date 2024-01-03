@@ -12,6 +12,7 @@ import {
   RouterLayoutType,
   RouterOptions,
   EndpointFunc,
+  checkRpath,
 } from '../index.js'
 import { ServerRouterConfig } from './server-router-config.js'
 import { RequestHandler } from 'express'
@@ -54,6 +55,7 @@ export abstract class BasicRouter implements Router {
   protected abstract createPagesHandlerBuildRunner(rpath: string, children: string[]): HandlerBuildRunner
 
   resources(rpath: string, config: ResourceRouteConfig): void {
+    rpath = checkRpath(rpath)
     this.routerCore.handlerBuildRunners.push(this.createResourcesHandlerBuildRunner(rpath, config))
   }
 

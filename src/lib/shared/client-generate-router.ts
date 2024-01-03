@@ -22,6 +22,7 @@ import {
   pageActionDescriptor,
   routerPlaceholderRegex,
   ActionType,
+  checkRpath,
 } from '../../client.js'
 import { filterWithoutKeys, toURLSearchParams } from './object-util.js'
 import { pathJoin } from './path-util.js'
@@ -299,6 +300,8 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
   }
 
   resources(rpath: string, routeConfig: ResourceRouteConfig): void {
+    rpath = checkRpath(rpath)
+
     const config = this.clientConfig
     const fetcher = this.clientConfig.createFetcher()
 

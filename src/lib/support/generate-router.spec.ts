@@ -29,6 +29,18 @@ describe('validations', () => {
       router.resources('/test', { name: 'testResource1', actions: [{ action: 'Test1', method: 'get', path: '/' }] }),
     ).toThrowError()
   })
+
+  test('Router.resources 1st argument is not blank string', () => {
+    const router = new GenerateRouter()
+    expect(() => {
+      // blank rpath
+      router.resources('', {
+        name: 'test_resource',
+        actions: [{ action: 'build', method: 'get', path: '/build' }],
+        construct: { build: { schema: blankSchema } },
+      })
+    }).toThrow('Router.resources() first argument cannnot be blank string')
+  })
 })
 
 test('resources', () => {

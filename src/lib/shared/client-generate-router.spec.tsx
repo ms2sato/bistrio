@@ -94,6 +94,23 @@ describe('ClientGenretateRouter', () => {
     return cgr
   }
 
+  describe('validations', () => {
+    test('Router.resources 1st argument is not blank string', () => {
+      const router = new ClientGenretateRouter<NamedResources>(
+        { ...defaultClientConfig(), host: () => 'dummy' },
+        (pageName: string) => pageNameToDummyComponent[pageName],
+      )
+
+      expect(() => {
+        // blank rpath
+        router.resources('', {
+          name: 'test_resource',
+          actions: [{ action: 'build', method: 'get', path: '/build' }],
+        })
+      }).toThrow('Router.resources() first argument cannnot be blank string')
+    })
+  })
+
   test('pickup pages', async () => {
     const routes = (router: Router) => {
       router.resources('/users', {

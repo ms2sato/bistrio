@@ -8,6 +8,22 @@ type ActionOption = { test: number }
 const DummyComponent = () => <div>test</div>
 const loadPage: LoadPageFunc = () => DummyComponent
 
+describe('validations', () => {
+  test('Router.resources 1st argument is not blank string', () => {
+    const holder: Record<string, Resource> = {}
+    const router = new ResourceHolderCreateRouter(holder, initServerRouterConfig({ baseDir: './', loadPage: loadPage }))
+
+    expect(() => {
+      // blank rpath
+      router.resources('', {
+        name: 'test_resource',
+        actions: [{ action: 'build', method: 'get', path: '/build' }],
+        construct: { build: { schema: blankSchema } },
+      })
+    }).toThrow('Router.resources() first argument cannnot be blank string')
+  })
+})
+
 test('standard', async () => {
   const holder: Record<string, Resource> = {}
   const router = new ResourceHolderCreateRouter(holder, initServerRouterConfig({ baseDir: './', loadPage: loadPage }))
