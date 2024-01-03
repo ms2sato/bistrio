@@ -14,7 +14,6 @@ import {
   MockResources,
   getDummyServerRouterImpl,
 } from '../misc/spec-util.js'
-import { ServerRouterImpl } from './server-router-impl.js'
 
 type ActionOption = { test: number }
 type TestReturn = { msg: string; opt?: opt<ActionOption> }
