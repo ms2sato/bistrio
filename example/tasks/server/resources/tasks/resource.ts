@@ -1,8 +1,10 @@
-import { defineResource, IdNumberParams, PageParams, Paginated } from 'bistrio'
+import { defineResource, IdNumberParams, opt, PageParams, Paginated } from 'bistrio'
 import { getPrismaCilent } from '@server/lib/prisma-util'
 import { TaskCreateWithTagsParams, TaskUpdateWithTagsParams } from '@/universal/params'
 import { TaskWithTags } from '@/universal/types'
 import { Task } from '@prisma/client'
+import { CustomMethodOption } from '@/server/customizers'
+import { Tasks } from '@bistrio/interfaces'
 
 const prisma = getPrismaCilent()
 
@@ -74,4 +76,4 @@ export default defineResource((_support, _options) => ({
   destroy: async ({ id }: IdNumberParams) => await prisma.task.delete({ where: { id } }),
 
   done: async ({ id }: IdNumberParams) => await prisma.task.update({ where: { id }, data: { done: true } }),
-}))
+} as const satisfies Tasks<opt<CustomMethodOption>>))

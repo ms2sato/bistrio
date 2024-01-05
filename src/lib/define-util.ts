@@ -1,7 +1,6 @@
 import {
   ActionSupport,
   RequestCallback,
-  Resource,
   ResourceFunc,
   ResourceSupport,
   Responder,
@@ -9,7 +8,7 @@ import {
   Handler,
 } from '../index.js'
 
-export function defineResource<R extends Resource>(
+export function defineResource<R>(
   callback: (support: ResourceSupport, config: ResourceRouteConfig) => R,
 ) {
   return callback
