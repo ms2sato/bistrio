@@ -162,3 +162,6 @@ export function deepCast<S extends AnyZodObject>(schema: S, obj: unknown): Zod.i
   }
   return record
 }
+
+// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+export const isBlank = (schema: AnyZodObject) => Object.keys(schema.shape).length === 0

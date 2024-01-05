@@ -84,4 +84,6 @@ function generateForAll<M extends Middlewares>(
   router.createTypes({ out: join(genRoot, 'index.ts') })
   router.createNamedEndpoints({ out: join(genRoot, 'named_endpoints.ts') })
   router.createEndpoints({ out: join(genRoot, 'endpoints.ts') })
+  
+  router.createInterfaces({ out: join(config.structure.generatedDir, 'interfaces.ts') })
 }

@@ -1,7 +1,10 @@
 import { join, resolve, relative, dirname } from 'node:path'
 import { writeFileSync, existsSync } from 'node:fs'
 
+import { createTypeAlias, printNode, zodToTs } from 'zod-to-ts'
+
 import {
+  ActionDescriptor,
   HttpMethod,
   ResourceRouteConfig,
   Router,
@@ -11,6 +14,7 @@ import {
 } from '../../lib/shared/common.js'
 import { Config } from '../config.js'
 import { isArray } from '../shared/type-util.js'
+import { isBlank } from '../shared/zod-util.js'
 
 export type LinkFunctionInfo = {
   name: string
@@ -51,14 +55,15 @@ export class GenerateRouter implements Router {
       named: [],
       unnamed: [],
     },
+    readonly resourceRouterConfigs: ResourceRouteConfig[] = [],
   ) {}
 
   sub(rpath: string, ..._args: unknown[]): Router {
-    return new GenerateRouter(join(this.httpPath, rpath), this.nameToPath, this.links)
+    return new GenerateRouter(join(this.httpPath, rpath), this.nameToPath, this.links, this.resourceRouterConfigs)
   }
 
   layout(_props: RouterLayoutType): Router {
-    return new GenerateRouter(this.httpPath, this.nameToPath, this.links)
+    return new GenerateRouter(this.httpPath, this.nameToPath, this.links, this.resourceRouterConfigs)
   }
 
   options(_value: RouterOptions) {
@@ -90,6 +95,8 @@ export class GenerateRouter implements Router {
       const linkPath = join(routePath, ad.path)
       this.registerLink(linkPath, ad.method, `${config.name}$${ad.action}`)
     }
+
+    this.resourceRouterConfigs.push(config)
   }
 
   pages(rpath: string, children: string[]): void {
@@ -175,6 +182,10 @@ entry<N2R>({
     writeFileSync(out, this.generateUnnamedEndpoints())
   }
 
+  createInterfaces({ out }: { out: string }) {
+    writeFileSync(out, this.generateInterfaces())
+  }
+
   // public for test
   generateNamedEndpoints() {
     return this.generateEndpoints(this.links.named, getNamedFunctionString)
@@ -182,6 +193,55 @@ entry<N2R>({
 
   generateUnnamedEndpoints() {
     return this.generateEndpoints(this.links.unnamed, getUnnamedFunctionString)
+  }
+
+  generateInterfaces() {
+    return this.resourceRouterConfigs
+      .filter((config) => config.actions && config.actions.length > 0)
+      .map((config) => this.generateInterface(config))
+      .join('\n')
+  }
+
+  private generateInterface(config: ResourceRouteConfig) {
+    const formatTypeName = (name: string) => `${name[0].toUpperCase()}${name.slice(1)}`
+    const formatParamName = (ad: ActionDescriptor) => `${interfaceName}${formatTypeName(ad.action)}Params`
+    const typeAliasStr = (ad: ActionDescriptor) => {
+      const schema = config.construct && config.construct[ad.action]?.schema
+      if (!schema || isBlank(schema)) {
+        return
+      }
+      const paramsName = formatParamName(ad)
+      const { node } = zodToTs(schema, paramsName)
+      const typeAlias = createTypeAlias(node, paramsName)
+      const typeAliasStr = printNode(typeAlias, {
+        omitTrailingSemicolon: true,
+      })
+      return `export ${typeAliasStr}`
+    }
+
+    const actionStr = (ad: ActionDescriptor) => {
+      const argsStr = `options?: OP`
+      const schema = config.construct && config.construct[ad.action]?.schema
+      if (!schema || isBlank(schema)) {
+        return `${ad.action}(${argsStr}): unknown`
+      }
+
+      const paramsName = formatParamName(ad)
+      return `${ad.action}(params: ${paramsName}, ${argsStr}): unknown`
+    }
+
+    if (!config.actions) {
+      throw new Error(`ResourceRouteConfig has no actions: ${config.name}`)
+    }
+
+    const interfaceName = formatTypeName(config.name)
+
+    return `${config.actions.map((ad) => typeAliasStr(ad)).join('\n')}
+
+export interface ${interfaceName}<OP> {
+  ${config.actions.map((ad) => actionStr(ad)).join('\n  ')}
+}
+`
   }
 
   private generateEndpoints(endpoints: LinkFunctionInfo[], getFunctionString: GetFunctionStringFunc) {

@@ -1,5 +1,11 @@
+import { z } from 'zod'
 import { blankSchema } from '../shared/schemas.js'
 import { GenerateRouter } from './generate-router.js'
+
+const testResourceSchema = z.object({
+  testId: z.string(),
+  id: z.number(),
+})
 
 describe('validations', () => {
   test('Resource name MUST not include any marks', () => {
@@ -70,15 +76,21 @@ test('resources', () => {
   expect(router.generateUnnamedEndpoints())
     .toEqual(`export const __test__build = Object.freeze({ path: () => { return \`/test/build\` }, method: 'get' })
 `)
+  expect(router.generateInterfaces()).toEqual(`
+
+export interface TestResource<OP> {
+  build(options?: OP): unknown
+}
+`)
 })
 
-test('resources with options', () => {
+test('resources with route parameters', () => {
   const router = new GenerateRouter()
 
   router.resources('/test/$testId', {
     name: 'testResource',
     actions: [{ action: 'build', method: 'get', path: '/$id', page: true }],
-    construct: { build: { schema: blankSchema } },
+    construct: { build: { schema: testResourceSchema } },
   })
 
   expect(router.links.named[0]).toEqual({
@@ -97,8 +109,19 @@ test('resources with options', () => {
   expect(router.generateNamedEndpoints())
     .toEqual(`export const testResource$build = Object.freeze({ path: ({ testId, id }: { testId: string|number, id: string|number }) => { return \`/test/\${testId}/\${id}\` }, method: 'get' })
 `)
+
   expect(router.generateUnnamedEndpoints())
     .toEqual(`export const __test__$__$ = Object.freeze({ path: ({ testId, id }: { testId: string|number, id: string|number }) => { return \`/test/\${testId}/\${id}\` }, method: 'get' })
+`)
+
+  expect(router.generateInterfaces()).toEqual(`export type TestResourceBuildParams = {
+    testId: string;
+    id: number;
+}
+
+export interface TestResource<OP> {
+  build(params: TestResourceBuildParams, options?: OP): unknown
+}
 `)
 })
 
@@ -162,7 +185,7 @@ test('multiple', () => {
       { action: 'update', method: ['patch', 'put'], path: '/$id' },
       { action: 'delete', method: 'delete', path: '/$id' },
     ],
-    construct: { create: { schema: blankSchema }, update: { schema: blankSchema } },
+    construct: { create: { schema: testResourceSchema }, update: { schema: testResourceSchema } },
   })
 
   expect(router.links.named[0]).toEqual({
@@ -200,4 +223,22 @@ export const testResource$delete = Object.freeze({ path: ({ id }: { id: string|n
     .toEqual(`export const __test = Object.freeze({ path: () => { return \`/test/\` }, method: 'post' })
 export const __test__$ = Object.freeze({ path: ({ id }: { id: string|number }) => { return \`/test/\${id}\` }, method: ['patch', 'put', 'delete'] })
 `)
+
+  expect(router.generateInterfaces()).toEqual(`export type TestResourceCreateParams = {
+    testId: string;
+    id: number;
+}
+
+export type TestResourceUpdateParams = {
+    testId: string;
+    id: number;
+}
+
+export interface TestResource<OP> {
+  create(params: TestResourceCreateParams, options?: OP): unknown
+  update(params: TestResourceUpdateParams, options?: OP): unknown
+  delete(options?: OP): unknown
+}
+`)
 })
+
