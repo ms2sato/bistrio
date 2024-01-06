@@ -2,7 +2,7 @@
 import { initConfig, support } from 'bistrio'
 import { routes } from '../universal/routes/all'
 import { config } from '../config'
-import { serverRouterConfig } from './config/server'
+import { serverRouterConfig } from './config'
 import { Middlewares } from '../universal/middlewares'
 
 initConfig(config)

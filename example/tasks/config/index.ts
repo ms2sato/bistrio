@@ -1,4 +1,4 @@
-import { resolve, dirname } from 'node:path'
+import { resolve } from 'node:path'
 import { ConfigCustom } from 'bistrio'
 import { entriesConfig, clientConfig } from '../universal/config'
 

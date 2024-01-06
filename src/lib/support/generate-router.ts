@@ -11,10 +11,12 @@ import {
   RouterLayoutType,
   RouterOptions,
   checkRpath,
+  choiceSchema,
 } from '../../lib/shared/common.js'
 import { Config } from '../config.js'
 import { isArray } from '../shared/type-util.js'
 import { isBlank } from '../shared/zod-util.js'
+import { ServerRouterConfig } from '../server-router-config.js'
 
 export type LinkFunctionInfo = {
   name: string
@@ -182,8 +184,8 @@ entry<N2R>({
     writeFileSync(out, this.generateUnnamedEndpoints())
   }
 
-  createInterfaces({ out }: { out: string }) {
-    writeFileSync(out, this.generateInterfaces())
+  createInterfaces({ out, serverRouterConfig }: { out: string; serverRouterConfig: ServerRouterConfig }) {
+    writeFileSync(out, this.generateInterfaces(serverRouterConfig))
   }
 
   // public for test
@@ -195,18 +197,20 @@ entry<N2R>({
     return this.generateEndpoints(this.links.unnamed, getUnnamedFunctionString)
   }
 
-  generateInterfaces() {
+  generateInterfaces(serverRouterConfig: ServerRouterConfig) {
     return this.resourceRouterConfigs
-      .filter((config) => config.actions && config.actions.length > 0)
-      .map((config) => this.generateInterface(config))
+      .map((routeConfig) => this.generateInterface(routeConfig, serverRouterConfig))
+      .filter((interfaceStr) => interfaceStr)
       .join('\n')
   }
 
-  private generateInterface(config: ResourceRouteConfig) {
+  private generateInterface(routeConfig: ResourceRouteConfig, serverRouterConfig: ServerRouterConfig) {
     const formatTypeName = (name: string) => `${name[0].toUpperCase()}${name.slice(1)}`
     const formatParamName = (ad: ActionDescriptor) => `${interfaceName}${formatTypeName(ad.action)}Params`
     const typeAliasStr = (ad: ActionDescriptor) => {
-      const schema = config.construct && config.construct[ad.action]?.schema
+      const defaultConstructConfig = serverRouterConfig.constructConfig
+      const constructDescriptor = routeConfig.construct?.[ad.action]
+      const schema = choiceSchema(defaultConstructConfig, constructDescriptor, ad.action)
       if (!schema || isBlank(schema)) {
         return
       }
@@ -221,7 +225,9 @@ entry<N2R>({
 
     const actionStr = (ad: ActionDescriptor) => {
       const argsStr = `options?: OP`
-      const schema = config.construct && config.construct[ad.action]?.schema
+      const defaultConstructConfig = serverRouterConfig.constructConfig
+      const constructDescriptor = routeConfig.construct?.[ad.action]
+      const schema = choiceSchema(defaultConstructConfig, constructDescriptor, ad.action)
       if (!schema || isBlank(schema)) {
         return `${ad.action}(${argsStr}): unknown`
       }
@@ -230,16 +236,21 @@ entry<N2R>({
       return `${ad.action}(params: ${paramsName}, ${argsStr}): unknown`
     }
 
-    if (!config.actions) {
-      throw new Error(`ResourceRouteConfig has no actions: ${config.name}`)
+    if (!routeConfig.actions) {
+      return
     }
 
-    const interfaceName = formatTypeName(config.name)
+    const targetActions = routeConfig.actions.filter((ad) => !ad.page)
+    if (targetActions.length === 0) {
+      return
+    }
 
-    return `${config.actions.map((ad) => typeAliasStr(ad)).join('\n')}
+    const interfaceName = formatTypeName(routeConfig.name)
+
+    return `${targetActions.map((ad) => typeAliasStr(ad)).join('\n')}
 
 export interface ${interfaceName}<OP> {
-  ${config.actions.map((ad) => actionStr(ad)).join('\n  ')}
+  ${targetActions.map((ad) => actionStr(ad)).join('\n  ')}
 }
 `
   }
