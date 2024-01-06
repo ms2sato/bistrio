@@ -13,7 +13,7 @@ import { middlewares } from './middlewares'
 import { localeMap } from '@universal/locales/index'
 import { constructView } from './customizers/construct-view'
 import { routes } from '@universal/routes/all'
-import { serverRouterConfig } from './config/server'
+import { serverRouterConfig } from './config'
 import { config } from '../config'
 import { init as initPassport } from './lib/passport-util'
 

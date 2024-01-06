@@ -1,14 +1,16 @@
 import { join } from 'node:path'
 import { writeFileSync, existsSync, mkdirSync } from 'node:fs'
 import { Router } from '../../client.js'
-import { Config, ConfigCustom, initConfig, Middlewares, nullRouterSupport, RouterSupport } from '../../index.js'
+import { Config, ConfigCustom, initConfig, Middlewares, nullRouterSupport, RouterSupport, ServerRouterConfig } from '../../index.js'
 import { GenerateRouter } from './generate-router.js'
 
 export async function generate<M extends Middlewares>({
   config: configCustom,
+  serverRouterConfig,
   allRoutes,
 }: {
   config: ConfigCustom
+  serverRouterConfig: ServerRouterConfig,
   allRoutes: (router: Router, support: RouterSupport<M>) => void
 }) {
   console.log('Generating...')
@@ -32,7 +34,7 @@ export async function generate<M extends Middlewares>({
     }),
   )
 
-  generateForAll(generatedRoutesDir, allRoutes, config)
+  generateForAll(generatedRoutesDir, allRoutes, config, serverRouterConfig)
 
   const ret = {
     generatedAt: new Date(),
@@ -68,6 +70,7 @@ function generateForAll<M extends Middlewares>(
   generatedRoutesDir: string,
   routes: (router: Router, support: RouterSupport<M>) => void,
   config: Config,
+  serverRouterConfig: ServerRouterConfig
 ) {
   const name = 'all'
 
@@ -85,5 +88,5 @@ function generateForAll<M extends Middlewares>(
   router.createNamedEndpoints({ out: join(genRoot, 'named_endpoints.ts') })
   router.createEndpoints({ out: join(genRoot, 'endpoints.ts') })
   
-  router.createInterfaces({ out: join(config.structure.generatedDir, 'interfaces.ts') })
+  router.createInterfaces({ out: join(config.structure.generatedDir, 'interfaces.ts'), serverRouterConfig })
 }
