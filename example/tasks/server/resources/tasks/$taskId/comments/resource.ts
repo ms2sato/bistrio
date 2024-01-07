@@ -1,4 +1,4 @@
-import { defineResource, opt } from 'bistrio'
+import { defineResource } from 'bistrio'
 import { getPrismaCilent } from '@server/lib/prisma-util'
 import { Comment } from '@prisma/client'
 import { TaskComments } from '@bistrio/interfaces'
@@ -20,5 +20,5 @@ export default defineResource(
         const { id, ...data } = params
         return prisma.comment.update({ where: { id }, data })
       },
-    }) as const satisfies TaskComments<opt<CustomMethodOption>>,
+    }) as const satisfies TaskComments<CustomMethodOption>,
 )

@@ -198,10 +198,12 @@ entry<N2R>({
   }
 
   generateInterfaces(serverRouterConfig: ServerRouterConfig) {
-    return this.resourceRouterConfigs
-      .map((routeConfig) => this.generateInterface(routeConfig, serverRouterConfig))
-      .filter((interfaceStr) => interfaceStr)
-      .join('\n')
+    return `import { opt } from 'bistrio/client'
+
+${this.resourceRouterConfigs
+  .map((routeConfig) => this.generateInterface(routeConfig, serverRouterConfig))
+  .filter((interfaceStr) => interfaceStr)
+  .join('\n')}`
   }
 
   private generateInterface(routeConfig: ResourceRouteConfig, serverRouterConfig: ServerRouterConfig) {
@@ -224,7 +226,7 @@ entry<N2R>({
     }
 
     const actionStr = (ad: ActionDescriptor) => {
-      const argsStr = `options?: OP`
+      const argsStr = `options?: opt<OP>`
       const defaultConstructConfig = serverRouterConfig.constructConfig
       const constructDescriptor = routeConfig.construct?.[ad.action]
       const schema = choiceSchema(defaultConstructConfig, constructDescriptor, ad.action)
