@@ -60,13 +60,13 @@ test('resources', () => {
   const router = new GenerateRouter()
 
   router.resources('/test', {
-    name: 'testResource',
+    name: 'testName',
     actions: [{ action: 'list', method: 'get', path: '/' }],
     construct: { list: { schema: blankSchema } },
   })
 
   expect(router.links.named[0]).toEqual({
-    name: 'testResource$list',
+    name: 'testName$list',
     methods: ['get'],
     link: '/test/',
     optionNames: [],
@@ -78,7 +78,7 @@ test('resources', () => {
     optionNames: [],
   })
   expect(router.generateNamedEndpoints())
-    .toEqual(`export const testResource$list = Object.freeze({ path: () => { return \`/test/\` }, method: 'get' })
+    .toEqual(`export const testName$list = Object.freeze({ path: () => { return \`/test/\` }, method: 'get' })
 `)
   expect(router.generateUnnamedEndpoints())
     .toEqual(`export const __test = Object.freeze({ path: () => { return \`/test/\` }, method: 'get' })
@@ -87,7 +87,7 @@ test('resources', () => {
 
 
 
-export interface TestResource<OP> {
+export interface TestNameResource<OP> {
   list(options?: opt<OP>): unknown
 }
 `)
@@ -97,13 +97,13 @@ test('resources page action only', () => {
   const router = new GenerateRouter()
 
   router.resources('/test', {
-    name: 'testResource',
+    name: 'testName',
     actions: [{ action: 'build', method: 'get', path: '/build', page: true }],
     construct: { build: { schema: blankSchema } },
   })
 
   expect(router.links.named[0]).toEqual({
-    name: 'testResource$build',
+    name: 'testName$build',
     methods: ['get'],
     link: '/test/build',
     optionNames: [],
@@ -115,7 +115,7 @@ test('resources page action only', () => {
     optionNames: [],
   })
   expect(router.generateNamedEndpoints())
-    .toEqual(`export const testResource$build = Object.freeze({ path: () => { return \`/test/build\` }, method: 'get' })
+    .toEqual(`export const testName$build = Object.freeze({ path: () => { return \`/test/build\` }, method: 'get' })
 `)
   expect(router.generateUnnamedEndpoints())
     .toEqual(`export const __test__build = Object.freeze({ path: () => { return \`/test/build\` }, method: 'get' })
@@ -131,13 +131,13 @@ test('resources with route parameters', () => {
   const router = new GenerateRouter()
 
   router.resources('/test/$testId', {
-    name: 'testResource',
+    name: 'testName',
     actions: [{ action: 'load', method: 'get', path: '/$id' }],
     construct: { load: { schema: testResourceSchema } },
   })
 
   expect(router.links.named[0]).toEqual({
-    name: 'testResource$load',
+    name: 'testName$load',
     methods: ['get'],
     link: '/test/${testId}/${id}',
     optionNames: ['testId', 'id'],
@@ -150,7 +150,7 @@ test('resources with route parameters', () => {
   })
 
   expect(router.generateNamedEndpoints())
-    .toEqual(`export const testResource$load = Object.freeze({ path: ({ testId, id }: { testId: string|number, id: string|number }) => { return \`/test/\${testId}/\${id}\` }, method: 'get' })
+    .toEqual(`export const testName$load = Object.freeze({ path: ({ testId, id }: { testId: string|number, id: string|number }) => { return \`/test/\${testId}/\${id}\` }, method: 'get' })
 `)
 
   expect(router.generateUnnamedEndpoints())
@@ -159,13 +159,13 @@ test('resources with route parameters', () => {
 
   expect(router.generateInterfaces(serverRouterConfig)).toEqual(`import { opt } from 'bistrio/client'
 
-export type TestResourceLoadParams = {
+export type TestNameResourceLoadParams = {
     testId: string;
     id: number;
 }
 
-export interface TestResource<OP> {
-  load(params: TestResourceLoadParams, options?: opt<OP>): unknown
+export interface TestNameResource<OP> {
+  load(params: TestNameResourceLoadParams, options?: opt<OP>): unknown
 }
 `)
 })
@@ -174,13 +174,13 @@ test('resources page action only with route parameters', () => {
   const router = new GenerateRouter()
 
   router.resources('/test/$testId', {
-    name: 'testResource',
+    name: 'testName',
     actions: [{ action: 'build', method: 'get', path: '/$id', page: true }],
     construct: { build: { schema: testResourceSchema } },
   })
 
   expect(router.links.named[0]).toEqual({
-    name: 'testResource$build',
+    name: 'testName$build',
     methods: ['get'],
     link: '/test/${testId}/${id}',
     optionNames: ['testId', 'id'],
@@ -193,7 +193,7 @@ test('resources page action only with route parameters', () => {
   })
 
   expect(router.generateNamedEndpoints())
-    .toEqual(`export const testResource$build = Object.freeze({ path: ({ testId, id }: { testId: string|number, id: string|number }) => { return \`/test/\${testId}/\${id}\` }, method: 'get' })
+    .toEqual(`export const testName$build = Object.freeze({ path: ({ testId, id }: { testId: string|number, id: string|number }) => { return \`/test/\${testId}/\${id}\` }, method: 'get' })
 `)
 
   expect(router.generateUnnamedEndpoints())
@@ -259,7 +259,7 @@ test('multiple', () => {
   const router = new GenerateRouter()
 
   router.resources('/test', {
-    name: 'testResource',
+    name: 'testName',
     actions: [
       { action: 'create', method: 'post', path: '/' },
       { action: 'update', method: ['patch', 'put'], path: '/$id' },
@@ -273,19 +273,19 @@ test('multiple', () => {
   })
 
   expect(router.links.named[0]).toEqual({
-    name: 'testResource$create',
+    name: 'testName$create',
     methods: ['post'],
     link: '/test/',
     optionNames: [],
   })
   expect(router.links.named[1]).toEqual({
-    name: 'testResource$update',
+    name: 'testName$update',
     methods: ['patch', 'put'],
     link: '/test/${id}',
     optionNames: ['id'],
   })
   expect(router.links.named[2]).toEqual({
-    name: 'testResource$delete',
+    name: 'testName$delete',
     methods: ['delete'],
     link: '/test/${id}',
     optionNames: ['id'],
@@ -299,9 +299,9 @@ test('multiple', () => {
   })
 
   expect(router.generateNamedEndpoints())
-    .toEqual(`export const testResource$create = Object.freeze({ path: () => { return \`/test/\` }, method: 'post' })
-export const testResource$update = Object.freeze({ path: ({ id }: { id: string|number }) => { return \`/test/\${id}\` }, method: ['patch', 'put'] })
-export const testResource$delete = Object.freeze({ path: ({ id }: { id: string|number }) => { return \`/test/\${id}\` }, method: 'delete' })
+    .toEqual(`export const testName$create = Object.freeze({ path: () => { return \`/test/\` }, method: 'post' })
+export const testName$update = Object.freeze({ path: ({ id }: { id: string|number }) => { return \`/test/\${id}\` }, method: ['patch', 'put'] })
+export const testName$delete = Object.freeze({ path: ({ id }: { id: string|number }) => { return \`/test/\${id}\` }, method: 'delete' })
 `)
   expect(router.generateUnnamedEndpoints())
     .toEqual(`export const __test = Object.freeze({ path: () => { return \`/test/\` }, method: 'post' })
@@ -310,22 +310,22 @@ export const __test__$ = Object.freeze({ path: ({ id }: { id: string|number }) =
 
   expect(router.generateInterfaces(serverRouterConfig)).toEqual(`import { opt } from 'bistrio/client'
 
-export type TestResourceCreateParams = {
+export type TestNameResourceCreateParams = {
     testId: string;
     id: number;
 }
-export type TestResourceUpdateParams = {
+export type TestNameResourceUpdateParams = {
     testId: string;
     id: number;
 }
-export type TestResourceDeleteParams = {
+export type TestNameResourceDeleteParams = {
     id: number;
 }
 
-export interface TestResource<OP> {
-  create(params: TestResourceCreateParams, options?: opt<OP>): unknown
-  update(params: TestResourceUpdateParams, options?: opt<OP>): unknown
-  delete(params: TestResourceDeleteParams, options?: opt<OP>): unknown
+export interface TestNameResource<OP> {
+  create(params: TestNameResourceCreateParams, options?: opt<OP>): unknown
+  update(params: TestNameResourceUpdateParams, options?: opt<OP>): unknown
+  delete(params: TestNameResourceDeleteParams, options?: opt<OP>): unknown
 }
 `)
 })
