@@ -202,16 +202,16 @@ export const suspense = (): Suspendable => {
 export class ResourceMethodOptions<SO = unknown, CO = RequestInit> {
   method_key?: string
   server?: {
-    options: SO | undefined
+    options: SO
   }
   client?: {
-    options: CO | undefined
+    options: CO
   }
 
   constructor({ method_key, server, client }: { method_key?: string; server?: SO; client?: CO }) {
     this.method_key = method_key
-    this.server = { options: server }
-    this.client = { options: client }
+    this.server = server && { options: server }
+    this.client = client && { options: client }
   }
 }
 
