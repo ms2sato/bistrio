@@ -1,7 +1,7 @@
 import { defineResource } from 'bistrio'
 import { getPrismaCilent } from '@server/lib/prisma-util'
 import { Comment } from '@prisma/client'
-import { TaskCommentsResource } from '@bistrio/interfaces'
+import { TaskCommentsResource } from '@bistrio/resources'
 import { CustomMethodOption } from '@/server/customizers'
 
 const prisma = getPrismaCilent()

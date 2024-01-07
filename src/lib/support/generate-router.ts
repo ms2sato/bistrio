@@ -120,7 +120,7 @@ export class GenerateRouter implements Router {
     writeFileSync(out, text)
   }
 
-  createResources({ out, config }: { out: string; config: Config }) {
+  createPathToResource({ out, config }: { out: string; config: Config }) {
     const resourcePath = (name: string) =>
       join(config.structure.serverDir, config.structure.serverResourcesPath, this.nameToPath[name], 'resource.ts')
     const existsResource = (name: string): boolean => existsSync(resourcePath(name))
@@ -133,7 +133,7 @@ export class GenerateRouter implements Router {
       .map((name, index) => `import type __Resource${index} from '${getResourceFile(name)}'`)
       .join('\n')}
 
-export type Resources = {
+export type PathToResource = {
   ${resourceNames
     .map((name, index) => `'${this.nameToPath[name]}': ReturnType<typeof __Resource${index}>`)
     .join('\n  ')}
@@ -145,9 +145,9 @@ export type Resources = {
   createTypes({ out }: { out: string }) {
     const ret = `import { useRenderSupport as useRenderSupportT, RenderSupport as RenderSupportT, NameToResource } from 'bistrio/client'
 import { type NameToPath } from './_name_to_path'
-import { type Resources } from './_resources'
+import { type PathToResource } from './_path_to_resource'
 
-export type N2R = NameToResource<Resources, NameToPath>
+export type N2R = NameToResource<PathToResource, NameToPath>
 export type RenderSupport = RenderSupportT<N2R>
 export const useRenderSupport = useRenderSupportT<N2R>
 `
@@ -184,7 +184,7 @@ entry<N2R>({
     writeFileSync(out, this.generateUnnamedEndpoints())
   }
 
-  createInterfaces({ out, serverRouterConfig }: { out: string; serverRouterConfig: ServerRouterConfig }) {
+  createResources({ out, serverRouterConfig }: { out: string; serverRouterConfig: ServerRouterConfig }) {
     writeFileSync(out, this.generateInterfaces(serverRouterConfig))
   }
 
