@@ -73,32 +73,43 @@ export class GenerateRouter implements Router {
   }
 
   resources(rpath: string, config: ResourceRouteConfig): void {
-    rpath = checkRpath(rpath)
+    try {
+      rpath = checkRpath(rpath)
 
-    const resourceRegex = /^[a-z][A-Za-z0-9]*$/
-    if (!resourceRegex.test(config.name)) {
-      throw new Error(`invalid resource name: "${config.name}": match to ${resourceRegex.toString()}`)
-    }
-
-    const routePath = join(this.httpPath, rpath)
-    this.nameToPath[config.name] = routePath
-
-    if (!config.actions) {
-      return
-    }
-
-    const actionRegex = /^[a-z][_A-Za-z0-9]*$/
-    for (const ad of config.actions) {
-      if (!actionRegex.test(ad.action)) {
-        throw new Error(
-          `invalid action: "${ad.action}" in resource: "${config.name}": match to ${actionRegex.toString()}`,
-        )
+      const resourceRegex = /^[a-z][A-Za-z0-9]*$/
+      if (!resourceRegex.test(config.name)) {
+        throw new Error(`invalid resource name: "${config.name}": match to ${resourceRegex.toString()}`)
       }
-      const linkPath = join(routePath, ad.path)
-      this.registerLink(linkPath, ad.method, `${config.name}$${ad.action}`)
-    }
 
-    this.resourceRouterConfigs.push(config)
+      const routePath = join(this.httpPath, rpath)
+      this.nameToPath[config.name] = routePath
+
+      if (!config.actions) {
+        return
+      }
+
+      const actionRegex = /^[a-z][_A-Za-z0-9]*$/
+      for (const ad of config.actions) {
+        if (!actionRegex.test(ad.action)) {
+          throw new Error(
+            `invalid action: "${ad.action}" in resource: "${config.name}": match to ${actionRegex.toString()}`,
+          )
+        }
+        const linkPath = join(routePath, ad.path)
+        this.registerLink(linkPath, ad.method, `${config.name}$${ad.action}`)
+      }
+
+      this.resourceRouterConfigs.push(config)
+    } catch (err) {
+      if (err instanceof Error) {
+        throw new Error(
+          `${err.message}; httpPath: ${this.httpPath}; rpath: ${rpath}; config.name: ${config.name}`,
+          { cause: err },
+        )
+      } else {
+        throw new TypeError(`Unexpected Error Object: ${err as string}`, { cause: err })
+      }
+    }
   }
 
   pages(rpath: string, children: string[]): void {
