@@ -1,4 +1,4 @@
-import { NamedResources, opt, Resource, ResourceMethod } from '../../client.js'
+import { NamedResources, opt, Resource } from '../../client.js'
 import { Localizer } from './locale.js'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -49,29 +49,43 @@ export function readable<T>(promise: Promise<T>): SuspendedReader<T> {
 export type ParamsDictionary = { [key: string]: string | undefined }
 export type QueryDictionary = { [key: string]: undefined | string | string[] | QueryDictionary | QueryDictionary[] }
 
-export type StubMethodParams<P> = {
-  [K in keyof P]: P[K] extends opt<unknown> ? ResourceMethodOptions : P[K]
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type StubMethodArguments<T extends ResourceMethod> = T extends (...args: infer P) => any
-  ? StubMethodParams<P>
-  : never
-
-export type StubResource<R extends Resource> = {
-  [MN in keyof R]: (...args: StubMethodArguments<R[MN]>) => ReturnType<R[MN]>
-}
-
 export type StubResources<RS extends NamedResources> = {
   [RN in keyof RS]: StubResource<RS[RN]>
 }
-
-export type StubSuspendedResource<R extends Resource> = {
-  [MN in keyof R]: (...args: StubMethodArguments<R[MN]>) => Awaited<ReturnType<R[MN]>>
-} & { $purge: () => void }
+export type StubResource<R> = AppendRMOArgument<OmitOptArgument<R>>
 
 export type StubSuspendedResources<RS extends NamedResources> = {
   [RN in keyof RS]: StubSuspendedResource<RS[RN]>
+}
+export type StubSuspendedResource<R> = SuspendedAppendRMOArgument<OmitOptArgument<R>> & { $purge: () => void }
+
+type RemoveLastArgIsA<F, A> = F extends (...args: infer Args) => infer R
+  ? Args extends { length: 0 } // Argsが長さ0の場合
+    ? F // 長さ0の場合はそのままの関数型を返す
+    : Args extends [...infer Rest, A?] // Argsが長さ0でない場合
+    ? (...args: Rest) => R // 最後の引数を除去した関数型を返す
+    : F // 上記の条件に当てはまらない場合はそのままの関数型を返す
+  : never
+
+type AppendLastArgToResourceMethodOptions<F> = F extends (...args: infer Args) => infer R
+  ? <SO, RO>(...args: [...Args, ResourceMethodOptions<SO, RO>?]) => R
+  : never
+
+type SuspendedAppendLastArgToResourceMethodOptions<F> = F extends (...args: infer Args) => infer R
+  ? <SO, RO>(...args: [...Args, ResourceMethodOptions<SO, RO>?]) => Awaited<R>
+  : never
+
+type OmitOptArgument<R> = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [A in keyof R]: RemoveLastArgIsA<R[A], opt<any>>
+}
+
+type AppendRMOArgument<R> = {
+  [A in keyof R]: AppendLastArgToResourceMethodOptions<R[A]>
+}
+
+type SuspendedAppendRMOArgument<R> = {
+  [A in keyof R]: SuspendedAppendLastArgToResourceMethodOptions<R[A]>
 }
 
 export type RenderSupport<RS extends NamedResources> = {
@@ -188,10 +202,16 @@ export const suspense = (): Suspendable => {
 export class ResourceMethodOptions<SO = unknown, CO = RequestInit> {
   method_key?: string
   server?: {
-    options: SO
+    options: SO | undefined
   }
   client?: {
-    options: CO
+    options: CO | undefined
+  }
+
+  constructor({ method_key, server, client }: { method_key?: string; server?: SO; client?: CO }) {
+    this.method_key = method_key
+    this.server = { options: server }
+    this.client = { options: client }
   }
 }
 
