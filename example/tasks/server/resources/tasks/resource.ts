@@ -1,6 +1,5 @@
-import { defineResource, IdNumberParams, opt, PageParams, Paginated } from 'bistrio'
+import { defineResource, opt, Paginated } from 'bistrio'
 import { getPrismaCilent } from '@server/lib/prisma-util'
-import { TaskCreateWithTagsParams, TaskUpdateWithTagsParams } from '@/universal/params'
 import { TaskWithTags } from '@/universal/types'
 import { Task } from '@prisma/client'
 import { CustomMethodOption } from '@/server/customizers'
@@ -11,7 +10,7 @@ const prisma = getPrismaCilent()
 export default defineResource(
   (_support, _options) =>
     ({
-      list: async (params: PageParams): Promise<Paginated<Task>> => {
+      list: async (params): Promise<Paginated<Task>> => {
         return {
           data: await prisma.task.findMany({ skip: (params.page - 1) * params.limit, take: params.limit }),
           count: await prisma.task.count(),
@@ -19,7 +18,7 @@ export default defineResource(
         }
       },
 
-      load: async (params: IdNumberParams): Promise<TaskWithTags> => {
+      load: async (params): Promise<TaskWithTags> => {
         const task = await prisma.task.findUniqueOrThrow({
           where: params,
           include: { tags: { include: { tag: true } } },
@@ -27,13 +26,13 @@ export default defineResource(
         return { ...task, tags: task.tags.map((tag) => tag.tag.label) }
       },
 
-      create: async (params: TaskCreateWithTagsParams) => {
+      create: async (params) => {
         return prisma.task.create({
           data: {
             ...params,
             done: false,
             tags: {
-              create: params.tags.map((tag) => ({
+              create: params.tags?.map((tag) => ({
                 tag: {
                   connectOrCreate: {
                     where: { label: tag },
@@ -46,11 +45,11 @@ export default defineResource(
         })
       },
 
-      update: async (params: TaskUpdateWithTagsParams) => {
+      update: async (params) => {
         const tags = await prisma.tagsOnTask.findMany({ where: { taskId: params.id }, include: { tag: true } })
         const originalTagLabels = tags.map((tag) => tag.tag.label)
-        const tagLabelsForCreate = params.tags.filter((tag) => !originalTagLabels.includes(tag))
-        const tagsForDelete = tags.filter((tag) => !params.tags.includes(tag.tag.label))
+        const tagLabelsForCreate = params.tags?.filter((tag) => !originalTagLabels.includes(tag))
+        const tagsForDelete = tags.filter((tag) => !params.tags?.includes(tag.tag.label))
 
         return prisma.$transaction(async (prisma) => {
           const updated = await prisma.task.update({
@@ -58,7 +57,7 @@ export default defineResource(
             data: {
               ...params,
               tags: {
-                create: tagLabelsForCreate.map((tag) => ({
+                create: tagLabelsForCreate?.map((tag) => ({
                   tag: {
                     connectOrCreate: {
                       where: { label: tag },
@@ -78,8 +77,8 @@ export default defineResource(
         })
       },
 
-      destroy: async ({ id }: IdNumberParams) => await prisma.task.delete({ where: { id } }),
+      destroy: async ({ id }) => await prisma.task.delete({ where: { id } }),
 
-      done: async ({ id }: IdNumberParams) => await prisma.task.update({ where: { id }, data: { done: true } }),
+      done: async ({ id }) => await prisma.task.update({ where: { id }, data: { done: true } }),
     }) as const satisfies Tasks<opt<CustomMethodOption>>,
 )
