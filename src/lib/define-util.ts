@@ -8,9 +8,7 @@ import {
   Handler,
 } from '../index.js'
 
-export function defineResource<R>(
-  callback: (support: ResourceSupport, config: ResourceRouteConfig) => R,
-) {
+export function defineResource<R>(callback: (support: ResourceSupport, config: ResourceRouteConfig) => R) {
   return callback
 }
 

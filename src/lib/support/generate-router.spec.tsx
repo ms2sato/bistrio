@@ -197,7 +197,6 @@ test('resources page action only with route parameters', () => {
   expect(router.generateInterfaces(serverRouterConfig)).toEqual(``)
 })
 
-
 test('pages', () => {
   const router = new GenerateRouter()
 
