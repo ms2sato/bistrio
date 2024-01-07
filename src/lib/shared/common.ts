@@ -148,7 +148,7 @@ export const checkRpath = (rpath: string): string => {
     throw new Error('Router.resources() first argument cannnot be "/"')
   }
 
-  const regex = /^[a-zA-Z0-9$/.]+$/
+  const regex = /^[a-zA-Z0-9$/.\-_]+$/
   if (!regex.test(rpath)) {
     throw new Error(`Router.resources() first argument is not match format ${regex}`)
   }
