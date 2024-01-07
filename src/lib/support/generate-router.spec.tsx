@@ -83,10 +83,12 @@ test('resources', () => {
   expect(router.generateUnnamedEndpoints())
     .toEqual(`export const __test = Object.freeze({ path: () => { return \`/test/\` }, method: 'get' })
 `)
-  expect(router.generateInterfaces(serverRouterConfig)).toEqual(`
+  expect(router.generateInterfaces(serverRouterConfig)).toEqual(`import { opt } from 'bistrio/client'
+
+
 
 export interface TestResource<OP> {
-  list(options?: OP): unknown
+  list(options?: opt<OP>): unknown
 }
 `)
 })
@@ -120,7 +122,9 @@ test('resources page action only', () => {
 `)
 
   // if page is true only, no interface is generated
-  expect(router.generateInterfaces(serverRouterConfig)).toEqual(``)
+  expect(router.generateInterfaces(serverRouterConfig)).toEqual(`import { opt } from 'bistrio/client'
+
+`)
 })
 
 test('resources with route parameters', () => {
@@ -153,13 +157,15 @@ test('resources with route parameters', () => {
     .toEqual(`export const __test__$__$ = Object.freeze({ path: ({ testId, id }: { testId: string|number, id: string|number }) => { return \`/test/\${testId}/\${id}\` }, method: 'get' })
 `)
 
-  expect(router.generateInterfaces(serverRouterConfig)).toEqual(`export type TestResourceLoadParams = {
+  expect(router.generateInterfaces(serverRouterConfig)).toEqual(`import { opt } from 'bistrio/client'
+
+export type TestResourceLoadParams = {
     testId: string;
     id: number;
 }
 
 export interface TestResource<OP> {
-  load(params: TestResourceLoadParams, options?: OP): unknown
+  load(params: TestResourceLoadParams, options?: opt<OP>): unknown
 }
 `)
 })
@@ -194,7 +200,9 @@ test('resources page action only with route parameters', () => {
     .toEqual(`export const __test__$__$ = Object.freeze({ path: ({ testId, id }: { testId: string|number, id: string|number }) => { return \`/test/\${testId}/\${id}\` }, method: 'get' })
 `)
 
-  expect(router.generateInterfaces(serverRouterConfig)).toEqual(``)
+  expect(router.generateInterfaces(serverRouterConfig)).toEqual(`import { opt } from 'bistrio/client'
+
+`)
 })
 
 test('pages', () => {
@@ -300,7 +308,9 @@ export const testResource$delete = Object.freeze({ path: ({ id }: { id: string|n
 export const __test__$ = Object.freeze({ path: ({ id }: { id: string|number }) => { return \`/test/\${id}\` }, method: ['patch', 'put', 'delete'] })
 `)
 
-  expect(router.generateInterfaces(serverRouterConfig)).toEqual(`export type TestResourceCreateParams = {
+  expect(router.generateInterfaces(serverRouterConfig)).toEqual(`import { opt } from 'bistrio/client'
+
+export type TestResourceCreateParams = {
     testId: string;
     id: number;
 }
@@ -313,9 +323,9 @@ export type TestResourceDeleteParams = {
 }
 
 export interface TestResource<OP> {
-  create(params: TestResourceCreateParams, options?: OP): unknown
-  update(params: TestResourceUpdateParams, options?: OP): unknown
-  delete(params: TestResourceDeleteParams, options?: OP): unknown
+  create(params: TestResourceCreateParams, options?: opt<OP>): unknown
+  update(params: TestResourceUpdateParams, options?: opt<OP>): unknown
+  delete(params: TestResourceDeleteParams, options?: opt<OP>): unknown
 }
 `)
 })
