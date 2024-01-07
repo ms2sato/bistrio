@@ -3,7 +3,7 @@ import { getPrismaCilent } from '@server/lib/prisma-util'
 import { TaskWithTags } from '@/universal/types'
 import { Task } from '@prisma/client'
 import { CustomMethodOption } from '@/server/customizers'
-import { TasksResource } from '@bistrio/interfaces'
+import { TasksResource } from '@bistrio/resources'
 
 const prisma = getPrismaCilent()
 
