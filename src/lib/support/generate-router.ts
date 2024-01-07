@@ -247,7 +247,7 @@ ${this.resourceRouterConfigs
       return
     }
 
-    const interfaceName = formatTypeName(routeConfig.name)
+    const interfaceName = `${formatTypeName(routeConfig.name)}Resource`
 
     return `${targetActions.map((ad) => typeAliasStr(ad)).join('\n')}
 
