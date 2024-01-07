@@ -102,10 +102,9 @@ export class GenerateRouter implements Router {
       this.resourceRouterConfigs.push(config)
     } catch (err) {
       if (err instanceof Error) {
-        throw new Error(
-          `${err.message}; httpPath: ${this.httpPath}; rpath: ${rpath}; config.name: ${config.name}`,
-          { cause: err },
-        )
+        throw new Error(`${err.message}; httpPath: ${this.httpPath}; rpath: ${rpath}; config.name: ${config.name}`, {
+          cause: err,
+        })
       } else {
         throw new TypeError(`Unexpected Error Object: ${err as string}`, { cause: err })
       }
