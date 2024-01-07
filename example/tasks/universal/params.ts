@@ -50,21 +50,13 @@ const taskWithTagsCoreProps = {
 }
 
 export const taskCreateSchema = object(taskCoreProps)
-export type TaskCreateParams = Zod.infer<typeof taskCreateSchema>
-
 export const taskCreateWithTagsSchema = object(taskWithTagsCoreProps)
-export type TaskCreateWithTagsParams = Zod.infer<typeof taskCreateWithTagsSchema>
-
 export const taskUpdateSchema = object({
   id: number(),
   ...taskCoreProps,
   done: coerce.boolean().default(false), // from view's value is string, change to boolean
 })
-
-export type TaskUpdateParams = Zod.infer<typeof taskUpdateSchema>
-
 export const taskUpdateWithTagsSchema = taskUpdateSchema.extend(withTags)
-export type TaskUpdateWithTagsParams = Zod.infer<typeof taskUpdateWithTagsSchema>
 
 export const taskIdSchema = object({
   taskId: number(),
@@ -76,14 +68,8 @@ const commentCoreProps = {
   taskId: number(),
   body: string().min(3).max(255),
 }
-
 export const commentCreateSchema = object(commentCoreProps)
-
-export type CommentCreateParams = Zod.infer<typeof commentCreateSchema>
-
 export const commentUpdateSchema = object({
   id: number(),
   ...commentCoreProps,
 })
-
-export type CommentUpdateParams = Zod.infer<typeof commentUpdateSchema>
