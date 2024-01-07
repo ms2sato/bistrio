@@ -12,6 +12,15 @@ import {
 } from '../../index.js'
 import { GenerateRouter } from './generate-router.js'
 
+// TODO: share to generate-router
+const nameToPathFileName = '_name_to_path.ts'
+const pathToResourceFileName = '_path_to_resource.ts'
+const typesFileName = 'index.ts'
+const namedEndpointsFileName = 'named_endpoints.ts'
+const endpointsFileName = 'endpoints.ts'
+const entryFileName = '_entry.ts'
+const resourcesFileName = 'resources.ts'
+
 export async function generate<M extends Middlewares>({
   config: configCustom,
   serverRouterConfig,
@@ -66,12 +75,12 @@ function generateForEntry<M extends Middlewares>(
     mkdirSync(genRoot)
   }
 
-  router.createNameToPath({ out: join(genRoot, '_name_to_path.ts') })
-  router.createPathToResource({ out: join(genRoot, '_path_to_resource.ts'), config })
-  router.createTypes({ out: join(genRoot, 'index.ts') })
-  router.createNamedEndpoints({ out: join(genRoot, 'named_endpoints.ts') })
-  router.createEndpoints({ out: join(genRoot, 'endpoints.ts') })
-  router.createEntry({ out: join(genRoot, '_entry.ts'), name, config })
+  router.createNameToPath({ out: join(genRoot, nameToPathFileName) })
+  router.createPathToResource({ out: join(genRoot, pathToResourceFileName), config })
+  router.createTypes({ out: join(genRoot, typesFileName) })
+  router.createNamedEndpoints({ out: join(genRoot, namedEndpointsFileName) })
+  router.createEndpoints({ out: join(genRoot, endpointsFileName) })
+  router.createEntry({ out: join(genRoot, entryFileName), name, config })
 }
 
 function generateForAll<M extends Middlewares>(
@@ -90,11 +99,11 @@ function generateForAll<M extends Middlewares>(
     mkdirSync(genRoot)
   }
 
-  router.createNameToPath({ out: join(genRoot, '_name_to_path.ts') })
-  router.createPathToResource({ out: join(genRoot, '_resources.ts'), config })
-  router.createTypes({ out: join(genRoot, 'index.ts') })
-  router.createNamedEndpoints({ out: join(genRoot, 'named_endpoints.ts') })
-  router.createEndpoints({ out: join(genRoot, 'endpoints.ts') })
+  router.createNameToPath({ out: join(genRoot, nameToPathFileName) })
+  router.createPathToResource({ out: join(genRoot, pathToResourceFileName), config })
+  router.createTypes({ out: join(genRoot, typesFileName) })
+  router.createNamedEndpoints({ out: join(genRoot, namedEndpointsFileName) })
+  router.createEndpoints({ out: join(genRoot, endpointsFileName) })
 
-  router.createResources({ out: join(config.structure.generatedDir, 'resources.ts'), serverRouterConfig })
+  router.createResources({ out: join(config.structure.generatedDir, resourcesFileName), serverRouterConfig })
 }
