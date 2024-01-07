@@ -88,7 +88,7 @@ test('resources', () => {
 
 
 export interface TestNameResource<OP> {
-  list(options?: opt<OP>): unknown
+  list(options: opt<OP>): unknown
 }
 `)
 })
@@ -165,7 +165,7 @@ export type TestNameResourceLoadParams = {
 }
 
 export interface TestNameResource<OP> {
-  load(params: TestNameResourceLoadParams, options?: opt<OP>): unknown
+  load(params: TestNameResourceLoadParams, options: opt<OP>): unknown
 }
 `)
 })
@@ -323,9 +323,9 @@ export type TestNameResourceDeleteParams = {
 }
 
 export interface TestNameResource<OP> {
-  create(params: TestNameResourceCreateParams, options?: opt<OP>): unknown
-  update(params: TestNameResourceUpdateParams, options?: opt<OP>): unknown
-  delete(params: TestNameResourceDeleteParams, options?: opt<OP>): unknown
+  create(params: TestNameResourceCreateParams, options: opt<OP>): unknown
+  update(params: TestNameResourceUpdateParams, options: opt<OP>): unknown
+  delete(params: TestNameResourceDeleteParams, options: opt<OP>): unknown
 }
 `)
 })

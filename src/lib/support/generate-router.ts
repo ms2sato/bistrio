@@ -236,7 +236,7 @@ ${this.resourceRouterConfigs
     }
 
     const actionStr = (ad: ActionDescriptor) => {
-      const argsStr = `options?: opt<OP>`
+      const argsStr = `options: opt<OP>`
       const defaultConstructConfig = serverRouterConfig.constructConfig
       const constructDescriptor = routeConfig.construct?.[ad.action]
       const schema = choiceSchema(defaultConstructConfig, constructDescriptor, ad.action)
