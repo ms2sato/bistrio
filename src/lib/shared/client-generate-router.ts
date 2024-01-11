@@ -326,7 +326,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
                 if (value instanceof File) {
                   formData.append(key, value, value.name)
                   hasFile = true
-                } else if (Array.isArray(value) && value.every((v) => v instanceof File)) {
+                } else if (Array.isArray(value) && value.length && value.every((v) => v instanceof File)) {
                   for (let i = 0; i < value.length; ++i) {
                     const v = value[i] as File
                     formData.append(`${key}[${i}]`, v, v.name)
@@ -342,7 +342,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
               } else {
                 return fetcher.fetch(httpPath, method, {
                   headers: { 'Content-Type': 'application/json' },
-                  body: formData,
+                  body: JSON.stringify(body),
                 })
               }
             }
