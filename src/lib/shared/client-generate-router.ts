@@ -205,22 +205,18 @@ export class StandardJsonFormatter
 }
 
 type Fetcher = {
-  fetch(url: string, method: HttpMethod, body?: BodyInit | null): Promise<unknown>
+  fetch(url: string, method: HttpMethod, init?: RequestInit): Promise<unknown>
 }
 
 type CreateFetcherFunc = () => Fetcher
 
 const createFetcher: CreateFetcherFunc = (): Fetcher => {
   return {
-    async fetch(url: string, method: HttpMethod, body?: BodyInit | null) {
-      const res = await fetch(url, {
-        method: method.toUpperCase(),
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest',
-        },
-        body,
-      })
+    async fetch(url: string, method: HttpMethod, init: RequestInit = {}) {
+      init.method = method.toUpperCase()
+      init.headers = { ...init.headers, 'X-Requested-With': 'XMLHttpRequest' }
+
+      const res = await fetch(url, init)
 
       const parser = new ResponseJsonParser()
       return parser.parse(res)
@@ -324,7 +320,31 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
             if (method === 'get' || method === 'head') {
               return fetcher.fetch(`${httpPath}?${toURLSearchParams(body).toString()}`, method)
             } else {
-              return fetcher.fetch(httpPath, method, JSON.stringify(body))
+              let hasFile = false
+              const formData = new FormData()
+              for (const [key, value] of Object.entries(body)) {
+                if (value instanceof File) {
+                  formData.append(key, value, value.name)
+                  hasFile = true
+                } else if (Array.isArray(value) && value.every((v) => v instanceof File)) {
+                  for (let i = 0; i < value.length; ++i) {
+                    const v = value[i] as File
+                    formData.append(`${key}[${i}]`, v, v.name)
+                  }
+                  hasFile = true
+                } else {
+                  formData.append(key, value as string)
+                }
+              }
+
+              if (hasFile) {
+                return fetcher.fetch(httpPath, method, { body: formData })
+              } else {
+                return fetcher.fetch(httpPath, method, {
+                  headers: { 'Content-Type': 'application/json' },
+                  body: formData,
+                })
+              }
             }
           } else {
             return fetcher.fetch(httpPath, method)

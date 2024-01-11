@@ -1,14 +1,27 @@
-import { Router, Actions, RouterSupport } from 'bistrio/client'
+import { Router, crud, RouterSupport, scope, api } from 'bistrio/client'
 import { routes as mainRoutes } from './main'
 import { Middlewares } from '../middlewares'
 import AdminLayout from '../components/AdminLayout'
+import { adminUserBatchCreateSchema } from '../params'
 
-export function routes(router: Router, support: RouterSupport<Middlewares>) {
-  const adminRouter = router.options({ hydrate: true }).sub('/admins/$adminId')
-  adminRouter.layout({ element: AdminLayout }).resources('/users', {
-    name: 'pageAdminUser',
-    actions: Actions.page({ only: ['index'] }),
+export function routes(r: Router, support: RouterSupport<Middlewares>) {
+  mainRoutes(r, support)
+
+  r.options({ hydrate: true })
+  scope(r, 'admin', (r) => {
+    r.layout({ element: AdminLayout })
+
+    r.resources('users', {
+      name: 'adminUsers',
+      actions: crud('index', 'list'),
+    })
+
+    r.resources('users/batch', {
+      name: 'adminUserBatch',
+      actions: api('create'),
+      construct: {
+        create: { schema: adminUserBatchCreateSchema },
+      },
+    })
   })
-
-  mainRoutes(router, support)
 }
