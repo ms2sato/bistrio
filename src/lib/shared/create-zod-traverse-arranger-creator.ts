@@ -1,4 +1,4 @@
-import { AnyZodObject, ZodDefault } from 'zod'
+import { AnyZodObject, ZodDefault, ZodType } from 'zod'
 import { strip, cast, ArrangeResult, nullArrangeResult, isZodArray } from './zod-util.js'
 import { NextRet, TraverseArranger, TraverseArrangerCreator } from './parse-form-body.js'
 
@@ -18,15 +18,15 @@ function isParentSchema(schema: unknown): schema is ParentSchema {
   return (schema as ParentSchema).element !== undefined && typeof (schema as ParentSchema).element === 'object'
 }
 
-export function createZodTraverseArrangerCreator(schema: AnyZodObject): TraverseArrangerCreator {
+export function createZodTraverseArrangerCreator(schema: ZodType): TraverseArrangerCreator {
   return () => new ZodArranger(schema)
 }
 
 export class ZodArranger implements TraverseArranger {
-  private topSchema: AnyZodObject
-  private schema: AnyZodObject
+  private topSchema: ZodType
+  private schema: ZodType
 
-  constructor(schema: AnyZodObject) {
+  constructor(schema: ZodType) {
     this.topSchema = schema
     this.schema = schema
   }
