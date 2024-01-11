@@ -1,4 +1,5 @@
 import express from 'express'
+import { ZodType } from 'zod'
 import { RouteObject } from 'react-router-dom'
 import {
   ValidationError,
@@ -7,7 +8,6 @@ import {
   ResourceRouteConfig,
   NamedResources,
   HandlerBuildRunner,
-  ConstructSchema,
 } from '../index.js'
 import { ResourceProxyCreateFunc } from './server-router-impl.js'
 
@@ -56,8 +56,8 @@ export type Responder<Opt = unknown, Out = unknown, Src = unknown> = {
 }
 
 export type RequestCallback<In = unknown> = {
-  beforeValidation?: (ctx: ActionContext, source: unknown, schema: ConstructSchema) => unknown
-  afterValidation?: (ctx: ActionContext, input: In, schema: ConstructSchema) => unknown
+  beforeValidation?: (ctx: ActionContext, source: unknown, schema: ZodType) => unknown
+  afterValidation?: (ctx: ActionContext, input: In, schema: ZodType) => unknown
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   override?: (ctx: ActionContext) => unknown
 }
@@ -73,7 +73,7 @@ export type CreateActionOptionFunction = (ctx: ActionContext) => unknown
  */
 export type Renderer = (ctx: ActionContext, options?: unknown) => false | undefined
 
-export type InputArranger = (ctx: MutableActionContext, sources: readonly string[], schema: ConstructSchema) => unknown
+export type InputArranger = (ctx: MutableActionContext, sources: readonly string[], schema: ZodType) => unknown
 
 export class ActionSupport {}
 

@@ -33,10 +33,8 @@ export interface ActionDescriptor {
   hydrate?: boolean
 }
 
-export type ConstructSchema = ZodType
-
 export type ConstructDescriptor = {
-  schema?: ConstructSchema | null
+  schema?: ZodType | null
   sources?: readonly ConstructSource[]
 }
 

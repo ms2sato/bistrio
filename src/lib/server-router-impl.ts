@@ -1,6 +1,6 @@
 import express, { NextFunction, RequestHandler } from 'express'
 import { join } from 'node:path'
-import { ZodError } from 'zod'
+import { ZodType, ZodError } from 'zod'
 import debug from 'debug'
 import {
   ActionContext,
@@ -32,7 +32,6 @@ import {
   ClientConfig,
   Router,
   ActionType,
-  ConstructSchema,
 } from '../index.js'
 import { HttpMethod, RouterOptions, opt } from './shared/index.js'
 import { RouteObject } from 'react-router-dom'
@@ -478,7 +477,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
           )
         }
 
-        const schema: ConstructSchema | undefined =
+        const schema: ZodType | undefined =
           resourceMethod === undefined
             ? undefined
             : choiceSchema(this.serverRouterConfig.constructConfig, constructDescriptor, actionName)
