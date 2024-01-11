@@ -55,6 +55,10 @@ export function strip(schema: AnyZodObject): AnyZodObject {
 }
 
 export function cast(schema: AnyZodObject, value: unknown): ArrangeResult {
+  if (value === undefined) {
+    return nullArrangeResult
+  }
+
   try {
     if (isZodBigInt(schema) && typeof value !== 'bigint') {
       return { arranged: true, result: BigInt(value as number) }
@@ -69,7 +73,7 @@ export function cast(schema: AnyZodObject, value: unknown): ArrangeResult {
     if (isZodBoolean(schema) && typeof value !== 'boolean') {
       return { arranged: true, result: Boolean(value) }
     }
-    if (isZodDate(schema) && !(value?.constructor?.name === 'Date')) {
+    if (isZodDate(schema) && !(value instanceof Date)) {
       return { arranged: true, result: new Date(value as number) }
     }
     if (isZodString(schema)) {
