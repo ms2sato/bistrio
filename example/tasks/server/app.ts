@@ -5,6 +5,8 @@ import cookieParser from 'cookie-parser'
 import logger from 'morgan'
 import createDebug from 'debug'
 import session from 'express-session'
+import fileUpload from 'express-fileupload'
+import { tmpdir } from 'os'
 import Redis from 'ioredis'
 import RedisStore from 'connect-redis'
 
@@ -39,6 +41,13 @@ export async function setup() {
   app.use(express.json())
   app.use(express.urlencoded({ extended: false }))
   app.use(cookieParser())
+  app.use(
+    fileUpload({
+      limits: { fileSize: 50 * 1024 * 1024 },
+      useTempFiles: true,
+      tempFileDir: tmpdir(),
+    }),
+  )
 
   app.use(express.static('dist/public'))
 
@@ -92,15 +101,15 @@ export async function setup() {
       return 'status' in herr && typeof herr.status === 'number'
     }
 
-    if (req.app.get('env') === 'development') {
-      console.error(err)
-    }
+    console.error(err)
 
     // TODO: handling RecordNotFound of prisma
 
     // render the error page
     res.status(isHttpError(err) ? err.status : 500)
-    // res.render('error', { err })
+
+    // TODO: render any error info accoding to the Content-Type
+    res.json({ err })
   } as express.ErrorRequestHandler)
 
   // catch 404 and forward to error handler
