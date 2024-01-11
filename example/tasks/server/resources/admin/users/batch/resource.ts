@@ -1,7 +1,7 @@
 import { createReadStream } from 'node:fs'
 import { createInterface } from 'node:readline'
 
-import { defineResource } from 'bistrio'
+import { UploadedFile, defineResource } from 'bistrio'
 import { getPrismaCilent } from '@server/lib/prisma-util'
 import { CustomMethodOption } from '@/server/customizers'
 import { AdminUserBatchResource } from '@/.bistrio/resources'
@@ -39,10 +39,14 @@ const lineSchema = object({
   password: string(),
 })
 
+export type BatchResult = { count: number; error?: Error[] }
+
 export default defineResource(
   (_support, _options) =>
     ({
-      create: async ({file}): Promise<{ count: number; error?: Error[] }> => {
+      create: async ({ file: anyFile }): Promise<BatchResult> => {
+        const file = anyFile as UploadedFile // TODO: fix type
+
         const callback: ReadLineCallback<{ count: number; error?: unknown }> = async (lines) => {
           const data = []
           for (const line of lines) {

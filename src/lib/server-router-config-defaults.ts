@@ -1,26 +1,25 @@
 import { existsSync } from 'node:fs'
-import { AnyZodObject } from 'zod'
 import { ActionContextCreator, SchemaUtil, routerPlaceholderRegex } from '../index.js'
-import { FileNotFoundError } from './shared/common.js'
+import { ConstructSchema, FileNotFoundError } from './shared/common.js'
 import { LoadFunc } from './server-router-config.js'
-import { ActionContext, CreateActionOptionFunction, MutableActionContext } from './action-context.js'
+import { ActionContext, CreateActionOptionFunction, InputArranger, MutableActionContext } from './action-context.js'
 import { createZodTraverseArrangerCreator } from './shared/create-zod-traverse-arranger-creator.js'
 import { parseFormBody } from './shared/parse-form-body.js'
 import { ActionContextImpl } from './server-router-impl.js'
 
-export function arrangeFormInput(ctx: MutableActionContext, sources: readonly string[], schema: AnyZodObject) {
+export function arrangeFormInput(ctx: MutableActionContext, sources: readonly string[], schema: ConstructSchema) {
   return parseFormBody(ctx.mergeInputs(sources), createZodTraverseArrangerCreator(schema))
 }
 
-export function arrangeJsonInput(ctx: MutableActionContext, sources: readonly string[], schema: AnyZodObject) {
+export function arrangeJsonInput(ctx: MutableActionContext, sources: readonly string[], schema: ConstructSchema) {
   const pred = (input: Record<string, unknown>, source: string) => {
-    return source === 'body' ? input : SchemaUtil.deepCast(schema, input)
+    return source === 'body' ? input : (SchemaUtil.deepCast(schema, input) as Record<string, unknown>)
   }
   return ctx.mergeInputs(sources, pred)
 }
 
 export type ContentArranger = {
-  (ctx: MutableActionContext, sources: readonly string[], schema: AnyZodObject): unknown
+  (ctx: MutableActionContext, sources: readonly string[], schema: ConstructSchema): unknown
 }
 
 type ContentType2Arranger = Record<string, ContentArranger>
@@ -32,8 +31,10 @@ export const defaultContentType2Arranger: ContentType2Arranger = {
   '': arrangeFormInput,
 }
 
-export const createSmartInputArranger = (contentType2Arranger: ContentType2Arranger = defaultContentType2Arranger) => {
-  return (ctx: MutableActionContext, sources: readonly string[], schema: AnyZodObject) => {
+export const createSmartInputArranger = (
+  contentType2Arranger: ContentType2Arranger = defaultContentType2Arranger,
+): InputArranger => {
+  return (ctx, sources, schema) => {
     const requestedContentType = ctx.req.headers['content-type']
     if (requestedContentType) {
       for (const [contentType, contentArranger] of Object.entries<ContentArranger>(contentType2Arranger)) {

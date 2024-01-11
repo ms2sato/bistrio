@@ -1,4 +1,4 @@
-import { ZodError, ZodIssue, AnyZodObject } from 'zod'
+import { ZodError, ZodIssue, ZodType } from 'zod'
 import { blankSchema } from './schemas.js'
 import { ComponentType, ReactNode } from 'react'
 
@@ -33,8 +33,10 @@ export interface ActionDescriptor {
   hydrate?: boolean
 }
 
+export type ConstructSchema = ZodType
+
 export type ConstructDescriptor = {
-  schema?: AnyZodObject | null
+  schema?: ConstructSchema | null
   sources?: readonly ConstructSource[]
 }
 

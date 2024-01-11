@@ -320,6 +320,7 @@ export type TestNameResourceUpdateParams = {
 }
 export type TestNameResourceDeleteParams = {
     id: number;
+    format?: string | undefined;
 }
 
 export interface TestNameResource<OP> {

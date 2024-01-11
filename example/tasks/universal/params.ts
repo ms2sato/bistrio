@@ -76,7 +76,12 @@ export const commentUpdateSchema = object({
 })
 
 export const fileSchema = zinstanceof(File)
-export const adminUserBatchCreateSchema = object({
-  file: union([uploadedFileSchema, fileSchema]),
+export const clientFileSchema = object({
+  file: fileSchema.optional(),
+})
+export const serverFileSchema = object({
+  file: uploadedFileSchema,
   format: string().optional(),
 })
+
+export const adminUserBatchCreateSchema = union([clientFileSchema, serverFileSchema])

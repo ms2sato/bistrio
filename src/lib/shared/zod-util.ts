@@ -10,6 +10,7 @@ import {
   ZodBigInt,
   ZodNumber,
   ZodDate,
+  ZodType,
 } from 'zod'
 
 const isSchemaOf =
@@ -46,7 +47,7 @@ type WrapType = {
   innerType: AnyZodObject
 }
 
-export function strip(schema: AnyZodObject): AnyZodObject {
+export function strip(schema: ZodType): ZodType {
   if (isZodDefault(schema) || isZodOptional(schema) || isZodNullable(schema)) {
     const wrapType = schema?._def as unknown as WrapType
     return strip(wrapType.innerType)
@@ -54,7 +55,7 @@ export function strip(schema: AnyZodObject): AnyZodObject {
   return schema
 }
 
-export function cast(schema: AnyZodObject, value: unknown): ArrangeResult {
+export function cast(schema: ZodType, value: unknown): ArrangeResult {
   if (value === undefined) {
     return nullArrangeResult
   }
@@ -87,12 +88,16 @@ export function cast(schema: AnyZodObject, value: unknown): ArrangeResult {
 }
 
 type TraverseBlankValueCallback = {
-  (schema: AnyZodObject, obj: Record<string, unknown>, key: string): void
+  (schema: ZodType, obj: Record<string, unknown>, key: string): void
 }
 
 // FIXME: draft implements
-function traverseBlankValue<S extends AnyZodObject>(schema: S, obj: unknown, callback: TraverseBlankValueCallback) {
-  const shape = schema.shape as Record<string, AnyZodObject>
+function traverseBlankValue<S extends ZodType>(schema: S, obj: unknown, callback: TraverseBlankValueCallback) {
+  if (!('shape' in schema)) {
+    return
+  }
+
+  const shape = schema.shape as Record<string, ZodType>
   for (const [key, subSchema] of Object.entries(shape)) {
     const record = obj as Record<string, unknown>
     if (key in record) {
@@ -116,7 +121,7 @@ function traverseBlankValue<S extends AnyZodObject>(schema: S, obj: unknown, cal
   }
 }
 
-export function fillDefault<S extends AnyZodObject>(schema: S, obj: unknown): unknown {
+export function fillDefault<S extends ZodType>(schema: S, obj: unknown): unknown {
   traverseBlankValue(schema, obj, (schema, obj, key) => {
     if (isZodDefault(schema)) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -137,9 +142,10 @@ export function isValue(obj: unknown): boolean {
   )
 }
 
-export function deepCast<S extends AnyZodObject>(schema: S, obj: unknown): Zod.infer<S> {
+export function deepCast<S extends ZodType>(schema: S, obj: unknown): Zod.infer<S> {
   if (isValue(obj)) {
     const ret = cast(strip(schema), obj)
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return (ret.arranged ? ret.result : obj) as Zod.infer<S>
   }
 
@@ -158,14 +164,22 @@ export function deepCast<S extends AnyZodObject>(schema: S, obj: unknown): Zod.i
 
   const record = obj as Record<string, unknown>
   for (const [key, val] of Object.entries<unknown>(record)) {
-    const shape = strip(schema).shape as Record<string, AnyZodObject>
-    const itemSchema = shape[key]
-    if (itemSchema) {
-      record[key] = deepCast(itemSchema, val)
+    const strippedSchema = strip(schema)
+    if ('shape' in strippedSchema) {
+      const shape = strippedSchema.shape as Record<string, AnyZodObject>
+      const itemSchema = shape[key]
+      if (itemSchema) {
+        record[key] = deepCast(itemSchema, val)
+      }
     }
   }
   return record
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-export const isBlank = (schema: AnyZodObject) => Object.keys(schema.shape).length === 0
+export const isBlank = (schema: ZodType): boolean => {
+  if (!('shape' in schema)) {
+    return false
+  }
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+  return schema.shape ? Object.keys(schema.shape).length === 0 : false
+}

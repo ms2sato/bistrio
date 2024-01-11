@@ -1,4 +1,3 @@
-import { AnyZodObject } from 'zod'
 import { type RouteObject } from 'react-router-dom'
 
 import {
@@ -29,6 +28,7 @@ import { pathJoin } from './path-util.js'
 import { PageNode } from './render-support.js'
 import { RouteObjectPickupper } from './route-object-pickupper.js'
 import createDebug from 'debug'
+import { ZodType } from 'zod'
 
 const debug = createDebug('bistrio:debug:client')
 
@@ -301,7 +301,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
     const config = this.clientConfig
     const fetcher = this.clientConfig.createFetcher()
 
-    const createStubMethod = (ad: ActionDescriptor, resourceUrl: string, schema: AnyZodObject, method: HttpMethod) => {
+    const createStubMethod = (ad: ActionDescriptor, resourceUrl: string, schema: ZodType, method: HttpMethod) => {
       if (schema === blankSchema) {
         return async function (...options: unknown[]) {
           const option = options.length > 0 ? (options[0] as Record<string, string | number>) : {}
@@ -311,11 +311,12 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
       } else {
         return async function (input: unknown, ..._options: unknown[]) {
           // TODO: catch error and rethrow with custom error type
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           const parsedInput = schema.parse(input)
 
           const { httpPath, keys } = createPath(config, resourceUrl, ad, input as Record<string, string | number>)
 
-          const body = filterWithoutKeys(parsedInput, keys)
+          const body = filterWithoutKeys(parsedInput as { [key: string]: unknown }, keys)
           if (Object.keys(body).length > 0) {
             if (method === 'get' || method === 'head') {
               return fetcher.fetch(`${httpPath}?${toURLSearchParams(body).toString()}`, method)

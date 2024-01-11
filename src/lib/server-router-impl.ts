@@ -1,6 +1,6 @@
 import express, { NextFunction, RequestHandler } from 'express'
 import { join } from 'node:path'
-import { ZodError, AnyZodObject } from 'zod'
+import { ZodError } from 'zod'
 import debug from 'debug'
 import {
   ActionContext,
@@ -32,6 +32,7 @@ import {
   ClientConfig,
   Router,
   ActionType,
+  ConstructSchema,
 } from '../index.js'
 import { HttpMethod, RouterOptions, opt } from './shared/index.js'
 import { RouteObject } from 'react-router-dom'
@@ -118,6 +119,7 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
               source = await responder.beforeValidation?.(ctx, source, schema)
             }
 
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             let input = schema.parse(source)
             if (responder && 'afterValidation' in responder) {
               input = (await responder.afterValidation?.(ctx, input, schema)) as { [x: string]: unknown }
@@ -476,7 +478,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
           )
         }
 
-        const schema: AnyZodObject | undefined =
+        const schema: ConstructSchema | undefined =
           resourceMethod === undefined
             ? undefined
             : choiceSchema(this.serverRouterConfig.constructConfig, constructDescriptor, actionName)

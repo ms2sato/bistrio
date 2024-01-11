@@ -1,5 +1,6 @@
 import { useRenderSupport } from '@/.bistrio/routes/admin'
-import { adminUserBatchCreateSchema } from '@/universal/params'
+import { BatchResult } from '@/server/resources/admin/users/batch/resource'
+import { clientFileSchema } from '@/universal/params'
 import { useSubmit } from 'bistrio/client'
 
 function Page() {
@@ -37,14 +38,14 @@ function Page() {
 function UploadForm() {
   const rs = useRenderSupport()
 
-  const { handleSubmit } = useSubmit({
-    source: { file: null },
+  const { handleSubmit } = useSubmit<typeof clientFileSchema, BatchResult>({
+    source: { file: undefined },
     action: {
       modifier: (params) => rs.resources().adminUserBatch.create(params),
       onSuccess: (result) => console.log('Success', result),
       onFatal: (err) => console.log('error', err),
     },
-    schema: adminUserBatchCreateSchema,
+    schema: clientFileSchema,
   })
 
   return (
