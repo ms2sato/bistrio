@@ -5,6 +5,7 @@ export type BlankParams = Zod.infer<typeof blankSchema>
 
 export const idNumberSchema = object({
   id: number(),
+  format: string().optional(),
 })
 
 export type IdNumberParams = Zod.infer<typeof idNumberSchema>
@@ -30,6 +31,7 @@ export type UploadedFile = Zod.infer<typeof uploadedFileSchema>
 const pageCoreProps = {
   page: number(),
   limit: number(),
+  format: string().optional(),
 }
 
 export const pageSchema = object(pageCoreProps)
