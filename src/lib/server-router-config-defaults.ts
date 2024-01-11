@@ -1,17 +1,18 @@
 import { existsSync } from 'node:fs'
+import { ZodType } from 'zod'
 import { ActionContextCreator, SchemaUtil, routerPlaceholderRegex } from '../index.js'
-import { ConstructSchema, FileNotFoundError } from './shared/common.js'
+import { FileNotFoundError } from './shared/common.js'
 import { LoadFunc } from './server-router-config.js'
 import { ActionContext, CreateActionOptionFunction, InputArranger, MutableActionContext } from './action-context.js'
 import { createZodTraverseArrangerCreator } from './shared/create-zod-traverse-arranger-creator.js'
 import { parseFormBody } from './shared/parse-form-body.js'
 import { ActionContextImpl } from './server-router-impl.js'
 
-export function arrangeFormInput(ctx: MutableActionContext, sources: readonly string[], schema: ConstructSchema) {
+export function arrangeFormInput(ctx: MutableActionContext, sources: readonly string[], schema: ZodType) {
   return parseFormBody(ctx.mergeInputs(sources), createZodTraverseArrangerCreator(schema))
 }
 
-export function arrangeJsonInput(ctx: MutableActionContext, sources: readonly string[], schema: ConstructSchema) {
+export function arrangeJsonInput(ctx: MutableActionContext, sources: readonly string[], schema: ZodType) {
   const pred = (input: Record<string, unknown>, source: string) => {
     return source === 'body' ? input : (SchemaUtil.deepCast(schema, input) as Record<string, unknown>)
   }
@@ -19,7 +20,7 @@ export function arrangeJsonInput(ctx: MutableActionContext, sources: readonly st
 }
 
 export type ContentArranger = {
-  (ctx: MutableActionContext, sources: readonly string[], schema: ConstructSchema): unknown
+  (ctx: MutableActionContext, sources: readonly string[], schema: ZodType): unknown
 }
 
 type ContentType2Arranger = Record<string, ContentArranger>

@@ -1,3 +1,4 @@
+import { ZodType } from 'zod'
 import {
   InputArranger,
   CreateActionOptionFunction,
@@ -11,7 +12,6 @@ import { ServerRouterImpl } from './server-router-impl.js'
 import {
   ActionDescriptor,
   ConstructConfig,
-  ConstructSchema,
   ConstructSource,
   LoadPageFunc,
   Resource,
@@ -25,7 +25,7 @@ export type ResourceMethodHandlerParams = {
   sources: readonly ConstructSource[]
   router: ServerRouterImpl
   httpPath: string
-  schema: ConstructSchema
+  schema: ZodType
   adapterPath: string
   actionDescriptor: ActionDescriptor
   responder: Responder | RequestCallback
