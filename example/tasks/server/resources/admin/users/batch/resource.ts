@@ -2,9 +2,10 @@ import { defineResource } from 'bistrio'
 import { getPrismaCilent } from '@server/lib/prisma-util'
 import { CustomMethodOption } from '@/server/customizers'
 import { AdminUserBatchResource } from '@/.bistrio/resources'
-import { object, string } from 'zod'
+import { object, string, infer as zinfer } from 'zod'
 import { hash } from '@/server/lib/crypter'
 import { ReadLineCallback, readLines } from './readlines'
+import { adminUserBatchCreateSchema } from '@/universal/params'
 
 const prisma = getPrismaCilent()
 
@@ -18,7 +19,7 @@ export type BatchResult = { count: number; error?: Error[] }
 export default defineResource(
   (_support, _options) =>
     ({
-      create: async ({ file }): Promise<BatchResult> => {
+      create: async ({ file }: zinfer<typeof adminUserBatchCreateSchema>): Promise<BatchResult> => {
         const callback: ReadLineCallback<{ count: number; error?: unknown }> = async (lines) => {
           const data = []
           for (const line of lines) {
@@ -36,7 +37,7 @@ export default defineResource(
           }
         }
 
-        const result = await readLines(file as File, callback)
+        const result = await readLines(file, callback)
 
         return {
           count: result.results.reduce((acc, cur) => acc + cur.count, 0),
