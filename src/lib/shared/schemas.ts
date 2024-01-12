@@ -9,6 +9,7 @@ import {
   void as void_,
   instanceof as zinstanceof,
 } from 'zod'
+import { withGetType } from 'zod-to-ts'
 
 export const blankSchema = object({})
 export type BlankParams = Zod.infer<typeof blankSchema>
@@ -36,7 +37,7 @@ export const uploadedFileSchema = object({
 
 export type UploadedFile = Zod.infer<typeof uploadedFileSchema>
 
-export const fileSchema = zinstanceof(File)
+export const fileSchema = withGetType(zinstanceof(File), (ts) => ts.factory.createIdentifier('File'))
 
 export type FileType = Zod.infer<typeof fileSchema>
 

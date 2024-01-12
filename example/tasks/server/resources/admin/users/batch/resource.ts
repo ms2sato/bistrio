@@ -19,7 +19,7 @@ export type BatchResult = { count: number; error?: Error[] }
 export default defineResource(
   (_support, _options) =>
     ({
-      create: async ({ file }: zinfer<typeof adminUserBatchCreateSchema>): Promise<BatchResult> => {
+      create: async ({ file }): Promise<BatchResult> => {
         const callback: ReadLineCallback<{ count: number; error?: unknown }> = async (lines) => {
           const data = []
           for (const line of lines) {
