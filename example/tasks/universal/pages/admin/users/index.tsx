@@ -38,7 +38,7 @@ function UploadForm() {
   const rs = useRenderSupport()
 
   const { handleSubmit } = useSubmit({
-    source: { file: undefined },
+    source: { file: new File([], '') },
     action: {
       modifier: (params) => rs.resources().adminUserBatch.create(params),
       onSuccess: (result) => console.log('Success', result),
