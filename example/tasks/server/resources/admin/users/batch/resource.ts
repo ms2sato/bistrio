@@ -2,10 +2,9 @@ import { defineResource } from 'bistrio'
 import { getPrismaCilent } from '@server/lib/prisma-util'
 import { CustomMethodOption } from '@/server/customizers'
 import { AdminUserBatchResource } from '@/.bistrio/resources'
-import { object, string, infer as zinfer } from 'zod'
+import { object, string } from 'zod'
 import { hash } from '@/server/lib/crypter'
 import { ReadLineCallback, readLines } from './readlines'
-import { adminUserBatchCreateSchema } from '@/universal/params'
 
 const prisma = getPrismaCilent()
 
