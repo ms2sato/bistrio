@@ -1,4 +1,14 @@
-import { string, function as func, any, boolean, number, object, promise, void as void_ } from 'zod'
+import {
+  string,
+  function as func,
+  any,
+  boolean,
+  number,
+  object,
+  promise,
+  void as void_,
+  instanceof as zinstanceof,
+} from 'zod'
 
 export const blankSchema = object({})
 export type BlankParams = Zod.infer<typeof blankSchema>
@@ -25,6 +35,10 @@ export const uploadedFileSchema = object({
 })
 
 export type UploadedFile = Zod.infer<typeof uploadedFileSchema>
+
+export const fileSchema = zinstanceof(File)
+
+export type FileType = Zod.infer<typeof fileSchema>
 
 // --- for pagination ---
 
