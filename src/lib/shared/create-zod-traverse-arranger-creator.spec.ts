@@ -1,6 +1,6 @@
 import { parseFormBody } from './parse-form-body.js'
 import { createZodTraverseArrangerCreator } from './create-zod-traverse-arranger-creator.js'
-import { string, number, date, array, object } from 'zod'
+import { string, number, date, array, object, instanceof as zinstanceof } from 'zod'
 
 const itemSchema = object({
   type: string(),
@@ -43,6 +43,11 @@ const userSchema = object({
   hobbies: array(string()),
   items: array(itemSchema),
   numbersHasDefault: array(number()).default([]),
+})
+
+const includeFileSchema = object({
+  name: string(),
+  file: zinstanceof(File),
 })
 
 const arrangerCreator = createZodTraverseArrangerCreator(userSchema)
@@ -123,4 +128,14 @@ test('unkown property', () => {
 
 test('unkown array property', () => {
   expect(() => parseFormBody({ 'tags[]': ['test1'], age: '20' }, arrangerCreator)).toThrow(`Unexpected path: tags`)
+})
+
+test('value include file object', () => {
+  const obj = parseFormBody(
+    { name: 'test', file: new File([], 'filename') },
+    createZodTraverseArrangerCreator(includeFileSchema),
+  )
+
+  expect(obj.name).toEqual('test')
+  expect(obj.file).toBeInstanceOf(File)
 })

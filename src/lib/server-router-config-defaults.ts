@@ -7,9 +7,23 @@ import { ActionContext, CreateActionOptionFunction, InputArranger, MutableAction
 import { createZodTraverseArrangerCreator } from './shared/create-zod-traverse-arranger-creator.js'
 import { parseFormBody } from './shared/parse-form-body.js'
 import { ActionContextImpl } from './server-router-impl.js'
+import { LocalFile } from './local-file.js'
+import { UploadedFile } from './shared/schemas.js'
 
 export function arrangeFormInput(ctx: MutableActionContext, sources: readonly string[], schema: ZodType) {
-  return parseFormBody(ctx.mergeInputs(sources), createZodTraverseArrangerCreator(schema))
+  const pred = (input: Record<string, unknown>, source: string) => {
+    if (source !== 'files') {
+      return input
+    }
+
+    const files: Record<string, LocalFile> = {}
+    for (const [name, file] of Object.entries(input)) {
+      files[name] = new LocalFile(file as UploadedFile)
+    }
+    return files
+  }
+
+  return parseFormBody(ctx.mergeInputs(sources, pred), createZodTraverseArrangerCreator(schema))
 }
 
 export function arrangeJsonInput(ctx: MutableActionContext, sources: readonly string[], schema: ZodType) {

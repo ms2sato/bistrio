@@ -1,5 +1,5 @@
-import { uploadedFileSchema } from 'bistrio/client'
-import { union, literal, number, string, date, object, array, coerce, instanceof as zinstanceof } from 'zod'
+import { fileSchema } from 'bistrio/client'
+import { union, literal, number, string, date, object, array, coerce } from 'zod'
 
 export const Role = {
   Unknown: -1,
@@ -75,16 +75,7 @@ export const commentUpdateSchema = object({
   ...commentCoreProps,
 })
 
-export const fileSchema = zinstanceof(File)
-// export const clientFileSchema = object({
-//   file: fileSchema.optional(),
-// })
-// export const serverFileSchema = object({
-//   file: uploadedFileSchema,
-//   format: string().optional(),
-// })
-
 export const adminUserBatchCreateSchema = object({
-  file: union([fileSchema, uploadedFileSchema]).optional(),
+  file: fileSchema,
   format: string().optional(),
 })

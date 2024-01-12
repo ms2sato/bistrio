@@ -1,11 +1,10 @@
-import { UploadedFile, defineResource } from 'bistrio'
+import { defineResource } from 'bistrio'
 import { getPrismaCilent } from '@server/lib/prisma-util'
 import { CustomMethodOption } from '@/server/customizers'
 import { AdminUserBatchResource } from '@/.bistrio/resources'
 import { object, string } from 'zod'
 import { hash } from '@/server/lib/crypter'
 import { ReadLineCallback, readLines } from './readlines'
-import { LocalFile } from './local-file'
 
 const prisma = getPrismaCilent()
 
@@ -19,12 +18,7 @@ export type BatchResult = { count: number; error?: Error[] }
 export default defineResource(
   (_support, _options) =>
     ({
-      create: async ({ file: anyFile }): Promise<BatchResult> => {
-        const file = anyFile as UploadedFile // TODO: fix type
-
-        // const readable:ReadableStream = Readable.toWeb(createReadStream(file.tempFilePath))
-        // const f:File = new File(readable, file.name, { type: file.mimetype })
-
+      create: async ({ file }): Promise<BatchResult> => {
         const callback: ReadLineCallback<{ count: number; error?: unknown }> = async (lines) => {
           const data = []
           for (const line of lines) {
@@ -42,7 +36,7 @@ export default defineResource(
           }
         }
 
-        const result = await readLines(new LocalFile(file), callback)
+        const result = await readLines(file as File, callback)
 
         return {
           count: result.results.reduce((acc, cur) => acc + cur.count, 0),
