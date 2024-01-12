@@ -1,14 +1,11 @@
-import { createReadStream } from 'node:fs'
-import { readFile } from 'node:fs/promises'
-
 import { UploadedFile, defineResource } from 'bistrio'
 import { getPrismaCilent } from '@server/lib/prisma-util'
 import { CustomMethodOption } from '@/server/customizers'
 import { AdminUserBatchResource } from '@/.bistrio/resources'
 import { object, string } from 'zod'
 import { hash } from '@/server/lib/crypter'
-import { Readable } from 'node:stream'
 import { ReadLineCallback, readLines } from './readlines'
+import { LocalFile } from './local-file'
 
 const prisma = getPrismaCilent()
 
@@ -18,46 +15,6 @@ const lineSchema = object({
 })
 
 export type BatchResult = { count: number; error?: Error[] }
-
-class LocalFile extends File {
-  mv
-
-  constructor(private uf: UploadedFile) {
-    super([], uf.name, { type: uf.mimetype })
-
-    this.mv = this.uf.mv.bind(this.uf)
-  }
-
-  stream(): ReadableStream<Uint8Array> {
-    return Readable.toWeb(createReadStream(this.uf.tempFilePath)) as ReadableStream<Uint8Array>
-  }
-
-  get size(): number {
-    return this.uf.size
-  }
-
-  get type(): string {
-    return this.uf.mimetype
-  }
-
-  async arrayBuffer(): Promise<ArrayBuffer> {
-    const buffer = await readFile(this.uf.tempFilePath)
-    return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)
-  }
-
-  async text(): Promise<string> {
-    return readFile(this.uf.tempFilePath, { encoding: 'utf8' })
-  }
-
-  async blob(): Promise<Blob> {
-    const buffer = await readFile(this.uf.tempFilePath)
-    return new Blob([buffer], { type: this.uf.mimetype })
-  }
-
-  slice(_start?: number, _end?: number, _contentType?: string): Blob {
-    throw new Error("Unimplemented 'slice' method")
-  }
-}
 
 export default defineResource(
   (_support, _options) =>
