@@ -2,7 +2,7 @@ import { OpenMode, createReadStream } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { Readable } from 'node:stream'
 import { Abortable } from 'node:events'
-import { UploadedFile } from 'bistrio'
+import { UploadedFile } from '../lib/shared/schemas.js'
 
 export class LocalFile extends File {
   mv
@@ -41,15 +41,8 @@ export class LocalFile extends File {
     return await readFile(this.uf.tempFilePath, options)
   }
 
-  async text(
-    options:
-      | ({
-          encoding: BufferEncoding
-          flag?: OpenMode | undefined
-        } & Abortable)
-      | BufferEncoding = { encoding: 'utf8' },
-  ): Promise<string> {
-    return readFile(this.uf.tempFilePath, options)
+  async text(): Promise<string> {
+    return readFile(this.uf.tempFilePath, { encoding: 'utf8' })
   }
 
   async blob(

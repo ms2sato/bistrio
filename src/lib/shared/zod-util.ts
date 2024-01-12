@@ -143,6 +143,7 @@ export function isValue(obj: unknown): boolean {
 }
 
 export function deepCast<S extends ZodType>(schema: S, obj: unknown): Zod.infer<S> {
+  if (obj === undefined || obj === null) return obj
   if (isValue(obj)) {
     const ret = cast(strip(schema), obj)
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
