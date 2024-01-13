@@ -6,11 +6,14 @@ import { CustomMethodOption } from '@/server/customizers'
 
 const prisma = getPrismaCilent()
 
+type SecureUser = Omit<User, 'hashedPassword'>
+
 export default defineResource(
   (_support, _options) =>
     ({
-      list({ q: _q }): Promise<User[]> {
-        return prisma.user.findMany()
+      async list({ q: _q }): Promise<SecureUser[]> {
+        const users = await prisma.user.findMany()
+        return users.map((user) => ({ ...user, hashedPassword: undefined })) // TODO: to secure
       },
     }) as const satisfies AdminUsersResource<CustomMethodOption>,
 )
