@@ -1,4 +1,4 @@
-import { readLines } from './readlines'
+import { readLines } from './readlines.js'
 
 const newReadableStream = () => {
   let callCount = 0

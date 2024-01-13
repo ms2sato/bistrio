@@ -1,10 +1,9 @@
-import { defineResource } from 'bistrio'
+import { defineResource, ReadLineCallback, readLines } from 'bistrio'
 import { getPrismaCilent } from '@server/lib/prisma-util'
 import { CustomMethodOption } from '@/server/customizers'
 import { AdminUserBatchResource } from '@/.bistrio/resources'
 import { object, string } from 'zod'
 import { hash } from '@/server/lib/crypter'
-import { ReadLineCallback, readLines } from './readlines'
 
 const prisma = getPrismaCilent()
 
@@ -22,7 +21,6 @@ export default defineResource(
         const callback: ReadLineCallback<{ count: number; error?: unknown }> = async (lines) => {
           const data = []
           for (const line of lines) {
-            console.log(`Line from file: ${line}`)
             const { username, password } = lineSchema.parse(JSON.parse(line))
             const hashedPassword = await hash(password)
             data.push({ username, hashedPassword })

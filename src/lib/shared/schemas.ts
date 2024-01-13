@@ -1,3 +1,4 @@
+import type ts from 'typescript'
 import {
   string,
   function as func,
@@ -8,8 +9,42 @@ import {
   promise,
   void as void_,
   instanceof as zinstanceof,
+  ZodTypeAny,
 } from 'zod'
-import { withGetType } from 'zod-to-ts'
+import { type GetType } from 'zod-to-ts'
+
+// ported from zod-to-ts
+// import { withGetType } from 'zod-to-ts'
+type ZodToTsOptions = {
+  /** @deprecated use `nativeEnums` instead */
+  resolveNativeEnums?: boolean
+  nativeEnums?: 'identifier' | 'resolve' | 'union'
+}
+declare const resolveOptions: (raw?: ZodToTsOptions) => {
+  resolveNativeEnums?: boolean | undefined
+  nativeEnums: 'identifier' | 'resolve' | 'union'
+}
+type ResolvedZodToTsOptions = ReturnType<typeof resolveOptions>
+type GetTypeFunction = (
+  typescript: typeof ts,
+  identifier: string,
+  options: ResolvedZodToTsOptions,
+) => ts.Identifier | ts.TypeNode
+
+/**
+ * @example
+ * // add TypeName 'File' to Schema for z.instanceof(File)
+ * const fileSchema = withGetType(zinstanceof(File), (ts) => ts.factory.createIdentifier('File'))
+ */
+export const withGetType = <T extends ZodTypeAny & GetType>(schema: T, getType: GetTypeFunction): T => {
+  if (!('_def' in schema)) {
+    throw new Error('schema._def is undefined')
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  schema._def.getType = getType
+  return schema
+}
 
 export const blankSchema = object({})
 export type BlankParams = Zod.infer<typeof blankSchema>
@@ -38,8 +73,6 @@ export const uploadedFileSchema = object({
 export type UploadedFile = Zod.infer<typeof uploadedFileSchema>
 
 export const fileSchema = withGetType(zinstanceof(File), (ts) => ts.factory.createIdentifier('File'))
-
-export type FileType = Zod.infer<typeof fileSchema>
 
 // --- for pagination ---
 

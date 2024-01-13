@@ -1,4 +1,4 @@
-import { LineTextStream } from './line-text-stream'
+import { LineTextStream } from './line-text-stream.js'
 
 test('1line', async () => {
   const textStream = new ReadableStream({
