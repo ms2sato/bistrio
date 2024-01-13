@@ -217,13 +217,14 @@ export class ActionContextImpl implements MutableActionContext {
     sources: readonly string[],
     pred: (input: Record<string, unknown>, source: string) => Record<string, unknown> = (input) => input,
   ) {
-    const request = this.req as unknown as Record<string, Record<string, unknown>>
+    const request = this.req as unknown as Record<string, Record<string, unknown> | undefined | null>
     const input = sources.reduce((prev, source) => {
-      if (request[source] === undefined) {
+      const reqSource = request[source]
+      if (reqSource === undefined || reqSource === null) {
         return prev
       }
 
-      return { ...prev, ...pred(request[source], source) }
+      return { ...prev, ...pred(reqSource, source) }
     }, {})
 
     this._input = input
