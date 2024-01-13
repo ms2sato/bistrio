@@ -1,3 +1,5 @@
+import { LineTextStream } from './line-text-stream'
+
 export type ReadLineResult<R> = {
   lines: number
   results: R[]
@@ -10,49 +12,21 @@ export const readLines = async <R>(
   callback: ReadLineCallback<R>,
   bufferSize = 1,
 ): Promise<ReadLineResult<R>> => {
-  const readableStream = file.stream()
-  const textStream = readableStream.pipeThrough(new TextDecoderStream())
+  const textStream = file.stream().pipeThrough(new TextDecoderStream()).pipeThrough(new LineTextStream(bufferSize))
   const reader = textStream.getReader()
 
   const results: R[] = []
-  const lines: string[] = []
-  let incompleteLine: string = ''
-  let chunk
-  let readerDone
+  let chunk: string[] | undefined
+  let readerDone: boolean
   let lineCount = 0
-
   do {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     ;({ value: chunk, done: readerDone } = await reader.read())
-    chunk = chunk ? chunk : ''
-
-    chunk = incompleteLine + chunk
-    const chunkLines = chunk.split('\n')
-    const newLineIncomplete = !chunk.endsWith('\n')
-
-    if (newLineIncomplete) {
-      incompleteLine = chunkLines.pop() || ''
-    } else {
-      incompleteLine = ''
-    }
-
-    lines.push(...chunkLines)
-    lineCount += chunkLines.length
-
-    while (lines.length >= bufferSize) {
-      const buffer = lines.splice(0, bufferSize)
-      results.push(await callback(buffer))
+    if (chunk?.length) {
+      lineCount += chunk.length
+      results.push(await callback(chunk))
     }
   } while (!readerDone)
 
-  if (incompleteLine) {
-    lineCount++
-    lines.push(incompleteLine)
-  }
-
-  while (lines.length > 0) {
-    const buffer = lines.splice(0, bufferSize)
-    results.push(await callback(buffer))
-  }
-
-  return Promise.resolve({ lines: lineCount, results })
+  return { lines: lineCount, results }
 }

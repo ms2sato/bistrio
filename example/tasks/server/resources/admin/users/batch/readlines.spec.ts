@@ -1,19 +1,28 @@
 import { readLines } from './readlines'
 
+const newReadableStream = () => {
+  let callCount = 0
+
+  return new ReadableStream({
+    start(controller) {
+      // 最初のデータを提供します。
+      controller.enqueue(new TextEncoder().encode('line1\nline2\nline3\nli'))
+      callCount++
+    },
+    pull(controller) {
+      // リーダーが新しいデータを要求するたびに、次のデータを提供します。
+      if (callCount === 1) {
+        controller.enqueue(new TextEncoder().encode('ne4\nline5'))
+        controller.close()
+      }
+    },
+  })
+}
+
 describe('readLines', () => {
   describe('bufferSize = 1', () => {
     it('reads lines correctly', async () => {
-      const mockStream = {
-        pipeThrough: jest.fn().mockReturnThis(),
-        getReader: jest.fn().mockReturnValue({
-          read: jest
-            .fn()
-            .mockResolvedValueOnce({ value: 'line1\nline2\nline3\nli', done: false })
-            .mockResolvedValueOnce({ value: 'ne4\nline5', done: true }),
-        }),
-      }
-      const mockFile = { stream: jest.fn().mockReturnValue(mockStream) } as unknown as File
-
+      const mockFile = { stream: () => newReadableStream() } as unknown as File
       const callback = jest.fn().mockResolvedValue('processed')
 
       const result = await readLines(mockFile, callback)
@@ -31,17 +40,7 @@ describe('readLines', () => {
 
   describe('multi bufferSize', () => {
     it('reads lines correctly', async () => {
-      const mockStream = {
-        pipeThrough: jest.fn().mockReturnThis(),
-        getReader: jest.fn().mockReturnValue({
-          read: jest
-            .fn()
-            .mockResolvedValueOnce({ value: 'line1\nline2\nline3\nli', done: false })
-            .mockResolvedValueOnce({ value: 'ne4\nline5', done: true }),
-        }),
-      }
-      const mockFile = { stream: jest.fn().mockReturnValue(mockStream) } as unknown as File
-
+      const mockFile = { stream: () => newReadableStream() } as unknown as File
       const callback = jest.fn().mockResolvedValue('processed')
 
       const result = await readLines(mockFile, callback, 2)
