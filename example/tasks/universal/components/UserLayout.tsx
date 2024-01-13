@@ -35,7 +35,7 @@ function Header() {
         <Link to={__auth__login.path()}>Login</Link>
       ) : (
         <>
-          <a href="#" onClick={handleLogout}>
+          <a id="logout" href="#" onClick={handleLogout}>
             Logout
           </a>
           {user.username}
