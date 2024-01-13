@@ -1,4 +1,4 @@
-import { LineTextStream } from './line-text-stream'
+import { LineTextStream } from './line-text-stream.js'
 
 export type ReadLineResult<R> = {
   lines: number
