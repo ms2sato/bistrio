@@ -79,3 +79,7 @@ export const adminUserBatchCreateSchema = object({
   file: fileSchema,
   format: string().optional(),
 })
+
+export const adminUserBatchListSchema = object({
+  q: string().optional(),
+})

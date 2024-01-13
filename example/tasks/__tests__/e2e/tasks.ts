@@ -2,11 +2,12 @@ import { Task } from '@prisma/client'
 import { getPrismaCilent } from '../../server/lib/prisma-util'
 import { asURL } from '../support'
 import { spy, RequestHolder, waitForAnyInnerText, waitForNotAnyInnerText } from '../support/request-spy'
-import { signIn } from '../support/helper'
+import { signIn, signOut } from '../support/helper'
 
 const prisma = getPrismaCilent()
 
 beforeAll(async () => await signIn('user1', 'password'))
+afterAll(async () => await signOut())
 
 describe('senario /tasks', () => {
   let req: RequestHolder
