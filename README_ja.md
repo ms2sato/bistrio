@@ -34,6 +34,7 @@ Webのシステムにおいて最も情報が多いのがルーティングで�
 - サーバーの Routing 情報
 - ブラウザの SPA Routing の情報
 - REPLで利用可能なResource情報
+- システム内のエンドポイントの情報
 
 ## Resource-View-Routes(RVR)
 
@@ -81,13 +82,18 @@ RoutesとResourceの情報から自動的に作成されるため、サーバー
 
 # ディレクトリ構造
 
+開発の際のディレクトリ構造は以下です。詳しくはExample実装として用意している[example/tasks](example/tasks)を確認してください。
+
 - .bistrio: 自動生成のコードはこの下に作成されます
 - bin: コマンド
 - config: 設定群（普段あまり操作しないものが入っています）
 - public: Webに公開されるstaticなファイル
 - server: サーバーサイドのコード
+  - config: 設定
   - resources: Resource を配置するディレクトリ
-- universal: サーバー・クライアントでの共通のコード
+  - middleware.ts: サーバーで呼び出される Middlewareの実装
+- universal: サーバー・クライアントでの共通のコード（注意! ブラウザへ公開されます）
+  - config: 設定
   - pages: JSXを配置するディレクトリ
   - routes: Routes を配置するディレクトリ
-  - middleware.ts: routesで利用されるMiddlewareを配置するファイル
+  - middleware.ts: routesで利用されるMiddlewareのインターフェース
