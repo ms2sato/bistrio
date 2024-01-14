@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import { z } from 'zod'
 import { ActionDescriptor, ServerRouter } from '../index.js'
-import { arrangeFormInput } from './server-router-config-defaults.js'
+import { arrangeFormInput } from './input-arrangers.js'
 import { ActionContextImpl } from './server-router-impl.js'
 import { fileSchema } from '../lib/shared/schemas.js'
 
