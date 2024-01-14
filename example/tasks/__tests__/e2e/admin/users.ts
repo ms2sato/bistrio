@@ -10,16 +10,16 @@ const prisma = getPrismaCilent()
 beforeAll(async () => await signIn('admin', 'password'))
 afterAll(async () => await signOut())
 
+afterEach(async () => {
+  await prisma.user.deleteMany({ where: { username: { not: { in: ['admin', 'user1', 'user2'] } } } })
+})
+
 describe('senario /admin/users', () => {
   let req: RequestHolder
 
   beforeAll(async () => {
     req = spy(page)
     await page.goto(asURL('admin/users'))
-  })
-
-  afterAll(async () => {
-    await prisma.user.deleteMany({ where: { username: { not: { in: ['admin', 'user1', 'user2'] } } } })
   })
 
   test('senario', async () => {

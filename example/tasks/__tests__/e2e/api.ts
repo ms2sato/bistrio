@@ -5,7 +5,11 @@ import { getPrismaCilent } from '../../server/lib/prisma-util'
 
 const prisma = getPrismaCilent()
 
-afterAll(async () => {
+beforeEach(async () => {
+  await prisma.user.deleteMany({ where: { username: { not: { in: ['admin', 'user1', 'user2'] } } } })
+})
+
+afterEach(async () => {
   await prisma.user.deleteMany({ where: { username: { not: { in: ['admin', 'user1', 'user2'] } } } })
 })
 
