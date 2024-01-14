@@ -1,5 +1,5 @@
 import { resolve, join } from 'node:path'
-import { createReadStream, createWriteStream, statSync } from 'node:fs'
+import { OpenMode, createReadStream, createWriteStream, statSync } from 'node:fs'
 import { mkdtemp, readFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import {
@@ -12,6 +12,7 @@ import {
 import { loadPage, importLocal } from '../../config/server/imports'
 import { createActionOptions } from '../customizers/index'
 import { Readable } from 'node:stream'
+import { Abortable } from 'node:events'
 
 // config for Routers in server
 export function serverRouterConfig(): ServerRouterConfig {
@@ -32,8 +33,9 @@ export class TmpFile extends File {
     readonly filePath: string,
     readonly size: number,
     type: string = 'application/octet-stream',
+    name: string = 'tmpfile',
   ) {
-    super([], 'tmpfile', { type })
+    super([], name, { type })
   }
 
   stream(): ReadableStream<Uint8Array> {
@@ -79,13 +81,15 @@ export class TmpFile extends File {
 const arrangeOctetStreamInput: ContentArranger = async (ctx, sources, schema): Promise<File> => {
   const dir = await mkdtemp(join(tmpdir(), 'uploaded-'))
   const type = ctx.req.headers['content-type'] || 'application/octet-stream'
-  const tmpFilePath = join(dir, 'tmpfile')
+  const filename = 'tmpfile'
+
+  const tmpFilePath = join(dir, filename)
   ctx.req.pipe(createWriteStream(tmpFilePath)) // TODO: remove tmp file on error and request end
 
   const promise = new Promise<File>((resolve, reject) => {
     ctx.req.on('end', () => {
       const stats = statSync(tmpFilePath)
-      resolve(new TmpFile(tmpFilePath, stats.size, type))
+      resolve(new TmpFile(tmpFilePath, stats.size, type, filename))
     })
     ctx.req.on('error', (err) => reject(err))
   })
