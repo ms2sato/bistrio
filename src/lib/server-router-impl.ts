@@ -110,7 +110,7 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
         await respond(ctx, output, option)
       } else {
         try {
-          let source = serverRouterConfig.inputArranger(ctx, sources, schema)
+          let source = await serverRouterConfig.inputArranger(ctx, sources, schema)
           handlerLog('source: %o', source)
 
           try {
