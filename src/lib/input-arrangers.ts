@@ -1,6 +1,6 @@
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-import { createWriteStream, statSync } from 'node:fs'
+import { createWriteStream } from 'node:fs'
 import { mkdtemp } from 'node:fs/promises'
 
 import { ZodType } from 'zod'
