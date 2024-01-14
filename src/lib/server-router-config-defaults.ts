@@ -5,7 +5,11 @@ import { createZodTraverseArrangerCreator } from './shared/create-zod-traverse-a
 import { parseFormBody } from './shared/parse-form-body.js'
 import { ActionContextImpl } from './server-router-impl.js'
 import { LocalFile } from './local-file.js'
-import { UploadedFile } from './shared/schemas.js'
+import { UploadedFile, fileSchema } from './shared/schemas.js'
+import { mkdtemp } from 'fs/promises'
+import { join } from 'node:path'
+import { tmpdir } from 'node:os'
+import { createWriteStream, statSync } from 'node:fs'
 
 export function arrangeFormInput(ctx: MutableActionContext, sources: readonly string[], schema: ZodType) {
   const pred = (input: Record<string, unknown>, source: string) => {
@@ -36,6 +40,28 @@ export function arrangeJsonInput(ctx: MutableActionContext, sources: readonly st
   return ctx.mergeInputs(sources, pred)
 }
 
+export const arrangeOctetStreamInput: ContentArranger = async (ctx, _sources, schema): Promise<File> => {
+  if (schema !== fileSchema) {
+    throw new Error('OctetStream input is only available for fileSchema')
+  }
+
+  const dir = await mkdtemp(join(tmpdir(), 'uploaded-'))
+  const type = ctx.req.headers['content-type'] || 'application/octet-stream'
+  const filename = 'tmpfile'
+
+  const tmpFilePath = join(dir, filename)
+  ctx.req.pipe(createWriteStream(tmpFilePath)) // TODO: remove tmp file on error and request end
+
+  const promise = new Promise<File>((resolve, reject) => {
+    ctx.req.on('end', () => {
+      const stats = statSync(tmpFilePath)
+      resolve(new LocalFile(tmpFilePath, stats.size, type, filename))
+    })
+    ctx.req.on('error', (err) => reject(err))
+  })
+  return await promise
+}
+
 export type ContentArranger = {
   (ctx: MutableActionContext, sources: readonly string[], schema: ZodType): unknown
 }
@@ -43,6 +69,7 @@ export type ContentArranger = {
 type ContentType2Arranger = Record<string, ContentArranger>
 
 export const defaultContentType2Arranger: ContentType2Arranger = {
+  'application/octet-stream': arrangeOctetStreamInput,
   'application/json': arrangeJsonInput,
   'application/x-www-form-urlencoded': arrangeFormInput,
   'multipart/form-data': arrangeFormInput,
