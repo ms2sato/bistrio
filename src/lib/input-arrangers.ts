@@ -54,8 +54,8 @@ export const arrangeOctetStreamInput: InputArranger = async (ctx, _sources, sche
 
   const promise = new Promise<File>((resolve, reject) => {
     ctx.req.on('end', () => {
-      const stats = statSync(tmpFilePath)
-      resolve(new LocalFile(tmpFilePath, stats.size, type, filename))
+      // const stats = statSync(tmpFilePath)
+      resolve(new LocalFile(tmpFilePath, 1, type, filename))
     })
     ctx.req.on('error', (err) => reject(err))
   })
