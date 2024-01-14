@@ -1,6 +1,5 @@
 import { ZodType } from 'zod'
-import { ActionContextCreator, SchemaUtil, routerPlaceholderRegex } from '../index.js'
-import { LoadFunc } from './server-router-config.js'
+import { ActionContextCreator, FileNotFoundError, SchemaUtil, routerPlaceholderRegex } from '../index.js'
 import { ActionContext, CreateActionOptionFunction, InputArranger, MutableActionContext } from './action-context.js'
 import { createZodTraverseArrangerCreator } from './shared/create-zod-traverse-arranger-creator.js'
 import { parseFormBody } from './shared/parse-form-body.js'
@@ -16,7 +15,13 @@ export function arrangeFormInput(ctx: MutableActionContext, sources: readonly st
 
     const files: Record<string, LocalFile> = {}
     for (const [name, file] of Object.entries(input)) {
-      files[name] = new LocalFile(file as UploadedFile)
+      const uploadedFile = file as UploadedFile
+      files[name] = new LocalFile(
+        uploadedFile.tempFilePath,
+        uploadedFile.size,
+        uploadedFile.mimetype,
+        uploadedFile.name,
+      )
     }
     return files
   }
@@ -82,4 +87,11 @@ export const createDefaultActionContext: ActionContextCreator = ({ router, req, 
 
 export const formatPlaceholderForRouter = (routePath: string) => routePath.replace(routerPlaceholderRegex, ':$1')
 
-export const importLocal: LoadFunc = async (filePath) => await (import(filePath) as unknown)
+export async function importLocal(filePath: string) {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return await import(filePath)
+  } catch (err) {
+    throw new FileNotFoundError(filePath, { cause: err })
+  }
+}

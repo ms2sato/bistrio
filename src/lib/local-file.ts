@@ -2,27 +2,19 @@ import { OpenMode, createReadStream } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { Readable } from 'node:stream'
 import { Abortable } from 'node:events'
-import { UploadedFile } from '../lib/shared/schemas.js'
 
 export class LocalFile extends File {
-  mv
-
-  constructor(private uf: UploadedFile) {
-    super([], uf.name, { type: uf.mimetype })
-
-    this.mv = this.uf.mv.bind(this.uf)
+  constructor(
+    readonly filePath: string,
+    readonly size: number,
+    type: string = 'application/octet-stream',
+    name: string = 'tmpfile',
+  ) {
+    super([], name, { type })
   }
 
   stream(): ReadableStream<Uint8Array> {
-    return Readable.toWeb(createReadStream(this.uf.tempFilePath)) as ReadableStream<Uint8Array>
-  }
-
-  get size(): number {
-    return this.uf.size
-  }
-
-  get type(): string {
-    return this.uf.mimetype
+    return Readable.toWeb(createReadStream(this.filePath)) as ReadableStream<Uint8Array>
   }
 
   async arrayBuffer(): Promise<ArrayBuffer> {
@@ -38,11 +30,11 @@ export class LocalFile extends File {
         } & Abortable)
       | null,
   ): Promise<Buffer> {
-    return await readFile(this.uf.tempFilePath, options)
+    return await readFile(this.filePath, options)
   }
 
   async text(): Promise<string> {
-    return readFile(this.uf.tempFilePath, { encoding: 'utf8' })
+    return readFile(this.filePath, { encoding: 'utf8' })
   }
 
   async blob(
@@ -54,7 +46,7 @@ export class LocalFile extends File {
       | null,
   ): Promise<Blob> {
     const buffer = await this.buffer(options)
-    return new Blob([buffer], { type: this.uf.mimetype })
+    return new Blob([buffer], { type: this.type })
   }
 
   slice(_start?: number, _end?: number, _contentType?: string): Blob {
