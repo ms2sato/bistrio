@@ -3,7 +3,7 @@ import { CustomMethodOption } from '@/server/customizers'
 import { User } from '@/universal/params'
 import { SessionCreateParams } from '@/universal/params'
 
-export default defineResource((_support, _options) => ({
+export default defineResource(() => ({
   create: (_params: SessionCreateParams): Promise<User> => {
     throw new Error('override by adapter')
   },

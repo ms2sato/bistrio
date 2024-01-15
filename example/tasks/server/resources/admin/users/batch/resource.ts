@@ -15,7 +15,7 @@ const lineSchema = object({
 export type BatchResult = { count: number; error?: Error[] }
 
 export default defineResource(
-  (_support, _options) =>
+  () =>
     ({
       create: async ({ file }): Promise<BatchResult> => {
         const callback: ReadLineCallback<{ count: number; error?: unknown }> = async (lines) => {

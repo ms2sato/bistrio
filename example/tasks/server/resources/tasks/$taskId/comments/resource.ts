@@ -7,7 +7,7 @@ import { CustomMethodOption } from '@/server/customizers'
 const prisma = getPrismaCilent()
 
 export default defineResource(
-  (_support, _options) =>
+  () =>
     ({
       list({ taskId }): Promise<Comment[]> {
         return prisma.comment.findMany({ where: { taskId } })

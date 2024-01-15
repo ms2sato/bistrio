@@ -9,7 +9,7 @@ const prisma = getPrismaCilent()
 type SecureUser = Omit<User, 'hashedPassword'>
 
 export default defineResource(
-  (_support, _options) =>
+  () =>
     ({
       async list({ q: _q }): Promise<SecureUser[]> {
         const users = await prisma.user.findMany()

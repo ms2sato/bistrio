@@ -8,7 +8,7 @@ import { TasksResource } from '@bistrio/resources'
 const prisma = getPrismaCilent()
 
 export default defineResource(
-  (_support, _options) =>
+  () =>
     ({
       list: async (params): Promise<Paginated<Task>> => {
         return {
