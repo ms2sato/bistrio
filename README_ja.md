@@ -50,6 +50,82 @@ Webのシステムにおいて最も情報が多いのがルーティングで�
 - クライアントから送信された値のチェック(Zod)
 - Mass Assignment 脆弱性への対応(Zod)
 
+### Routes
+
+独自のDSLを使って構造化されたRoutingを定義します。内容の基本構造は Resource への対応を定義するものです。
+
+以下に紹介を行いますが、まだドキュメントの整備が間に合っていないところもあり、仕様の調整等も行う可能性があります。最新の利用例は [example/tasks](./example/tasks/universal/routes/) を確認いただくと良いでしょう。
+
+#### Router.resources
+
+Routerに定義されたresourcesメソッドはリクエスト情報をResourceへ伝えるためのエンドポイントを定義します。
+
+この時Zodの型情報を各アクションに対して割り当て、フレームワークが行うスキーマチェックを通過したものだけが Resource で扱えるようにしています。つまり入力値のバリデーションが自動で行われ、明示した値だけがサーバーで受信され、堅牢になります。
+
+```ts
+// `/tasks` のパスに対応する1つのResourceに対応するCRUDを定義しています。
+r.resources('tasks', {
+  name: 'tasks', // リソースの名前(TasksResource インターフェース が自動生成されます)
+  actions: crud(), // 典型的なアクションが定義されます
+  construct: {
+    // Zodのスキーマを指定して、受け付けるデータを明示します
+    create: { schema: taskCreateWithTagsSchema },
+    update: { schema: taskUpdateWithTagsSchema },
+  },
+})
+```
+
+デフォルトで以下のようなルーティングが想定されています。`crud()` 関数はこれらを一気に定義します。
+
+| action | method | path      | type | page |
+| ------ | ------ | --------- | ---- | ---- |
+| index  | GET    | /         |      | true |
+| show   | GET    | /:id      |      | true |
+| build  | GET    | /build    |      | true |
+| edit   | GET    | /:id/edit |      | true |
+| list   | GET    | /         | json |      |
+| load   | GET    | /         | json |      |
+| create | GET    | /         |      |      |
+| update | GET    | /:id      |      |      |
+| delete | GET    | /:id      |      |      |
+
+例えば `/tasks` の edit アクションは `/tasks/:id/edit` (`:id` はプレースホルダです) となります。
+
+`crud()` の他に `api()` 関数を用意しています。これは `list`, `load`, `create`, `update`, `delete` だけを定義するものです。
+
+また、 `crud()` や `api()` は共通の引数で情報をフィルタすることが可能です。
+
+```ts
+crud({ only: ['index', 'load'] }) // index と load のみ定義
+api({ except: ['list', 'load'] }) // list と load 以外の create, update, delete を定義
+
+crud('index', 'load') // index と load のみ定義(onlyのシンタックス・シュガー)
+```
+
+また、 actions として指定できるのは `crud()` 等のユーティリティの戻り値だけではなく、独自に定義することができます。例えば以下のようにして独自のアクション `done` を追加できます。
+
+```ts
+r.resources({
+  ...
+  actions: [...crud(), { action: 'done', path: '$id/done', method: 'post', type: 'json' }],
+  ...
+})
+```
+
+#### Router.pages
+
+Resourceに無関係なページを作成するためのメソッドです。
+
+```ts
+r.pages('/', ['/', '/about']) // `/`、`/about` のルーティングを定義
+```
+
+#### その他
+
+- scope: ルーティングの階層を作るユーティリティです(内部でsubを呼びます)
+- layout: ReactRouterのlayoutを定義できます
+- sub: 子に当たるRouterを作成します
+
 ### Resource
 
 RESTの概念における Resource です。Resourceは開発者が必要とするメソッドを自由に作成できます。Routesからはこれらのメソッドをアクションとして呼び出せます。
@@ -58,13 +134,92 @@ RESTの概念における Resource です。Resourceは開発者が必要とす�
 - ResourceはREPLからも簡単に呼び出せるため、ロジックの動作確認がやりやすいです。
 - 広義のModelの位置付けなので、多くのロジックをそのまま書いて問題ありません。
 
+Routes を定義した後、 `npm run bistrio:gen` が実行されれば、`.bistrio/resources` 内に対応するインターフェースが自動生成されます。この型を使って実際の Resource を実装すると動作に支障ない内容が作成できます。
+
+作成を補助するユーティリティ関数として defineResource が用意されています。`server/resources` 内に URL のパス階層と一致するディレクトリを作成した上で `resource.ts` として作成します。
+
+例えば `/tasks` のResourceは `server/resources/tasks/resource.ts` のファイルが該当します。内容は以下のようになります。
+
+```ts
+import { CustomMethodOption } from '@/server/customizers'
+import { TasksResource } from '@bistrio/resources'
+
+//...
+
+export default defineResource(
+  () =>
+    ({
+      // 各アクションの名前に対応したメソッドを作る
+      list: async (params): Promise<Paginated<Task>> => {
+        return {
+          //...
+        }
+      },
+
+      load: async (params): Promise<Task> => {
+        // これはprismaを利用した例
+        const task = await prisma.task.findUniqueOrThrow({
+          where: params,
+        })
+        return task
+      },
+
+      // ...
+      done: async ({ id }) => await prisma.task.update({ where: { id }, data: { done: true } }),
+    }) as const satisfies TasksResource<CustomMethodOption>, // この指定で具体的な型を外から利用可能になる
+)
+```
+
+Resource の作成の注意としては以下のポイントがあります
+
+- `TaskResource` 型はカスタム引数の型を指定できるジェネリクス型です。`CustomMethodOption` のようなシステムで定義した型を指定します。
+- `as const satisfies TasksResource<CustomMethodOption>` のように、 `as const satisfies` を付与して具体的な型を返すようにしてください
+
+#### `CustomMethodOption` について
+
+> 後で書く
+
 ### View
 
 JSXで書かれたViewです。本フレームワークでは RenderSupport を介して サーバーのResourceを操作できます。React18 から導入された Suspense への対応も済んでいるので、 useEffect を多用するコードを書く必要はありません。
 
-### Routes
+Viewの実体はフロントエンドのJSの慣習に従って Page と呼ばれます。
 
-独自のDSLを使って構造化されたRoutingを定義します。この時、Zodの型情報を各アクションに対して割り当て、フレームワークが行うスキーマチェックを通過したものだけが Resource で扱えるようにしています。つまり入力値のバリデーションが自動で行われ、明示した値だけがサーバーで受信され、堅牢になります。
+`universal/pages` 以下に URL のパス階層と一致するディレクトリを作成した上で ファイル名が一致するように作成してください。
+
+例えば以下のようになります。
+
+- `/about`: `universal/pages/about.tsx`、
+- `/` : `universal/pages/index.tsx`(indexは`/`を示す特殊な名前です)
+- `/test/mypage`: `universal/pages/test/mypage.tsx`
+
+### RenderSupport
+
+Page 実装する際には サーバーからのデータを使うことが必要です。本フレームワークでは この時に `RenderSupport` を介して情報を取得します。
+
+例えば tasks リソースの持つ load アクションを呼び出したければ以下のように書けます。
+
+```ts
+import { useRenderSupport } from '@bistrio/routes/main'
+
+// ...
+
+function Task({ id }: { id: number }) {
+  const rs = useRenderSupport()
+  const task = rs.suspendedResources().tasks.load({ id })
+  // rs.suspendedResources() によって Suspense 対応されたオブジェクトが取得できます。
+
+  return (
+    <>
+      {/* ... */}
+    </>
+  )
+}
+```
+
+- useRenderSupport は 自動生成された '@bistrio/routes/main' に配置されたものを利用します(フレームワークから提供されるのは型が確定していません)。
+- Suspense を使わない場合には `rs.resources()` として呼び出すと Promise を返す実装が利用できます。
+
 
 # 自動生成
 
