@@ -75,19 +75,19 @@ r.resources('tasks', {
 })
 ```
 
-デフォルトで以下のようなルーティングが想定されています。`crud()` 関数はこれらを一気に定義します。
+`tasks` リソースを例にすると、デフォルトで以下のようなルーティングが想定されています。`crud()` 関数はこれらを一気に定義します。
 
-| action | method | path      | type | page |
-| ------ | ------ | --------- | ---- | ---- |
-| index  | GET    | /         |      | true |
-| show   | GET    | /:id      |      | true |
-| build  | GET    | /build    |      | true |
-| edit   | GET    | /:id/edit |      | true |
-| list   | GET    | /         | json |      |
-| load   | GET    | /         | json |      |
-| create | GET    | /         |      |      |
-| update | GET    | /:id      |      |      |
-| delete | GET    | /:id      |      |      |
+| action | method    | path            | type | page | 主な用途       |
+| ------ | --------- | --------------- | ---- | ---- | -------------- |
+| index  | GET       | /tasks          |      | true | 一覧画面       |
+| show   | GET       | /tasks/:id      |      | true | 詳細画面       |
+| build  | GET       | /tasks/build    |      | true | 新規作成画面   |
+| edit   | GET       | /tasks/:id/edit |      | true | 編集画面       |
+| list   | GET       | /tasks.json     | json |      | 一覧のJson取得 |
+| load   | GET       | /tasks/:id.json | json |      | 詳細のJson取得 |
+| create | POST      | /tasks/         |      |      | 新規作成処理   |
+| update | PUT,PATCh | /tasks/:id      |      |      | 更新処理       |
+| delete | DELETE    | /tasks/:id      |      |      | 削除処理       |
 
 例えば `/tasks` の edit アクションは `/tasks/:id/edit` (`:id` はプレースホルダです) となります。
 
@@ -156,11 +156,9 @@ export default defineResource(
         }
       },
 
-      load: async (params): Promise<Task> => {
+      load: async ({ id }): Promise<Task> => {
         // これはprismaを利用した例
-        const task = await prisma.task.findUniqueOrThrow({
-          where: params,
-        })
+        const task = await prisma.task.findUniqueOrThrow({ id })
         return task
       },
 
@@ -170,6 +168,8 @@ export default defineResource(
 )
 ```
 
+より実践的な例は [example/tasks/server/resources/tasks/resource.ts](example/tasks/server/resources/tasks/resource.ts) にあります。
+
 Resource の作成の注意としては以下のポイントがあります
 
 - `TaskResource` 型はカスタム引数の型を指定できるジェネリクス型です。`CustomMethodOption` のようなシステムで定義した型を指定します。
@@ -177,7 +177,34 @@ Resource の作成の注意としては以下のポイントがあります
 
 #### `CustomMethodOption` について
 
-> 後で書く
+セッションからユーザーの情報を取り出すなどの処理は Resource の中では行いません。このような処理はシステムのほとんどの箇所で共通に行える処理であると考えて、アクションを呼び出す前に `server/customizers/index.ts` の `createActionOptions` で行われます。この中身はアプリケーションに合わせてカスタマイズしてください。
+
+`ctx` 変数から `req` で `Request` オブジェクト(Express由来のオブジェクトです)が取得できるので、これを使って実装します。この戻り値がリソースの各アクションのオプション引数としてセットされるので、アクション内で利用できます。
+
+```ts
+export const createActionOptions: CreateActionOptionFunction = (ctx) => {
+  debug('createOptions: req.params %s', ctx.params)
+
+  const customMethodOption: CustomMethodOption = { user: ctx.req.user as User }
+
+  if (ctx.params.adminId) {
+    customMethodOption.admin = {
+      id: Number(ctx.params.adminId),
+      accessedAt: new Date(),
+    }
+  }
+
+  return customMethodOption
+}
+```
+
+例えば Resourceに `load` アクションを追加した場合の第二引数に設定され、利用できます。引数がない場合には CustomMethodOption だけが引数として設定されます。
+
+```ts
+      load: async ({ id }, options: CustomMethodOption): Promise<Task> => {
+        // options を利用した処理を書けます
+      },
+```
 
 ### View
 
@@ -189,7 +216,7 @@ Viewの実体はフロントエンドのJSの慣習に従って Page と呼ば�
 
 例えば以下のようになります。
 
-- `/about`: `universal/pages/about.tsx`、
+- `/about`: `universal/pages/about.tsx`
 - `/` : `universal/pages/index.tsx`(indexは`/`を示す特殊な名前です)
 - `/test/mypage`: `universal/pages/test/mypage.tsx`
 
@@ -209,17 +236,12 @@ function Task({ id }: { id: number }) {
   const task = rs.suspendedResources().tasks.load({ id })
   // rs.suspendedResources() によって Suspense 対応されたオブジェクトが取得できます。
 
-  return (
-    <>
-      {/* ... */}
-    </>
-  )
+  return <>{/* ... */}</>
 }
 ```
 
 - useRenderSupport は 自動生成された '@bistrio/routes/main' に配置されたものを利用します(フレームワークから提供されるのは型が確定していません)。
 - Suspense を使わない場合には `rs.resources()` として呼び出すと Promise を返す実装が利用できます。
-
 
 # 自動生成
 
