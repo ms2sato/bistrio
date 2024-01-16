@@ -59,7 +59,8 @@ export const arrangeOctetStreamInput: InputArranger = async (ctx, _sources, sche
   })
   await promise
 
-  return new LocalFile(tmpFilePath, statSync(tmpFilePath), type, filename)
+  const stat = statSync(tmpFilePath)
+  return new LocalFile(tmpFilePath, stat.size, type, filename)
 }
 
 type ContentType2Arranger = Record<string, InputArranger>
