@@ -47,35 +47,35 @@ export class StandardJsonResponder<Opt = undefined, Out = unknown, Src = unknown
   }
 }
 
-type FatalHandler = (ctx: ActionContext, err: Error) => void
+type RespondFatalHandler = (ctx: ActionContext, err: Error) => Promise<void>
 
 export class SmartResponder<Opt = undefined, Out = unknown, Src = unknown> implements Responder<Opt, Out, Src> {
   constructor(
     private router: ServerRouterImpl,
-    private fatalHandler: FatalHandler,
+    private fatalHandler: RespondFatalHandler,
     private jsonResonder = new StandardJsonResponder(),
   ) {}
 
-  success(ctx: ActionContext, output: Out): void | Promise<void> {
+  async success(ctx: ActionContext, output: Out): Promise<void> {
     if (ctx.willRespondJson()) {
-      return this.jsonResonder.success(ctx, output)
+      return await this.jsonResonder.success(ctx, output)
     }
 
     if (this.router.serverRouterConfig.renderDefault(ctx, output) === false) {
-      return this.jsonResonder.success(ctx, output)
+      return await this.jsonResonder.success(ctx, output)
     }
   }
 
-  invalid(ctx: ActionContext, validationError: ValidationError, source: Src): void | Promise<void> {
-    return this.jsonResonder.invalid(ctx, validationError, source)
+  async invalid(ctx: ActionContext, validationError: ValidationError, source: Src): Promise<void> {
+    return await this.jsonResonder.invalid(ctx, validationError, source)
   }
 
-  fatal(ctx: ActionContext, err: Error): void | Promise<void> {
+  async fatal(ctx: ActionContext, err: Error): Promise<void> {
     console.error('fatal', err)
     if (ctx.willRespondJson()) {
-      return this.jsonResonder.fatal(ctx, err)
+      return await this.jsonResonder.fatal(ctx, err)
     }
 
-    this.fatalHandler(ctx, err)
+    await this.fatalHandler(ctx, err)
   }
 }
