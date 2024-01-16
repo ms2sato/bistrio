@@ -1,6 +1,6 @@
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-import { createWriteStream, statSync } from 'node:fs'
+import { createWriteStream } from 'node:fs'
 import { mkdtemp } from 'node:fs/promises'
 
 import { SchemaUtil } from '../index.js'
@@ -19,12 +19,7 @@ export const arrangeFormInput: InputArranger = (ctx, sources, schema) => {
     const files: Record<string, LocalFile> = {}
     for (const [name, file] of Object.entries(input)) {
       const uploadedFile = file as UploadedFile
-      files[name] = new LocalFile(
-        uploadedFile.tempFilePath,
-        uploadedFile.size,
-        uploadedFile.mimetype,
-        uploadedFile.name,
-      )
+      files[name] = new LocalFile(uploadedFile.tempFilePath, uploadedFile.mimetype, uploadedFile.name)
     }
     return files
   }
@@ -59,8 +54,7 @@ export const arrangeOctetStreamInput: InputArranger = async (ctx, _sources, sche
   })
   await promise
 
-  const stat = statSync(tmpFilePath)
-  return new LocalFile(tmpFilePath, stat.size, type, filename)
+  return new LocalFile(tmpFilePath, type, filename)
 }
 
 type ContentType2Arranger = Record<string, InputArranger>
