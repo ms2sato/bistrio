@@ -11,7 +11,9 @@ const testSchema = z.object({
   file: fileSchema,
 })
 
-test('', () => {
+type TestType = z.infer<typeof testSchema>
+
+test('request with file', () => {
   const req: Request = {
     body: { name: 'name', age: 20 },
     files: {
@@ -32,8 +34,8 @@ test('', () => {
 
   const ctx = new ActionContextImpl(router, req, res, ad, '/test')
 
-  const ret = arrangeFormInput(ctx, ['body', 'files'], testSchema)
-  expect(ret.name).toBe('name')
-  expect(ret.age).toBe(20)
-  expect(ret.file).toBeInstanceOf(File)
+  const { name, age, file } = arrangeFormInput(ctx, ['body', 'files'], testSchema) as TestType
+  expect(name).toBe('name')
+  expect(age).toBe(20)
+  expect(file).toBeInstanceOf(File)
 })

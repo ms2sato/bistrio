@@ -1,30 +1,8 @@
 import { ActionContextCreator, FileNotFoundError, routerPlaceholderRegex } from '../index.js'
-import { ActionContext, CreateActionOptionFunction, InputArranger } from './action-context.js'
+import { ActionContext, CreateActionOptionFunction } from './action-context.js'
 import { ActionContextImpl } from './server-router-impl.js'
-import { arrangeFormInput, arrangeJsonInput, arrangeOctetStreamInput } from './input-arrangers.js'
 
-type ContentType2Arranger = Record<string, InputArranger>
-
-export const defaultContentType2Arranger: ContentType2Arranger = {
-  'application/octet-stream': arrangeOctetStreamInput,
-  'application/json': arrangeJsonInput,
-  'application/x-www-form-urlencoded': arrangeFormInput,
-  'multipart/form-data': arrangeFormInput,
-  '': arrangeFormInput,
-}
-
-export const createSmartInputArranger = (
-  contentType2Arranger: ContentType2Arranger = defaultContentType2Arranger,
-): InputArranger => {
-  return (ctx, sources, schema) => {
-    const requestedContentType = ctx.req.headers['content-type']
-    if (requestedContentType) {
-      const contentArranger = contentType2Arranger[requestedContentType] || contentType2Arranger['']
-      return contentArranger(ctx, sources, schema)
-    }
-    return contentType2Arranger[''](ctx, sources, schema)
-  }
-}
+export { createSmartInputArranger } from './input-arrangers.js'
 
 export const createNullActionOption: CreateActionOptionFunction = (_ctx) => {
   return Promise.resolve(undefined)

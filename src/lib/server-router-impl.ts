@@ -66,14 +66,14 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
       const ret = await responder.success?.apply(adapter, [ctx, output, option])
       if (ret === false) {
         handlerLog(' dispatch to default responder')
-        defaultResponder.success(ctx, output)
+        await defaultResponder.success(ctx, output)
       } else if (ret !== undefined) {
         handlerLog(' dispatch to default responder for ret value')
-        defaultResponder.success(ctx, ret)
+        await defaultResponder.success(ctx, ret)
       }
     } else {
       handlerLog('%s#%s success by default responder', adapterPath, actionName)
-      defaultResponder.success(ctx, output)
+      await defaultResponder.success(ctx, output)
     }
   }
 

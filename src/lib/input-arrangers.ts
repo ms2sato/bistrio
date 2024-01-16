@@ -3,15 +3,14 @@ import { tmpdir } from 'node:os'
 import { createWriteStream } from 'node:fs'
 import { mkdtemp } from 'node:fs/promises'
 
-import { ZodType } from 'zod'
 import { SchemaUtil } from '../index.js'
-import { InputArranger, MutableActionContext } from './action-context.js'
+import { InputArranger } from './action-context.js'
 import { createZodTraverseArrangerCreator } from './shared/create-zod-traverse-arranger-creator.js'
 import { parseFormBody } from './shared/parse-form-body.js'
 import { LocalFile } from './local-file.js'
 import { UploadedFile, fileSchema } from './shared/schemas.js'
 
-export function arrangeFormInput(ctx: MutableActionContext, sources: readonly string[], schema: ZodType) {
+export const arrangeFormInput: InputArranger = (ctx, sources, schema) => {
   const pred = (input: Record<string, unknown>, source: string) => {
     if (source !== 'files') {
       return input
@@ -33,7 +32,7 @@ export function arrangeFormInput(ctx: MutableActionContext, sources: readonly st
   return parseFormBody(ctx.mergeInputs(sources, pred), createZodTraverseArrangerCreator(schema))
 }
 
-export function arrangeJsonInput(ctx: MutableActionContext, sources: readonly string[], schema: ZodType) {
+export const arrangeJsonInput: InputArranger = (ctx, sources, schema) => {
   const pred = (input: Record<string, unknown>, source: string) => {
     return source === 'body' ? input : (SchemaUtil.deepCast(schema, input) as Record<string, unknown>)
   }
@@ -52,12 +51,37 @@ export const arrangeOctetStreamInput: InputArranger = async (ctx, _sources, sche
   const tmpFilePath = join(dir, filename)
   ctx.req.pipe(createWriteStream(tmpFilePath)) // TODO: remove tmp file on error and request end
 
-  const promise = new Promise<File>((resolve, reject) => {
+  const promise = new Promise<void>((resolve, reject) => {
     ctx.req.on('end', () => {
       // const stats = statSync(tmpFilePath)
-      resolve(new LocalFile(tmpFilePath, 1, type, filename))
+      resolve()
     })
     ctx.req.on('error', (err) => reject(err))
   })
-  return await promise
+  await promise
+
+  return new LocalFile(tmpFilePath, 1, type, filename)
+}
+
+type ContentType2Arranger = Record<string, InputArranger>
+
+export const defaultContentType2Arranger: ContentType2Arranger = {
+  'application/octet-stream': arrangeOctetStreamInput,
+  'application/json': arrangeJsonInput,
+  'application/x-www-form-urlencoded': arrangeFormInput,
+  'multipart/form-data': arrangeFormInput,
+  '': arrangeFormInput,
+}
+
+export const createSmartInputArranger = (
+  contentType2Arranger: ContentType2Arranger = defaultContentType2Arranger,
+): InputArranger => {
+  return (ctx, sources, schema) => {
+    const requestedContentType = ctx.req.headers['content-type']
+    if (requestedContentType) {
+      const contentArranger = contentType2Arranger[requestedContentType] || contentType2Arranger['']
+      return contentArranger(ctx, sources, schema)
+    }
+    return contentType2Arranger[''](ctx, sources, schema)
+  }
 }
