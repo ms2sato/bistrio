@@ -1,6 +1,6 @@
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-import { createWriteStream } from 'node:fs'
+import { createWriteStream, statSync } from 'node:fs'
 import { mkdtemp } from 'node:fs/promises'
 
 import { SchemaUtil } from '../index.js'
@@ -53,14 +53,13 @@ export const arrangeOctetStreamInput: InputArranger = async (ctx, _sources, sche
 
   const promise = new Promise<void>((resolve, reject) => {
     ctx.req.on('end', () => {
-      // const stats = statSync(tmpFilePath)
       resolve()
     })
     ctx.req.on('error', (err) => reject(err))
   })
   await promise
 
-  return new LocalFile(tmpFilePath, 1, type, filename)
+  return new LocalFile(tmpFilePath, statSync(tmpFilePath), type, filename)
 }
 
 type ContentType2Arranger = Record<string, InputArranger>
