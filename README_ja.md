@@ -80,16 +80,16 @@ r.resources('tasks', {
 | action | method    | path            | type | page | 主な用途       |
 | ------ | --------- | --------------- | ---- | ---- | -------------- |
 | index  | GET       | /tasks          |      | true | 一覧画面       |
-| show   | GET       | /tasks/:id      |      | true | 詳細画面       |
+| show   | GET       | /tasks/$id      |      | true | 詳細画面       |
 | build  | GET       | /tasks/build    |      | true | 新規作成画面   |
-| edit   | GET       | /tasks/:id/edit |      | true | 編集画面       |
+| edit   | GET       | /tasks/$id/edit |      | true | 編集画面       |
 | list   | GET       | /tasks.json     | json |      | 一覧のJson取得 |
-| load   | GET       | /tasks/:id.json | json |      | 詳細のJson取得 |
+| load   | GET       | /tasks/$id.json | json |      | 詳細のJson取得 |
 | create | POST      | /tasks/         |      |      | 新規作成処理   |
-| update | PUT,PATCh | /tasks/:id      |      |      | 更新処理       |
-| delete | DELETE    | /tasks/:id      |      |      | 削除処理       |
+| update | PUT,PATCh | /tasks/$id      |      |      | 更新処理       |
+| delete | DELETE    | /tasks/$id      |      |      | 削除処理       |
 
-例えば `/tasks` の edit アクションは `/tasks/:id/edit` (`:id` はプレースホルダです) となります。
+例えば `/tasks` の edit アクションは `/tasks/$id/edit` (`$id` はプレースホルダです) となります。
 
 `crud()` の他に `api()` 関数を用意しています。これは `list`, `load`, `create`, `update`, `delete` だけを定義するものです。
 
