@@ -52,12 +52,14 @@ export const arrangeOctetStreamInput: InputArranger = async (ctx, _sources, sche
   const tmpFilePath = join(dir, filename)
   ctx.req.pipe(createWriteStream(tmpFilePath)) // TODO: remove tmp file on error and request end
 
-  const promise = new Promise<File>((resolve, reject) => {
+  const promise = new Promise<void>((resolve, reject) => {
     ctx.req.on('end', () => {
       // const stats = statSync(tmpFilePath)
-      resolve(new LocalFile(tmpFilePath, 1, type, filename))
+      resolve()
     })
     ctx.req.on('error', (err) => reject(err))
   })
-  return await promise
+  await promise
+
+  return new LocalFile(tmpFilePath, 1, type, filename)
 }
