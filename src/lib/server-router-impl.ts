@@ -114,14 +114,14 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
           handlerLog('source: %o', source)
 
           try {
-            if (responder && 'beforeValidation' in responder) {
-              source = await responder.beforeValidation?.(ctx, source, schema)
+            if (responder && 'beforeValidation' in responder && responder.beforeValidation) {
+              source = await responder.beforeValidation(ctx, source, schema)
             }
 
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             let input = schema.parse(source)
-            if (responder && 'afterValidation' in responder) {
-              input = (await responder.afterValidation?.(ctx, input, schema)) as { [x: string]: unknown }
+            if (responder && 'afterValidation' in responder && responder.afterValidation) {
+              input = await responder.afterValidation(ctx, input, schema)
             }
 
             handlerLog('input', input)
