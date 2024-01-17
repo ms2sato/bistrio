@@ -8,8 +8,8 @@ export class LocalFile extends File {
 
   constructor(
     readonly filePath: string,
-    type: string = 'application/octet-stream',
-    name: string = 'tmpfile',
+    type = 'application/octet-stream',
+    name = 'tmpfile',
   ) {
     super([], name, { type })
     this.stat = statSync(filePath)
