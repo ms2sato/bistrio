@@ -73,7 +73,11 @@ export type CreateActionOptionFunction = (ctx: ActionContext) => unknown
  */
 export type Renderer = (ctx: ActionContext, options?: unknown) => false | undefined
 
-export type InputArranger = (ctx: MutableActionContext, sources: readonly string[], schema: ZodType) => object | Promise<object>
+export type InputArranger = (
+  ctx: MutableActionContext,
+  sources: readonly string[],
+  schema: ZodType,
+) => object | Promise<object>
 
 export class ActionSupport {}
 
