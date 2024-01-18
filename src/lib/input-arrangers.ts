@@ -1,6 +1,6 @@
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-import { createWriteStream } from 'node:fs'
+import { createWriteStream, existsSync } from 'node:fs'
 import { mkdtemp } from 'node:fs/promises'
 
 import { SchemaUtil } from '../index.js'
@@ -40,7 +40,7 @@ export const arrangeOctetStreamInput: InputArranger = async (ctx, _sources, sche
   }
 
   const dir = await mkdtemp(join(tmpdir(), 'uploaded-'))
-  const type = ctx.req.headers['content-type'] || 'application/octet-stream'
+  const type = ctx.req.get('content-type') || 'application/octet-stream'
   const filename = 'tmpfile'
 
   const tmpFilePath = join(dir, filename)
@@ -71,7 +71,7 @@ export const createSmartInputArranger = (
   contentType2Arranger: ContentType2Arranger = defaultContentType2Arranger,
 ): InputArranger => {
   return (ctx, sources, schema) => {
-    const requestedContentType = ctx.req.headers['content-type']
+    const requestedContentType = ctx.req.get('content-type')
     if (requestedContentType) {
       const contentArranger = contentType2Arranger[requestedContentType] || contentType2Arranger['']
       return contentArranger(ctx, sources, schema)

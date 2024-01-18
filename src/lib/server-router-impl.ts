@@ -209,7 +209,7 @@ export class ActionContextImpl implements MutableActionContext {
   }
 
   willRespondJson() {
-    const contentType = this.req.headers['content-type']
+    const contentType = this.req.get('content-type')
     return this.format === 'json' || (contentType !== undefined && contentType.indexOf('application/json') >= 0)
   }
 
