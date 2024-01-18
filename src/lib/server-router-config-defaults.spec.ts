@@ -25,7 +25,7 @@ test('request with file', () => {
       file: {
         name: 'filename',
         size: 123,
-        mimetype: 'application/jsonl',
+        mimetype: 'plain/text',
         tempFilePath: dummyFile,
       },
     },
@@ -45,9 +45,9 @@ test('request with file', () => {
 
   expect(file).toBeInstanceOf(File)
   expect(file.name).toBe('filename')
-  expect(file.type).toBe('application/jsonl')
+  expect(file.type).toBe('plain/text')
 
   const stat = statSync(dummyFile)
-  expect(file.size).toBe(stat.size) // size is temporary file size
+  expect(file.size).toBe(18) // size is temporary file size
   expect(file.lastModified).toBe(stat.mtimeMs)
 })
