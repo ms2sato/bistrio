@@ -32,7 +32,7 @@ describe('senario /admin/users', () => {
     const fileEl = await page.$('input[type=file]')
     if (!fileEl) throw new Error('fileEl is null')
 
-    await fileEl.uploadFile(join(__dirname, '../../assets/users.jsonl'))
+    await fileEl.uploadFile(join(__dirname, '../../fixtures/users.ndjson'))
     await page.screenshot()
     await Promise.all([req.clearAndWaitForResponses(1, { resourceType: 'ajax' }), page.click('[type=submit]')])
 
