@@ -70,7 +70,7 @@
   "dependencies": {
     "@prisma/client": "^4.9.0",
     "bcrypt": "^5.1.0",
-    "bistrio": "file:../../bistrio-0.7.6.tgz",
+    "bistrio": "file:../../bistrio-0.7.7.tgz",
     "compression": "^1.7.4",
     "connect-redis": "^7.1.0",
     "cookie-parser": "~1.4.6",
