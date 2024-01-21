@@ -10,6 +10,10 @@ const prisma = getPrismaCilent()
 beforeAll(async () => await signIn('admin', 'password'))
 afterAll(async () => await signOut())
 
+beforeEach(async () => {
+  await prisma.user.deleteMany({ where: { username: { not: { in: ['admin', 'user1', 'user2'] } } } })
+})
+
 afterEach(async () => {
   await prisma.user.deleteMany({ where: { username: { not: { in: ['admin', 'user1', 'user2'] } } } })
 })
@@ -32,7 +36,7 @@ describe('senario /admin/users', () => {
     const fileEl = await page.$('input[type=file]')
     if (!fileEl) throw new Error('fileEl is null')
 
-    await fileEl.uploadFile(join(__dirname, '../../assets/users.jsonl'))
+    await fileEl.uploadFile(join(__dirname, '../../fixtures/users.ndjson'))
     await page.screenshot()
     await Promise.all([req.clearAndWaitForResponses(1, { resourceType: 'ajax' }), page.click('[type=submit]')])
 

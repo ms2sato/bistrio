@@ -1,9 +1,9 @@
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { createWriteStream } from 'node:fs'
-import { mkdtemp } from 'node:fs/promises'
+import { mkdtemp, rm, stat } from 'node:fs/promises'
 
-import { SchemaUtil } from '../index.js'
+import { SchemaUtil, isErrorWithCode } from '../index.js'
 import { InputArranger } from './action-context.js'
 import { createZodTraverseArrangerCreator } from './shared/create-zod-traverse-arranger-creator.js'
 import { parseFormBody } from './shared/parse-form-body.js'
@@ -19,48 +19,55 @@ export const arrangeFormInput: InputArranger = (ctx, sources, schema) => {
     const files: Record<string, LocalFile> = {}
     for (const [name, file] of Object.entries(input)) {
       const uploadedFile = file as UploadedFile
-      files[name] = new LocalFile(
-        uploadedFile.tempFilePath,
-        uploadedFile.size,
-        uploadedFile.mimetype,
-        uploadedFile.name,
-      )
+      files[name] = new LocalFile(uploadedFile.tempFilePath, uploadedFile.mimetype, uploadedFile.name)
     }
     return files
   }
 
-  return parseFormBody(ctx.mergeInputs(sources, pred), createZodTraverseArrangerCreator(schema))
+  return [parseFormBody(ctx.mergeInputs(sources, pred), createZodTraverseArrangerCreator(schema)), () => {}]
 }
 
 export const arrangeJsonInput: InputArranger = (ctx, sources, schema) => {
   const pred = (input: Record<string, unknown>, source: string) => {
     return source === 'body' ? input : (SchemaUtil.deepCast(schema, input) as Record<string, unknown>)
   }
-  return ctx.mergeInputs(sources, pred)
+  return [ctx.mergeInputs(sources, pred), () => {}]
 }
 
-export const arrangeOctetStreamInput: InputArranger = async (ctx, _sources, schema): Promise<File> => {
+export const arrangeOctetStreamInput: InputArranger = async (ctx, _sources, schema) => {
   if (schema !== fileSchema) {
     throw new Error('OctetStream input is only available for fileSchema')
   }
 
-  const dir = await mkdtemp(join(tmpdir(), 'uploaded-'))
-  const type = ctx.req.headers['content-type'] || 'application/octet-stream'
+  const type = ctx.req.get('content-type') || 'application/octet-stream'
   const filename = 'tmpfile'
 
-  const tmpFilePath = join(dir, filename)
-  ctx.req.pipe(createWriteStream(tmpFilePath)) // TODO: remove tmp file on error and request end
+  const tmpDir = await mkdtemp(join(tmpdir(), 'uploaded-'))
+  const tmpFilePath = join(tmpDir, filename)
+  ctx.req.pipe(createWriteStream(tmpFilePath))
 
-  const promise = new Promise<void>((resolve, reject) => {
+  await new Promise<void>((resolve, reject) => {
     ctx.req.on('end', () => {
-      // const stats = statSync(tmpFilePath)
       resolve()
     })
     ctx.req.on('error', (err) => reject(err))
   })
-  await promise
 
-  return new LocalFile(tmpFilePath, 1, type, filename)
+  return [
+    new LocalFile(tmpFilePath, type, filename),
+    async () => {
+      try {
+        await stat(tmpDir)
+        await rm(tmpDir, { recursive: true, force: true })
+      } catch (err) {
+        if (isErrorWithCode(err) && err.code !== 'ENOENT') {
+          // if the file not exists, nop
+        } else {
+          throw err
+        }
+      }
+    },
+  ]
 }
 
 type ContentType2Arranger = Record<string, InputArranger>
@@ -77,7 +84,7 @@ export const createSmartInputArranger = (
   contentType2Arranger: ContentType2Arranger = defaultContentType2Arranger,
 ): InputArranger => {
   return (ctx, sources, schema) => {
-    const requestedContentType = ctx.req.headers['content-type']
+    const requestedContentType = ctx.req.get('content-type')
     if (requestedContentType) {
       const contentArranger = contentType2Arranger[requestedContentType] || contentType2Arranger['']
       return contentArranger(ctx, sources, schema)

@@ -110,18 +110,21 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
         await respond(ctx, output, option)
       } else {
         try {
-          let source = await serverRouterConfig.inputArranger(ctx, sources, schema)
+          const arranged = await serverRouterConfig.inputArranger(ctx, sources, schema)
+          let source = arranged[0]
+          const cleanup = arranged[1]
+
           handlerLog('source: %o', source)
 
           try {
-            if (responder && 'beforeValidation' in responder) {
-              source = await responder.beforeValidation?.(ctx, source, schema)
+            if (responder && 'beforeValidation' in responder && responder.beforeValidation) {
+              source = await responder.beforeValidation(ctx, source, schema)
             }
 
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             let input = schema.parse(source)
-            if (responder && 'afterValidation' in responder) {
-              input = (await responder.afterValidation?.(ctx, input, schema)) as { [x: string]: unknown }
+            if (responder && 'afterValidation' in responder && responder.afterValidation) {
+              input = await responder.afterValidation(ctx, input, schema)
             }
 
             handlerLog('input', input)
@@ -153,6 +156,8 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
             } else {
               await handleFatal(ctx, err as Error, option, next)
             }
+          } finally {
+            await cleanup()
           }
         } catch (err) {
           return await handleFatal(ctx, err as Error, option, next)
@@ -209,7 +214,7 @@ export class ActionContextImpl implements MutableActionContext {
   }
 
   willRespondJson() {
-    const contentType = this.req.headers['content-type']
+    const contentType = this.req.get('content-type')
     return this.format === 'json' || (contentType !== undefined && contentType.indexOf('application/json') >= 0)
   }
 

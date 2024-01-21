@@ -1,3 +1,6 @@
+import { resolve } from 'node:path'
+import { statSync } from 'node:fs'
+
 import { Request, Response } from 'express'
 import { z } from 'zod'
 import { ActionDescriptor, ServerRouter } from '../index.js'
@@ -13,15 +16,17 @@ const testSchema = z.object({
 
 type TestType = z.infer<typeof testSchema>
 
-test('request with file', () => {
+const dummyFile = resolve(__dirname, '../../__tests__/fixtures/testfile')
+
+test('request with file', async () => {
   const req: Request = {
     body: { name: 'name', age: 20 },
     files: {
       file: {
         name: 'filename',
-        mv: () => {},
         size: 123,
-        mimetype: 'application/jsonl',
+        mimetype: 'plain/text',
+        tempFilePath: dummyFile,
       },
     },
   } as unknown as Request
@@ -34,8 +39,16 @@ test('request with file', () => {
 
   const ctx = new ActionContextImpl(router, req, res, ad, '/test')
 
-  const { name, age, file } = arrangeFormInput(ctx, ['body', 'files'], testSchema) as TestType
+  const [testObj] = await arrangeFormInput(ctx, ['body', 'files'], testSchema)
+  const { name, age, file } = testObj as TestType
   expect(name).toBe('name')
   expect(age).toBe(20)
+
   expect(file).toBeInstanceOf(File)
+  expect(file.name).toBe('filename')
+  expect(file.type).toBe('plain/text')
+
+  const stat = statSync(dummyFile)
+  expect(file.size).toBe(18) // size is temporary file size
+  expect(file.lastModified).toBe(stat.mtimeMs)
 })

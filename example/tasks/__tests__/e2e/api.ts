@@ -14,7 +14,7 @@ afterEach(async () => {
 })
 
 test('POST /api/users', async () => {
-  const buffer = readFileSync(resolve(__dirname, '../assets/users.jsonl'))
+  const buffer = readFileSync(resolve(__dirname, '../fixtures/users.ndjson'))
   const res = await fetch(asURL('api/users'), {
     method: 'POST',
     headers: {
