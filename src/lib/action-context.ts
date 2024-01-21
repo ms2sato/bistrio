@@ -56,8 +56,8 @@ export type Responder<Opt = unknown, Out = unknown, Src = unknown> = {
 }
 
 export type RequestCallback<In = unknown> = {
-  beforeValidation?: (ctx: ActionContext, source: unknown, schema: ZodType) => object | Promise<object>
-  afterValidation?: (ctx: ActionContext, input: In, schema: ZodType) => object | Promise<object>
+  beforeValidation?: (ctx: ActionContext, source: unknown, schema: ZodType) => IncommingType | Promise<IncommingType>
+  afterValidation?: (ctx: ActionContext, input: In, schema: ZodType) => IncommingType | Promise<IncommingType>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   override?: (ctx: ActionContext) => object | Promise<object>
 }
@@ -73,11 +73,15 @@ export type CreateActionOptionFunction = (ctx: ActionContext) => unknown
  */
 export type Renderer = (ctx: ActionContext, options?: unknown) => false | undefined
 
+export type IncommingType = Record<string, unknown> | File
+
+export type InputArrangerResult = [IncommingType, () => void | Promise<void>]
+
 export type InputArranger = (
   ctx: MutableActionContext,
   sources: readonly string[],
   schema: ZodType,
-) => object | Promise<object>
+) => InputArrangerResult | Promise<InputArrangerResult>
 
 export class ActionSupport {}
 

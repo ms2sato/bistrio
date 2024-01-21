@@ -3,13 +3,13 @@ import { readFile } from 'node:fs/promises'
 import { Readable } from 'node:stream'
 import { Abortable } from 'node:events'
 
-export class LocalFile extends File {
+export class LocalFile extends File implements File {
   readonly stat: Stats
 
   constructor(
     readonly filePath: string,
-    type = 'application/octet-stream',
-    name = 'tmpfile',
+    readonly type = 'application/octet-stream',
+    readonly name = 'tmpfile',
   ) {
     super([], name, { type })
     this.stat = statSync(filePath)
@@ -57,6 +57,10 @@ export class LocalFile extends File {
   ): Promise<Blob> {
     const buffer = await this.buffer(options)
     return new Blob([buffer], { type: this.type })
+  }
+
+  get webkitRelativePath(): string {
+    throw new Error("Unimplemented 'webkitRelativePath' getter")
   }
 
   slice(_start?: number, _end?: number, _contentType?: string): Blob {

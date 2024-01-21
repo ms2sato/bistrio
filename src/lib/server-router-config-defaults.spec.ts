@@ -18,7 +18,7 @@ type TestType = z.infer<typeof testSchema>
 
 const dummyFile = resolve(__dirname, '../../__tests__/fixtures/testfile')
 
-test('request with file', () => {
+test('request with file', async () => {
   const req: Request = {
     body: { name: 'name', age: 20 },
     files: {
@@ -39,7 +39,8 @@ test('request with file', () => {
 
   const ctx = new ActionContextImpl(router, req, res, ad, '/test')
 
-  const { name, age, file } = arrangeFormInput(ctx, ['body', 'files'], testSchema) as TestType
+  const [testObj] = await arrangeFormInput(ctx, ['body', 'files'], testSchema)
+  const { name, age, file } = testObj as TestType
   expect(name).toBe('name')
   expect(age).toBe(20)
 

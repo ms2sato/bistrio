@@ -110,7 +110,10 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
         await respond(ctx, output, option)
       } else {
         try {
-          let source = await serverRouterConfig.inputArranger(ctx, sources, schema)
+          const arranged = await serverRouterConfig.inputArranger(ctx, sources, schema)
+          let source = arranged[0]
+          const cleanup = arranged[1]
+
           handlerLog('source: %o', source)
 
           try {
@@ -153,6 +156,8 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
             } else {
               await handleFatal(ctx, err as Error, option, next)
             }
+          } finally {
+            await cleanup()
           }
         } catch (err) {
           return await handleFatal(ctx, err as Error, option, next)

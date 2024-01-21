@@ -173,6 +173,9 @@ describe('ServerRouter', () => {
         url: '/test/build',
         method: 'GET',
         headers: { 'content-type': 'application/json' },
+        get: function (key: string) {
+          return this.headers[key]
+        },
       })
 
       expect(ret.statusCode).toBe(200)
@@ -207,6 +210,9 @@ describe('ServerRouter', () => {
         url: '.json',
         method: 'GET',
         headers: { 'content-type': 'application/json' },
+        get: function (key: string) {
+          return this.headers[key]
+        },
       })
 
       expect(ret.statusCode).toBe(200)
@@ -241,6 +247,9 @@ describe('ServerRouter', () => {
         url: 'tasks.json',
         method: 'GET',
         headers: { 'content-type': 'application/json' },
+        get: function (key: string) {
+          return this.headers[key]
+        },
       })
 
       expect(ret.statusCode).toBe(200)
@@ -273,6 +282,9 @@ describe('ServerRouter', () => {
         url: '/users/1/items',
         method: 'GET',
         headers: { 'content-type': 'application/json' },
+        get: function (key: string) {
+          return this.headers[key]
+        },
       })
 
       expect(ret.statusCode).toBe(200)
@@ -306,6 +318,9 @@ describe('ServerRouter', () => {
         url: '/users/1/items',
         method: 'GET',
         headers: { 'content-type': 'application/json' },
+        get: function (key: string) {
+          return this.headers[key]
+        },
       })
 
       expect(ret.statusCode).toBe(200)
@@ -327,6 +342,9 @@ describe('ServerRouter', () => {
         url: '/test/has_option',
         method: 'GET',
         headers: { 'content-type': 'application/json' },
+        get: function (key: string) {
+          return this.headers[key]
+        },
       })
 
       expect(ret.statusCode).toBe(200)
@@ -366,6 +384,9 @@ describe('ServerRouter', () => {
         url: '/test/get',
         method: 'GET',
         headers: { 'content-type': 'application/json' },
+        get: function (key: string) {
+          return this.headers[key]
+        },
       })
 
       expect(ret.statusCode).toBe(200)
@@ -400,6 +421,9 @@ describe('ServerRouter', () => {
         url: '/test/1',
         method: 'GET',
         headers: { 'content-type': 'application/json' },
+        get: function (key: string) {
+          return this.headers[key]
+        },
       })
 
       expect(ret.statusCode).toBe(200)

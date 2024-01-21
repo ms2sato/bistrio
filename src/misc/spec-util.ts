@@ -17,7 +17,7 @@ import {
 import { RouteObject } from 'react-router-dom'
 
 type VirtualResponse<R> = { statusCode: number; data: R }
-type VirtualRequest = { url: string; method: string; headers: Record<string, string> }
+type VirtualRequest = { url: string; method: string; headers: Record<string, string>; get: (key: string) => string }
 type Handle = (
   req: VirtualRequest,
   res: {
