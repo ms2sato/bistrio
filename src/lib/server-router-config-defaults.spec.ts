@@ -5,8 +5,9 @@ import { Request, Response } from 'express'
 import { z } from 'zod'
 import { ActionDescriptor, ServerRouter } from '../index.js'
 import { arrangeFormInput } from './input-arrangers.js'
-import { ActionContextImpl } from './server-router-impl.js'
+import { ExpressActionContext } from './express-action-context.js'
 import { fileSchema } from '../lib/shared/schemas.js'
+import { createElement } from 'react'
 
 const testSchema = z.object({
   name: z.string(),
@@ -37,7 +38,14 @@ test('request with file', async () => {
   const ad: ActionDescriptor = { action: 'test', path: '/', method: 'post' }
   const router = {} as ServerRouter
 
-  const ctx = new ActionContextImpl(router, req, res, ad, '/test')
+  const ctx = new ExpressActionContext({
+    router,
+    req,
+    res,
+    descriptor: ad,
+    httpPath: '/test',
+    constructView: () => createElement('div', null),
+  })
 
   const [testObj] = await arrangeFormInput(ctx, ['body', 'files'], testSchema)
   const { name, age, file } = testObj as TestType

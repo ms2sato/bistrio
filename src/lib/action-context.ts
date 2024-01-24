@@ -21,9 +21,7 @@ export type RouterCore = RouterCoreLight & {
   routeObject: RouteObject
 }
 
-export type ActionContext = {
-  render: express.Response['render']
-  readonly redirect: express.Response['redirect']
+export interface ActionContext {
   readonly params: express.Request['params']
   readonly body: express.Request['body']
   readonly query: express.Request['query']
@@ -37,6 +35,8 @@ export type ActionContext = {
   readonly descriptor: ActionDescriptor
   readonly willRespondJson: () => boolean
   resources(): NamedResources
+  respond(response: Response): Promise<void>
+  renderRequestedView(): Promise<void> // render view from httpFilePath
   getCore(): RouterCore
 }
 
@@ -50,10 +50,12 @@ export type MutableActionContext = ActionContext & {
 export type Handler = (ctx: ActionContext) => void | Promise<void>
 
 export type Responder<Opt = unknown, Out = unknown, Src = unknown> = {
-  success?: (ctx: ActionContext, output: Out, option?: Opt) => unknown
-  invalid?: (ctx: ActionContext, err: ValidationError, source: Src, option?: Opt) => void | Promise<void>
-  fatal?: (ctx: ActionContext, err: Error, option?: Opt) => void | Promise<void>
+  success?: (ctx: ActionContext, output: Out, option?: Opt) => Response | Promise<Response>
+  invalid?: (ctx: ActionContext, err: ValidationError, source: Src, option?: Opt) => Response | Promise<Response>
+  fatal?: (ctx: ActionContext, err: Error, option?: Opt) => Response | Promise<Response>
 }
+
+export type FilledResponder<Opt = unknown, Out = unknown, Src = unknown> = Required<Responder<Opt, Out, Src>>
 
 export type RequestCallback<In = unknown> = {
   beforeValidation?: (ctx: ActionContext, source: unknown, schema: ZodType) => IncommingType | Promise<IncommingType>
@@ -71,7 +73,7 @@ export type CreateActionOptionFunction = (ctx: ActionContext) => unknown
 /**
  * @returns If not rendered return false.
  */
-export type Renderer = (ctx: ActionContext, options?: unknown) => false | undefined
+export type Renderer = (ctx: ActionContext, options?: unknown) => Promise<false | undefined>
 
 export type IncommingType = Record<string, unknown> | File
 

@@ -1,7 +1,6 @@
 import { Actions } from '../index.js'
 import { ResourceMethodHandlerParams, ServerRouterConfig, ServerRouterConfigCustom } from './server-router-config.js'
 import {
-  createDefaultActionContext,
   createNullActionOption,
   createSmartInputArranger,
   formatPlaceholderForRouter,
@@ -25,7 +24,9 @@ function defaultServerRouterConfig(): Omit<ServerRouterConfig, 'baseDir' | 'load
     actions: Actions.page(),
     inputArranger: createSmartInputArranger(),
     createActionOptions: createNullActionOption,
-    createActionContext: createDefaultActionContext,
+    createActionContext: () => {
+      throw new Error('createActionContext should be override for server platform')
+    },
     constructConfig: Actions.defaultConstructConfig(),
     createDefaultResponder: createSmartResponder,
     renderDefault: renderDefault,

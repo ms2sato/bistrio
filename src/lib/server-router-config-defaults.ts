@@ -1,26 +1,17 @@
-import { ActionContextCreator, FileNotFoundError, routerPlaceholderRegex } from '../index.js'
 import { ActionContext, CreateActionOptionFunction } from './action-context.js'
-import { ActionContextImpl } from './server-router-impl.js'
-
+import { FileNotFoundError, routerPlaceholderRegex } from './shared/common.js'
 export { createSmartInputArranger } from './input-arrangers.js'
 
 export const createNullActionOption: CreateActionOptionFunction = (_ctx) => {
   return Promise.resolve(undefined)
 }
 
-export function renderDefault(ctx: ActionContext, options: unknown = undefined) {
+export const renderDefault = async (ctx: ActionContext) => {
   if (!ctx.descriptor.page) {
     return false
   }
 
-  const viewPath = ctx.httpFilePath.replace(/^\//, '')
-
-  // as object for Express
-  ctx.render(viewPath, options as object)
-}
-
-export const createDefaultActionContext: ActionContextCreator = ({ router, req, res, descriptor, httpPath }) => {
-  return new ActionContextImpl(router, req, res, descriptor, httpPath)
+  await ctx.renderRequestedView()
 }
 
 export const formatPlaceholderForRouter = (routePath: string) => routePath.replace(routerPlaceholderRegex, ':$1')

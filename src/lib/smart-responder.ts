@@ -1,4 +1,4 @@
-import { ActionContext, Responder } from './action-context.js'
+import { ActionContext, FilledResponder } from './action-context.js'
 import { ServerRouterImpl } from './server-router-impl.js'
 import { JsonFormatter, StandardJsonFormatter, ValidationError } from './shared/index.js'
 
@@ -11,10 +11,12 @@ function isContextHolder(obj: unknown): obj is ContextHolder {
 }
 
 // FIXME: @see https://google.github.io/styleguide/jsoncstyleguide.xml
-export class StandardJsonResponder<Opt = undefined, Out = unknown, Src = unknown> implements Responder<Opt, Out, Src> {
+export class StandardJsonResponder<Opt = undefined, Out = unknown, Src = unknown>
+  implements FilledResponder<Opt, Out, Src>
+{
   constructor(private jsonFormatter: JsonFormatter = new StandardJsonFormatter()) {}
 
-  success(ctx: ActionContext, output: Out): void | Promise<void> {
+  success(_ctx: ActionContext, output: Out) {
     let ret
     if (output === undefined || output === null) {
       ret = this.jsonFormatter.success(output)
@@ -26,21 +28,18 @@ export class StandardJsonResponder<Opt = undefined, Out = unknown, Src = unknown
     } else {
       ret = this.jsonFormatter.success(output)
     }
-    ctx.res.status(ret.status)
-    ctx.res.json(ret.json)
+    return Response.json(ret.json, { status: ret.status })
   }
 
-  invalid(ctx: ActionContext, validationError: ValidationError, _source: Src): void | Promise<void> {
+  invalid(_ctx: ActionContext, validationError: ValidationError, _source: Src) {
     const ret = this.jsonFormatter.invalid(validationError)
-    ctx.res.status(ret.status)
-    ctx.res.json(ret.json)
+    return Response.json(ret.json, { status: ret.status })
   }
 
-  fatal(ctx: ActionContext, err: Error): void | Promise<void> {
+  fatal(_ctx: ActionContext, err: Error) {
     if (process.env.NODE_ENV === 'production') {
       const ret = this.jsonFormatter.fatal(err)
-      ctx.res.status(ret.status)
-      ctx.res.json(ret.json)
+      return Response.json(ret.json, { status: ret.status })
     } else {
       throw err
     }
@@ -49,28 +48,33 @@ export class StandardJsonResponder<Opt = undefined, Out = unknown, Src = unknown
 
 type RespondFatalHandler = (ctx: ActionContext, err: Error) => Promise<void>
 
-export class SmartResponder<Opt = undefined, Out = unknown, Src = unknown> implements Responder<Opt, Out, Src> {
+export class SmartResponder<Opt = undefined, Out = unknown, Src = unknown> implements FilledResponder<Opt, Out, Src> {
   constructor(
     private router: ServerRouterImpl,
     private fatalHandler: RespondFatalHandler,
-    private jsonResonder = new StandardJsonResponder(),
+    private jsonResonder: FilledResponder<Opt, Out, Src> = new StandardJsonResponder(),
   ) {}
 
-  async success(ctx: ActionContext, output: Out): Promise<void> {
+  async success(ctx: ActionContext, output: Out) {
+    if (output instanceof Response) {
+      return output
+    }
+
     if (ctx.willRespondJson()) {
       return await this.jsonResonder.success(ctx, output)
     }
 
-    if (this.router.serverRouterConfig.renderDefault(ctx, output) === false) {
+    const renderRet = await this.router.serverRouterConfig.renderDefault(ctx, output)
+    if (renderRet === false) {
       return await this.jsonResonder.success(ctx, output)
     }
   }
 
-  async invalid(ctx: ActionContext, validationError: ValidationError, source: Src): Promise<void> {
+  async invalid(ctx: ActionContext, validationError: ValidationError, source: Src) {
     return await this.jsonResonder.invalid(ctx, validationError, source)
   }
 
-  async fatal(ctx: ActionContext, err: Error): Promise<void> {
+  async fatal(ctx: ActionContext, err: Error) {
     console.error('fatal', err)
     if (ctx.willRespondJson()) {
       return await this.jsonResonder.fatal(ctx, err)
