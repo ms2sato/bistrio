@@ -1,19 +1,19 @@
-import { defineResource, opt } from 'bistrio'
+import { defineResource } from 'bistrio'
 import { CustomMethodOption } from '@/server/customizers'
 import { User } from '@/universal/params'
-import { SessionCreateParams } from '@/universal/params'
+import { AuthResource } from '@/.bistrio/resources'
 
-export default defineResource(() => ({
-  create: (_params: SessionCreateParams): Promise<User> => {
-    throw new Error('override by adapter')
-  },
-  verify: (_params: SessionCreateParams): Promise<User> => {
-    throw new Error('override by adapter')
-  },
-  user: (option?: opt<CustomMethodOption>): User | null => {
-    return option?.body.user || null
-  },
-  logout: () => {
-    throw new Error('override by adapter')
-  },
-}))
+export default defineResource(
+  () =>
+    ({
+      verify: (_params): Promise<User> => {
+        throw new Error('override by adapter')
+      },
+      user: (option): User | null => {
+        return option?.body.user || null
+      },
+      logout: () => {
+        throw new Error('override by adapter')
+      },
+    }) as const satisfies AuthResource<CustomMethodOption>,
+)

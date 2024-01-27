@@ -23,7 +23,7 @@ export const importPage = async (filePath: string): Promise<PageMaterial> => {
   return (await safeImport(filePath)) as PageMaterial
 }
 
-export class ServerRenderSupport<RS extends NamedResources> implements RenderSupport<RS> {
+export class ServerRenderSupport<RS extends NamedResources = NamedResources> implements RenderSupport<RS> {
   readonly suspense
 
   readonly isClient: boolean = false

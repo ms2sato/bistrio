@@ -16,7 +16,6 @@ import {
   HandlerBuildRunner,
   Resource,
   ResourceMethod,
-  MutableActionContext,
   NamedResources,
   choiceSchema,
   choiseSources,
@@ -61,19 +60,28 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
   const actionName = actionDescriptor.action
 
   const respond = async (ctx: ActionContext, output: unknown, option: unknown) => {
+    let response: Response | undefined | false
     if (responder && 'success' in responder) {
       handlerLog('%s#%s.success', adapterPath, actionName)
       const ret = await responder.success?.apply(adapter, [ctx, output, option])
       if (ret === false) {
         handlerLog(' dispatch to default responder')
-        await defaultResponder.success(ctx, output)
+        response = await defaultResponder.success(ctx, output)
       } else if (ret !== undefined) {
         handlerLog(' dispatch to default responder for ret value')
-        await defaultResponder.success(ctx, ret)
+        response = await defaultResponder.success(ctx, ret)
       }
     } else {
       handlerLog('%s#%s success by default responder', adapterPath, actionName)
-      await defaultResponder.success(ctx, output)
+      response = await defaultResponder.success(ctx, output)
+    }
+
+    if (response) {
+      await ctx.respond(response)
+    }
+
+    if (response === false) {
+      throw new Error('Cannot return false from defaultResponder.success')
     }
   }
 
@@ -164,80 +172,6 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
         }
       }
     })().catch((err) => next(err))
-  }
-}
-
-export class ActionContextImpl implements MutableActionContext {
-  render
-  redirect
-  private _input: unknown
-
-  constructor(
-    private router: ServerRouter,
-    readonly req: express.Request,
-    readonly res: express.Response,
-    readonly descriptor: ActionDescriptor,
-    readonly httpPath: string,
-  ) {
-    // @see https://stackoverflow.com/questions/47647709/method-alias-with-typescript
-    this.render = this.res.render.bind(this.res)
-    this.redirect = this.res.redirect.bind(this.res)
-  }
-
-  get params() {
-    return this.req.params
-  }
-  get body() {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return this.req.body
-  }
-  get query() {
-    return this.req.query
-  }
-
-  get input() {
-    return this._input
-  }
-  get format() {
-    return this.req.params.format
-  }
-  get httpFilePath() {
-    const filePath = this.descriptor.path.endsWith('/') ? `${this.descriptor.path}index` : this.descriptor.path
-    return join(this.httpPath, filePath)
-  }
-  get routePath() {
-    return join(this.httpPath, this.descriptor.path)
-  }
-
-  resources(): NamedResources {
-    return this.router.namedResources(this)
-  }
-
-  willRespondJson() {
-    const contentType = this.req.get('content-type')
-    return this.format === 'json' || (contentType !== undefined && contentType.indexOf('application/json') >= 0)
-  }
-
-  mergeInputs(
-    sources: readonly string[],
-    pred: (input: Record<string, unknown>, source: string) => Record<string, unknown> = (input) => input,
-  ) {
-    const request = this.req as unknown as Record<string, Record<string, unknown> | undefined | null>
-    const input = sources.reduce((prev, source) => {
-      const reqSource = request[source]
-      if (reqSource === undefined || reqSource === null) {
-        return prev
-      }
-
-      return { ...prev, ...pred(reqSource, source) }
-    }, {})
-
-    this._input = input
-    return input
-  }
-
-  getCore(): RouterCore {
-    return this.router.routerCore
   }
 }
 
@@ -670,12 +604,11 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
         descriptor: actionDescriptor,
         httpPath: fullResourceRoutePath,
       })
-      try {
+
+      ;(async () => {
         handlerLog('page: %s', ctx.httpFilePath)
-        this.serverRouterConfig.renderDefault(ctx)
-      } catch (err) {
-        next(err)
-      }
+        await ctx.renderRequestedView()
+      })().catch((err) => next(err))
     }
 
     pageActionDescriptors.push(actionDescriptor)

@@ -1,5 +1,9 @@
+import { createElement } from 'react'
+
+import { Writable } from 'node:stream'
 import { join } from 'node:path'
-import { Express } from 'express'
+import { Express, Response as ExpressResponse } from 'express'
+
 import listEndpoints from 'express-list-endpoints'
 import { Adapter, RouterCore } from '../lib/action-context.js'
 import { initServerRouterConfig } from '../lib/init-server-router-config.js'
@@ -15,52 +19,29 @@ import {
   defaultClientConfig,
 } from '../lib/shared/index.js'
 import { RouteObject } from 'react-router-dom'
+import { ExpressActionContext } from '../lib/express-action-context.js'
+import { ActionContextCreator } from '../lib/common.js'
 
-type VirtualResponse<R> = { statusCode: number; data: R }
 type VirtualRequest = { url: string; method: string; headers: Record<string, string>; get: (key: string) => string }
-type Handle = (
-  req: VirtualRequest,
-  res: {
-    render: () => void
-    redirect: () => void
-    status: (value: number) => void
-    json: (ret: StandardJsonSuccess) => void
-  },
-  out: () => void,
-) => void
+type Handle = (req: VirtualRequest, res: MockExpressResponse, out: () => void) => void
 type Handlable = { handle: Handle }
 
 const checkHandlable = (router: unknown): router is Handlable => 'handle' in (router as Handlable)
 
-export const fakeRequest = <R>(router: ServerRouterImpl, req: VirtualRequest): Promise<VirtualResponse<R>> =>
-  new Promise<VirtualResponse<R>>((resolve, reject) => {
+export const fakeRequest = (router: ServerRouterImpl, req: VirtualRequest): Promise<MockExpressResponse> =>
+  new Promise<MockExpressResponse>((resolve, reject) => {
     const expressRouter = router.router
     if (!checkHandlable(expressRouter)) {
       throw new Error('Unexpexted router type')
     }
 
-    let statusCode: number
+    const res = new MockExpressResponse()
+    res.on('close', () => resolve(res))
+
     // @see https://stackoverflow.com/questions/33090091/is-it-possible-to-call-express-router-directly-from-code-with-a-fake-request
-    expressRouter.handle(
-      req,
-      {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        render() {},
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        redirect() {},
-        status(value: number) {
-          statusCode = value
-          return this
-        },
-        json(ret: StandardJsonSuccess) {
-          const data = ret.data as VirtualResponse<R>['data']
-          resolve({ statusCode, data })
-        },
-      },
-      (...args: unknown[]) => {
-        reject(args[0])
-      },
-    )
+    expressRouter.handle(req, res, (...args: unknown[]) => {
+      reject(args[0])
+    })
   })
 
 export class TestServerRouter extends ServerRouterImpl {
@@ -147,8 +128,13 @@ export const buildRouter = async ({
   }
   const routerOptions: RouterOptions = { hydrate: false }
 
+  const createActionContext: ActionContextCreator = (params) => {
+    return new ExpressActionContext({ ...params, constructView: () => Promise.resolve(createElement('div')) })
+  }
+
+  serverRouterConfig = serverRouterConfig || initServerRouterConfig({ baseDir: './', loadPage })
   const router = new TestServerRouter(
-    serverRouterConfig || initServerRouterConfig({ baseDir: './', loadPage }),
+    { ...serverRouterConfig, createActionContext },
     defaultClientConfig(),
     routePath,
     routeObject,
@@ -165,4 +151,84 @@ export const buildRouter = async ({
 export const getEndpoints = (router: ServerRouterImpl) => {
   const endpoints = listEndpoints(router.router as Express)
   return endpoints.map(({ methods, path }) => ({ methods, path }))
+}
+
+export function isBufferEncoding(encoding: string): encoding is BufferEncoding {
+  return ['ascii', 'utf8', 'utf16le', 'ucs2', 'base64', 'base64url', 'latin1', 'binary', 'hex'].includes(encoding)
+}
+
+export class MockExpressResponse extends Writable {
+  private _statusCode: number
+  private _data: Buffer = Buffer.alloc(0)
+  readonly headers: Record<string, string>
+  private _redirectUrl: string | null
+
+  constructor() {
+    super()
+    this._statusCode = 200
+    this.headers = {}
+    this._redirectUrl = null
+  }
+
+  get statusCode() {
+    return this._statusCode
+  }
+
+  get data() {
+    return this._data
+  }
+
+  dataAsString(encoding: BufferEncoding = 'utf8'): string {
+    return this._data.toString(encoding)
+  }
+
+  dataAsJson<T = unknown>(): T {
+    return JSON.parse(this.dataAsString()) as T
+  }
+
+  jsonData<T = unknown>(): T {
+    return this.dataAsJson<StandardJsonSuccess>().data as T
+  }
+
+  get redirectUrl() {
+    return this._redirectUrl
+  }
+
+  forExpress() {
+    return this as unknown as ExpressResponse
+  }
+
+  status(code: number) {
+    this._statusCode = code
+    return this
+  }
+
+  setHeader(name: string, value: string) {
+    this.headers[name] = value
+    return this
+  }
+
+  redirect(status: number, url: string): this
+  redirect(url: string): this
+  redirect(arg1: number | string, arg2?: string) {
+    if (typeof arg1 === 'string') {
+      this._statusCode = 302
+      this._redirectUrl = arg1
+    } else {
+      this._statusCode = arg1
+      this._redirectUrl = arg2 || null
+    }
+    this.end()
+    return this
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  _write(chunk: any, encoding: string, callback: (error?: Error | null) => void) {
+    const bencoding: BufferEncoding = isBufferEncoding(encoding) ? encoding : 'utf8'
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk as string, bencoding)
+    this._data = Buffer.concat([this._data, buffer])
+    callback()
+  }
 }

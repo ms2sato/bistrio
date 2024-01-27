@@ -8,13 +8,11 @@ import {
   Handler,
 } from '../index.js'
 
-export function defineResource<R>(callback: (support: ResourceSupport, config: ResourceRouteConfig) => R) {
-  return callback
-}
+export type DefineResourceCallback<R> = (support: ResourceSupport, config: ResourceRouteConfig) => R
+export const defineResource = <R>(callback: DefineResourceCallback<R>): DefineResourceCallback<R> => callback
 
-export function defineAdapter<AR>(callback: (support: ActionSupport, config: ResourceRouteConfig) => AR) {
-  return callback
-}
+export type DefineAdapterCallback<AR> = (support: ActionSupport, config: ResourceRouteConfig) => Partial<AR>
+export const defineAdapter = <AR>(callback: DefineAdapterCallback<AR>): DefineAdapterCallback<AR> => callback
 
 export type AdapterOf<R extends ResourceFunc, Opt = undefined> = {
   [actionName in keyof ReturnType<R>]:

@@ -10,7 +10,7 @@ import {
 } from '../index.js'
 import { ActionContextCreator } from './common.js'
 import { ServerRouterImpl } from './server-router-impl.js'
-import { buildActionContextCreator } from './build-action-context-creator.js'
+import { ExpressActionContext } from './express-action-context.js'
 
 export type ExpressRouterConfig<M extends Middlewares> = {
   app: Application
@@ -28,7 +28,9 @@ export const useExpressRouter = async <M extends Middlewares>({
   serverRouterConfig,
 }: ExpressRouterConfig<M>) => {
   const conf = config()
-  const createActionContext: ActionContextCreator = buildActionContextCreator(constructView)
+  const createActionContext: ActionContextCreator = (params) => {
+    return new ExpressActionContext({ ...params, constructView })
+  }
   const serverConfig: ServerRouterConfig = { ...serverRouterConfig, createActionContext }
 
   const router: ServerRouterImpl = new ServerRouterImpl(serverConfig, conf.client)

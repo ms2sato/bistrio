@@ -6,12 +6,6 @@ import type resource from './resource'
 type Adapter = AdapterOf<typeof resource>
 
 export default defineAdapter<Adapter>(() => ({
-  user: {},
-
-  create: (_ctx) => {
-    throw new Error('unimplemented')
-  },
-
   verify: {
     override: async (ctx) => {
       const { user, info } = await authenticate(ctx)
