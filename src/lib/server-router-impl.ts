@@ -80,7 +80,7 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
       await ctx.respond(response)
     }
 
-    if(response === false) {
+    if (response === false) {
       throw new Error('Cannot return false from defaultResponder.success')
     }
   }

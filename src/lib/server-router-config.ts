@@ -1,5 +1,12 @@
 import { ZodType } from 'zod'
-import { InputArranger, CreateActionOptionFunction, Responder, Adapter, RequestCallback, FilledResponder } from './action-context.js'
+import {
+  InputArranger,
+  CreateActionOptionFunction,
+  Responder,
+  Adapter,
+  RequestCallback,
+  FilledResponder,
+} from './action-context.js'
 import { ActionContextCreator } from './common.js'
 import { ServerRouterImpl } from './server-router-impl.js'
 import {

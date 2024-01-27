@@ -5,13 +5,13 @@ import createDebug from 'debug'
 import express from 'express'
 import { renderToPipeableStream } from 'react-dom/server'
 
-import { ActionDescriptor, NamedResources } from './shared/common'
+import { ActionDescriptor, NamedResources } from './shared/common.js'
 import { isErrorWithCode, isError } from './shared/is-error.js'
 import { ConstructViewFunc, ServerRouter } from './common.js'
-import { MutableActionContext, RouterCore } from './action-context'
+import { MutableActionContext, RouterCore } from './action-context.js'
 import { ServerRenderSupport } from './server-render-support.js'
-import { createViewNode } from './express-action-context-view-node'
-import { toRoutes } from './shared/react-router-util'
+import { createViewNode } from './express-action-context-view-node.js'
+import { toRoutes } from './shared/react-router-util.js'
 
 const debug = createDebug('bistrio:debug:express-action-context')
 

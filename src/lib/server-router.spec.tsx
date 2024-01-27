@@ -16,7 +16,6 @@ import {
 import { ExpressActionContext } from './express-action-context.js'
 
 type ActionOption = { test: number }
-type TestReturn = { msg: string; opt?: opt<ActionOption> }
 
 const dummyResource = {
   build: () => ({ msg: 'ret build' }),
