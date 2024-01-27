@@ -25,13 +25,11 @@ export function routes(r: Router, support: RouterSupport<Middlewares>) {
         login: { schema: blankSchema },
         user: { schema: blankSchema },
         verify: { schema: sessionCreateSchema, sources: ['body'] },
-        create: { schema: blankSchema },
         logout: { schema: blankSchema },
       },
       actions: [
         { action: 'login', path: 'login', method: 'get', page: true },
         { action: 'user', path: 'user', method: 'get' },
-        { action: 'create', path: '/', method: 'post' },
         { action: 'verify', path: 'session', method: 'patch' },
         { action: 'logout', path: 'session', method: 'delete' },
       ],
