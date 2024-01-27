@@ -1,6 +1,7 @@
 import express from 'express'
 import { ActionContext, MutableActionContext, RouterCore } from './action-context.js'
 import { ActionDescriptor, NamedResources, RenderSupport, Router } from './shared/index.js'
+import { ServerRouterConfig } from './server-router-config.js'
 
 export type ConstructViewFunc = (props: {
   routes: JSX.Element
@@ -14,6 +15,7 @@ export type ConstructViewFunc = (props: {
 export interface ServerRouter extends Router {
   readonly routerCore: RouterCore
   readonly router: express.Router
+  readonly serverRouterConfig: ServerRouterConfig
   namedResources(ctx: ActionContext): NamedResources
 }
 

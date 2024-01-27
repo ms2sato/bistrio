@@ -50,7 +50,11 @@ export type MutableActionContext = ActionContext & {
 export type Handler = (ctx: ActionContext) => void | Promise<void>
 
 export type Responder<Opt = unknown, Out = unknown, Src = unknown> = {
-  success?: (ctx: ActionContext, output: Out, option?: Opt) => Response | Promise<Response>
+  success?: (
+    ctx: ActionContext,
+    output: Out,
+    option?: Opt,
+  ) => Response | false | undefined | Promise<Response | false | undefined>
   invalid?: (ctx: ActionContext, err: ValidationError, source: Src, option?: Opt) => Response | Promise<Response>
   fatal?: (ctx: ActionContext, err: Error, option?: Opt) => Response | Promise<Response>
 }

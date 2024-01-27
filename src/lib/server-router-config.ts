@@ -1,12 +1,5 @@
 import { ZodType } from 'zod'
-import {
-  InputArranger,
-  CreateActionOptionFunction,
-  Responder,
-  Renderer,
-  Adapter,
-  RequestCallback,
-} from './action-context.js'
+import { InputArranger, CreateActionOptionFunction, Responder, Adapter, RequestCallback, FilledResponder } from './action-context.js'
 import { ActionContextCreator } from './common.js'
 import { ServerRouterImpl } from './server-router-impl.js'
 import {
@@ -36,6 +29,8 @@ export type FormatPlaceholderForServerRouterFunc = (routePath: string) => string
 
 export type LoadFunc = (path: string) => Promise<unknown>
 
+export type CreateDefaultResponderFunc = (params: ResourceMethodHandlerParams) => FilledResponder
+
 export type ServerRouterConfig = {
   baseDir: string
   actions: readonly ActionDescriptor[]
@@ -43,8 +38,7 @@ export type ServerRouterConfig = {
   createActionOptions: CreateActionOptionFunction
   createActionContext: ActionContextCreator
   constructConfig: ConstructConfig
-  createDefaultResponder: (params: ResourceMethodHandlerParams) => Required<Responder>
-  renderDefault: Renderer
+  createDefaultResponder: CreateDefaultResponderFunc
   adapterRoot: string
   adapterFileName: string
   resourceRoot: string

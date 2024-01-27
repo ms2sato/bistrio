@@ -4,7 +4,6 @@ import { ServerRenderSupport } from './server-render-support.js'
 import { ActionDescriptor, IdNumberParams, LoadPageFunc, blankSchema, opt } from './shared/index.js'
 import { CreateActionOptionFunction } from './action-context.js'
 import { ConstructViewFunc, Resource, ServerRouterConfig, idNumberSchema } from '../index.js'
-import { buildActionContextCreator } from './build-action-context-creator.js'
 import { initServerRouterConfig } from './init-server-router-config.js'
 import {
   RoutesFunction,
@@ -14,6 +13,7 @@ import {
   MockResources,
   getDummyServerRouterImpl,
 } from '../misc/spec-util.js'
+import { ExpressActionContext } from './express-action-context.js'
 
 type ActionOption = { test: number }
 type TestReturn = { msg: string; opt?: opt<ActionOption> }
@@ -63,8 +63,7 @@ const createDummyActionContext = async (params: CreateDummyActionContextProps) =
   const httpPath = '/test/build'
 
   const descriptor: ActionDescriptor = { action: 'build', method: 'get', path: '/build' }
-  const ctxCreator = buildActionContextCreator(constructView)
-  return ctxCreator({ router, req, res, descriptor, httpPath })
+  return new ExpressActionContext({ router, req, res, descriptor, httpPath, constructView })
 }
 
 describe('ServerRouter', () => {
@@ -165,11 +164,27 @@ describe('ServerRouter', () => {
     })
   })
 
+  test('requests', async () => {
+    const router = await buildRouter(dummyProps)
+
+    const ret = await fakeRequest(router, {
+      url: '/test/build',
+      method: 'GET',
+      headers: { 'content-type': 'application/json' },
+      get: function (key: string) {
+        return this.headers[key]
+      },
+    })
+
+    expect(ret.statusCode).toBe(200)
+    expect(ret.jsonData()).toStrictEqual({ msg: 'ret build' })
+  })
+
   describe('as API', () => {
     test('requests', async () => {
       const router = await buildRouter(dummyProps)
 
-      const ret = await fakeRequest<TestReturn>(router, {
+      const ret = await fakeRequest(router, {
         url: '/test/build',
         method: 'GET',
         headers: { 'content-type': 'application/json' },
@@ -179,7 +194,7 @@ describe('ServerRouter', () => {
       })
 
       expect(ret.statusCode).toBe(200)
-      expect(ret.data).toStrictEqual({ msg: 'ret build' })
+      expect(ret.jsonData()).toStrictEqual({ msg: 'ret build' })
     })
 
     // FIXME: not supported
@@ -206,7 +221,7 @@ describe('ServerRouter', () => {
         },
       ])
 
-      const ret = await fakeRequest<TestReturn>(router, {
+      const ret = await fakeRequest(router, {
         url: '.json',
         method: 'GET',
         headers: { 'content-type': 'application/json' },
@@ -216,7 +231,7 @@ describe('ServerRouter', () => {
       })
 
       expect(ret.statusCode).toBe(200)
-      expect(ret.data).toStrictEqual({ msg: 'ret user item' })
+      expect(ret.jsonData()).toStrictEqual({ msg: 'ret user item' })
     })
 
     // FIXME: not supported
@@ -243,7 +258,7 @@ describe('ServerRouter', () => {
         },
       ])
 
-      const ret = await fakeRequest<TestReturn>(router, {
+      const ret = await fakeRequest(router, {
         url: 'tasks.json',
         method: 'GET',
         headers: { 'content-type': 'application/json' },
@@ -253,7 +268,7 @@ describe('ServerRouter', () => {
       })
 
       expect(ret.statusCode).toBe(200)
-      expect(ret.data).toStrictEqual({ msg: 'ret user item' })
+      expect(ret.jsonData()).toStrictEqual({ msg: 'ret user item' })
     })
     test('requests nested', async () => {
       const router = await buildRouter({
@@ -278,7 +293,7 @@ describe('ServerRouter', () => {
         },
       ])
 
-      const ret = await fakeRequest<TestReturn>(router, {
+      const ret = await fakeRequest(router, {
         url: '/users/1/items',
         method: 'GET',
         headers: { 'content-type': 'application/json' },
@@ -288,7 +303,7 @@ describe('ServerRouter', () => {
       })
 
       expect(ret.statusCode).toBe(200)
-      expect(ret.data).toStrictEqual({ msg: 'ret user item' })
+      expect(ret.jsonData()).toStrictEqual({ msg: 'ret user item' })
     })
 
     test('requests nested loose separator', async () => {
@@ -314,7 +329,7 @@ describe('ServerRouter', () => {
         },
       ])
 
-      const ret = await fakeRequest<TestReturn>(router, {
+      const ret = await fakeRequest(router, {
         url: '/users/1/items',
         method: 'GET',
         headers: { 'content-type': 'application/json' },
@@ -324,7 +339,7 @@ describe('ServerRouter', () => {
       })
 
       expect(ret.statusCode).toBe(200)
-      expect(ret.data).toStrictEqual({ msg: 'ret user item' })
+      expect(ret.jsonData()).toStrictEqual({ msg: 'ret user item' })
     })
 
     test('requests with actionOpitons', async () => {
@@ -348,7 +363,7 @@ describe('ServerRouter', () => {
       })
 
       expect(ret.statusCode).toBe(200)
-      expect(ret.data).toStrictEqual({
+      expect(ret.jsonData()).toStrictEqual({
         msg: 'ret hasOption',
         opt: { test: 321 },
       })
@@ -390,7 +405,7 @@ describe('ServerRouter', () => {
       })
 
       expect(ret.statusCode).toBe(200)
-      expect(ret.data).toStrictEqual({ msg: 'ret adapter get' })
+      expect(ret.jsonData()).toStrictEqual({ msg: 'ret adapter get' })
     })
 
     test('an arg', async () => {
@@ -427,7 +442,7 @@ describe('ServerRouter', () => {
       })
 
       expect(ret.statusCode).toBe(200)
-      expect(ret.data).toStrictEqual({ msg: 'ret adapter get' })
+      expect(ret.jsonData()).toStrictEqual({ msg: 'ret adapter get' })
     })
   })
 

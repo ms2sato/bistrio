@@ -1,17 +1,9 @@
-import { ActionContext, CreateActionOptionFunction } from './action-context.js'
+import { CreateActionOptionFunction } from './action-context.js'
 import { FileNotFoundError, routerPlaceholderRegex } from './shared/common.js'
 export { createSmartInputArranger } from './input-arrangers.js'
 
 export const createNullActionOption: CreateActionOptionFunction = (_ctx) => {
   return Promise.resolve(undefined)
-}
-
-export const renderDefault = async (ctx: ActionContext) => {
-  if (!ctx.descriptor.page) {
-    return false
-  }
-
-  await ctx.renderRequestedView()
 }
 
 export const formatPlaceholderForRouter = (routePath: string) => routePath.replace(routerPlaceholderRegex, ':$1')

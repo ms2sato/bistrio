@@ -92,8 +92,10 @@ export class ExpressActionContext implements MutableActionContext {
       return
     }
 
-    if (response.bodyUsed && response.body) {
+    if (response.body) {
       await response.body.pipeTo(Writable.toWeb(this.res))
+    } else {
+      this.res.end()
     }
   }
 

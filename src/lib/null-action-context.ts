@@ -4,12 +4,6 @@ import { NamedResources, ActionContext, ActionDescriptor, RouterCore } from '../
 export class NullActionContext implements ActionContext {
   private errorMessage = 'Cannot access this ActionContext(May not request context)'
 
-  render() {
-    throw new Error(this.errorMessage)
-  }
-  redirect() {
-    throw new Error(this.errorMessage)
-  }
   get params(): express.Request['params'] {
     throw new Error(this.errorMessage)
   }
@@ -48,6 +42,12 @@ export class NullActionContext implements ActionContext {
   }
   resources(): NamedResources {
     throw new Error(this.errorMessage)
+  }
+  respond(_response: Response): Promise<void> {
+    throw new Error('Method not implemented.')
+  }
+  renderRequestedView(): Promise<void> {
+    throw new Error('Method not implemented.')
   }
   getCore(): RouterCore {
     throw new Error(this.errorMessage)

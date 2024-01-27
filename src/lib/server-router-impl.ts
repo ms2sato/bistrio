@@ -60,19 +60,28 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
   const actionName = actionDescriptor.action
 
   const respond = async (ctx: ActionContext, output: unknown, option: unknown) => {
+    let response: Response | undefined | false
     if (responder && 'success' in responder) {
       handlerLog('%s#%s.success', adapterPath, actionName)
       const ret = await responder.success?.apply(adapter, [ctx, output, option])
       if (ret === false) {
         handlerLog(' dispatch to default responder')
-        await defaultResponder.success(ctx, output)
+        response = await defaultResponder.success(ctx, output)
       } else if (ret !== undefined) {
         handlerLog(' dispatch to default responder for ret value')
-        await defaultResponder.success(ctx, ret)
+        response = await defaultResponder.success(ctx, ret)
       }
     } else {
       handlerLog('%s#%s success by default responder', adapterPath, actionName)
-      await defaultResponder.success(ctx, output)
+      response = await defaultResponder.success(ctx, output)
+    }
+
+    if (response) {
+      await ctx.respond(response)
+    }
+
+    if(response === false) {
+      throw new Error('Cannot return false from defaultResponder.success')
     }
   }
 
@@ -598,7 +607,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
 
       ;(async () => {
         handlerLog('page: %s', ctx.httpFilePath)
-        await this.serverRouterConfig.renderDefault(ctx)
+        await ctx.renderRequestedView()
       })().catch((err) => next(err))
     }
 

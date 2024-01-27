@@ -1,22 +1,17 @@
 import { Actions } from '../index.js'
-import { ResourceMethodHandlerParams, ServerRouterConfig, ServerRouterConfigCustom } from './server-router-config.js'
+import { CreateDefaultResponderFunc, ServerRouterConfig, ServerRouterConfigCustom } from './server-router-config.js'
 import {
   createNullActionOption,
   createSmartInputArranger,
   formatPlaceholderForRouter,
   importLocal,
-  renderDefault,
 } from './server-router-config-defaults.js'
 import { SmartResponder, StandardJsonResponder } from './smart-responder.js'
 
-const createSmartResponder = ({ router }: ResourceMethodHandlerParams) => {
-  return new SmartResponder(
-    router,
-    () => {
-      throw new Error('Unimplemented Fatal Handler')
-    },
-    new StandardJsonResponder(),
-  )
+const createSmartResponder: CreateDefaultResponderFunc = () => {
+  return new SmartResponder(() => {
+    throw new Error('Unimplemented Fatal Handler')
+  }, new StandardJsonResponder())
 }
 
 function defaultServerRouterConfig(): Omit<ServerRouterConfig, 'baseDir' | 'loadPage'> {
@@ -29,7 +24,6 @@ function defaultServerRouterConfig(): Omit<ServerRouterConfig, 'baseDir' | 'load
     },
     constructConfig: Actions.defaultConstructConfig(),
     createDefaultResponder: createSmartResponder,
-    renderDefault: renderDefault,
     formatPlaceholderForRouter,
     adapterRoot: './resources',
     adapterFileName: 'adapter',

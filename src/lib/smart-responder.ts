@@ -1,5 +1,4 @@
 import { ActionContext, FilledResponder } from './action-context.js'
-import { ServerRouterImpl } from './server-router-impl.js'
 import { JsonFormatter, StandardJsonFormatter, ValidationError } from './shared/index.js'
 
 type ContextHolder = {
@@ -11,7 +10,7 @@ function isContextHolder(obj: unknown): obj is ContextHolder {
 }
 
 // FIXME: @see https://google.github.io/styleguide/jsoncstyleguide.xml
-export class StandardJsonResponder<Opt = undefined, Out = unknown, Src = unknown>
+export class StandardJsonResponder<Opt = unknown, Out = unknown, Src = unknown>
   implements FilledResponder<Opt, Out, Src>
 {
   constructor(private jsonFormatter: JsonFormatter = new StandardJsonFormatter()) {}
@@ -46,11 +45,15 @@ export class StandardJsonResponder<Opt = undefined, Out = unknown, Src = unknown
   }
 }
 
-type RespondFatalHandler = (ctx: ActionContext, err: Error) => Promise<void>
+/**
+ * Fatal handler is called when the error is not handled by the responder.
+ * Throw error or Response object to respond.
+ * @returns Response object
+ */
+export type RespondFatalHandler = (ctx: ActionContext, err: Error) => Promise<Response>
 
-export class SmartResponder<Opt = undefined, Out = unknown, Src = unknown> implements FilledResponder<Opt, Out, Src> {
+export class SmartResponder<Opt = unknown, Out = unknown, Src = unknown> implements FilledResponder<Opt, Out, Src> {
   constructor(
-    private router: ServerRouterImpl,
     private fatalHandler: RespondFatalHandler,
     private jsonResonder: FilledResponder<Opt, Out, Src> = new StandardJsonResponder(),
   ) {}
@@ -64,9 +67,10 @@ export class SmartResponder<Opt = undefined, Out = unknown, Src = unknown> imple
       return await this.jsonResonder.success(ctx, output)
     }
 
-    const renderRet = await this.router.serverRouterConfig.renderDefault(ctx, output)
-    if (renderRet === false) {
+    if (!ctx.descriptor.page) {
       return await this.jsonResonder.success(ctx, output)
+    } else {
+      await ctx.renderRequestedView()
     }
   }
 
@@ -80,6 +84,6 @@ export class SmartResponder<Opt = undefined, Out = unknown, Src = unknown> imple
       return await this.jsonResonder.fatal(ctx, err)
     }
 
-    await this.fatalHandler(ctx, err)
+    return await this.fatalHandler(ctx, err)
   }
 }
