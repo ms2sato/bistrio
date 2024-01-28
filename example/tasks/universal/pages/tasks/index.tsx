@@ -1,10 +1,10 @@
 import { Suspense, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { PaginationAttrs, usePagination, useUIEvent } from 'bistrio/client'
+import { PaginationAttrs, useNavigate, usePagination, useUIEvent } from 'bistrio/client'
 import { Task } from '@prisma/client'
 import { Pagination } from '@/universal/components/Pagination'
 import { useRenderSupport } from '@bistrio/routes/main'
-import { tasks$show, tasks$edit, tasks$build } from '@bistrio/routes/main/named_endpoints'
+import { tasks$show, tasks$edit, tasks$build, tasks$index } from '@bistrio/routes/main/named_endpoints'
 
 export function Index() {
   const rs = useRenderSupport()
@@ -122,12 +122,18 @@ function DoneSelector({ task, setTask }: { task: Task; setTask: (task: Task) => 
 }
 
 function Remover({ task }: { task: Task }) {
+  const navigate = useNavigate()
   const rs = useRenderSupport()
   const l = rs.getLocalizer()
 
   const { handleEvent: handleDeleteClick, pending } = useUIEvent({
     modifier: () => rs.resources().tasks.destroy(task),
-    onSuccess: () => (location.href = '/tasks'),
+    onSuccess: () => {
+      navigate(tasks$index.path(), {
+        purge: true,
+        flashMessage: { text: `Task deleted '${task.title}'`, type: 'info' },
+      })
+    },
   })
 
   return <>{pending ? '...' : <a href="#" onClick={handleDeleteClick}>{l.t`Delete`}</a>}</>
