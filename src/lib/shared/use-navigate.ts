@@ -27,6 +27,8 @@ export type NavigateFunc = {
   (delta: number, options?: NavigateOptions): void
 }
 
+export const navigateOptionsKey = '__bistrio_navigate_options__'
+
 export function useNavigate(): NavigateFunc {
   const rs = useRenderSupport()
   const navi = useNavi()
@@ -37,8 +39,12 @@ export function useNavigate(): NavigateFunc {
         rs.suspense.purge(options.purge)
       }
       if (isFlashMessageState(options)) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        navigateOptions.state = { ...options, ...navigateOptions.state }
+        const opt = {
+          ...options,
+          flashMessage: { ...options.flashMessage, to },
+        }
+
+        rs.suspense.put(navigateOptionsKey, opt)
       }
     }
 

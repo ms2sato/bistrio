@@ -34,6 +34,15 @@ class CacheReadableSuspenseDecorator implements Suspendable {
 
     return this.body.suspend(asyncProcess, key)
   }
+  put(key: string | symbol, val: unknown): void {
+    this.body.put(key, val)
+  }
+  remove(key: string | symbol): void {
+    this.body.remove(key)
+  }
+  read(key: string | symbol): unknown {
+    return this.body.read(key)
+  }
   fetchJson<T>(url: string, key: string): T {
     return this.body.fetchJson(url, key)
   }
