@@ -113,7 +113,7 @@ describe('senario /tasks', () => {
 
     await expect(page.title()).resolves.toMatch('Tasks')
     await expect(page.content()).resolves.toMatch('Task list')
-    await expect(page.content()).resolves.toMatch('Task deleted') 
+    await expect(page.content()).resolves.toMatch('Task deleted')
     await expect(page.content()).resolves.not.toMatch('<td>NewTitle</td>') // TODO: fix conflict with flash message and record
   })
 })
