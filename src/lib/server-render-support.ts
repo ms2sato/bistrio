@@ -10,9 +10,6 @@ import {
   StubSuspendedResources,
 } from './shared/render-support.js'
 
-// import createDebug from 'debug'
-// const debug = createDebug('bistrio:react-render-support')
-
 type Node = React.FC<unknown>
 
 type PageMaterial = {

@@ -102,7 +102,7 @@ export type RenderSupport<RS extends NamedResources> = {
 
 export type PageNode = React.FC
 
-export type ReaderMap = { [key: string]: SuspendedReader<unknown> }
+export type ReaderMap = { [key: string | symbol]: SuspendedReader<unknown> }
 
 export type SuspensePurgeOptions =
   | boolean
@@ -113,6 +113,9 @@ export type SuspensePurgeOptions =
 export interface Suspendable {
   readonly readers: ReaderMap
   suspend<T>(asyncProcess: () => Promise<T>, key: string): T
+  put(key: string | symbol, val: unknown): void
+  remove(key: string | symbol): void
+  read(key: string | symbol): unknown
   fetchJson<T>(url: string, key: string): T
   purge(options?: SuspensePurgeOptions): void
 }
@@ -140,7 +143,7 @@ export function isSuspensePurgeOptions(option: unknown): option is SuspensePurge
 
 export class SuspenseImpl implements Suspendable {
   readonly readers: ReaderMap = {}
-  suspend<T>(asyncProcess: () => Promise<T>, key: string): T {
+  suspend<T>(asyncProcess: () => Promise<T>, key: string | symbol): T {
     let reader: SuspendedReader<unknown> | undefined = this.readers[key]
     if (!reader) {
       reader = readable(asyncProcess())
@@ -148,6 +151,18 @@ export class SuspenseImpl implements Suspendable {
     }
 
     return (reader as SuspendedReader<T>).read()
+  }
+
+  put(key: string | symbol, val: unknown) {
+    this.readers[key] = readable(Promise.resolve(val))
+  }
+
+  remove(key: string | symbol) {
+    delete this.readers[key]
+  }
+
+  read(key: string | symbol) {
+    return this.readers[key]?.read()
   }
 
   fetchJson<T>(url: string, key: string = url): T {

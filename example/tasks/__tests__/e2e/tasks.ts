@@ -21,8 +21,10 @@ describe('senario /tasks', () => {
     await expect(page.title()).resolves.toMatch('Tasks')
     await expect(page.content()).resolves.toMatch('Task list')
 
-    await page.click('a[href="/tasks/build"]') // Build CSR(wait for loading view)
-    await page.waitForSelector('textarea[name=description]')
+    await Promise.all([
+      page.click('a[href="/tasks/build"]'), // Build CSR(wait for loading view)
+      page.waitForSelector('textarea[name=description]'),
+    ])
 
     await expect(page.title()).resolves.toMatch('Tasks')
     await expect(page.content()).resolves.toMatch('Create new task')
@@ -42,6 +44,7 @@ describe('senario /tasks', () => {
 
     await expect(page.title()).resolves.toMatch('Tasks')
     await expect(page.$eval('h1', (el) => (el as HTMLTitleElement).innerText)).resolves.toMatch('Task list')
+    await expect(page.content()).resolves.toMatch('Task created')
     await expect(page.content()).resolves.toMatch('Undone')
     await expect(page.content()).resolves.toMatch('TestTitle')
     await expect(page.content()).resolves.toMatch('TestDescription')
@@ -93,6 +96,7 @@ describe('senario /tasks', () => {
 
     await expect(page.title()).resolves.toMatch('Tasks')
     await expect(page.content()).resolves.toMatch('Task list')
+    await expect(page.content()).resolves.toMatch('Task updated')
     await expect(page.content()).resolves.toMatch('Done')
     await expect(page.content()).resolves.toMatch('NewTitle')
     await expect(page.content()).resolves.toMatch('NewDescription')
@@ -109,7 +113,8 @@ describe('senario /tasks', () => {
 
     await expect(page.title()).resolves.toMatch('Tasks')
     await expect(page.content()).resolves.toMatch('Task list')
-    await expect(page.content()).resolves.not.toMatch('NewTitle')
+    await expect(page.content()).resolves.toMatch('Task deleted')
+    await expect(page.content()).resolves.not.toMatch('<td>NewTitle</td>') // TODO: fix conflict with flash message and record
   })
 })
 

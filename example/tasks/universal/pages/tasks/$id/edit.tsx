@@ -17,7 +17,11 @@ function MyForm() {
     source,
     action: {
       modifier: (params) => rs.resources().tasks.update({ done: false, ...params, id }),
-      onSuccess: () => navigate(tasks$index.path(), { purge: true }),
+      onSuccess: (result) =>
+        navigate(tasks$index.path(), {
+          purge: true,
+          flashMessage: { text: `Task updated '${result.title}'`, type: 'info' },
+        }),
     },
     schema: formSchema,
   }

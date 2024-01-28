@@ -12,7 +12,11 @@ export function Build() {
     source: { title: '', description: '', tags: [] },
     action: {
       modifier: (params) => rs.resources().tasks.create(params),
-      onSuccess: () => navigate(tasks$index.path(), { purge: true }),
+      onSuccess: (result) =>
+        navigate(tasks$index.path(), {
+          purge: true,
+          flashMessage: { text: `Task created '${result.title}'`, type: 'info' },
+        }),
     },
     schema: formSchema,
   }
