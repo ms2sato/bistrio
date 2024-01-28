@@ -1,6 +1,10 @@
 body {
   padding: 50px;
-  font: 14px 'Lucida Grande', Helvetica, Arial, sans-serif;
+  font:
+    14px 'Lucida Grande',
+    Helvetica,
+    Arial,
+    sans-serif;
 }
 
 a {
@@ -11,4 +15,8 @@ table,
 td,
 th {
   border: gray solid 1px;
+}
+
+.flash-message.info {
+  background-color: aquamarine;
 }
