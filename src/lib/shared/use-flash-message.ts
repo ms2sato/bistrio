@@ -36,6 +36,7 @@ export function useFlashMessage<T extends string = DefaultFlashMessageType>(): [
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     const newNavigateOptions = rs.suspense.read(navigateOptionsKey) as Record<string, unknown> | undefined
     if (!newNavigateOptions?.flashMessage) {
+      setNavigateOptions(newNavigateOptions)
       return
     }
 
@@ -54,10 +55,10 @@ export function useFlashMessage<T extends string = DefaultFlashMessageType>(): [
   }, [location])
 
   function dismiss() {
-    if (navigateOptions && 'flashMessage' in navigateOptions) {
-      // For state.flashMessage required, not to be optional.
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      setNavigateOptions({ ...navigateOptions, flashMessage: undefined })
+    if (navigateOptions && 'flashMessage' in navigateOptions && navigateOptions.flashMessage) {
+      const newNavigateOptions = { ...navigateOptions, flashMessage: undefined }
+      rs.suspense.put(navigateOptionsKey, newNavigateOptions)
+      setNavigateOptions(newNavigateOptions)
     }
   }
   return [isFlashMessageState<T>(navigateOptions) ? navigateOptions?.flashMessage : undefined, dismiss]
