@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+git switch main
+git pull origin main
+
 version=`node -p "require('./package.json').version"`
 echo "version: $version"
 
