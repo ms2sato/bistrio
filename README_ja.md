@@ -136,9 +136,9 @@ RESTの概念における Resource です。Resourceは開発者が必要とす�
 
 Routes を定義した後、 `npm run bistrio:gen` が実行されれば、`.bistrio/resources` 内に対応するインターフェースが自動生成されます。この型を使って実際の Resource を実装すると動作に支障ない内容が作成できます。
 
-作成を補助するユーティリティ関数として defineResource が用意されています。`server/resources` 内に URL のパス階層と一致するディレクトリを作成した上で `resource.ts` として作成します。
+`server/resources` 内に URL のパス階層と一致するディレクトリを作成した上で `resource.ts` として作成します。
 
-例えば `/tasks` のResourceは `server/resources/tasks/resource.ts` のファイルが該当します。内容は以下のようになります。
+例えば `/tasks` のResourceは `server/resources/tasks/resource.ts` のファイルが該当します。内容は以下のようになります。作成を補助するユーティリティ関数として defineResource が用意されています。
 
 ```ts
 import { CustomMethodOption } from '@/server/customizers'
@@ -220,7 +220,7 @@ Viewの実体はフロントエンドのJSの慣習に従って Page と呼ば�
 - `/` : `universal/pages/index.tsx`(indexは`/`を示す特殊な名前です)
 - `/test/mypage`: `universal/pages/test/mypage.tsx`
 
-### RenderSupport
+#### RenderSupport
 
 Page 実装する際には サーバーからのデータを使うことが必要です。本フレームワークでは この時に `RenderSupport` を介して情報を取得します。
 
@@ -233,15 +233,42 @@ import { useRenderSupport } from '@bistrio/routes/main'
 
 function Task({ id }: { id: number }) {
   const rs = useRenderSupport()
-  const task = rs.suspendedResources().tasks.load({ id })
-  // rs.suspendedResources() によって Suspense 対応されたオブジェクトが取得できます。
+  const task = rs.suspendedResources().tasks.load({ id }) // 通信して tasksリソースの load アクションを呼びます
+  // rs.suspendedResources() によって Suspense 対応されたリソースのスタブが取得できます。
 
   return <>{/* ... */}</>
 }
 ```
 
-- useRenderSupport は 自動生成された '@bistrio/routes/main' に配置されたものを利用します(フレームワークから提供されるのは型が確定していません)。
+- useRenderSupport は 自動生成された '@bistrio/routes/main' に配置されたものを利用してください(フレームワークから提供されるのは型が確定していません)。
 - Suspense を使わない場合には `rs.resources()` として呼び出すと Promise を返す実装が利用できます。
+
+# REPL
+
+`npm run console` で `REPL` が起動します。 グローバル変数 `resources` を介して各リソースを呼び出せます。
+
+例えば以下のようにして、tasks リソースの load アクションを試すことが可能です。
+
+```termilan
+$ npm run console
+
+> tasks@0.0.0 console
+> DEBUG=-bistrio:console NODE_ENV=development dotenv -e .env.development -- node --import ./dist/server/console.js
+
+Welcome to Node.js v20.10.0.
+Type ".help" for more information.
+> await resources.tasks.load({id: 1})
+{
+  id: 1,
+  title: 'Test1',
+  description: 'Test1 Description',
+  done: false,
+  createdAt: 2023-12-23T05:45:07.584Z,
+  updatedAt: 2024-01-28T07:57:17.471Z,
+  tags: [ 'tag1', 'tag2' ]
+}
+> 
+```
 
 # 自動生成
 
