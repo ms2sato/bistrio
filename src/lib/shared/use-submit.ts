@@ -32,7 +32,13 @@ export interface UseSubmitResult<R, S = unknown, E extends ValidationError = Val
   source?: S
 }
 
-export function useSubmit<ZS extends ZodType, R, O = undefined, S = Zod.infer<ZS>, E extends ValidationError = ValidationError>(
+export function useSubmit<
+  ZS extends ZodType,
+  R,
+  O = undefined,
+  S = Zod.infer<ZS>,
+  E extends ValidationError = ValidationError,
+>(
   { action, onSuccess, onInvalid, onFatal, schema, source }: UseSubmitProps<ZS, R, O, S, E>,
   custom?: O,
 ): UseSubmitResult<R, S, E> {

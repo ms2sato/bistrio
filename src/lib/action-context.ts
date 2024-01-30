@@ -64,8 +64,7 @@ export type FilledResponder<Opt = unknown, Out = unknown, Src = unknown> = Requi
 export type RequestCallback<In = unknown> = {
   beforeValidation?: (ctx: ActionContext, source: unknown, schema: ZodType) => IncommingType | Promise<IncommingType>
   afterValidation?: (ctx: ActionContext, input: In, schema: ZodType) => IncommingType | Promise<IncommingType>
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  override?: (ctx: ActionContext) => object | Promise<object>
+  override?: (ctx: ActionContext) => Record<string, unknown> | undefined | Promise<Record<string, unknown> | void>
 }
 
 export type Adapter<Opt = unknown, In = unknown> = {
