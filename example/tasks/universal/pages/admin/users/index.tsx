@@ -54,15 +54,12 @@ function UploadForm({ reload }: { reload: () => void }) {
   const rs = useRenderSupport()
 
   const { handleSubmit } = useSubmit({
-    source: { file: new File([], '') },
-    action: {
-      modifier: (params) => rs.resources().adminUserBatch.create(params),
-      onSuccess: (result) => {
-        console.log('Success', result)
-        reload()
-      },
-      onFatal: (err) => console.log('error', err),
+    action: (params) => rs.resources().adminUserBatch.create(params),
+    onSuccess: (result) => {
+      console.log('Success', result)
+      reload()
     },
+    onFatal: (err) => console.log('error', err),
     schema: adminUserBatchCreateSchema,
   })
 

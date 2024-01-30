@@ -68,13 +68,10 @@ function CommentCreateForm({ taskId }: { taskId: number }) {
   const navigate = useNavigate()
   const rs = useRenderSupport()
   const submitProps: CommentSubmitProps = {
-    source: { body: '' },
-    action: {
-      modifier: async ({ body }) => rs.resources().taskComments.create({ taskId, body }),
-      onSuccess: (_result, { custom }) => {
-        custom.reset()
-        navigate(location.pathname, { purge: true })
-      },
+    action: async ({ body }) => rs.resources().taskComments.create({ taskId, body }),
+    onSuccess: (_result, { custom }) => {
+      custom.reset()
+      navigate(location.pathname, { purge: true })
     },
     schema: commentFormSchema,
   }
@@ -102,7 +99,7 @@ function CommentForm({ submitProps }: CommentFormProps) {
       {invalid && <ErrorPanel err={invalid}></ErrorPanel>}
       <form onSubmit={handleSubmit} ref={ref}>
         <fieldset disabled={pending}>
-          <input name="body" defaultValue={source.body} />
+          <input name="body" defaultValue={source?.body} />
           <input type="submit" />
         </fieldset>
       </form>
