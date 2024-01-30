@@ -14,7 +14,7 @@ export type FormAttrs = typeof formSchema
 
 export type UseSubmitProps = TUseSubmitProps<FormAttrs, Task>
 
-export function Form({ source = {title: '', description: '', tags: []}, ...props }: UseSubmitProps) {
+export function Form({ source = { title: '', description: '', tags: [] }, ...props }: UseSubmitProps) {
   const { handleSubmit, invalid, pending } = useSubmit<FormAttrs, Task>(props)
   const [tags, setTags] = useState(source.tags)
   const tagInputRef = useRef<HTMLInputElement>(null)
