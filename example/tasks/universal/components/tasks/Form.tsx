@@ -14,9 +14,9 @@ export type FormAttrs = typeof formSchema
 
 export type UseSubmitProps = TUseSubmitProps<FormAttrs, Task>
 
-export function Form(props: UseSubmitProps) {
-  const { handleSubmit, attrs, invalid, pending } = useSubmit<FormAttrs, Task>(props)
-  const [tags, setTags] = useState(attrs.tags)
+export function Form({ source = { title: '', description: '', tags: [] }, ...props }: UseSubmitProps) {
+  const { handleSubmit, invalid, pending } = useSubmit<FormAttrs, Task>(props)
+  const [tags, setTags] = useState(source.tags)
   const tagInputRef = useRef<HTMLInputElement>(null)
 
   const handleClickTag: React.MouseEventHandler<HTMLAnchorElement> = () => {
@@ -31,17 +31,17 @@ export function Form(props: UseSubmitProps) {
       {invalid && <ErrorPanel err={invalid}></ErrorPanel>}
       <form onSubmit={handleSubmit}>
         <fieldset disabled={pending}>
-          {'done' in attrs && (
+          {source && 'done' in source && (
             <div>
-              <input name="done" type="checkbox" value="true" defaultChecked={attrs.done || false}></input>
+              <input name="done" type="checkbox" value="true" defaultChecked={source.done || false}></input>
             </div>
           )}
 
           <div>
-            <input name="title" defaultValue={attrs.title}></input>
+            <input name="title" defaultValue={source.title}></input>
           </div>
           <div>
-            <textarea name="description" defaultValue={attrs.description}></textarea>
+            <textarea name="description" defaultValue={source.description}></textarea>
           </div>
           <div>
             tags:

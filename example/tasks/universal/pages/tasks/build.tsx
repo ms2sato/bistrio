@@ -9,15 +9,12 @@ export function Build() {
   const rs = useRenderSupport()
 
   const props: UseSubmitProps = {
-    source: { title: '', description: '', tags: [] },
-    action: {
-      modifier: (params) => rs.resources().tasks.create(params),
-      onSuccess: (result) =>
-        navigate(tasks$index.path(), {
-          purge: true,
-          flashMessage: { text: `Task created '${result.title}'`, type: 'info' },
-        }),
-    },
+    action: (params) => rs.resources().tasks.create(params),
+    onSuccess: (result) =>
+      navigate(tasks$index.path(), {
+        purge: true,
+        flashMessage: { text: `Task created '${result.title}'`, type: 'info' },
+      }),
     schema: formSchema,
   }
 
@@ -30,7 +27,7 @@ export function Build() {
   return (
     <div>
       <h2>{l.t`Create new task`}</h2>
-      <Form {...props}></Form>
+      <Form {...props} />
       <button onClick={handleClick}>This is test button</button>
       <Link to={tasks$index.path()}>To Top</Link>
     </div>

@@ -10,17 +10,14 @@ export function Page() {
   const navigate = useNavigate()
   const [err, setError] = useState<unknown>(undefined)
 
-  const { handleSubmit, source, invalid } = useSubmit({
-    source: { username: '', password: '' },
-    action: {
-      modifier: (params) => rs.resources().auth.verify(params),
-      onSuccess: (result) =>
-        navigate(tasks$index.path(), {
-          purge: true,
-          flashMessage: { text: `Logged in as ${result.username}`, type: 'info' },
-        }),
-      onFatal: (err) => setError(err),
-    },
+  const { handleSubmit, invalid } = useSubmit({
+    action: (params) => rs.resources().auth.verify(params),
+    onSuccess: (result) =>
+      navigate(tasks$index.path(), {
+        purge: true,
+        flashMessage: { text: `Logged in as ${result.username}`, type: 'info' },
+      }),
+    onFatal: (err) => setError(err),
     schema: sessionCreateSchema,
   })
 
@@ -31,15 +28,7 @@ export function Page() {
       <form onSubmit={handleSubmit}>
         <section>
           <label htmlFor="username">Username</label>
-          <input
-            id="username"
-            name="username"
-            type="text"
-            defaultValue={source.username}
-            autoComplete="username"
-            required
-            autoFocus
-          />
+          <input id="username" name="username" type="text" autoComplete="username" required autoFocus />
         </section>
         <section>
           <label htmlFor="current-password">Password</label>

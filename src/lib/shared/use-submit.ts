@@ -13,39 +13,35 @@ export interface UseSubmitProps<
   ZS extends ZodType,
   R,
   O = unknown,
-  E extends ValidationError = ValidationError,
   S = Zod.infer<ZS>,
+  E extends ValidationError = ValidationError,
 > {
-  source: S
-  action: {
-    modifier: (params: S, options: UseSubmitPropEventOptions<O>) => Promise<R>
-    onSuccess?: (result: R, options: UseSubmitPropEventOptions<O>) => void
-    onInvalid?: (invalid: E, options: UseSubmitPropEventOptions<O>) => void
-    onFatal?: (err: unknown, options: UseSubmitPropEventOptions<O>) => void
-  }
+  action: (params: S, options: UseSubmitPropEventOptions<O>) => Promise<R>
+  onSuccess?: (result: R, options: UseSubmitPropEventOptions<O>) => void
+  onInvalid?: (invalid: E, options: UseSubmitPropEventOptions<O>) => void
+  onFatal?: (err: unknown, options: UseSubmitPropEventOptions<O>) => void
   schema: ZS
+  source?: S
 }
 
-export interface UseSubmitResult<S, R, E extends ValidationError = ValidationError> {
+export interface UseSubmitResult<R, S = unknown, E extends ValidationError = ValidationError> {
   handleSubmit: React.FormEventHandler<HTMLFormElement>
-  attrs: S
-  source: S
   invalid: E | null
   result: R | undefined | null
   pending: boolean
+  source?: S
 }
 
 export function useSubmit<
   ZS extends ZodType,
   R,
   O = undefined,
-  E extends ValidationError = ValidationError,
   S = Zod.infer<ZS>,
+  E extends ValidationError = ValidationError,
 >(
-  { source, action: { modifier, onSuccess, onInvalid, onFatal }, schema }: UseSubmitProps<ZS, R, O, E, S>,
+  { action, onSuccess, onInvalid, onFatal, schema, source }: UseSubmitProps<ZS, R, O, S, E>,
   custom?: O,
-): UseSubmitResult<S, R, E> {
-  const [attrs, setAttrs] = useState(source)
+): UseSubmitResult<R, S, E> {
   const [invalid, setInvalid] = useState<E | null>(null)
   const [result, setResult] = useState<R | undefined | null>(null)
 
@@ -61,13 +57,12 @@ export function useSubmit<
     const formParams = objectFromEntries(formData.entries())
 
     ;(async () => {
-      const newParams = parseFormBody(formParams, createZodTraverseArrangerCreator(schema)) as S
+      const newParams = parseFormBody(formParams, createZodTraverseArrangerCreator(schema))
 
       setInvalid(null)
       setResult(undefined)
 
-      const result = await modifier(newParams, { el, custom: custom as O })
-      setAttrs(newParams)
+      const result = await action(newParams as S, { el, custom: custom as O })
       setResult(result)
       onSuccess && onSuccess(result, { el, custom: custom as O })
     })().catch((err) => {
@@ -89,7 +84,7 @@ export function useSubmit<
     })
   }
 
-  return { handleSubmit, attrs, source, invalid, result, pending: result === undefined }
+  return { handleSubmit, invalid, result, pending: result === undefined, source }
 }
 
 function objectFromEntries(entries: IterableIterator<[string, FormDataEntryValue]>) {

@@ -14,19 +14,17 @@ function MyForm() {
   const source = rs.suspendedResources().tasks.load({ id })
 
   const props: UseSubmitProps = {
-    source,
-    action: {
-      modifier: (params) => rs.resources().tasks.update({ done: false, ...params, id }),
-      onSuccess: (result) =>
-        navigate(tasks$index.path(), {
-          purge: true,
-          flashMessage: { text: `Task updated '${result.title}'`, type: 'info' },
-        }),
-    },
+    action: (params) => rs.resources().tasks.update({ done: false, ...params, id }),
+    onSuccess: (result) =>
+      navigate(tasks$index.path(), {
+        purge: true,
+        flashMessage: { text: `Task updated '${result.title}'`, type: 'info' },
+      }),
     schema: formSchema,
+    source,
   }
 
-  return <Form {...props}></Form>
+  return <Form {...props} />
 }
 
 export function Edit() {
@@ -34,7 +32,7 @@ export function Edit() {
     <>
       <h2>Update Task</h2>
       <Suspense fallback={<p>Loading...</p>}>
-        <MyForm></MyForm>
+        <MyForm />
       </Suspense>
     </>
   )
