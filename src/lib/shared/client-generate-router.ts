@@ -241,7 +241,7 @@ export const fillClientConfig = (config: ClientConfigCustom) => {
 }
 
 export class ClientGenretateRouter<RS extends NamedResources> implements Router {
-  private routeObjectPickupper: RouteObjectPickupper
+  readonly routeObjectPickupper: RouteObjectPickupper
 
   constructor(
     private clientConfig: ClientConfig,

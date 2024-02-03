@@ -6,8 +6,8 @@ import { ClientConfig } from './client-generate-router.js'
 
 export class RouteObjectPickupper {
   constructor(
-    private clientConfig: ClientConfig,
-    private routeObject: RouteObject,
+    readonly clientConfig: ClientConfig,
+    readonly routeObject: RouteObject,
     private loadPage: LoadPageFunc,
   ) {}
 

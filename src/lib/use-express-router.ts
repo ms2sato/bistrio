@@ -38,4 +38,5 @@ export const useExpressRouter = async <M extends Middlewares>({
   routes(router, routerSupport)
   app.use(router.router)
   await router.build()
+  return router
 }

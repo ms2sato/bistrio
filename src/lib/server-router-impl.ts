@@ -245,7 +245,7 @@ function hasRoutingMethod(router: unknown, method: HttpMethod): router is Routin
 
 export class ServerRouterImpl extends BasicRouter implements ServerRouter {
   readonly router: express.Router
-  private routeObjectPickupper: RouteObjectPickupper
+  readonly routeObjectPickupper: RouteObjectPickupper
 
   constructor(
     serverRouterConfig: ServerRouterConfig,
