@@ -25,9 +25,7 @@ export function isNavigateFlashMessageOptions<T extends string = DefaultFlashMes
     !!typedState.flashMessage.text &&
     typeof typedState.flashMessage.text === 'string' &&
     !!typedState.flashMessage.type &&
-    typeof typedState.flashMessage.type === 'string' &&
-    !!typedState.flashMessage.to &&
-    typeof typedState.flashMessage.to === 'string'
+    typeof typedState.flashMessage.type === 'string'
   )
 }
 
