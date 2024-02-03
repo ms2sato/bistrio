@@ -6,7 +6,7 @@ export type DefaultFlashMessageType = 'info' | 'error'
 export type NavigateFlashMessageProps<T extends string = DefaultFlashMessageType> = {
   text: string
   type: T
-  to: To | number
+  to?: To | number
 }
 export type NavigateFlashMessageOptions<T extends string = DefaultFlashMessageType> = {
   flashMessage: NavigateFlashMessageProps<T>
