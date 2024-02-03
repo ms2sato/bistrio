@@ -1,30 +1,38 @@
 import { useEffect, useState } from 'react'
 import { navigateOptionsKey, useRenderSupport } from '../../client.js'
-import { useLocation } from 'react-router-dom'
+import { To, useLocation } from 'react-router-dom'
 
 export type DefaultFlashMessageType = 'info' | 'error'
-export type FlashMessageProps<T extends string = DefaultFlashMessageType> = { text: string; type: T; to?: string }
-export type FlashMessageState<T extends string = DefaultFlashMessageType> = { flashMessage: FlashMessageProps<T> }
+export type NavigateFlashMessageProps<T extends string = DefaultFlashMessageType> = {
+  text: string
+  type: T
+  to?: To | number
+}
+export type NavigateFlashMessageOptions<T extends string = DefaultFlashMessageType> = {
+  flashMessage: NavigateFlashMessageProps<T>
+}
 
-export function isFlashMessageState<T extends string = DefaultFlashMessageType>(
+export function isNavigateFlashMessageOptions<T extends string = DefaultFlashMessageType>(
   state: unknown,
-): state is FlashMessageState<T> {
+): state is NavigateFlashMessageOptions<T> {
   if (!state) {
     return false
   }
-  const typedState = state as FlashMessageState<T>
+  const typedState = state as NavigateFlashMessageOptions<T>
   return (
     'flashMessage' in typedState &&
     typedState.flashMessage &&
+    !!typedState.flashMessage.text &&
     typeof typedState.flashMessage.text === 'string' &&
+    !!typedState.flashMessage.type &&
     typeof typedState.flashMessage.type === 'string'
   )
 }
 
 export type DismissFunc = () => void
 
-export function useFlashMessage<T extends string = DefaultFlashMessageType>(): [
-  FlashMessageProps<T> | undefined,
+export function useNavigateFlashMessage<T extends string = DefaultFlashMessageType>(): [
+  NavigateFlashMessageProps<T> | undefined,
   DismissFunc,
 ] {
   const location = useLocation()
@@ -40,7 +48,7 @@ export function useFlashMessage<T extends string = DefaultFlashMessageType>(): [
       return
     }
 
-    if (isFlashMessageState<T>(newNavigateOptions)) {
+    if (isNavigateFlashMessageOptions<T>(newNavigateOptions)) {
       if (!newNavigateOptions.flashMessage.to) {
         throw new Error('navigateOptions.flashMessage.to is required')
       }
@@ -61,5 +69,5 @@ export function useFlashMessage<T extends string = DefaultFlashMessageType>(): [
       setNavigateOptions(newNavigateOptions)
     }
   }
-  return [isFlashMessageState<T>(navigateOptions) ? navigateOptions?.flashMessage : undefined, dismiss]
+  return [isNavigateFlashMessageOptions<T>(navigateOptions) ? navigateOptions?.flashMessage : undefined, dismiss]
 }

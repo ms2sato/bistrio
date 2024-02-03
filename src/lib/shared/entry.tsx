@@ -85,4 +85,6 @@ export async function entry<R extends NamedResources>({
       </RenderSupportContext.Provider>
     </StrictMode>,
   )
+
+  return cgr
 }

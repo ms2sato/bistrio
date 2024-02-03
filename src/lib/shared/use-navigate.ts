@@ -1,8 +1,8 @@
-import { NavigateOptions as NaviOptions, useNavigate as useNavi, To } from 'react-router-dom'
+import { NavigateOptions as NaviOptions, useNavigate as useReactRouterNavi, To } from 'react-router-dom'
 import {
   useRenderSupport,
-  FlashMessageState,
-  isFlashMessageState,
+  NavigateFlashMessageOptions,
+  isNavigateFlashMessageOptions,
   SuspensePurgeOptions,
   isSuspensePurgeOptions,
 } from './index.js'
@@ -20,7 +20,7 @@ export const isPurgeOption = (option: unknown): option is PurgeOption => {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type NavigateOptions = PurgeOption | FlashMessageState<any>
+export type NavigateOptions = PurgeOption | NavigateFlashMessageOptions<any>
 
 export type NavigateFunc = {
   (to: To, options?: NavigateOptions, navigateOptions?: NaviOptions): void
@@ -31,20 +31,22 @@ export const navigateOptionsKey = '__bistrio_navigate_options__'
 
 export function useNavigate(): NavigateFunc {
   const rs = useRenderSupport()
-  const navi = useNavi()
+  const navi = useReactRouterNavi()
 
   return function navigate(to: To | number, options?: NavigateOptions, navigateOptions: NaviOptions = {}) {
     if (options) {
+      let storeOptions = options
+
       if (isPurgeOption(options)) {
         rs.suspense.purge(options.purge)
       }
-      if (isFlashMessageState(options)) {
-        const opt = {
+      if (isNavigateFlashMessageOptions(options)) {
+        storeOptions = {
           ...options,
           flashMessage: { ...options.flashMessage, to },
         }
 
-        rs.suspense.put(navigateOptionsKey, opt)
+        rs.suspense.put(navigateOptionsKey, storeOptions)
       }
     }
 
