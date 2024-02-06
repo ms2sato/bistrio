@@ -13,8 +13,6 @@
     "prewatch": "npm run bistrio:gen",
     "watch": "run-p watch:**",
     "watch:server": "NODE_ENV=development dotenv -e .env.development -- npm-watch",
-    "watch:livereload": "NODE_ENV=development dotenv -e .env.development -- livereload -w 1500 -ee 'tsx,ts' 'dist'",
-    "watch:client": "NODE_ENV=development dotenv -e .env.development -- tsx node_modules/.bin/webpack --watch --config ./config/client/webpack.config.ts",
     "copy-assets": "cpx 'public/**' dist/public",
     "build": "npm run bistrio:gen && npm run build:client && npm run build:server",
     "clean": "rimraf dist .cache .bistrio",
@@ -55,7 +53,6 @@
     },
     "dev:server": {
       "patterns": [
-        ".bistrio/filemap.json",
         "universal",
         "server"
       ],
@@ -103,6 +100,7 @@
     "@types/passport": "^1.0.12",
     "@types/passport-local": "^1.0.35",
     "@types/react-dom": "^18.0.10",
+    "@types/webpack-hot-middleware": "^2.25.9",
     "@types/webpack-node-externals": "^3.0.4",
     "@typescript-eslint/eslint-plugin": "^6.16.0",
     "@typescript-eslint/parser": "^6.16.0",
@@ -130,6 +128,8 @@
     "typescript": "^5.3.3",
     "webpack": ">=5.76.0",
     "webpack-cli": "^5.1.1",
+    "webpack-dev-middleware": "^7.0.0",
+    "webpack-hot-middleware": "^2.26.1",
     "webpack-node-externals": "^3.0.0"
   },
   "overrides": {

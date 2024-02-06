@@ -1,5 +1,5 @@
 import { ReactNode } from 'react'
-import { ActionContext, Livereload, ScriptProps, Scripts } from 'bistrio'
+import { ActionContext, ScriptProps, Scripts } from 'bistrio'
 
 export function Layout({ children, ctx, hydrate }: { children: ReactNode; ctx: ActionContext; hydrate: boolean }) {
   const script = ctx.req.originalUrl.startsWith('/admin') ? ['admin'] : ['main']
@@ -11,7 +11,6 @@ export function Layout({ children, ctx, hydrate }: { children: ReactNode; ctx: A
         <title>Tasks</title>
         <link type="text/css" rel="stylesheet" href="/css/style.css"></link>
         <Scripts {...scriptProps}></Scripts>
-        <Livereload />
       </head>
       <body>
         <div id="app">{children}</div>

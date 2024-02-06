@@ -10,6 +10,11 @@ import { tmpdir } from 'os'
 import Redis from 'ioredis'
 import RedisStore from 'connect-redis'
 
+import webpack from 'webpack'
+import webpackDevMiddleware from 'webpack-dev-middleware'
+import webpackConfig from '../config/client/webpack.config'
+import webpackHotMiddleware from 'webpack-hot-middleware'
+
 import { initConfig, localeMiddleware, useExpressRouter } from 'bistrio'
 import { middlewares } from './middlewares'
 import { localeMap } from '@universal/locales/index'
@@ -90,6 +95,23 @@ export async function setup() {
       debug(`req.query: %o`, req.query)
     }
   })
+
+  if (process.env.NODE_ENV === 'development') {
+    console.log('webpackConfig', JSON.stringify(webpackConfig, null, 2))
+    const entryObject = webpackConfig.entry as Record<string, string | string[]>
+    Object.keys(entryObject).forEach(function (key) {
+      entryObject[key] = ['webpack-hot-middleware/client', entryObject[key] as string]
+    })
+
+    webpackConfig.plugins = [new webpack.HotModuleReplacementPlugin()]
+    const compiler = webpack(webpackConfig)
+    app.use(
+      webpackDevMiddleware(compiler, {
+        publicPath: webpackConfig.output.publicPath,
+      }),
+    )
+    app.use(webpackDevMiddleware(compiler, {}))
+  }
 
   await useExpressRouter({ app, middlewares, routes, constructView, serverRouterConfig: serverRouterConfig() })
 
