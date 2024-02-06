@@ -103,6 +103,17 @@ export async function setup() {
       entryObject[key] = ['webpack-hot-middleware/client', entryObject[key] as string]
     })
 
+    webpackConfig.module!.rules?.push({
+      test: /\.(?:js|tsx|ts|mjs|cjs)$/,
+      exclude: /node_modules/,
+      use: {
+        loader: 'babel-loader',
+        options: {
+          presets: ['@babel/preset-typescript', ['@babel/preset-env', { targets: 'defaults' }]],
+        },
+      },
+    })
+
     webpackConfig.plugins = [new webpack.HotModuleReplacementPlugin()]
     const compiler = webpack(webpackConfig)
     app.use(
