@@ -12,8 +12,10 @@ import RedisStore from 'connect-redis'
 
 import webpack from 'webpack'
 import webpackDevMiddleware from 'webpack-dev-middleware'
-import webpackConfig from '../config/client/webpack.config'
 import webpackHotMiddleware from 'webpack-hot-middleware'
+import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin'
+
+import webpackConfig from '../config/client/webpack.config'
 
 import { initConfig, localeMiddleware, useExpressRouter } from 'bistrio'
 import { middlewares } from './middlewares'
@@ -102,7 +104,11 @@ export async function setup() {
     Object.keys(entryObject).forEach(function (key) {
       entryObject[key] = ['webpack-hot-middleware/client', entryObject[key] as string]
     })
-
+    webpackConfig.output = {
+      ...webpackConfig.output!,
+      filename: '[name].bundle.js',
+    }
+    webpackConfig.optimization = undefined
     webpackConfig.module!.rules?.push({
       test: /\.(?:js|tsx|ts|mjs|cjs)$/,
       exclude: /node_modules/,
@@ -113,15 +119,17 @@ export async function setup() {
         },
       },
     })
+    webpackConfig.cache = undefined
 
-    webpackConfig.plugins = [new webpack.HotModuleReplacementPlugin()]
+    webpackConfig.plugins = [new webpack.HotModuleReplacementPlugin(), new ReactRefreshWebpackPlugin()]
+    console.log('webpackConfig', JSON.stringify(webpackConfig, null, 2))
     const compiler = webpack(webpackConfig)
     app.use(
       webpackDevMiddleware(compiler, {
         publicPath: webpackConfig.output.publicPath,
       }),
     )
-    app.use(webpackDevMiddleware(compiler, {}))
+    app.use(webpackHotMiddleware(compiler))
   }
 
   await useExpressRouter({ app, middlewares, routes, constructView, serverRouterConfig: serverRouterConfig() })
