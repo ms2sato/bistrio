@@ -106,7 +106,7 @@ export async function setup() {
     })
     webpackConfig.output = {
       ...webpackConfig.output!,
-      filename: '[name].bundle.js',
+      filename: '[name].[hash].bundle.js',
     }
     webpackConfig.optimization = undefined
     webpackConfig.module!.rules?.push({
@@ -127,6 +127,7 @@ export async function setup() {
     app.use(
       webpackDevMiddleware(compiler, {
         publicPath: webpackConfig.output.publicPath,
+        serverSideRender: true,
       }),
     )
     app.use(webpackHotMiddleware(compiler))
