@@ -25,6 +25,7 @@ import { routes } from '@universal/routes/all'
 import { serverRouterConfig } from './config'
 import { config } from '../config'
 import { init as initPassport } from './lib/passport-util'
+import { purge } from './lib/lazy'
 
 if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = 'development'
@@ -106,9 +107,14 @@ export async function setup() {
     })
     webpackConfig.output = {
       ...webpackConfig.output!,
+      clean: true,
       filename: '[name].[hash].bundle.js',
     }
-    webpackConfig.optimization = undefined
+    // webpackConfig.optimization = undefined
+    webpackConfig.optimization = {
+      moduleIds: 'deterministic', // Now, despite any new local dependencies, our vendor hash should stay consistent between builds
+      // runtimeChunk: true, // see https://webpack.js.org/guides/build-performance/#minimal-entry-chunk
+    }
     webpackConfig.module!.rules?.push({
       test: /\.(?:js|tsx|ts|mjs|cjs)$/,
       exclude: /node_modules/,
@@ -119,11 +125,26 @@ export async function setup() {
         },
       },
     })
-    webpackConfig.cache = undefined
+    // webpackConfig.cache = undefined
 
     webpackConfig.plugins = [new webpack.HotModuleReplacementPlugin(), new ReactRefreshWebpackPlugin()]
     console.log('webpackConfig', JSON.stringify(webpackConfig, null, 2))
     const compiler = webpack(webpackConfig)
+    compiler.hooks.afterEmit.tap('cleanup-the-require-cache', () => {
+      // console.log('cleanup-the-require-cache', require.cache)
+      const dirName = './universal'
+      // After webpack rebuild, clear the files from the require cache,
+      // so that next server side render will be in sync
+      Object.keys(require.cache)
+        .filter((key) => key.includes(dirName))
+        .forEach((key) => {
+          console.log('delete require.cache', key)
+          delete require.cache[key]
+        })
+
+      purge()
+    })
+
     app.use(
       webpackDevMiddleware(compiler, {
         publicPath: webpackConfig.output.publicPath,

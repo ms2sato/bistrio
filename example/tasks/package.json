@@ -9,9 +9,9 @@
     "prepare": "npm run bistrio:gen",
     "dev": "npm run watch",
     "predev:server": "npm run build:server",
-    "dev:server": "cpx '.bistrio/filemap.json' dist/.bistrio && NODE_ENV=development dotenv -e .env.development -- node ./dist/server/boot.js",
+    "dev:server": "cpx '.bistrio/filemap.json' dist/.bistrio && NODE_ENV=development dotenv -e .env.development -- node --inspect ./dist/server/boot.js",
     "prewatch": "npm run bistrio:gen",
-    "watch": "npm run bistrio:gen && npm run dev:server",
+    "watch": "npm run bistrio:gen && run-p dev:server watch:server",
     "watch:server": "NODE_ENV=development dotenv -e .env.development -- npm-watch",
     "copy-assets": "cpx 'public/**' dist/public",
     "build": "npm run bistrio:gen && npm run build:client && npm run build:server",
@@ -51,7 +51,7 @@
       "runOnChangeOnly": true,
       "extensions": "ts,tsx"
     },
-    "dev:server": {
+    "build:server": {
       "patterns": [
         "universal",
         "server"

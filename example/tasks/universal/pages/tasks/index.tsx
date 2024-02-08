@@ -12,7 +12,7 @@ export function Index() {
 
   return (
     <>
-      <h1>{l.t`Task list`}</h1>
+      <h1>{l.t`Task list`}</h1>abaadcdefghijklmnopqrstuvwxyzabcdef
       <Link to={tasks$build.path()}>{l.t`Create new task`}</Link>
       <Suspense fallback={<p>{l.t`Loading...`}</p>}>
         <TaskTable></TaskTable>
