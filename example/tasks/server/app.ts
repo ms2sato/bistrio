@@ -127,23 +127,23 @@ export async function setup() {
     })
     // webpackConfig.cache = undefined
 
-    webpackConfig.plugins = [new webpack.HotModuleReplacementPlugin(), new ReactRefreshWebpackPlugin()]
+    webpackConfig.plugins = [new webpack.HotModuleReplacementPlugin(), new ReactRefreshWebpackPlugin({overlay: false})]
     console.log('webpackConfig', JSON.stringify(webpackConfig, null, 2))
     const compiler = webpack(webpackConfig)
-    compiler.hooks.afterEmit.tap('cleanup-the-require-cache', () => {
-      // console.log('cleanup-the-require-cache', require.cache)
-      const dirName = './universal'
-      // After webpack rebuild, clear the files from the require cache,
-      // so that next server side render will be in sync
-      Object.keys(require.cache)
-        .filter((key) => key.includes(dirName))
-        .forEach((key) => {
-          console.log('delete require.cache', key)
-          delete require.cache[key]
-        })
+    // compiler.hooks.afterEmit.tap('cleanup-the-require-cache', () => {
+    //   // console.log('cleanup-the-require-cache', require.cache)
+    //   const dirName = './universal'
+    //   // After webpack rebuild, clear the files from the require cache,
+    //   // so that next server side render will be in sync
+    //   Object.keys(require.cache)
+    //     .filter((key) => key.includes(dirName))
+    //     .forEach((key) => {
+    //       console.log('delete require.cache', key)
+    //       delete require.cache[key]
+    //     })
 
-      purge()
-    })
+    //   purge()
+    // })
 
     app.use(
       webpackDevMiddleware(compiler, {
@@ -151,7 +151,11 @@ export async function setup() {
         serverSideRender: true,
       }),
     )
-    app.use(webpackHotMiddleware(compiler))
+    app.use(
+      webpackHotMiddleware(compiler, {
+        log: console.log,
+      }),
+    )
   }
 
   await useExpressRouter({ app, middlewares, routes, constructView, serverRouterConfig: serverRouterConfig() })
