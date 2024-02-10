@@ -1,5 +1,5 @@
 import { ReactNode } from 'react'
-import { ActionContext, Livereload, ScriptProps, Scripts } from 'bistrio'
+import { ActionContext, DevScripts, ScriptProps, Scripts } from 'bistrio'
 
 export function Layout({ children, ctx, hydrate }: { children: ReactNode; ctx: ActionContext; hydrate: boolean }) {
   const script = ctx.req.originalUrl.startsWith('/admin') ? ['admin'] : ['main']
@@ -10,8 +10,11 @@ export function Layout({ children, ctx, hydrate }: { children: ReactNode; ctx: A
       <head>
         <title>Tasks</title>
         <link type="text/css" rel="stylesheet" href="/css/style.css"></link>
-        <Scripts {...scriptProps}></Scripts>
-        <Livereload />
+        {process.env.NODE_ENV === 'development' && ctx.res.locals?.webpack ? (
+          <DevScripts {...{ ctx, ...scriptProps }} />
+        ) : (
+          <Scripts {...scriptProps} />
+        )}
       </head>
       <body>
         <div id="app">{children}</div>

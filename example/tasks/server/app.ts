@@ -10,6 +10,8 @@ import { tmpdir } from 'os'
 import Redis from 'ioredis'
 import RedisStore from 'connect-redis'
 
+import clientWebpackConfig from '../config/client/webpack.config'
+
 import { initConfig, localeMiddleware, useExpressRouter } from 'bistrio'
 import { middlewares } from './middlewares'
 import { localeMap } from '@universal/locales/index'
@@ -91,7 +93,14 @@ export async function setup() {
     }
   })
 
-  await useExpressRouter({ app, middlewares, routes, constructView, serverRouterConfig: serverRouterConfig() })
+  await useExpressRouter({
+    app,
+    middlewares,
+    routes,
+    constructView,
+    serverRouterConfig: serverRouterConfig(),
+    hmr: { clientWebpackConfig },
+  })
 
   // error handler
   app.use(function (err: unknown, req, res, _next) {
