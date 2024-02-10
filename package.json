@@ -1,6 +1,6 @@
 {
   "name": "bistrio",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "files": [
     "esm",
     "cjs",
