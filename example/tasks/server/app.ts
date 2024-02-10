@@ -1,5 +1,5 @@
 import createError from 'http-errors'
-import express, { Express } from 'express'
+import express from 'express'
 import compression from 'compression'
 import cookieParser from 'cookie-parser'
 import logger from 'morgan'
@@ -10,12 +10,7 @@ import { tmpdir } from 'os'
 import Redis from 'ioredis'
 import RedisStore from 'connect-redis'
 
-import webpack from 'webpack'
-import webpackDevMiddleware from 'webpack-dev-middleware'
-import webpackHotMiddleware from 'webpack-hot-middleware'
-import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin'
-
-import webpackConfig from '../config/client/webpack.config'
+import clientWebpackConfig from '../config/client/webpack.config'
 
 import { initConfig, localeMiddleware, useExpressRouter } from 'bistrio'
 import { middlewares } from './middlewares'
@@ -25,39 +20,6 @@ import { routes } from '@universal/routes/all'
 import { serverRouterConfig } from './config'
 import { config } from '../config'
 import { init as initPassport } from './lib/passport-util'
-
-const useHMR = (app: Express) => {
-  if (process.env.NODE_ENV === 'development') {
-    const entryObject = webpackConfig.entry as Record<string, string | string[]>
-    Object.keys(entryObject).forEach(function (key) {
-      entryObject[key] = ['webpack-hot-middleware/client', entryObject[key] as string]
-    })
-    webpackConfig.output = {
-      ...webpackConfig.output,
-      clean: true,
-    }
-
-    webpackConfig.optimization = {
-      moduleIds: 'deterministic',
-    }
-
-    webpackConfig.plugins = [
-      new webpack.HotModuleReplacementPlugin(),
-      new ReactRefreshWebpackPlugin({ overlay: false }),
-    ]
-
-    const compiler = webpack(webpackConfig)
-
-    app.use(
-      webpackDevMiddleware(compiler, {
-        publicPath: webpackConfig.output.publicPath,
-        serverSideRender: true,
-        writeToDisk: true,
-      }),
-    )
-    app.use(webpackHotMiddleware(compiler))
-  }
-}
 
 if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = 'development'
@@ -131,8 +93,14 @@ export async function setup() {
     }
   })
 
-  useHMR(app)
-  await useExpressRouter({ app, middlewares, routes, constructView, serverRouterConfig: serverRouterConfig() })
+  await useExpressRouter({
+    app,
+    middlewares,
+    routes,
+    constructView,
+    serverRouterConfig: serverRouterConfig(),
+    hmr: { clientWebpackConfig },
+  })
 
   // error handler
   app.use(function (err: unknown, req, res, _next) {
