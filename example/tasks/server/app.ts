@@ -1,5 +1,5 @@
 import createError from 'http-errors'
-import express from 'express'
+import express, { Express } from 'express'
 import compression from 'compression'
 import cookieParser from 'cookie-parser'
 import logger from 'morgan'
@@ -25,7 +25,39 @@ import { routes } from '@universal/routes/all'
 import { serverRouterConfig } from './config'
 import { config } from '../config'
 import { init as initPassport } from './lib/passport-util'
-import { purge } from './lib/lazy'
+
+const useHMR = (app: Express) => {
+  if (process.env.NODE_ENV === 'development') {
+    const entryObject = webpackConfig.entry as Record<string, string | string[]>
+    Object.keys(entryObject).forEach(function (key) {
+      entryObject[key] = ['webpack-hot-middleware/client', entryObject[key] as string]
+    })
+    webpackConfig.output = {
+      ...webpackConfig.output,
+      clean: true,
+    }
+
+    webpackConfig.optimization = {
+      moduleIds: 'deterministic',
+    }
+
+    webpackConfig.plugins = [
+      new webpack.HotModuleReplacementPlugin(),
+      new ReactRefreshWebpackPlugin({ overlay: false }),
+    ]
+
+    const compiler = webpack(webpackConfig)
+
+    app.use(
+      webpackDevMiddleware(compiler, {
+        publicPath: webpackConfig.output.publicPath,
+        serverSideRender: true,
+        writeToDisk: true,
+      }),
+    )
+    app.use(webpackHotMiddleware(compiler))
+  }
+}
 
 if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = 'development'
@@ -99,65 +131,7 @@ export async function setup() {
     }
   })
 
-  if (process.env.NODE_ENV === 'development') {
-    console.log('webpackConfig', JSON.stringify(webpackConfig, null, 2))
-    const entryObject = webpackConfig.entry as Record<string, string | string[]>
-    Object.keys(entryObject).forEach(function (key) {
-      entryObject[key] = ['webpack-hot-middleware/client', entryObject[key] as string]
-    })
-    webpackConfig.output = {
-      ...webpackConfig.output!,
-      clean: true,
-      filename: '[name].[hash].bundle.js',
-    }
-    // webpackConfig.optimization = undefined
-    webpackConfig.optimization = {
-      moduleIds: 'deterministic', // Now, despite any new local dependencies, our vendor hash should stay consistent between builds
-      // runtimeChunk: true, // see https://webpack.js.org/guides/build-performance/#minimal-entry-chunk
-    }
-    webpackConfig.module!.rules?.push({
-      test: /\.(?:js|tsx|ts|mjs|cjs)$/,
-      exclude: /node_modules/,
-      use: {
-        loader: 'babel-loader',
-        options: {
-          presets: ['@babel/preset-typescript', ['@babel/preset-env', { targets: 'defaults' }]],
-        },
-      },
-    })
-    // webpackConfig.cache = undefined
-
-    webpackConfig.plugins = [new webpack.HotModuleReplacementPlugin(), new ReactRefreshWebpackPlugin({overlay: false})]
-    console.log('webpackConfig', JSON.stringify(webpackConfig, null, 2))
-    const compiler = webpack(webpackConfig)
-    // compiler.hooks.afterEmit.tap('cleanup-the-require-cache', () => {
-    //   // console.log('cleanup-the-require-cache', require.cache)
-    //   const dirName = './universal'
-    //   // After webpack rebuild, clear the files from the require cache,
-    //   // so that next server side render will be in sync
-    //   Object.keys(require.cache)
-    //     .filter((key) => key.includes(dirName))
-    //     .forEach((key) => {
-    //       console.log('delete require.cache', key)
-    //       delete require.cache[key]
-    //     })
-
-    //   purge()
-    // })
-
-    app.use(
-      webpackDevMiddleware(compiler, {
-        publicPath: webpackConfig.output.publicPath,
-        serverSideRender: true,
-      }),
-    )
-    app.use(
-      webpackHotMiddleware(compiler, {
-        log: console.log,
-      }),
-    )
-  }
-
+  useHMR(app)
   await useExpressRouter({ app, middlewares, routes, constructView, serverRouterConfig: serverRouterConfig() })
 
   // error handler
