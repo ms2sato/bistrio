@@ -12,7 +12,7 @@ import RedisStore from 'connect-redis'
 
 import clientWebpackConfig from '../config/client/webpack.config'
 
-import { initConfig, localeMiddleware, useExpressRouter } from 'bistrio'
+import { defaultHotMiddlewareClientPath, initConfig, localeMiddleware, useExpressRouter } from 'bistrio'
 import { middlewares } from './middlewares'
 import { localeMap } from '@universal/locales/index'
 import { constructView } from './customizers/construct-view'
@@ -99,7 +99,11 @@ export async function setup() {
     routes,
     constructView,
     serverRouterConfig: serverRouterConfig(),
-    hmr: { clientWebpackConfig },
+    hmrOptions: {
+      clientWebpackConfig,
+      hotMiddlewareClientPath: `${defaultHotMiddlewareClientPath}&timeout=7000`,
+      hotMiddlewareOptions: { heartbeat: 3500 },
+    },
   })
 
   // error handler
