@@ -1,6 +1,5 @@
-import { ComponentType } from 'react'
+import { ComponentType, lazy } from 'react'
 import { FileNotFoundError } from 'bistrio'
-import { lazy } from '@/server/lib/lazy'
 
 export async function importLocal(filePath: string) {
   try {
