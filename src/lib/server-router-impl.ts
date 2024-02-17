@@ -27,7 +27,7 @@ import {
   ServerRouterConfig,
   ServerRouter,
   ResourceMethodHandlerParams,
-  pageActionDescriptor,
+  createPageActionDescriptor,
   ClientConfig,
   Router,
   ActionType,
@@ -320,16 +320,12 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
 
     const hasPages = routeConfig.actions?.some((ad) => ad.page) ?? false
     const subRouteObject = hasPages ? this.routeObjectPickupper.addNewSub(rpath) : undefined
-    const pageActionDescriptors: ActionDescriptor[] = []
-    const fullResourceRoutePath = this.getRoutePath(rpath)
+    const pageAds: ActionDescriptor[] = []
+    const httpPath = this.getRoutePath(rpath)
 
     const pickPageToSubRouteObject = () => {
       if (subRouteObject) {
-        this.routeObjectPickupper.pushPageRouteObjectsToSub(
-          fullResourceRoutePath,
-          subRouteObject,
-          pageActionDescriptors,
-        )
+        this.routeObjectPickupper.pushPageRouteObjectsToSub(httpPath, subRouteObject, pageAds)
       }
     }
 
@@ -420,7 +416,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
               req,
               res,
               ad: ad,
-              httpPath: fullResourceRoutePath,
+              httpPath: httpPath,
             })
             try {
               handlerLog('%s#%s as Handler', adapterLocalPath, actionName)
@@ -440,7 +436,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
               throw new Error('Unreachable: resourceMethod is undefined and action.page not set')
             }
 
-            const handler: express.Handler = this.createPageHandler(ad, fullResourceRoutePath, pageActionDescriptors)
+            const handler: express.Handler = this.createPageHandler(ad, httpPath, pageAds)
             handlers = [handler]
           } else {
             if (!schema) {
@@ -465,7 +461,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
               resource,
               sources,
               router: this,
-              httpPath: fullResourceRoutePath,
+              httpPath: httpPath,
               schema,
               adapterPath: adapterLocalPath,
               ad,
@@ -496,31 +492,22 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
 
   protected createPagesHandlerBuildRunner(rpath: string, children: string[]): HandlerBuildRunner {
     const subRouteObject = this.routeObjectPickupper.addNewSub(rpath)
-    const pageActionDescriptors: ActionDescriptor[] = []
-    const fullResourceRoutePath = this.getRoutePath(rpath)
+    const pageAds: ActionDescriptor[] = []
+    const httpPath = this.getRoutePath(rpath)
 
     const pickPageToSubRouteObject = () => {
       if (subRouteObject) {
-        this.routeObjectPickupper.pushPageRouteObjectsToSub(
-          fullResourceRoutePath,
-          subRouteObject,
-          pageActionDescriptors,
-        )
+        this.routeObjectPickupper.pushPageRouteObjectsToSub(httpPath, subRouteObject, pageAds)
       }
     }
 
     return () => {
-      this.buildPagesHandler(rpath, children, pageActionDescriptors, fullResourceRoutePath)
+      this.buildPagesHandler(rpath, children, pageAds, httpPath)
       pickPageToSubRouteObject()
     }
   }
 
-  private buildPagesHandler(
-    rpath: string,
-    children: string[],
-    pageActionDescriptors: ActionDescriptor[],
-    fullResourceRoutePath: string,
-  ) {
+  private buildPagesHandler(rpath: string, children: string[], pageAds: ActionDescriptor[], httpPath: string) {
     const router = this.router as unknown
 
     for (const child of children) {
@@ -533,11 +520,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
 
       router.get(
         this.generateRoutePath(childRoutePath),
-        this.createPageHandler(
-          pageActionDescriptor(child, this.routerOptions.hydrate),
-          fullResourceRoutePath,
-          pageActionDescriptors,
-        ),
+        this.createPageHandler(createPageActionDescriptor(child, this.routerOptions.hydrate), httpPath, pageAds),
       )
     }
   }
@@ -576,18 +559,14 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
     }
   }
 
-  private createPageHandler(
-    ad: ActionDescriptor,
-    fullResourceRoutePath: string,
-    pageActionDescriptors: ActionDescriptor[],
-  ) {
+  private createPageHandler(ad: ActionDescriptor, httpPath: string, pageAds: ActionDescriptor[]) {
     const handler: express.Handler = (req, res, next) => {
       const ctx = this.serverRouterConfig.createActionContext({
         router: this,
         req,
         res,
         ad,
-        httpPath: fullResourceRoutePath,
+        httpPath,
       })
 
       ;(async () => {
@@ -596,7 +575,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
       })().catch((err) => next(err))
     }
 
-    pageActionDescriptors.push(ad)
+    pageAds.push(ad)
     return handler
   }
 }
