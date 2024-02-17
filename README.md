@@ -1,3 +1,5 @@
+[Japanese Version](./README_ja.md)
+
 # What is this?
 
 This is a web application framework made with TypeScript, React, and Zod. It focuses on the presentation layer as described in the three-tier architecture, covering both the frontend written in JSX and the backend layer (the surface of the server) that communicates with the frontend.
