@@ -3,12 +3,12 @@ import { type Express, type NextFunction } from 'express'
 import { IVerifyOptions, Strategy, VerifyFunction } from 'passport-local'
 import { ActionContext } from 'bistrio'
 import { compare } from './crypter'
-import { getPrismaCilent } from './prisma-util'
+import { getPrismaClient } from './prisma-util'
 import { User, userSchema } from '@universal/params'
 
 // @see https://www.passportjs.org/tutorials/password/
 
-const prisma = getPrismaCilent()
+const prisma = getPrismaClient()
 
 const verify: VerifyFunction = (username, password, done) => {
   ;(async () => {
