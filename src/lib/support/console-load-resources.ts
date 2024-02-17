@@ -48,7 +48,10 @@ export async function loadResources<M extends Middlewares>(
       outputEndpoints()
     }
 
-    const pad = (str: string, length: number) => `${str}${' '.repeat(length - str.length)}`
+    const pad = (str: string, length: number) => {
+      const repeatCount = length - str.length
+      return `${str}${' '.repeat(repeatCount > 1 ? repeatCount : 1)}`
+    }
 
     const outputEndpoints = () => {
       console.log(`ROUTES`)
