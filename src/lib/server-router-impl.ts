@@ -88,7 +88,7 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
     }
   }
 
-  return (req, res, next) => {
+  const resourceMethodHandler: express.Handler = (req, res, next) => {
     ;(async () => {
       const ctx = serverRouterConfig.createActionContext({ router, req, res, ad: ad, httpPath })
       if (responder && 'override' in responder && responder.override) {
@@ -162,6 +162,7 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
       }
     })().catch((err) => next(err))
   }
+  return resourceMethodHandler
 }
 
 export type ResourceProxyCreateFunc = (ctx: ActionContext) => Resource
@@ -560,7 +561,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
   }
 
   private createPageHandler(ad: ActionDescriptor, httpPath: string, pageAds: ActionDescriptor[]) {
-    const handler: express.Handler = (req, res, next) => {
+    const pageHandler: express.Handler = (req, res, next) => {
       const ctx = this.serverRouterConfig.createActionContext({
         router: this,
         req,
@@ -576,6 +577,6 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
     }
 
     pageAds.push(ad)
-    return handler
+    return pageHandler
   }
 }

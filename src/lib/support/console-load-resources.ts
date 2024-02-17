@@ -23,6 +23,7 @@ declare global {
 export async function loadResources<M extends Middlewares>(
   serverRouterConfig: ServerRouterConfig,
   routes: (router: Router, support: RouterSupport<M>) => void,
+  extensions: Record<string, unknown> = {},
 ) {
   {
     const resources = {} as Record<string, Resource>
@@ -47,18 +48,21 @@ export async function loadResources<M extends Middlewares>(
       outputEndpoints()
     }
 
-    const methodLength = 25
+    const pad = (str: string, length: number) => `${str}${' '.repeat(length - str.length)}`
+
     const outputEndpoints = () => {
       console.log(`ROUTES`)
-      endpoints.map((endpoint) => {
-        const methods = endpoint.methods.join(',')
+      endpoints.map((endpoint): void => {
+        const methodsStr = endpoint.methods.join(',')
         const path = endpoint.path.startsWith('/') ? endpoint.path : `/${endpoint.path}`
-        console.log(`${methods}${' '.repeat(methodLength - methods.length)}\t${path}`)
+        console.log(`${pad(methodsStr, 25)}\t${pad(path, 40)}\t${endpoint.middlewares.join(',')}`)
       })
     }
 
     global.routes = () => {
       return createRoutes()
     }
+
+    Object.assign(global, extensions)
   }
 }
