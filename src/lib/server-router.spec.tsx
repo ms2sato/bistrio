@@ -61,8 +61,8 @@ const createDummyActionContext = async (params: CreateDummyActionContextProps) =
   const res = { render: () => 1, redirect: () => 1 } as unknown as express.Response
   const httpPath = '/test/build'
 
-  const descriptor: ActionDescriptor = { action: 'build', method: 'get', path: '/build' }
-  return new ExpressActionContext({ router, req, res, descriptor, httpPath, constructView })
+  const ad: ActionDescriptor = { action: 'build', method: 'get', path: '/build' }
+  return new ExpressActionContext({ router, req, res, ad, httpPath, constructView })
 }
 
 describe('ServerRouter', () => {

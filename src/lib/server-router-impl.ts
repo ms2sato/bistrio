@@ -42,22 +42,11 @@ const routeLog = log.extend('route')
 const handlerLog = log.extend('handler')
 
 const createResourceMethodHandler = (params: ResourceMethodHandlerParams): express.Handler => {
-  const {
-    resourceMethod,
-    resource,
-    sources,
-    router,
-    httpPath,
-    schema,
-    adapterPath,
-    actionDescriptor,
-    responder,
-    adapter,
-  } = params
+  const { resourceMethod, resource, sources, router, httpPath, schema, adapterPath, ad, responder, adapter } = params
 
   const serverRouterConfig = router.serverRouterConfig
   const defaultResponder = serverRouterConfig.createDefaultResponder(params)
-  const actionName = actionDescriptor.action
+  const actionName = ad.action
 
   const respond = async (ctx: ActionContext, output: unknown, option: unknown) => {
     let response: Response | undefined | false
@@ -101,7 +90,7 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
 
   return (req, res, next) => {
     ;(async () => {
-      const ctx = serverRouterConfig.createActionContext({ router, req, res, descriptor: actionDescriptor, httpPath })
+      const ctx = serverRouterConfig.createActionContext({ router, req, res, ad: ad, httpPath })
       if (responder && 'override' in responder && responder.override) {
         const output = await responder.override.call(responder, ctx)
         await respond(ctx, output, undefined)
@@ -193,8 +182,8 @@ const createLocalResourceProxy = (
     for (const actionName in resource) {
       const resourceMethod = resource[actionName]
       const cad: ConstructDescriptor | undefined = config.construct?.[actionName]
-      const actionDescriptor = config.actions?.find((action) => action.action === actionName)
-      if (!actionDescriptor) {
+      const ad = config.actions?.find((action) => action.action === actionName)
+      if (!ad) {
         continue
       }
 
@@ -346,7 +335,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
 
     return async () => {
       handlerLog('buildHandler: %s', join(this.routePath, rpath))
-      const actionDescriptors: readonly ActionDescriptor[] = routeConfig.actions || this.serverRouterConfig.actions
+      const ads: readonly ActionDescriptor[] = routeConfig.actions || this.serverRouterConfig.actions
 
       const resourceLocalPath = this.getResourceLocalPath(rpath)
       const resourceName = routeConfig.name
@@ -389,14 +378,14 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
         }
       }
 
-      for (const actionDescriptor of actionDescriptors) {
-        if (actionDescriptor.page && actionDescriptor.hydrate === undefined) {
-          actionDescriptor.hydrate = this.routerOptions.hydrate
+      for (const ad of ads) {
+        if (ad.page && ad.hydrate === undefined) {
+          ad.hydrate = this.routerOptions.hydrate
         }
 
-        const urlPath = join(rpath, actionDescriptor.path)
-        const httpMethod = actionDescriptor.method
-        const actionName = actionDescriptor.action
+        const urlPath = join(rpath, ad.path)
+        const httpMethod = ad.method
+        const actionName = ad.action
 
         const resourceMethod: ResourceMethod | undefined = resource?.[actionName]
         const actionFunc: Handler | Responder | RequestCallback | undefined = adapter[actionName]
@@ -404,7 +393,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
 
         const actionOverride = actionFunc instanceof Function
         if (!actionOverride) {
-          if (resourceMethod === undefined && !actionDescriptor.page) {
+          if (resourceMethod === undefined && !ad.page) {
             throw new RouterError(
               `Logic not found! define action.page option on routes, or define ${resourceLocalPath}#${actionName} or/and ${adapterLocalPath}#${actionName}`,
             )
@@ -430,7 +419,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
               router: this,
               req,
               res,
-              descriptor: actionDescriptor,
+              ad: ad,
               httpPath: fullResourceRoutePath,
             })
             try {
@@ -447,15 +436,11 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
           handlers = [handler]
         } else {
           if (!resourceMethod) {
-            if (!actionDescriptor.page) {
+            if (!ad.page) {
               throw new Error('Unreachable: resourceMethod is undefined and action.page not set')
             }
 
-            const handler: express.Handler = this.createPageHandler(
-              actionDescriptor,
-              fullResourceRoutePath,
-              pageActionDescriptors,
-            )
+            const handler: express.Handler = this.createPageHandler(ad, fullResourceRoutePath, pageActionDescriptors)
             handlers = [handler]
           } else {
             if (!schema) {
@@ -483,7 +468,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
               httpPath: fullResourceRoutePath,
               schema,
               adapterPath: adapterLocalPath,
-              actionDescriptor,
+              ad,
               responder: actionFunc,
               adapter,
             })
@@ -498,11 +483,11 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
           actionName,
           actionOverride,
           !!resourceMethod,
-          actionDescriptor.page,
-          actionDescriptor.hydrate,
+          ad.page,
+          ad.hydrate,
         )
 
-        this.appendRoute(urlPath, actionDescriptor, handlers)
+        this.appendRoute(urlPath, ad, handlers)
       }
 
       pickPageToSubRouteObject()
@@ -592,7 +577,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
   }
 
   private createPageHandler(
-    actionDescriptor: ActionDescriptor,
+    ad: ActionDescriptor,
     fullResourceRoutePath: string,
     pageActionDescriptors: ActionDescriptor[],
   ) {
@@ -601,7 +586,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
         router: this,
         req,
         res,
-        descriptor: actionDescriptor,
+        ad,
         httpPath: fullResourceRoutePath,
       })
 
@@ -611,7 +596,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
       })().catch((err) => next(err))
     }
 
-    pageActionDescriptors.push(actionDescriptor)
+    pageActionDescriptors.push(ad)
     return handler
   }
 }

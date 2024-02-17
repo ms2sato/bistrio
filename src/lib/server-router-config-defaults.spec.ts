@@ -42,7 +42,7 @@ test('request with file', async () => {
     router,
     req,
     res,
-    descriptor: ad,
+    ad,
     httpPath: '/test',
     constructView: () => createElement('div', null),
   })

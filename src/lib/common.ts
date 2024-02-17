@@ -23,7 +23,7 @@ export type ActionContextProps = {
   router: ServerRouter
   req: express.Request
   res: express.Response
-  descriptor: ActionDescriptor
+  ad: ActionDescriptor
   httpPath: string
 }
 

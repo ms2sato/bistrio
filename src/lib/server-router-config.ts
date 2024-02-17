@@ -27,7 +27,7 @@ export type ResourceMethodHandlerParams = {
   httpPath: string
   schema: ZodType
   adapterPath: string
-  actionDescriptor: ActionDescriptor
+  ad: ActionDescriptor
   responder: Responder | RequestCallback
   adapter: Adapter
 }
