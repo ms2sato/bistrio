@@ -4,6 +4,8 @@
 # version [<newversion> | major | minor | patch | premajor | preminor | prepatch | prerelease | from-git]
 # args: newversion - semver string (default "patch")
 
+set -e
+
 git switch main
 git pull origin main
 
