@@ -28,21 +28,21 @@ export class ExpressActionContext implements MutableActionContext {
     router,
     req,
     res,
-    descriptor,
+    ad,
     httpPath,
     constructView,
   }: {
     router: ServerRouter
     req: express.Request
     res: express.Response
-    descriptor: ActionDescriptor
+    ad: ActionDescriptor
     httpPath: string
     constructView: ConstructViewFunc
   }) {
     this.router = router
     this.req = req
     this.res = res
-    this.descriptor = descriptor
+    this.descriptor = ad
     this.httpPath = httpPath
     this.constructView = constructView
   }

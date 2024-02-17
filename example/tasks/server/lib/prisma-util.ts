@@ -5,7 +5,7 @@ const log = createDebug('bistrio:sql')
 
 let _prisma: PrismaClient
 
-export const getPrismaCilent = (): PrismaClient => {
+export const getPrismaClient = (): PrismaClient => {
   if (!_prisma) {
     const prisma = new PrismaClient({
       log: [

@@ -101,7 +101,7 @@ export const choiceSchema = (
   }
 }
 
-export const pageActionDescriptor = (path: string, hydrate = true): ActionDescriptor => ({
+export const createPageActionDescriptor = (path: string, hydrate = true): ActionDescriptor => ({
   page: true,
   action: path,
   path,

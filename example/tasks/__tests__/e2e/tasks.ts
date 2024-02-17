@@ -1,10 +1,10 @@
 import { Task } from '@prisma/client'
-import { getPrismaCilent } from '../../server/lib/prisma-util'
+import { getPrismaClient } from '../../server/lib/prisma-util'
 import { asURL } from '../support'
 import { spy, RequestHolder, waitForAnyInnerText, waitForNotAnyInnerText } from '../support/request-spy'
 import { signIn, signOut } from '../support/helper'
 
-const prisma = getPrismaCilent()
+const prisma = getPrismaClient()
 
 beforeAll(async () => await signIn('user1', 'password'))
 afterAll(async () => await signOut())

@@ -1,11 +1,11 @@
 import { defineResource, Paginated } from 'bistrio'
-import { getPrismaCilent } from '@server/lib/prisma-util'
+import { getPrismaClient } from '@server/lib/prisma-util'
 import { TaskWithTags } from '@/universal/types'
 import { Task } from '@prisma/client'
 import { CustomMethodOption } from '@/server/customizers'
 import { TasksResource } from '@bistrio/resources'
 
-const prisma = getPrismaCilent()
+const prisma = getPrismaClient()
 
 export default defineResource(
   () =>

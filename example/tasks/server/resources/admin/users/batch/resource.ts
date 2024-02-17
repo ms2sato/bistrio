@@ -1,11 +1,11 @@
 import { defineResource, ReadLineCallback, readLines } from 'bistrio'
-import { getPrismaCilent } from '@server/lib/prisma-util'
+import { getPrismaClient } from '@server/lib/prisma-util'
 import { CustomMethodOption } from '@/server/customizers'
 import { AdminUserBatchResource } from '@/.bistrio/resources'
 import { object, string } from 'zod'
 import { hash } from '@/server/lib/crypter'
 
-const prisma = getPrismaCilent()
+const prisma = getPrismaClient()
 
 const lineSchema = object({
   username: string(),

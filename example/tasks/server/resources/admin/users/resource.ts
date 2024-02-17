@@ -1,10 +1,10 @@
 import { defineResource } from 'bistrio'
-import { getPrismaCilent } from '@server/lib/prisma-util'
+import { getPrismaClient } from '@server/lib/prisma-util'
 import { User } from '@prisma/client'
 import { AdminUsersResource } from '@bistrio/resources'
 import { CustomMethodOption } from '@/server/customizers'
 
-const prisma = getPrismaCilent()
+const prisma = getPrismaClient()
 
 type SecureUser = Omit<User, 'hashedPassword'>
 

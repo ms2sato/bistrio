@@ -18,7 +18,7 @@ import {
   ValidationError,
   createValidationError,
   RouterLayoutType,
-  pageActionDescriptor,
+  createPageActionDescriptor,
   routerPlaceholderRegex,
   ActionType,
   checkRpath,
@@ -420,7 +420,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
     this.core.handlerBuildRunners.push(() => {
       const fullResourceRoutePath = pathJoin(this.httpPath, rpath)
 
-      pageActionDescriptors.push(...children.map((child) => pageActionDescriptor(child)))
+      pageActionDescriptors.push(...children.map((child) => createPageActionDescriptor(child)))
 
       if (subRouteObject) {
         this.routeObjectPickupper.pushPageRouteObjectsToSub(
