@@ -1,9 +1,9 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { asURL } from '../support'
-import { getPrismaCilent } from '../../server/lib/prisma-util'
+import { getPrismaClient } from '../../server/lib/prisma-util'
 
-const prisma = getPrismaCilent()
+const prisma = getPrismaClient()
 
 beforeEach(async () => {
   await prisma.user.deleteMany({ where: { username: { not: { in: ['admin', 'user1', 'user2'] } } } })

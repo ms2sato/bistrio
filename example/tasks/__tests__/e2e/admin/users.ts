@@ -3,9 +3,9 @@ import { join } from 'node:path'
 import { asURL } from '../../support'
 import { spy, RequestHolder, waitForAnyInnerText } from '../../support/request-spy'
 import { signIn, signOut } from '../../support/helper'
-import { getPrismaCilent } from '../../../server/lib/prisma-util'
+import { getPrismaClient } from '../../../server/lib/prisma-util'
 
-const prisma = getPrismaCilent()
+const prisma = getPrismaClient()
 
 beforeAll(async () => await signIn('admin', 'password'))
 afterAll(async () => await signOut())
