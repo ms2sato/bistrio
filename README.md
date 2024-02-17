@@ -306,4 +306,3 @@ The directory structure during development is as follows. For more details, chec
   - pages: Directory for placing JSX
   - routes: Directory for placing Routes
   - middleware.ts: Interface for Middleware used in routes
-```
