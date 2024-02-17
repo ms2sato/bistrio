@@ -201,10 +201,10 @@ export const createActionOptions: CreateActionOptionFunction = (ctx) => {
 }
 ```
 
-例えば Resourceに `load` アクションを追加した場合の第二引数に設定され、利用できます。引数がない場合には CustomMethodOption だけが引数として設定されます。
+例えば Resourceに `load` アクションを追加した場合の第二引数に設定され、利用できます。引数がない場合には `opt<CustomMethodOption>` だけが引数として設定されます。
 
 ```ts
-      load: async ({ id }, options: CustomMethodOption): Promise<Task> => {
+      load: async ({ id }, options: opt<CustomMethodOption>): Promise<Task> => {
         // options を利用した処理を書けます
       },
 ```

@@ -203,10 +203,10 @@ export const createActionOptions: CreateActionOptionFunction = (ctx) => {
 }
 ```
 
-For example, if you add a `load` action to a Resource, it will be set as the second argument and available for use. If there are no arguments, only `CustomMethodOption` is set as the argument.
+For example, if you add a `load` action to a Resource, it will be set as the second argument and available for use. If there are no arguments, only `opt<CustomMethodOption>` is set as the argument.
 
 ```ts
-      load: async ({ id }, options: CustomMethodOption): Promise<Task> => {
+      load: async ({ id }, options: opt<CustomMethodOption>): Promise<Task> => {
         // You can write processing using options
       },
 ```
