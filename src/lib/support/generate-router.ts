@@ -209,9 +209,9 @@ entry<N2R>({
 
   generateInterfaces(serverRouterConfig: ServerRouterConfig) {
     return `${this.resourceRouterConfigs
-  .map((routeConfig) => this.generateInterface(routeConfig, serverRouterConfig))
-  .filter((interfaceStr) => interfaceStr)
-  .join('\n')}`
+      .map((routeConfig) => this.generateInterface(routeConfig, serverRouterConfig))
+      .filter((interfaceStr) => interfaceStr)
+      .join('\n')}`
   }
 
   private generateInterface(routeConfig: ResourceRouteConfig, serverRouterConfig: ServerRouterConfig) {

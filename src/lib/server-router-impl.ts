@@ -31,6 +31,7 @@ import {
   ClientConfig,
   Router,
   ActionType,
+  isActionOption,
 } from '../index.js'
 import { HttpMethod, RouterOptions } from './shared/index.js'
 import { RouteObject } from 'react-router-dom'
@@ -98,6 +99,9 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
       }
 
       const option = await serverRouterConfig.createActionOptions(ctx)
+      if (!isActionOption(option)) {
+        throw new Error('"option" is not an ActionOption')
+      }
 
       if (schema == blankSchema) {
         // TODO: typesafe
@@ -191,6 +195,9 @@ const createLocalResourceProxy = (
       resourceProxy[actionName] = async function (...args) {
         try {
           const option = await serverRouterConfig.createActionOptions(ctx)
+          if (!isActionOption(option)) {
+            throw new Error('"option" is not an ActionOption')
+          }
 
           if (args.length === 0) {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-return
