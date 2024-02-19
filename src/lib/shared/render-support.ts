@@ -75,11 +75,16 @@ type SuspendedAppendLastArgToResourceMethodOptions<F> = F extends (...args: infe
   ? <SO, RO>(...args: [...Args, ResourceMethodOptions<SO, RO>?]) => Awaited<R>
   : never
 
-export const actionOptionInternalSymbol = Symbol.for('__bistrio_action_option__')
+const actionOptionInternalSymbol = Symbol('__bistrio_action_option__')
 
 export interface ActionOption {
-  [actionOptionInternalSymbol]: true
+  readonly [actionOptionInternalSymbol]: typeof actionOptionInternalSymbol
 }
+
+export const buildActionOption = <O extends object = Record<string, unknown>>(o: O): O & ActionOption => ({
+  [actionOptionInternalSymbol]: actionOptionInternalSymbol,
+  ...o,
+})
 
 type OmitOptArgument<R> = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
