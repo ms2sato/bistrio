@@ -1,4 +1,4 @@
-import { NamedResources, opt, Resource } from '../../client.js'
+import { NamedResources, Resource } from '../../client.js'
 import { Localizer } from './locale.js'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -75,9 +75,15 @@ type SuspendedAppendLastArgToResourceMethodOptions<F> = F extends (...args: infe
   ? <SO, RO>(...args: [...Args, ResourceMethodOptions<SO, RO>?]) => Awaited<R>
   : never
 
+export const actionOptionInternalSymbol = Symbol.for('__bistrio_action_option__')
+
+export interface ActionOption {
+  [actionOptionInternalSymbol]: true
+}
+
 type OmitOptArgument<R> = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [A in keyof R]: RemoveLastArgIsA<R[A], opt<any>>
+  [A in keyof R]: RemoveLastArgIsA<R[A], ActionOption>
 }
 
 type AppendRMOArgument<R> = {

@@ -1,7 +1,7 @@
 import express from 'express'
 import { Outlet } from 'react-router-dom'
 import { ServerRenderSupport } from './server-render-support.js'
-import { ActionDescriptor, IdNumberParams, LoadPageFunc, blankSchema, opt } from './shared/index.js'
+import { ActionDescriptor, IdNumberParams, LoadPageFunc, blankSchema } from './shared/index.js'
 import { CreateActionOptionFunction } from './action-context.js'
 import { ConstructViewFunc, Resource, ServerRouterConfig, idNumberSchema } from '../index.js'
 import { initServerRouterConfig } from './init-server-router-config.js'
@@ -20,7 +20,7 @@ type ActionOption = { test: number }
 const dummyResource = {
   build: () => ({ msg: 'ret build' }),
   show: ({ id }: IdNumberParams) => ({ msg: `ret show ${id}` }),
-  hasOption: (ao: opt<ActionOption>) => ({ msg: 'ret hasOption', opt: ao.body }),
+  hasOption: (ao: ActionOption) => ({ msg: 'ret hasOption', opt: ao }),
 } as const satisfies Resource
 
 const mockResources = { '/test/resource': dummyResource }

@@ -4,7 +4,6 @@ import {
   ConstructDescriptor,
   FileNotFoundError,
   HandlerBuildRunner,
-  opt,
   Resource,
   ResourceRouteConfig,
   RouterCoreLight,
@@ -13,6 +12,7 @@ import {
   ServerRouterConfig,
 } from '../../index.js'
 import { BasicRouter } from '../basic-router.js'
+import { isBlank } from '../shared/zod-util.js'
 
 const log = debug('bistrio')
 const debugLog = log.extend('console')
@@ -105,12 +105,9 @@ const createLocalResourceProxy = (config: ResourceRouteConfig, resource: Resourc
     if (cad?.schema) {
       const schema = cad.schema
       resourceProxy[actionName] = function (...args) {
-        if (args.length === 0) {
+        if (isBlank(schema)) {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-          return resourceMethod.apply(resource)
-        } else if (args[0] instanceof opt) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-          return resourceMethod.apply(resource, [args[0]])
+          return resourceMethod.apply(resource, [args[0]]) // args[0] is option
         } else {
           schema.parse(args[0])
           // eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -118,9 +115,9 @@ const createLocalResourceProxy = (config: ResourceRouteConfig, resource: Resourc
         }
       }
     } else {
-      resourceProxy[actionName] = function (option) {
+      resourceProxy[actionName] = function (...options) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        return resourceMethod.apply(resource, [option])
+        return resourceMethod.apply(resource, options)
       }
     }
   }

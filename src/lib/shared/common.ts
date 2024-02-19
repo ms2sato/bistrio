@@ -2,13 +2,6 @@ import { ZodError, ZodIssue, ZodType } from 'zod'
 import { blankSchema } from './schemas.js'
 import { ComponentType, ReactNode } from 'react'
 
-const optType = Symbol('opt<>')
-
-export class opt<T> {
-  readonly [optType]: symbol = optType
-  constructor(public body: T) {}
-}
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ResourceMethod = (...args: any[]) => any
 

@@ -32,7 +32,7 @@ import {
   Router,
   ActionType,
 } from '../index.js'
-import { HttpMethod, RouterOptions, opt } from './shared/index.js'
+import { HttpMethod, RouterOptions } from './shared/index.js'
 import { RouteObject } from 'react-router-dom'
 import { RouteObjectPickupper } from './shared/route-object-pickupper.js'
 import { BasicRouter } from './basic-router.js'
@@ -99,11 +99,10 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
 
       const option = await serverRouterConfig.createActionOptions(ctx)
 
-      const wrappedOption = new opt(option)
       if (schema == blankSchema) {
         // TODO: typesafe
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const output = await resourceMethod.apply(resource, [wrappedOption])
+        const output = await resourceMethod.apply(resource, [option])
         await respond(ctx, output, option)
       } else {
         try {
@@ -127,7 +126,7 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
             handlerLog('input', input)
 
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            const output = await resourceMethod.apply(resource, input ? [input, wrappedOption] : [wrappedOption])
+            const output = await resourceMethod.apply(resource, input ? [input, option] : [option])
             await respond(ctx, output, option)
           } catch (err) {
             if (err instanceof ZodError) {
@@ -192,17 +191,16 @@ const createLocalResourceProxy = (
       resourceProxy[actionName] = async function (...args) {
         try {
           const option = await serverRouterConfig.createActionOptions(ctx)
-          const wrappedOption = new opt(option)
 
           if (args.length === 0) {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-            return await resourceMethod.apply(resource, [wrappedOption])
+            return await resourceMethod.apply(resource, [option])
           } else {
             schema.parse(args[0]) // if throw error, args[0] is unexpected
 
             // TOOD: typesafe
             // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-assignment
-            return await resourceMethod.apply(resource, [...args, wrappedOption])
+            return await resourceMethod.apply(resource, [...args, option])
           }
         } catch (err) {
           console.error(err)

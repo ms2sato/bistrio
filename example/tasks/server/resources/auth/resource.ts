@@ -10,7 +10,7 @@ export default defineResource(
         throw new Error('override by adapter')
       },
       user: (option): User | null => {
-        return option?.body.user || null
+        return option.user || null
       },
       logout: () => {
         throw new Error('override by adapter')
