@@ -115,9 +115,8 @@ const createLocalResourceProxy = (config: ResourceRouteConfig, resource: Resourc
         }
       }
     } else {
-      resourceProxy[actionName] = function (...options) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        return resourceMethod.apply(resource, options)
+      resourceProxy[actionName] = function (...args) {
+        return resourceMethod.apply(resource, args)
       }
     }
   }
