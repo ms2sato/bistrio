@@ -33,7 +33,7 @@ const dummyRoutes: RoutesFunction = (router) => {
       { action: 'hasOption', method: 'get', path: '/has_option' },
       { action: 'show', method: 'get', path: '/$id' },
     ],
-    construct: { build: { schema: blankSchema }, hasOption: { schema: blankSchema } },
+    inputs: { build: { schema: blankSchema }, hasOption: { schema: blankSchema } },
   })
 }
 
@@ -379,7 +379,7 @@ describe('ServerRouter', () => {
           router.resources('/test', {
             name: 'test_resource',
             actions: [{ action: 'get', method: 'get', path: '/get' }],
-            construct: { get: { schema: blankSchema } },
+            inputs: { get: { schema: blankSchema } },
           })
         },
         mockResources: {
@@ -416,7 +416,7 @@ describe('ServerRouter', () => {
           router.resources('/test', {
             name: 'test_resource',
             actions: [{ action: 'get', method: 'get', path: '/$id' }],
-            construct: { get: { schema: idNumberSchema } },
+            inputs: { get: { schema: idNumberSchema } },
           })
         },
         mockResources: {
@@ -455,7 +455,7 @@ describe('ServerRouter', () => {
           router.layout({ Component: DummyLayout }).resources('/test', {
             name: 'test_resource',
             actions: [{ action: 'page', method: 'get', path: '/$id', page: true }],
-            construct: { show: { schema: blankSchema } },
+            inputs: { show: { schema: blankSchema } },
           })
         },
         mockResources,
@@ -488,7 +488,7 @@ describe('ServerRouter', () => {
           subLayoutRouter.resources('/test', {
             name: 'test_resource',
             actions: [{ action: 'page', method: 'get', path: '/$id', page: true }],
-            construct: { show: { schema: blankSchema } },
+            inputs: { show: { schema: blankSchema } },
           })
         },
         mockResources,

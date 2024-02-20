@@ -50,7 +50,7 @@ describe('validations', () => {
       router.resources('', {
         name: 'test_resource',
         actions: [{ action: 'build', method: 'get', path: '/build' }],
-        construct: { build: { schema: blankSchema } },
+        inputs: { build: { schema: blankSchema } },
       })
     }).toThrow('Router.resources() first argument cannnot be blank string')
   })
@@ -62,7 +62,7 @@ test('resources', () => {
   router.resources('/test', {
     name: 'testName',
     actions: [{ action: 'list', method: 'get', path: '/' }],
-    construct: { list: { schema: blankSchema } },
+    inputs: { list: { schema: blankSchema } },
   })
 
   expect(router.links.named[0]).toEqual({
@@ -97,7 +97,7 @@ test('resources page action only', () => {
   router.resources('/test', {
     name: 'testName',
     actions: [{ action: 'build', method: 'get', path: '/build', page: true }],
-    construct: { build: { schema: blankSchema } },
+    inputs: { build: { schema: blankSchema } },
   })
 
   expect(router.links.named[0]).toEqual({
@@ -129,7 +129,7 @@ test('resources with route parameters', () => {
   router.resources('/test/$testId', {
     name: 'testName',
     actions: [{ action: 'load', method: 'get', path: '/$id' }],
-    construct: { load: { schema: testResourceSchema } },
+    inputs: { load: { schema: testResourceSchema } },
   })
 
   expect(router.links.named[0]).toEqual({
@@ -170,7 +170,7 @@ test('resources page action only with route parameters', () => {
   router.resources('/test/$testId', {
     name: 'testName',
     actions: [{ action: 'build', method: 'get', path: '/$id', page: true }],
-    construct: { build: { schema: testResourceSchema } },
+    inputs: { build: { schema: testResourceSchema } },
   })
 
   expect(router.links.named[0]).toEqual({
@@ -257,7 +257,7 @@ test('multiple', () => {
       { action: 'update', method: ['patch', 'put'], path: '/$id' },
       { action: 'delete', method: 'delete', path: '/$id' },
     ],
-    construct: {
+    inputs: {
       create: { schema: testResourceSchema },
       update: { schema: testResourceSchema },
       delete: { schema: idNumberSchema },

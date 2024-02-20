@@ -5,7 +5,7 @@ import debug from 'debug'
 import {
   ActionContext,
   ActionDescriptor,
-  ConstructDescriptor,
+  InputDescriptor,
   Handler,
   Adapter,
   ResourceRouteConfig,
@@ -111,26 +111,26 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
       } else {
         try {
           const arranged = await serverRouterConfig.inputArranger(ctx, sources, schema)
-          let source = arranged[0]
+          let input = arranged[0]
           const cleanup = arranged[1]
 
-          handlerLog('source: %o', source)
+          handlerLog('input: %o', input)
 
           try {
             if (responder && 'beforeValidation' in responder && responder.beforeValidation) {
-              source = await responder.beforeValidation(ctx, source, schema)
+              input = await responder.beforeValidation(ctx, input, schema)
             }
 
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            let input = schema.parse(source)
+            let trusted = schema.parse(input)
             if (responder && 'afterValidation' in responder && responder.afterValidation) {
-              input = await responder.afterValidation(ctx, input, schema)
+              trusted = await responder.afterValidation(ctx, trusted, schema)
             }
 
-            handlerLog('input', input)
+            handlerLog('trusted', trusted)
 
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            const output = await resourceMethod.apply(resource, input ? [input, options] : [options])
+            const output = await resourceMethod.apply(resource, trusted ? [trusted, options] : [options])
             await respond(ctx, output, options)
           } catch (err) {
             if (err instanceof ZodError) {
@@ -142,7 +142,7 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
                     throw new Error('Unreachable: invalid in responder is not implemented')
                   }
 
-                  const filledSource = SchemaUtil.fillDefault(schema, source)
+                  const filledSource = SchemaUtil.fillDefault(schema, input)
                   handlerLog('%s#%s.invalid', adapterPath, actionName, filledSource)
                   res.status(422)
                   await responder.invalid.apply(adapter, [ctx, validationError, filledSource, options])
@@ -151,7 +151,7 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
                 }
               } else {
                 handlerLog('%s#%s invalid by default responder', adapterPath, actionName)
-                await defaultResponder.invalid(ctx, validationError, source)
+                await defaultResponder.invalid(ctx, validationError, input)
               }
             } else {
               await handleFatal(ctx, err as Error, options, next)
@@ -185,13 +185,13 @@ const createLocalResourceProxy = (
     const resourceProxy: Resource = {}
     for (const actionName in resource) {
       const resourceMethod = resource[actionName]
-      const cad: ConstructDescriptor | undefined = config.construct?.[actionName]
+      const cad: InputDescriptor | undefined = config.inputs?.[actionName]
       const ad = config.actions?.find((action) => action.action === actionName)
       if (!ad) {
         continue
       }
 
-      const schema = choiceSchema(serverRouterConfig.constructConfig, cad, actionName)
+      const schema = choiceSchema(serverRouterConfig.inputsConfig, cad, actionName)
       resourceProxy[actionName] = async function (...args) {
         try {
           const options = await serverRouterConfig.createActionOptions(ctx)
@@ -391,7 +391,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
 
         const resourceMethod: ResourceMethod | undefined = resource?.[actionName]
         const actionFunc: Handler | Responder | RequestCallback | undefined = adapter[actionName]
-        const constructDescriptor: ConstructDescriptor | undefined = routeConfig.construct?.[actionName]
+        const inputDescriptor: InputDescriptor | undefined = routeConfig.inputs?.[actionName]
 
         const actionOverride = actionFunc instanceof Function
         if (!actionOverride) {
@@ -411,7 +411,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
         const schema: ZodType | undefined =
           resourceMethod === undefined
             ? undefined
-            : choiceSchema(this.serverRouterConfig.constructConfig, constructDescriptor, actionName)
+            : choiceSchema(this.serverRouterConfig.inputsConfig, inputDescriptor, actionName)
 
         let handlers
         if (actionOverride) {
@@ -453,7 +453,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
               throw new Error('Unreachable: resource is undefined')
             }
 
-            const sources = choiseSources(this.serverRouterConfig.constructConfig, constructDescriptor, actionName)
+            const sources = choiseSources(this.serverRouterConfig.inputsConfig, inputDescriptor, actionName)
             handlerLog(
               '%s#%s  with construct middleware; schema: %s, sources: %o',
               adapterLocalPath,

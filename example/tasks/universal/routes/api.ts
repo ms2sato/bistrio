@@ -6,7 +6,7 @@ export function routes(r: Router, _support: RouterSupport<Middlewares>) {
     r.resources('users', {
       name: 'apiUsers',
       actions: api('create'),
-      construct: {
+      inputs: {
         create: { schema: fileSchema },
       },
     })
