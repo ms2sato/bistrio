@@ -102,20 +102,16 @@ const createLocalResourceProxy = (config: ResourceRouteConfig, resource: Resourc
   for (const actionName in resource) {
     const resourceMethod = resource[actionName]
     const cad: ConstructDescriptor | undefined = config.construct?.[actionName]
-    if (cad?.schema) {
-      const schema = cad.schema
+    const schema = cad?.schema
+    if (schema && !isBlank(schema)) {
       resourceProxy[actionName] = function (...args) {
-        if (isBlank(schema)) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-          return resourceMethod.apply(resource, [args[0]]) // args[0] is option
-        } else {
-          schema.parse(args[0])
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-          return resourceMethod.apply(resource, args)
-        }
+        schema.parse(args[0])
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        return resourceMethod.apply(resource, args)
       }
     } else {
       resourceProxy[actionName] = function (...args) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return resourceMethod.apply(resource, args)
       }
     }
