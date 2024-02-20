@@ -26,9 +26,15 @@ export interface ActionDescriptor {
   hydrate?: boolean
 }
 
-export type InputDescriptor = {
+export type StrictInputDescriptor = {
   schema?: ZodType | null
   sources?: readonly InputSource[]
+}
+
+export type InputDescriptor = StrictInputDescriptor | ZodType
+
+export type StrictInputsConfig = {
+  [action: string]: StrictInputDescriptor
 }
 
 export type InputsConfig = {
@@ -94,10 +100,14 @@ export const isActionOptions = (o: unknown): o is ActionOptions => {
 }
 
 export const choiceSchema = (
-  defaultInputsConfig: InputsConfig,
+  defaultInputsConfig: StrictInputsConfig,
   inputDescriptor: InputDescriptor | undefined,
   actionName: string,
 ) => {
+  if (inputDescriptor instanceof ZodType) {
+    return inputDescriptor
+  }
+
   const defaultInputDescriptor: InputDescriptor | undefined = defaultInputsConfig[actionName]
 
   if (inputDescriptor?.schema === undefined) {
@@ -121,11 +131,15 @@ export const createPageActionDescriptor = (path: string, hydrate = true): Action
 })
 
 export const choiseSources = (
-  defaultInputsConfig: InputsConfig,
+  defaultInputsConfig: StrictInputsConfig,
   inputDescriptor: InputDescriptor | undefined,
   actionName: string,
 ) => {
-  const defaultInputDescriptor: InputDescriptor | undefined = defaultInputsConfig[actionName]
+  const defaultInputDescriptor: StrictInputDescriptor | undefined = defaultInputsConfig[actionName]
+  if (inputDescriptor instanceof ZodType) {
+    return defaultInputDescriptor?.sources || ['params']
+  }
+
   return inputDescriptor?.sources || defaultInputDescriptor?.sources || ['params']
 }
 
