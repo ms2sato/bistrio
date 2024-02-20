@@ -111,26 +111,26 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
       } else {
         try {
           const arranged = await serverRouterConfig.inputArranger(ctx, sources, schema)
-          let source = arranged[0]
+          let input = arranged[0]
           const cleanup = arranged[1]
 
-          handlerLog('source: %o', source)
+          handlerLog('input: %o', input)
 
           try {
             if (responder && 'beforeValidation' in responder && responder.beforeValidation) {
-              source = await responder.beforeValidation(ctx, source, schema)
+              input = await responder.beforeValidation(ctx, input, schema)
             }
 
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            let input = schema.parse(source)
+            let trusted = schema.parse(input)
             if (responder && 'afterValidation' in responder && responder.afterValidation) {
-              input = await responder.afterValidation(ctx, input, schema)
+              trusted = await responder.afterValidation(ctx, trusted, schema)
             }
 
-            handlerLog('input', input)
+            handlerLog('trusted', trusted)
 
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            const output = await resourceMethod.apply(resource, input ? [input, options] : [options])
+            const output = await resourceMethod.apply(resource, trusted ? [trusted, options] : [options])
             await respond(ctx, output, options)
           } catch (err) {
             if (err instanceof ZodError) {
@@ -142,7 +142,7 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
                     throw new Error('Unreachable: invalid in responder is not implemented')
                   }
 
-                  const filledSource = SchemaUtil.fillDefault(schema, source)
+                  const filledSource = SchemaUtil.fillDefault(schema, input)
                   handlerLog('%s#%s.invalid', adapterPath, actionName, filledSource)
                   res.status(422)
                   await responder.invalid.apply(adapter, [ctx, validationError, filledSource, options])
@@ -151,7 +151,7 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
                 }
               } else {
                 handlerLog('%s#%s invalid by default responder', adapterPath, actionName)
-                await defaultResponder.invalid(ctx, validationError, source)
+                await defaultResponder.invalid(ctx, validationError, input)
               }
             } else {
               await handleFatal(ctx, err as Error, options, next)

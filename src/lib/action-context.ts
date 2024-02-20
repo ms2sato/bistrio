@@ -63,8 +63,8 @@ export type Responder<Opt = unknown, Out = unknown, Src = unknown> = {
 export type FilledResponder<Opt = unknown, Out = unknown, Src = unknown> = Required<Responder<Opt, Out, Src>>
 
 export type RequestCallback<In = unknown> = {
-  beforeValidation?: (ctx: ActionContext, source: unknown, schema: ZodType) => IncommingType | Promise<IncommingType>
-  afterValidation?: (ctx: ActionContext, input: In, schema: ZodType) => IncommingType | Promise<IncommingType>
+  beforeValidation?: (ctx: ActionContext, source: unknown, schema: ZodType) => InputType | Promise<InputType>
+  afterValidation?: (ctx: ActionContext, input: In, schema: ZodType) => InputType | Promise<InputType>
   override?: (ctx: ActionContext) => Record<string, unknown> | undefined | Promise<Record<string, unknown> | void>
 }
 
@@ -79,9 +79,9 @@ export type CreateActionOptionsFunction = (ctx: ActionContext) => ActionOptions 
  */
 export type Renderer = (ctx: ActionContext, options?: unknown) => Promise<false | undefined>
 
-export type IncommingType = Record<string, unknown> | File
+export type InputType = Record<string, unknown> | File
 
-export type InputArrangerResult = [IncommingType, () => void | Promise<void>]
+export type InputArrangerResult = [InputType, () => void | Promise<void>]
 
 export type InputArranger = (
   ctx: MutableActionContext,
