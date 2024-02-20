@@ -13,7 +13,7 @@ export type CustomActionOptions = {
 } & ActionOptions
 
 export const createActionOptions: CreateActionOptionsFunction = (ctx) => {
-  debug('createOptions: req.params %s', ctx.params)
+  debug('createActionOptions: req.params %s', ctx.params)
 
   const customActionOptions: CustomActionOptions = buildActionOptions({ user: ctx.req.user })
 
