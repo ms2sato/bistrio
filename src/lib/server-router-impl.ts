@@ -134,15 +134,11 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
             await respond(ctx, output, options)
 
             ctx.res.on('finish', () => {
-              ;(async () => {
-                await cleanup()
-              })().catch((err) => console.error(err))
+              ;(async () => await cleanup())().catch((err) => handleFatal(ctx, err as Error, options, next))
             })
 
             ctx.res.on('error', () => {
-              ;(async () => {
-                await cleanup()
-              })().catch((err) => console.error(err))
+              ;(async () => await cleanup())().catch((err) => handleFatal(ctx, err as Error, options, next))
             })
           } catch (err) {
             if (err instanceof ZodError) {
