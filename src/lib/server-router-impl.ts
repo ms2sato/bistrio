@@ -132,6 +132,14 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             const output = await resourceMethod.apply(resource, trusted ? [trusted, options] : [options])
             await respond(ctx, output, options)
+
+            ctx.res.on('finish', () => {
+              ;(async () => await cleanup())().catch((err) => handleFatal(ctx, err as Error, options, next))
+            })
+
+            ctx.res.on('error', () => {
+              ;(async () => await cleanup())().catch((err) => handleFatal(ctx, err as Error, options, next))
+            })
           } catch (err) {
             if (err instanceof ZodError) {
               const validationError = err
