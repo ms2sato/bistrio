@@ -15,7 +15,7 @@ export function routes(r: Router, support: RouterSupport<Middlewares>) {
       name: 'adminUsers',
       actions: crud('index', 'list'),
       inputs: {
-        list: { schema: adminUserBatchListSchema },
+        list: adminUserBatchListSchema,
       },
     })
 
@@ -23,7 +23,7 @@ export function routes(r: Router, support: RouterSupport<Middlewares>) {
       name: 'adminUserBatch',
       actions: api('create'),
       inputs: {
-        create: { schema: adminUserBatchCreateSchema },
+        create: adminUserBatchCreateSchema,
       },
     })
   })

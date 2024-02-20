@@ -13,6 +13,7 @@ import {
 } from '../../index.js'
 import { BasicRouter } from '../basic-router.js'
 import { isBlank } from '../shared/zod-util.js'
+import { ZodType } from 'zod'
 
 const log = debug('bistrio')
 const debugLog = log.extend('console')
@@ -102,7 +103,7 @@ const createLocalResourceProxy = (config: ResourceRouteConfig, resource: Resourc
   for (const actionName in resource) {
     const resourceMethod = resource[actionName]
     const cad: InputDescriptor | undefined = config.inputs?.[actionName]
-    const schema = cad?.schema
+    const schema = cad instanceof ZodType ? cad : cad?.schema
     if (schema && !isBlank(schema)) {
       resourceProxy[actionName] = function (...args) {
         schema.parse(args[0])

@@ -1,4 +1,4 @@
-import { ActionDescriptor, blankSchema, InputsConfig, idNumberSchema, RouterError } from '../../client.js'
+import { ActionDescriptor, blankSchema, idNumberSchema, RouterError, StrictInputsConfig } from '../../client.js'
 import { type AnyZodObject } from 'zod'
 
 export type ActionName = 'build' | 'edit' | 'show' | 'index' | 'load' | 'list' | 'create' | 'update' | 'destroy'
@@ -63,7 +63,7 @@ const list = {
   type: 'json',
 } as const satisfies ActionDescriptor
 
-export function defaultInputsConfig(idSchema: AnyZodObject = idNumberSchema): InputsConfig {
+export function defaultInputsConfig(idSchema: AnyZodObject = idNumberSchema): StrictInputsConfig {
   return {
     build: { schema: blankSchema, sources: ['params'] },
     edit: { schema: idSchema, sources: ['params'] },

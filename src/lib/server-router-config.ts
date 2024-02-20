@@ -9,7 +9,14 @@ import {
 } from './action-context.js'
 import { ActionContextCreator } from './common.js'
 import { ServerRouterImpl } from './server-router-impl.js'
-import { ActionDescriptor, InputsConfig, InputSource, LoadPageFunc, Resource, ResourceMethod } from './shared/index.js'
+import {
+  ActionDescriptor,
+  StrictInputsConfig,
+  InputSource,
+  LoadPageFunc,
+  Resource,
+  ResourceMethod,
+} from './shared/index.js'
 import { PartialWithRequired } from './shared/type-util.js'
 
 export type ResourceMethodHandlerParams = {
@@ -37,7 +44,7 @@ export type ServerRouterConfig = {
   inputArranger: InputArranger
   createActionOptions: CreateActionOptionsFunction
   createActionContext: ActionContextCreator
-  inputsConfig: InputsConfig
+  inputsConfig: StrictInputsConfig
   createDefaultResponder: CreateDefaultResponderFunc
   adapterRoot: string
   adapterFileName: string

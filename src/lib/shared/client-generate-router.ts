@@ -8,7 +8,7 @@ import {
   HandlerBuildRunner,
   NamedResources,
   choiceSchema,
-  InputsConfig,
+  StrictInputsConfig,
   Actions,
   blankSchema,
   ActionDescriptor,
@@ -71,7 +71,7 @@ export type PathPageMap = Map<string, PageNode | React.LazyExoticComponent<any>>
 
 export type ClientGenretateRouterCore = {
   host: string
-  inputsConfig: InputsConfig
+  inputsConfig: StrictInputsConfig
   loadPage: LoadPageFunc
   handlerBuildRunners: HandlerBuildRunner[]
   resourceNameToInfo: ResourceNameToInfo
@@ -80,7 +80,7 @@ export type ClientGenretateRouterCore = {
 
 export type ClientConfig = {
   host: () => string
-  inputsConfig: InputsConfig
+  inputsConfig: StrictInputsConfig
   createFetcher: CreateFetcherFunc
   sharedBundlePrefix: string
   jsRoot: string

@@ -28,10 +28,10 @@ export function routes(r: Router, support: RouterSupport<Middlewares>) {
         { action: 'logout', path: 'session', method: 'delete' },
       ],
       inputs: {
-        login: { schema: blankSchema },
-        user: { schema: blankSchema },
+        login: blankSchema,
+        user: blankSchema,
         verify: { schema: sessionCreateSchema, sources: ['body'] },
-        logout: { schema: blankSchema },
+        logout: blankSchema,
       },
     })
   })
@@ -45,9 +45,9 @@ export function routes(r: Router, support: RouterSupport<Middlewares>) {
       actions: [...crud(), { action: 'done', path: '$id/done', method: 'post', type: 'json' }],
       inputs: {
         list: { schema: pageSchema, sources: ['query', 'params'] },
-        create: { schema: taskCreateWithTagsSchema },
-        update: { schema: taskUpdateWithTagsSchema },
-        done: { schema: idNumberSchema },
+        create: taskCreateWithTagsSchema,
+        update: taskUpdateWithTagsSchema,
+        done: idNumberSchema,
       },
     })
 
@@ -55,9 +55,9 @@ export function routes(r: Router, support: RouterSupport<Middlewares>) {
       name: 'taskComments',
       actions: api('list', 'create', 'update'),
       inputs: {
-        list: { schema: taskIdSchema },
-        create: { schema: commentCreateSchema },
-        update: { schema: commentUpdateSchema },
+        list: taskIdSchema,
+        create: commentCreateSchema,
+        update: commentUpdateSchema,
       },
     })
   })

@@ -7,7 +7,7 @@ export function routes(r: Router, _support: RouterSupport<Middlewares>) {
       name: 'apiUsers',
       actions: api('create'),
       inputs: {
-        create: { schema: fileSchema },
+        create: fileSchema,
       },
     })
   })
