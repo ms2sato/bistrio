@@ -218,9 +218,9 @@ entry<N2R>({
     const formatTypeName = (name: string) => `${name[0].toUpperCase()}${name.slice(1)}`
     const formatParamName = (ad: ActionDescriptor) => `${interfaceName}${formatTypeName(ad.action)}Params`
     const typeAliasStr = (ad: ActionDescriptor) => {
-      const defaultConstructConfig = serverRouterConfig.constructConfig
-      const constructDescriptor = routeConfig.construct?.[ad.action]
-      const schema = choiceSchema(defaultConstructConfig, constructDescriptor, ad.action)
+      const defaultInputsConfig = serverRouterConfig.inputsConfig
+      const inputDescriptor = routeConfig.inputs?.[ad.action]
+      const schema = choiceSchema(defaultInputsConfig, inputDescriptor, ad.action)
       if (!schema || isBlank(schema)) {
         return
       }
@@ -235,9 +235,9 @@ entry<N2R>({
 
     const actionStr = (ad: ActionDescriptor) => {
       const argsStr = `options: OP`
-      const defaultConstructConfig = serverRouterConfig.constructConfig
-      const constructDescriptor = routeConfig.construct?.[ad.action]
-      const schema = choiceSchema(defaultConstructConfig, constructDescriptor, ad.action)
+      const defaultInputsConfig = serverRouterConfig.inputsConfig
+      const inputDescriptor = routeConfig.inputs?.[ad.action]
+      const schema = choiceSchema(defaultInputsConfig, inputDescriptor, ad.action)
       if (!schema || isBlank(schema)) {
         return `${ad.action}(${argsStr}): unknown`
       }

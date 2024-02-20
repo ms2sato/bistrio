@@ -13,7 +13,7 @@ export type NamedResources = {
 export type ValidationError = ZodError
 export type ValidationIssue = ZodIssue
 
-export type ConstructSource = 'body' | 'query' | 'params' | 'files'
+export type InputSource = 'body' | 'query' | 'params' | 'files'
 export type HttpMethod = 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head' | 'option'
 export type ActionType = 'json' | 'html'
 
@@ -26,18 +26,18 @@ export interface ActionDescriptor {
   hydrate?: boolean
 }
 
-export type ConstructDescriptor = {
+export type InputDescriptor = {
   schema?: ZodType | null
-  sources?: readonly ConstructSource[]
+  sources?: readonly InputSource[]
 }
 
-export type ConstructConfig = {
-  [action: string]: ConstructDescriptor
+export type InputsConfig = {
+  [action: string]: InputDescriptor
 }
 
 export type ResourceRouteConfig = {
   name: string
-  construct?: ConstructConfig
+  inputs?: InputsConfig
   actions?: readonly ActionDescriptor[]
 }
 
@@ -94,21 +94,21 @@ export const isActionOptions = (o: unknown): o is ActionOptions => {
 }
 
 export const choiceSchema = (
-  defaultConstructConfig: ConstructConfig,
-  constructDescriptor: ConstructDescriptor | undefined,
+  defaultInputsConfig: InputsConfig,
+  inputDescriptor: InputDescriptor | undefined,
   actionName: string,
 ) => {
-  const defaultConstructDescriptor: ConstructDescriptor | undefined = defaultConstructConfig[actionName]
+  const defaultInputDescriptor: InputDescriptor | undefined = defaultInputsConfig[actionName]
 
-  if (constructDescriptor?.schema === undefined) {
-    if (!defaultConstructDescriptor?.schema) {
-      throw new Error(`construct.${actionName}.schema not found in routes for #${actionName}`)
+  if (inputDescriptor?.schema === undefined) {
+    if (!defaultInputDescriptor?.schema) {
+      throw new Error(`inputs.${actionName}.schema not found in routes for #${actionName}`)
     }
-    return defaultConstructDescriptor.schema
-  } else if (constructDescriptor.schema === null) {
+    return defaultInputDescriptor.schema
+  } else if (inputDescriptor.schema === null) {
     return blankSchema
   } else {
-    return constructDescriptor.schema
+    return inputDescriptor.schema
   }
 }
 
@@ -121,12 +121,12 @@ export const createPageActionDescriptor = (path: string, hydrate = true): Action
 })
 
 export const choiseSources = (
-  defaultConstructConfig: ConstructConfig,
-  constructDescriptor: ConstructDescriptor | undefined,
+  defaultInputsConfig: InputsConfig,
+  inputDescriptor: InputDescriptor | undefined,
   actionName: string,
 ) => {
-  const defaultConstructDescriptor: ConstructDescriptor | undefined = defaultConstructConfig[actionName]
-  return constructDescriptor?.sources || defaultConstructDescriptor?.sources || ['params']
+  const defaultInputDescriptor: InputDescriptor | undefined = defaultInputsConfig[actionName]
+  return inputDescriptor?.sources || defaultInputDescriptor?.sources || ['params']
 }
 
 export type Scope = (router: Router) => void

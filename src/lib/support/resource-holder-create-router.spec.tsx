@@ -18,7 +18,7 @@ describe('validations', () => {
       router.resources('', {
         name: 'test_resource',
         actions: [{ action: 'build', method: 'get', path: '/build' }],
-        construct: { build: { schema: blankSchema } },
+        inputs: { build: { schema: blankSchema } },
       })
     }).toThrow('Router.resources() first argument cannnot be blank string')
   })
@@ -37,7 +37,7 @@ test('standard', async () => {
   router.resources('/test', {
     name: 'test_resource',
     actions: [{ action: 'build', method: 'get', path: '/build' }],
-    construct: { build: { schema: blankSchema } },
+    inputs: { build: { schema: blankSchema } },
   })
   await router.build()
 
@@ -64,7 +64,7 @@ test('with actionOption', async () => {
   router.resources('/test', {
     name: 'test_resource',
     actions: [{ action: 'hasOption', method: 'get', path: '/has_option' }],
-    construct: { hasOption: { schema: blankSchema } },
+    inputs: { hasOption: { schema: blankSchema } },
   })
   await router.build()
 

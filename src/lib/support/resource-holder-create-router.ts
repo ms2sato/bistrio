@@ -1,7 +1,7 @@
 import path from 'node:path'
 import debug from 'debug'
 import {
-  ConstructDescriptor,
+  InputDescriptor,
   FileNotFoundError,
   HandlerBuildRunner,
   Resource,
@@ -101,7 +101,7 @@ const createLocalResourceProxy = (config: ResourceRouteConfig, resource: Resourc
   const resourceProxy: Resource = {}
   for (const actionName in resource) {
     const resourceMethod = resource[actionName]
-    const cad: ConstructDescriptor | undefined = config.construct?.[actionName]
+    const cad: InputDescriptor | undefined = config.inputs?.[actionName]
     const schema = cad?.schema
     if (schema && !isBlank(schema)) {
       resourceProxy[actionName] = function (...args) {

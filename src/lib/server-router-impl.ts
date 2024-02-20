@@ -5,7 +5,7 @@ import debug from 'debug'
 import {
   ActionContext,
   ActionDescriptor,
-  ConstructDescriptor,
+  InputDescriptor,
   Handler,
   Adapter,
   ResourceRouteConfig,
@@ -185,13 +185,13 @@ const createLocalResourceProxy = (
     const resourceProxy: Resource = {}
     for (const actionName in resource) {
       const resourceMethod = resource[actionName]
-      const cad: ConstructDescriptor | undefined = config.construct?.[actionName]
+      const cad: InputDescriptor | undefined = config.inputs?.[actionName]
       const ad = config.actions?.find((action) => action.action === actionName)
       if (!ad) {
         continue
       }
 
-      const schema = choiceSchema(serverRouterConfig.constructConfig, cad, actionName)
+      const schema = choiceSchema(serverRouterConfig.inputsConfig, cad, actionName)
       resourceProxy[actionName] = async function (...args) {
         try {
           const options = await serverRouterConfig.createActionOptions(ctx)
@@ -391,7 +391,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
 
         const resourceMethod: ResourceMethod | undefined = resource?.[actionName]
         const actionFunc: Handler | Responder | RequestCallback | undefined = adapter[actionName]
-        const constructDescriptor: ConstructDescriptor | undefined = routeConfig.construct?.[actionName]
+        const inputDescriptor: InputDescriptor | undefined = routeConfig.inputs?.[actionName]
 
         const actionOverride = actionFunc instanceof Function
         if (!actionOverride) {
@@ -411,7 +411,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
         const schema: ZodType | undefined =
           resourceMethod === undefined
             ? undefined
-            : choiceSchema(this.serverRouterConfig.constructConfig, constructDescriptor, actionName)
+            : choiceSchema(this.serverRouterConfig.inputsConfig, inputDescriptor, actionName)
 
         let handlers
         if (actionOverride) {
@@ -453,7 +453,7 @@ export class ServerRouterImpl extends BasicRouter implements ServerRouter {
               throw new Error('Unreachable: resource is undefined')
             }
 
-            const sources = choiseSources(this.serverRouterConfig.constructConfig, constructDescriptor, actionName)
+            const sources = choiseSources(this.serverRouterConfig.inputsConfig, inputDescriptor, actionName)
             handlerLog(
               '%s#%s  with construct middleware; schema: %s, sources: %o',
               adapterLocalPath,

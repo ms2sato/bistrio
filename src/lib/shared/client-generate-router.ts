@@ -1,14 +1,14 @@
 import { type RouteObject } from 'react-router-dom'
 
 import {
-  ConstructDescriptor,
+  InputDescriptor,
   Resource,
   ResourceRouteConfig,
   Router,
   HandlerBuildRunner,
   NamedResources,
   choiceSchema,
-  ConstructConfig,
+  InputsConfig,
   Actions,
   blankSchema,
   ActionDescriptor,
@@ -71,7 +71,7 @@ export type PathPageMap = Map<string, PageNode | React.LazyExoticComponent<any>>
 
 export type ClientGenretateRouterCore = {
   host: string
-  constructConfig: ConstructConfig
+  inputsConfig: InputsConfig
   loadPage: LoadPageFunc
   handlerBuildRunners: HandlerBuildRunner[]
   resourceNameToInfo: ResourceNameToInfo
@@ -80,7 +80,7 @@ export type ClientGenretateRouterCore = {
 
 export type ClientConfig = {
   host: () => string
-  constructConfig: ConstructConfig
+  inputsConfig: InputsConfig
   createFetcher: CreateFetcherFunc
   sharedBundlePrefix: string
   jsRoot: string
@@ -227,7 +227,7 @@ const createFetcher: CreateFetcherFunc = (): Fetcher => {
 export const defaultClientConfig = (): ClientConfig => {
   return {
     host: () => location.origin,
-    constructConfig: Actions.defaultConstructConfig(),
+    inputsConfig: Actions.defaultInputsConfig(),
     createFetcher,
     sharedBundlePrefix: 'shared--',
     jsRoot: 'js',
@@ -250,7 +250,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
     routeObject: RouteObject = {},
     private core: ClientGenretateRouterCore = {
       host: clientConfig.host(),
-      constructConfig: clientConfig.constructConfig,
+      inputsConfig: clientConfig.inputsConfig,
       loadPage,
       resourceNameToInfo: new Map<string, ResourceInfo>(),
       handlerBuildRunners: [],
@@ -372,8 +372,8 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
             method = ad.method[0]
           }
 
-          const cad: ConstructDescriptor | undefined = routeConfig.construct?.[actionName]
-          const schema = choiceSchema(this.core.constructConfig, cad, actionName)
+          const cad: InputDescriptor | undefined = routeConfig.inputs?.[actionName]
+          const schema = choiceSchema(this.core.inputsConfig, cad, actionName)
 
           resource[actionName] = createStubMethod(ad, resourceUrl, schema, method)
 

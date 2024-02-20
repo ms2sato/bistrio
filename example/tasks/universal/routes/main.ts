@@ -21,18 +21,18 @@ export function routes(r: Router, support: RouterSupport<Middlewares>) {
   scope(r, (r) => {
     r.resources('auth', {
       name: 'auth',
-      construct: {
-        login: { schema: blankSchema },
-        user: { schema: blankSchema },
-        verify: { schema: sessionCreateSchema, sources: ['body'] },
-        logout: { schema: blankSchema },
-      },
       actions: [
         { action: 'login', path: 'login', method: 'get', page: true },
         { action: 'user', path: 'user', method: 'get' },
         { action: 'verify', path: 'session', method: 'patch' },
         { action: 'logout', path: 'session', method: 'delete' },
       ],
+      inputs: {
+        login: { schema: blankSchema },
+        user: { schema: blankSchema },
+        verify: { schema: sessionCreateSchema, sources: ['body'] },
+        logout: { schema: blankSchema },
+      },
     })
   })
 
@@ -41,24 +41,24 @@ export function routes(r: Router, support: RouterSupport<Middlewares>) {
     r = r.layout({ element: TaskLayout }) // set layout
 
     r.resources('tasks', {
-      construct: {
+      name: 'tasks',
+      actions: [...crud(), { action: 'done', path: '$id/done', method: 'post', type: 'json' }],
+      inputs: {
         list: { schema: pageSchema, sources: ['query', 'params'] },
         create: { schema: taskCreateWithTagsSchema },
         update: { schema: taskUpdateWithTagsSchema },
         done: { schema: idNumberSchema },
       },
-      name: 'tasks',
-      actions: [...crud(), { action: 'done', path: '$id/done', method: 'post', type: 'json' }],
     })
 
     r.resources('tasks/$taskId/comments', {
-      construct: {
+      name: 'taskComments',
+      actions: api('list', 'create', 'update'),
+      inputs: {
         list: { schema: taskIdSchema },
         create: { schema: commentCreateSchema },
         update: { schema: commentUpdateSchema },
       },
-      name: 'taskComments',
-      actions: api('list', 'create', 'update'),
     })
   })
 }

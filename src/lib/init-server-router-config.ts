@@ -22,7 +22,7 @@ function defaultServerRouterConfig(): Omit<ServerRouterConfig, 'baseDir' | 'load
     createActionContext: () => {
       throw new Error('createActionContext should be override for server platform')
     },
-    constructConfig: Actions.defaultConstructConfig(),
+    inputsConfig: Actions.defaultInputsConfig(),
     createDefaultResponder: createSmartResponder,
     formatPlaceholderForRouter,
     adapterRoot: './resources',

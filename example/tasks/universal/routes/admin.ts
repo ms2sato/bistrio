@@ -14,7 +14,7 @@ export function routes(r: Router, support: RouterSupport<Middlewares>) {
     r.resources('users', {
       name: 'adminUsers',
       actions: crud('index', 'list'),
-      construct: {
+      inputs: {
         list: { schema: adminUserBatchListSchema },
       },
     })
@@ -22,7 +22,7 @@ export function routes(r: Router, support: RouterSupport<Middlewares>) {
     r.resources('users/batch', {
       name: 'adminUserBatch',
       actions: api('create'),
-      construct: {
+      inputs: {
         create: { schema: adminUserBatchCreateSchema },
       },
     })
