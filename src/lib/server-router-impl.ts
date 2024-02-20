@@ -31,8 +31,9 @@ import {
   ClientConfig,
   Router,
   ActionType,
+  isActionOptions,
 } from '../index.js'
-import { HttpMethod, RouterOptions, opt } from './shared/index.js'
+import { HttpMethod, RouterOptions } from './shared/index.js'
 import { RouteObject } from 'react-router-dom'
 import { RouteObjectPickupper } from './shared/route-object-pickupper.js'
 import { BasicRouter } from './basic-router.js'
@@ -97,14 +98,16 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
         return
       }
 
-      const option = await serverRouterConfig.createActionOptions(ctx)
+      const options = await serverRouterConfig.createActionOptions(ctx)
+      if (!isActionOptions(options)) {
+        throw new Error('"options" is not an ActionOptions')
+      }
 
-      const wrappedOption = new opt(option)
       if (schema == blankSchema) {
         // TODO: typesafe
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const output = await resourceMethod.apply(resource, [wrappedOption])
-        await respond(ctx, output, option)
+        const output = await resourceMethod.apply(resource, [options])
+        await respond(ctx, output, options)
       } else {
         try {
           const arranged = await serverRouterConfig.inputArranger(ctx, sources, schema)
@@ -127,8 +130,8 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
             handlerLog('input', input)
 
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            const output = await resourceMethod.apply(resource, input ? [input, wrappedOption] : [wrappedOption])
-            await respond(ctx, output, option)
+            const output = await resourceMethod.apply(resource, input ? [input, options] : [options])
+            await respond(ctx, output, options)
           } catch (err) {
             if (err instanceof ZodError) {
               const validationError = err
@@ -142,7 +145,7 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
                   const filledSource = SchemaUtil.fillDefault(schema, source)
                   handlerLog('%s#%s.invalid', adapterPath, actionName, filledSource)
                   res.status(422)
-                  await responder.invalid.apply(adapter, [ctx, validationError, filledSource, option])
+                  await responder.invalid.apply(adapter, [ctx, validationError, filledSource, options])
                 } else {
                   next(validationError)
                 }
@@ -151,13 +154,13 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
                 await defaultResponder.invalid(ctx, validationError, source)
               }
             } else {
-              await handleFatal(ctx, err as Error, option, next)
+              await handleFatal(ctx, err as Error, options, next)
             }
           } finally {
             await cleanup()
           }
         } catch (err) {
-          return await handleFatal(ctx, err as Error, option, next)
+          return await handleFatal(ctx, err as Error, options, next)
         }
       }
     })().catch((err) => next(err))
@@ -191,18 +194,20 @@ const createLocalResourceProxy = (
       const schema = choiceSchema(serverRouterConfig.constructConfig, cad, actionName)
       resourceProxy[actionName] = async function (...args) {
         try {
-          const option = await serverRouterConfig.createActionOptions(ctx)
-          const wrappedOption = new opt(option)
+          const options = await serverRouterConfig.createActionOptions(ctx)
+          if (!isActionOptions(options)) {
+            throw new Error('"options" is not an ActionOptions')
+          }
 
           if (args.length === 0) {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-            return await resourceMethod.apply(resource, [wrappedOption])
+            return await resourceMethod.apply(resource, [options])
           } else {
             schema.parse(args[0]) // if throw error, args[0] is unexpected
 
             // TOOD: typesafe
             // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-assignment
-            return await resourceMethod.apply(resource, [...args, wrappedOption])
+            return await resourceMethod.apply(resource, [...args, options])
           }
         } catch (err) {
           console.error(err)

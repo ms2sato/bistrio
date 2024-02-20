@@ -80,17 +80,17 @@ r.resources('tasks', {
 
 Taking the `tasks` resource as an example, the default routing would look like this, defined all at once by the `crud()` function:
 
-| action | method    | path            | type | page | Main Purpose    |
-| ------ | --------- | --------------- | ---- | ---- | --------------- |
-| index  | GET       | /tasks          |      | true | List view       |
-| show   | GET       | /tasks/$id      |      | true | Detail view     |
-| build  | GET       | /tasks/build    |      | true | New creation view |
-| edit   | GET       | /tasks/$id/edit |      | true | Edit view       |
-| list   | GET       | /tasks.json     | json |      | Fetch list as JSON |
+| action | method    | path            | type | page | Main Purpose          |
+| ------ | --------- | --------------- | ---- | ---- | --------------------- |
+| index  | GET       | /tasks          |      | true | List view             |
+| show   | GET       | /tasks/$id      |      | true | Detail view           |
+| build  | GET       | /tasks/build    |      | true | New creation view     |
+| edit   | GET       | /tasks/$id/edit |      | true | Edit view             |
+| list   | GET       | /tasks.json     | json |      | Fetch list as JSON    |
 | load   | GET       | /tasks/$id.json | json |      | Fetch details as JSON |
-| create | POST      | /tasks/         |      |      | Create action   |
-| update | PUT,PATCh | /tasks/$id      |      |      | Update action   |
-| delete | DELETE    | /tasks/$id      |      |      | Delete action   |
+| create | POST      | /tasks/         |      |      | Create action         |
+| update | PUT,PATCh | /tasks/$id      |      |      | Update action         |
+| delete | DELETE    | /tasks/$id      |      |      | Delete action         |
 
 For example, the edit action for `/tasks` would be `/tasks/$id/edit` (where `$id` is a placeholder).
 
@@ -137,7 +137,7 @@ Resources are based on the REST concept, allowing developers to freely create ne
 - Resources can be easily called from a REPL, making it simple to verify logic.
 - Being broadly positioned as Models, it's fine to write a lot of
 
- logic directly in them.
+logic directly in them.
 
 After defining Routes, running `npm run bistrio:gen` will automatically generate corresponding interfaces in `.bistrio/resources`. Using these types to implement actual Resources ensures smooth operation.
 
@@ -146,7 +146,7 @@ Create a directory matching the URL path hierarchy in `server/resources` and cre
 For example, the Resource for `/tasks` corresponds to the file `server/resources/tasks/resource.ts`. The content looks like this, with the utility function `defineResource` provided to assist in creation.
 
 ```ts
-import { CustomMethodOption } from '@/server/customizers'
+import { CustomActionOptions } from '@/server/customizers'
 import { TasksResource } from '@bistrio/resources'
 
 //...
@@ -169,7 +169,7 @@ export default defineResource(
 
       // ...
       done: async ({ id }) => await prisma.task.update({ where: { id }, data: { done: true } }),
-    }) as const satisfies TasksResource<CustomMethodOption>, // This specification makes the specific type available externally
+    }) as const satisfies TasksResource<CustomActionOptions>, // This specification makes the specific type available externally
 )
 ```
 
@@ -177,36 +177,43 @@ For a more practical example, see [example/tasks/server/resources/tasks/resource
 
 When creating a Resource, keep the following points in mind:
 
-- The `TaskResource` type is a generic type that can specify custom argument types. Specify types defined by the system, like `CustomMethodOption`.
-- Add `as const satisfies TasksResource<CustomMethodOption>` to ensure the return of a specific type.
+- The `TaskResource` type is a generic type that can specify custom argument types. Specify types defined by the system, like `CustomActionOptions`.
+- Add `as const satisfies TasksResource<CustomActionOptions>` to ensure the return of a specific type.
 
-#### About `CustomMethodOption`
+#### About `CustomActionOptions`
 
 Processes like extracting user information from sessions are not performed within Resources. Since such processes are common across most parts of the system, they are handled before calling an action in `server/customizers/index.ts`'s `createActionOptions`. Customize this content according to your application.
 
 You can implement using the `req` object from the `ctx` variable, which is derived from Express. This return value is set as an optional argument for each action in the resource, making it available within the action.
 
 ```ts
-export const createActionOptions: CreateActionOptionFunction = (ctx) => {
-  debug('createOptions: req.params %s', ctx.params)
+export type CustomActionOptions = {
+  user?: User
+  admin?: {
+    id: number
+    accessedAt: Date
+  }
+} & ActionOptions // It is also required to be of type ActionOptions
 
-  const customMethodOption: CustomMethodOption = { user: ctx.req.user as User }
+export const createActionOptions: CreateActionOptionFunction = (ctx) => {
+  const customActionOptions: CustomActionOptions = buildActionOptions({ user: ctx.req.user as User })
 
   if (ctx.params.adminId) {
-    customMethodOption.admin = {
+    // For example, if it's an admin, additional specific information is included
+    customActionOptions.admin = {
       id: Number(ctx.params.adminId),
       accessedAt: new Date(),
     }
   }
 
-  return customMethodOption
+  return customActionOptions
 }
 ```
 
-For example, if you add a `load` action to a Resource, it will be set as the second argument and available for use. If there are no arguments, only `opt<CustomMethodOption>` is set as the argument.
+For example, if you add a `load` action to a Resource, it will be set as the second argument and available for use. If there are no arguments, only `CustomActionOptions` is set as the argument.
 
 ```ts
-      load: async ({ id }, options: opt<CustomMethodOption>): Promise<Task> => {
+      load: async ({ id }, options: CustomActionOptions): Promise<Task> => {
         // You can write processing using options
       },
 ```
@@ -272,7 +279,7 @@ Type ".help" for more information.
   updatedAt: 2024-01-28T07:57:17.471Z,
   tags: [ 'tag1', 'tag2' ]
 }
-> 
+>
 ```
 
 # Automatic Generation

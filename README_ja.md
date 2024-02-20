@@ -144,7 +144,7 @@ Routes を定義した後、 `npm run bistrio:gen` が実行されれば、`.bis
 例えば `/tasks` のResourceは `server/resources/tasks/resource.ts` のファイルが該当します。内容は以下のようになります。作成を補助するユーティリティ関数として defineResource が用意されています。
 
 ```ts
-import { CustomMethodOption } from '@/server/customizers'
+import { CustomActionOptions } from '@/server/customizers'
 import { TasksResource } from '@bistrio/resources'
 
 //...
@@ -167,7 +167,7 @@ export default defineResource(
 
       // ...
       done: async ({ id }) => await prisma.task.update({ where: { id }, data: { done: true } }),
-    }) as const satisfies TasksResource<CustomMethodOption>, // この指定で具体的な型を外から利用可能になる
+    }) as const satisfies TasksResource<CustomActionOptions>, // この指定で具体的な型を外から利用可能になる
 )
 ```
 
@@ -175,36 +175,43 @@ export default defineResource(
 
 Resource の作成の注意としては以下のポイントがあります
 
-- `TaskResource` 型はカスタム引数の型を指定できるジェネリクス型です。`CustomMethodOption` のようなシステムで定義した型を指定します。
-- `as const satisfies TasksResource<CustomMethodOption>` のように、 `as const satisfies` を付与して具体的な型を返すようにしてください
+- `TaskResource` 型はカスタム引数の型を指定できるジェネリクス型です。`CustomActionOptions` のようなシステムで定義した型を指定します。
+- `as const satisfies TasksResource<CustomActionOptions>` のように、 `as const satisfies` を付与して具体的な型を返すようにしてください
 
-#### `CustomMethodOption` について
+#### `CustomActionOptions` について
 
-セッションからユーザーの情報を取り出すなどの処理は Resource の中では行いません。このような処理はシステムのほとんどの箇所で共通に行える処理であると考えて、アクションを呼び出す前に `server/customizers/index.ts` の `createActionOptions` で行われます。この中身はアプリケーションに合わせてカスタマイズしてください。
+セッションからユーザー情報を取り出すなどの処理は Resource の中では行いません。このような処理はシステムのほとんどの箇所で共通に行える処理であると考えて、アクションを呼び出す前に `server/customizers/index.ts` の `createActionOptions` で行います。この中身はアプリケーションに合わせてカスタマイズしてください。
 
 `ctx` 変数から `req` で `Request` オブジェクト(Express由来のオブジェクトです)が取得できるので、これを使って実装します。この戻り値がリソースの各アクションのオプション引数としてセットされるので、アクション内で利用できます。
 
 ```ts
-export const createActionOptions: CreateActionOptionFunction = (ctx) => {
-  debug('createOptions: req.params %s', ctx.params)
+export type CustomActionOptions = {
+  user?: User
+  admin?: {
+    id: number
+    accessedAt: Date
+  }
+} & ActionOptions // ActionOptions型でもあることが必須
 
-  const customMethodOption: CustomMethodOption = { user: ctx.req.user as User }
+export const createActionOptions: CreateActionOptionFunction = (ctx) => {
+  const customActionOptions: CustomActionOptions = buildActionOptions({ user: ctx.req.user as User })
 
   if (ctx.params.adminId) {
-    customMethodOption.admin = {
+    // 例えばadminであれば、追加で特定の情報が入っている
+    customActionOptions.admin = {
       id: Number(ctx.params.adminId),
       accessedAt: new Date(),
     }
   }
 
-  return customMethodOption
+  return customActionOptions
 }
 ```
 
-例えば Resourceに `load` アクションを追加した場合の第二引数に設定され、利用できます。引数がない場合には `opt<CustomMethodOption>` だけが引数として設定されます。
+例えば Resourceに `load` アクションを追加した場合の第二引数に設定され、利用できます。引数がない場合には `CustomActionOptions` だけが引数として設定されます。
 
 ```ts
-      load: async ({ id }, options: opt<CustomMethodOption>): Promise<Task> => {
+      load: async ({ id }, options: CustomActionOptions): Promise<Task> => {
         // options を利用した処理を書けます
       },
 ```
@@ -270,7 +277,7 @@ Type ".help" for more information.
   updatedAt: 2024-01-28T07:57:17.471Z,
   tags: [ 'tag1', 'tag2' ]
 }
-> 
+>
 ```
 
 # 自動生成

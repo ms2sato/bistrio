@@ -1,9 +1,9 @@
 import express from 'express'
 import { Outlet } from 'react-router-dom'
 import { ServerRenderSupport } from './server-render-support.js'
-import { ActionDescriptor, IdNumberParams, LoadPageFunc, blankSchema, opt } from './shared/index.js'
-import { CreateActionOptionFunction } from './action-context.js'
-import { ConstructViewFunc, Resource, ServerRouterConfig, idNumberSchema } from '../index.js'
+import { ActionDescriptor, IdNumberParams, LoadPageFunc, blankSchema } from './shared/index.js'
+import { CreateActionOptionsFunction } from './action-context.js'
+import { ConstructViewFunc, Resource, ServerRouterConfig, buildActionOptions, idNumberSchema } from '../index.js'
 import { initServerRouterConfig } from './init-server-router-config.js'
 import {
   RoutesFunction,
@@ -20,7 +20,7 @@ type ActionOption = { test: number }
 const dummyResource = {
   build: () => ({ msg: 'ret build' }),
   show: ({ id }: IdNumberParams) => ({ msg: `ret show ${id}` }),
-  hasOption: (ao: opt<ActionOption>) => ({ msg: 'ret hasOption', opt: ao.body }),
+  hasOption: (ao: ActionOption) => ({ msg: 'ret hasOption', opt: ao }),
 } as const satisfies Resource
 
 const mockResources = { '/test/resource': dummyResource }
@@ -121,12 +121,15 @@ describe('ServerRouter', () => {
     })
 
     test('access resources with actionOptions', async () => {
-      const createActionOptions: CreateActionOptionFunction = () => ({ test: 321 })
+      const createActionOptions: CreateActionOptionsFunction = () => buildActionOptions({ test: 321 })
       const rs = await createServerRenderSupport({
         ...dummyProps,
         serverRouterConfig: initServerRouterConfig({ createActionOptions, baseDir: './', loadPage }),
       })
-      expect(await rs.resources().test_resource.hasOption()).toStrictEqual({ msg: 'ret hasOption', opt: { test: 321 } })
+      expect(await rs.resources().test_resource.hasOption()).toStrictEqual({
+        msg: 'ret hasOption',
+        opt: buildActionOptions({ test: 321 }),
+      })
     })
 
     test('access suspendedResources', async () => {
@@ -143,7 +146,7 @@ describe('ServerRouter', () => {
     })
 
     test('access suspendedResources with actionOptions', async () => {
-      const createActionOptions: CreateActionOptionFunction = () => ({ test: 321 })
+      const createActionOptions: CreateActionOptionsFunction = () => buildActionOptions({ test: 321 })
       const rs = await createServerRenderSupport({
         ...dummyProps,
         serverRouterConfig: initServerRouterConfig({ createActionOptions, baseDir: './', loadPage }),
@@ -157,7 +160,7 @@ describe('ServerRouter', () => {
         await susp
         expect(await rs.suspendedResources().test_resource.hasOption()).toStrictEqual({
           msg: 'ret hasOption',
-          opt: { test: 321 },
+          opt: buildActionOptions({ test: 321 }),
         })
       }
     })
@@ -342,7 +345,7 @@ describe('ServerRouter', () => {
     })
 
     test('requests with actionOpitons', async () => {
-      const createActionOptions: CreateActionOptionFunction = () => ({ test: 321 })
+      const createActionOptions: CreateActionOptionsFunction = () => buildActionOptions({ test: 321 })
       const router = await buildRouter({
         ...dummyProps,
         serverRouterConfig: initServerRouterConfig({

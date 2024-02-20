@@ -1,6 +1,6 @@
 import { defineResource, ReadLineCallback, readLines } from 'bistrio'
 import { getPrismaClient } from '@server/lib/prisma-util'
-import { CustomMethodOption } from '@/server/customizers'
+import { CustomActionOptions } from '@/server/customizers'
 import { ApiUsersResource } from '@/.bistrio/resources'
 import { object, string } from 'zod'
 import { hash } from '@/server/lib/crypter'
@@ -43,5 +43,5 @@ export default defineResource(
             .map((r) => (r.error instanceof Error ? r.error : new Error(JSON.stringify(r.error)))),
         }
       },
-    }) as const satisfies ApiUsersResource<CustomMethodOption>,
+    }) as const satisfies ApiUsersResource<CustomActionOptions>,
 )

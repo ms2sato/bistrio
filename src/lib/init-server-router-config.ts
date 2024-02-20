@@ -1,7 +1,7 @@
 import { Actions } from '../index.js'
 import { CreateDefaultResponderFunc, ServerRouterConfig, ServerRouterConfigCustom } from './server-router-config.js'
 import {
-  createNullActionOption,
+  createNullActionOptions,
   createSmartInputArranger,
   formatPlaceholderForRouter,
   importLocal,
@@ -18,7 +18,7 @@ function defaultServerRouterConfig(): Omit<ServerRouterConfig, 'baseDir' | 'load
   return {
     actions: Actions.page(),
     inputArranger: createSmartInputArranger(),
-    createActionOptions: createNullActionOption,
+    createActionOptions: createNullActionOptions,
     createActionContext: () => {
       throw new Error('createActionContext should be override for server platform')
     },

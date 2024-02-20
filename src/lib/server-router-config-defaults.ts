@@ -1,9 +1,9 @@
-import { CreateActionOptionFunction } from './action-context.js'
-import { FileNotFoundError, routerPlaceholderRegex } from './shared/common.js'
+import { CreateActionOptionsFunction } from './action-context.js'
+import { FileNotFoundError, buildActionOptions, routerPlaceholderRegex } from './shared/common.js'
 export { createSmartInputArranger } from './input-arrangers.js'
 
-export const createNullActionOption: CreateActionOptionFunction = (_ctx) => {
-  return Promise.resolve(undefined)
+export const createNullActionOptions: CreateActionOptionsFunction = (_ctx) => {
+  return Promise.resolve(buildActionOptions({}))
 }
 
 export const formatPlaceholderForRouter = (routePath: string) => routePath.replace(routerPlaceholderRegex, ':$1')

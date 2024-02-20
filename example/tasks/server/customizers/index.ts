@@ -1,28 +1,28 @@
 import { User } from '@/universal/params'
-import { CreateActionOptionFunction } from 'bistrio'
+import { ActionOptions, CreateActionOptionsFunction, buildActionOptions } from 'bistrio'
 import createDebug from 'debug'
 
 const debug = createDebug('bistrio:customizer')
 
-export type CustomMethodOption = {
+export type CustomActionOptions = {
   user?: User
   admin?: {
     id: number
     accessedAt: Date
   }
-}
+} & ActionOptions
 
-export const createActionOptions: CreateActionOptionFunction = (ctx) => {
-  debug('createOptions: req.params %s', ctx.params)
+export const createActionOptions: CreateActionOptionsFunction = (ctx) => {
+  debug('createActionOptions: req.params %s', ctx.params)
 
-  const customMethodOption: CustomMethodOption = { user: ctx.req.user as User } // TODO: typesafe
+  const customActionOptions: CustomActionOptions = buildActionOptions({ user: ctx.req.user })
 
   if (ctx.params.adminId) {
-    customMethodOption.admin = {
+    customActionOptions.admin = {
       id: Number(ctx.params.adminId),
       accessedAt: new Date(),
     }
   }
 
-  return customMethodOption
+  return customActionOptions
 }

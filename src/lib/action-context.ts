@@ -8,6 +8,7 @@ import {
   ResourceRouteConfig,
   NamedResources,
   HandlerBuildRunner,
+  ActionOptions,
 } from '../index.js'
 import { ResourceProxyCreateFunc } from './server-router-impl.js'
 
@@ -71,7 +72,7 @@ export type Adapter<Opt = unknown, In = unknown> = {
   [key: string]: Handler | Responder<Opt> | RequestCallback<In>
 }
 
-export type CreateActionOptionFunction = (ctx: ActionContext) => unknown
+export type CreateActionOptionsFunction = (ctx: ActionContext) => ActionOptions | Promise<ActionOptions>
 
 /**
  * @returns If not rendered return false.

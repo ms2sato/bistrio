@@ -2,13 +2,6 @@ import { ZodError, ZodIssue, ZodType } from 'zod'
 import { blankSchema } from './schemas.js'
 import { ComponentType, ReactNode } from 'react'
 
-const optType = Symbol('opt<>')
-
-export class opt<T> {
-  readonly [optType]: symbol = optType
-  constructor(public body: T) {}
-}
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ResourceMethod = (...args: any[]) => any
 
@@ -81,6 +74,24 @@ export function isValidationError(err: unknown): err is ValidationError {
 }
 
 export class FileNotFoundError extends Error {}
+
+const actionOptionsInternalSymbol = Symbol('__bistrio_action_option__')
+
+export interface ActionOptions {
+  readonly [actionOptionsInternalSymbol]: typeof actionOptionsInternalSymbol
+}
+
+export const buildActionOptions = <O extends object = Record<string, unknown>>(o: O): O & ActionOptions => ({
+  [actionOptionsInternalSymbol]: actionOptionsInternalSymbol,
+  ...o,
+})
+
+export const isActionOptions = (o: unknown): o is ActionOptions => {
+  if (typeof o !== 'object' || o === null) {
+    return false
+  }
+  return actionOptionsInternalSymbol in o
+}
 
 export const choiceSchema = (
   defaultConstructConfig: ConstructConfig,

@@ -2,7 +2,7 @@ import { defineResource } from 'bistrio'
 import { getPrismaClient } from '@server/lib/prisma-util'
 import { User } from '@prisma/client'
 import { AdminUsersResource } from '@bistrio/resources'
-import { CustomMethodOption } from '@/server/customizers'
+import { CustomActionOptions } from '@/server/customizers'
 
 const prisma = getPrismaClient()
 
@@ -15,5 +15,5 @@ export default defineResource(
         const users = await prisma.user.findMany()
         return users.map((user) => ({ ...user, hashedPassword: undefined })) // TODO: to secure
       },
-    }) as const satisfies AdminUsersResource<CustomMethodOption>,
+    }) as const satisfies AdminUsersResource<CustomActionOptions>,
 )

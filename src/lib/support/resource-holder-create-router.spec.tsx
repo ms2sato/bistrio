@@ -1,6 +1,6 @@
-import { CreateActionOptionFunction } from '../action-context.js'
+import { CreateActionOptionsFunction } from '../action-context.js'
 import { initServerRouterConfig } from '../init-server-router-config.js'
-import { FileNotFoundError, LoadPageFunc, Resource, blankSchema, opt } from '../shared/index.js'
+import { FileNotFoundError, LoadPageFunc, Resource, blankSchema, buildActionOptions } from '../shared/index.js'
 import { ResourceHolderCreateRouter } from './resource-holder-create-router.js'
 
 type ActionOption = { test: number }
@@ -47,7 +47,7 @@ test('standard', async () => {
 })
 
 test('with actionOption', async () => {
-  const createActionOptions: CreateActionOptionFunction = () => ({ test: 321 })
+  const createActionOptions: CreateActionOptionsFunction = () => buildActionOptions({ test: 321 })
 
   const holder: Record<string, Resource> = {}
   const router = new ResourceHolderCreateRouter(
@@ -57,7 +57,7 @@ test('with actionOption', async () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const spy = jest.spyOn(router as any, 'loadLocalResource').mockImplementation(() =>
     Promise.resolve({
-      hasOption: (ao: opt<ActionOption>) => ({ msg: 'ret hasOption', opt: ao.body }),
+      hasOption: (ao: ActionOption) => ({ msg: 'ret hasOption', opt: ao }),
     }),
   )
 
@@ -69,7 +69,7 @@ test('with actionOption', async () => {
   await router.build()
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-  expect(await holder.test_resource.hasOption(new opt({ test: 123 }))).toStrictEqual({
+  expect(await holder.test_resource.hasOption({ test: 123 })).toStrictEqual({
     msg: 'ret hasOption',
     opt: { test: 123 },
   })
