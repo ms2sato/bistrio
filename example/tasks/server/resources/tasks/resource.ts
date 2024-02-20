@@ -2,7 +2,7 @@ import { defineResource, Paginated } from 'bistrio'
 import { getPrismaClient } from '@server/lib/prisma-util'
 import { TaskWithTags } from '@/universal/types'
 import { Task } from '@prisma/client'
-import { CustomMethodOption } from '@/server/customizers'
+import { CustomActionOptions } from '@/server/customizers'
 import { TasksResource } from '@bistrio/resources'
 
 const prisma = getPrismaClient()
@@ -80,5 +80,5 @@ export default defineResource(
       destroy: async ({ id }) => await prisma.task.delete({ where: { id } }),
 
       done: async ({ id }) => await prisma.task.update({ where: { id }, data: { done: true } }),
-    }) as const satisfies TasksResource<CustomMethodOption>,
+    }) as const satisfies TasksResource<CustomActionOptions>,
 )

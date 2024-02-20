@@ -1,6 +1,6 @@
-import { CreateActionOptionFunction } from '../action-context.js'
+import { CreateActionOptionsFunction } from '../action-context.js'
 import { initServerRouterConfig } from '../init-server-router-config.js'
-import { FileNotFoundError, LoadPageFunc, Resource, blankSchema, buildActionOption } from '../shared/index.js'
+import { FileNotFoundError, LoadPageFunc, Resource, blankSchema, buildActionOptions } from '../shared/index.js'
 import { ResourceHolderCreateRouter } from './resource-holder-create-router.js'
 
 type ActionOption = { test: number }
@@ -47,7 +47,7 @@ test('standard', async () => {
 })
 
 test('with actionOption', async () => {
-  const createActionOptions: CreateActionOptionFunction = () => buildActionOption({ test: 321 })
+  const createActionOptions: CreateActionOptionsFunction = () => buildActionOptions({ test: 321 })
 
   const holder: Record<string, Resource> = {}
   const router = new ResourceHolderCreateRouter(

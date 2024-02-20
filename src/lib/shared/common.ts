@@ -75,22 +75,22 @@ export function isValidationError(err: unknown): err is ValidationError {
 
 export class FileNotFoundError extends Error {}
 
-const actionOptionInternalSymbol = Symbol('__bistrio_action_option__')
+const actionOptionsInternalSymbol = Symbol('__bistrio_action_option__')
 
-export interface ActionOption {
-  readonly [actionOptionInternalSymbol]: typeof actionOptionInternalSymbol
+export interface ActionOptions {
+  readonly [actionOptionsInternalSymbol]: typeof actionOptionsInternalSymbol
 }
 
-export const buildActionOption = <O extends object = Record<string, unknown>>(o: O): O & ActionOption => ({
-  [actionOptionInternalSymbol]: actionOptionInternalSymbol,
+export const buildActionOptions = <O extends object = Record<string, unknown>>(o: O): O & ActionOptions => ({
+  [actionOptionsInternalSymbol]: actionOptionsInternalSymbol,
   ...o,
 })
 
-export const isActionOption = (o: unknown): o is ActionOption => {
+export const isActionOptions = (o: unknown): o is ActionOptions => {
   if (typeof o !== 'object' || o === null) {
     return false
   }
-  return actionOptionInternalSymbol in o
+  return actionOptionsInternalSymbol in o
 }
 
 export const choiceSchema = (

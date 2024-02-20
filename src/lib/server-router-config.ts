@@ -1,7 +1,7 @@
 import { ZodType } from 'zod'
 import {
   InputArranger,
-  CreateActionOptionFunction,
+  CreateActionOptionsFunction,
   Responder,
   Adapter,
   RequestCallback,
@@ -42,7 +42,7 @@ export type ServerRouterConfig = {
   baseDir: string
   actions: readonly ActionDescriptor[]
   inputArranger: InputArranger
-  createActionOptions: CreateActionOptionFunction
+  createActionOptions: CreateActionOptionsFunction
   createActionContext: ActionContextCreator
   constructConfig: ConstructConfig
   createDefaultResponder: CreateDefaultResponderFunc

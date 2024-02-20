@@ -1,4 +1,4 @@
-import { ActionOption, NamedResources, Resource } from '../../client.js'
+import { ActionOptions, NamedResources, Resource } from '../../client.js'
 import { Localizer } from './locale.js'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -77,7 +77,7 @@ type SuspendedAppendLastArgToResourceMethodOptions<F> = F extends (...args: infe
 
 type OmitOptArgument<R> = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [A in keyof R]: RemoveLastArgIsA<R[A], ActionOption>
+  [A in keyof R]: RemoveLastArgIsA<R[A], ActionOptions>
 }
 
 type AppendRMOArgument<R> = {
