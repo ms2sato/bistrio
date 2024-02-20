@@ -44,13 +44,14 @@ export const arrangeOctetStreamInput: InputArranger = async (ctx, _sources, sche
 
   const tmpDir = await mkdtemp(join(tmpdir(), 'uploaded-'))
   const tmpFilePath = join(tmpDir, filename)
-  ctx.req.pipe(createWriteStream(tmpFilePath))
+  const fileStream = createWriteStream(tmpFilePath)
+  ctx.req.pipe(fileStream)
 
   await new Promise<void>((resolve, reject) => {
-    ctx.req.on('end', () => {
-      resolve()
-    })
-    ctx.req.on('error', (err) => reject(err))
+    fileStream.on('finish', () => resolve())
+
+    ctx.req.on('error', reject)
+    fileStream.on('error', reject)
   })
 
   return [
