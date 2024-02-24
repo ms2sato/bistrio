@@ -197,7 +197,7 @@ export const createActionOptions: CreateActionOptionFunction = (ctx) => {
   const customActionOptions: CustomActionOptions = buildActionOptions({ user: ctx.req.user as User })
 
   if (ctx.params.adminId) {
-    // 例えばadminであれば、追加で特定の情報が入っている
+    // 例えばadminであれば、追加で特定の情報が入っているなど
     customActionOptions.admin = {
       id: Number(ctx.params.adminId),
       accessedAt: new Date(),
@@ -250,7 +250,7 @@ function Task({ id }: { id: number }) {
 }
 ```
 
-- useRenderSupport は 自動生成された '@bistrio/routes/main' に配置されたものを利用してください(フレームワークから提供されるのは型が確定していません)。
+- useRenderSupport は 自動生成された '@bistrio/routes/main' 等に配置されたものを利用してください(フレームワークから提供されるものは型が確定していません)。
 - Suspense を使わない場合には `rs.resources()` として呼び出すと Promise を返す実装が利用できます。
 
 # REPL
