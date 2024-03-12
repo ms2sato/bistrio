@@ -6,7 +6,7 @@ This is a web application framework made with TypeScript, React, and Zod. It foc
 
 ## Challenges and Solutions
 
-Frameworks like Next.js and Vue.js mainly focus on the frontend. We believe this approach presents the following challenges:
+Many frameworks like Next.js primarily focus on the frontend. In such cases, I believe there are several challenges:
 
 - Often, non-essential tasks related to connecting with the backend (such as adjusting URLs for communication) arise.
 - Using Server Side Rendering (SSR) necessitates a frontend server (BFF), complicating the system architecture.
