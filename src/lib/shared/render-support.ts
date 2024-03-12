@@ -116,7 +116,7 @@ export interface Suspendable {
   put(key: string | symbol, val: unknown): void
   remove(key: string | symbol): void
   read(key: string | symbol): unknown
-  fetchJson<T>(url: string, key: string): T
+  fetchJson<T>(url: string, key?: string): T
   purge(options?: SuspensePurgeOptions): void
 }
 
