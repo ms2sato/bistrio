@@ -22,7 +22,13 @@ import { RouteObject } from 'react-router-dom'
 import { ExpressActionContext } from '../lib/express-action-context.js'
 import { ActionContextCreator } from '../lib/common.js'
 
-type VirtualRequest = { url: string; method: string; headers: Record<string, string>; get: (key: string) => string }
+type VirtualRequest = {
+  url: string
+  method: string
+  headers: Record<string, string>
+  get: (key: string) => string
+  body?: string
+}
 type Handle = (req: VirtualRequest, res: MockExpressResponse, out: () => void) => void
 type Handlable = { handle: Handle }
 

@@ -14,13 +14,22 @@ import {
   getDummyServerRouterImpl,
 } from '../misc/spec-util.js'
 import { ExpressActionContext } from './express-action-context.js'
+import { z } from 'zod'
 
 type ActionOption = { test: number }
+
+const taskSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+})
+
+type TaskParams = z.infer<typeof taskSchema>
 
 const dummyResource = {
   build: () => ({ msg: 'ret build' }),
   show: ({ id }: IdNumberParams) => ({ msg: `ret show ${id}` }),
   hasOption: (ao: ActionOption) => ({ msg: 'ret hasOption', opt: ao }),
+  create: (params: TaskParams) => ({ msg: params }),
 } as const satisfies Resource
 
 const mockResources = { '/test/resource': dummyResource }
@@ -32,8 +41,9 @@ const dummyRoutes: RoutesFunction = (router) => {
       { action: 'build', method: 'get', path: '/build' },
       { action: 'hasOption', method: 'get', path: '/has_option' },
       { action: 'show', method: 'get', path: '/$id' },
+      { action: 'create', method: 'post', path: '/' },
     ],
-    inputs: { build: { schema: blankSchema }, hasOption: { schema: blankSchema } },
+    inputs: { build: { schema: blankSchema }, hasOption: { schema: blankSchema }, create: taskSchema },
   })
 }
 
@@ -99,6 +109,10 @@ describe('ServerRouter', () => {
         {
           methods: ['GET'],
           path: '/test/:id.:format?',
+        },
+        {
+          methods: ['POST'],
+          path: '/test.:format?',
         },
       ])
     })
@@ -197,6 +211,46 @@ describe('ServerRouter', () => {
 
       expect(ret.statusCode).toBe(200)
       expect(ret.jsonData()).toStrictEqual({ msg: 'ret build' })
+    })
+
+    test('invalid requests', async () => {
+      const router = await buildRouter(dummyProps)
+
+      const ret = await fakeRequest(router, {
+        url: '/test/',
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({}), // title, description is missing
+        get: function (key: string) {
+          return this.headers[key]
+        },
+      })
+
+      expect(ret.statusCode).toBe(422)
+
+      // responsed zod error
+      const data = JSON.parse(ret.dataAsString()) as {
+        errors: [{ code: string; expected: string; message: string; path: string[]; received: string }]
+        status: string
+      }
+      expect(data.errors).toStrictEqual([
+        {
+          code: 'invalid_type',
+          expected: 'string',
+          message: 'Required',
+          path: ['title'],
+          received: 'undefined',
+        },
+        {
+          code: 'invalid_type',
+          expected: 'string',
+          message: 'Required',
+          path: ['description'],
+          received: 'undefined',
+        },
+      ])
+
+      expect(data.status).toBe('error')
     })
 
     // FIXME: not supported
