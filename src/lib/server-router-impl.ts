@@ -159,7 +159,8 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
                 }
               } else {
                 handlerLog('%s#%s invalid by default responder', adapterPath, actionName)
-                await defaultResponder.invalid(ctx, validationError, input)
+                const response = await defaultResponder.invalid(ctx, validationError, input)
+                await ctx.respond(response)
               }
             } else {
               await handleFatal(ctx, err as Error, options, next)
