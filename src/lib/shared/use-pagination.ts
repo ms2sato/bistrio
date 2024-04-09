@@ -53,7 +53,7 @@ export function usePagination<T>(props: PaginationProps<T>): PaginationReturn<T>
   }, [query.limit, query.page])
 
   const { data, count } = props.loader(pageParams)
-  const maxPage = Math.ceil(count / limit)
+  const maxPage = count === 0 ? 1 : Math.ceil(count / limit)
 
   const toPageParams = (pages: number[]): PageParams[] => pages.map((page) => ({ ...pageParams, page }))
 
