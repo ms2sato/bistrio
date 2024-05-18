@@ -9,8 +9,12 @@ import {
 import { SmartResponder, StandardJsonResponder } from './smart-responder.js'
 
 const createSmartResponder: CreateDefaultResponderFunc = () => {
-  return new SmartResponder(() => {
-    throw new Error('Unimplemented Fatal Handler')
+  return new SmartResponder((_ctx, err, _options, next) => {
+    if (!next) {
+      throw new Error('next is required')
+    }
+    next(err)
+    return false
   }, new StandardJsonResponder())
 }
 

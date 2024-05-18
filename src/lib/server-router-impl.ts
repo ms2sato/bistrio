@@ -77,17 +77,24 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
     }
   }
 
-  const handleFatal = async (ctx: ActionContext, err: Error, option: unknown, _next: NextFunction) => {
+  const handleFatal = async (ctx: ActionContext, err: Error, option: unknown, next: NextFunction) => {
+    let response: Response | undefined | false
     if (responder && 'fatal' in responder) {
       try {
         handlerLog('%s#%s.fatal', adapterPath, actionName)
-        await responder.fatal?.apply(adapter, [ctx, err, option])
+        response = await responder.fatal?.apply(adapter, [ctx, err, option, next])
       } catch (er) {
         console.error('Unexpected Error on responder.fatal, dispatch to default responder', er)
-        await defaultResponder.fatal(ctx, err)
+        response = await defaultResponder.fatal(ctx, err, option, next)
       }
     } else {
-      await defaultResponder.fatal(ctx, err)
+      response = await defaultResponder.fatal(ctx, err, option, next)
+    }
+
+    if (response) {
+      await ctx.respond(response)
+    } else {
+      next(err)
     }
   }
 
