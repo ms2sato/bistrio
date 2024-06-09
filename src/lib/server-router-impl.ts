@@ -32,6 +32,8 @@ import {
   Router,
   ActionType,
   isActionOptions,
+  InputType,
+  InputArrangerResult,
 } from '../index.js'
 import { HttpMethod, RouterOptions } from './shared/index.js'
 import { RouteObject } from 'react-router-dom'
@@ -110,7 +112,17 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
         await respond(ctx, output, options)
       } else {
         try {
-          const arranged = await serverRouterConfig.inputArranger(ctx, sources, schema)
+          let arranged: InputArrangerResult
+          try {
+            arranged = await serverRouterConfig.inputArranger(ctx, sources, schema)
+          } catch (err) {
+            if (err instanceof ZodError) {
+              return await handleZodError(err, {})
+            } else {
+              return await handleFatal(ctx, err as Error, options, next)
+            }
+          }
+
           let input = arranged[0]
           const cleanup = arranged[1]
 
@@ -142,26 +154,7 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
             })
           } catch (err) {
             if (err instanceof ZodError) {
-              const validationError = err
-              handlerLog.extend('debug')('%s#%s validationError %s', adapterPath, actionName, validationError.message)
-              if (responder) {
-                if ('invalid' in responder) {
-                  if (!responder.invalid) {
-                    throw new Error('Unreachable: invalid in responder is not implemented')
-                  }
-
-                  const filledSource = SchemaUtil.fillDefault(schema, input)
-                  handlerLog('%s#%s.invalid', adapterPath, actionName, filledSource)
-                  res.status(422)
-                  await responder.invalid.apply(adapter, [ctx, validationError, filledSource, options])
-                } else {
-                  next(validationError)
-                }
-              } else {
-                handlerLog('%s#%s invalid by default responder', adapterPath, actionName)
-                const response = await defaultResponder.invalid(ctx, validationError, input)
-                await ctx.respond(response)
-              }
+              await handleZodError(err, input)
             } else {
               await handleFatal(ctx, err as Error, options, next)
             }
@@ -170,6 +163,29 @@ const createResourceMethodHandler = (params: ResourceMethodHandlerParams): expre
           }
         } catch (err) {
           return await handleFatal(ctx, err as Error, options, next)
+        }
+      }
+
+      async function handleZodError(err: ZodError, input: InputType) {
+        const validationError = err
+        handlerLog.extend('debug')('%s#%s validationError %s', adapterPath, actionName, validationError.message)
+        if (responder) {
+          if ('invalid' in responder) {
+            if (!responder.invalid) {
+              throw new Error('Unreachable: invalid in responder is not implemented')
+            }
+
+            const filledSource = SchemaUtil.fillDefault(schema, input)
+            handlerLog('%s#%s.invalid', adapterPath, actionName, filledSource)
+            res.status(422)
+            await responder.invalid.apply(adapter, [ctx, validationError, filledSource, options])
+          } else {
+            next(validationError)
+          }
+        } else {
+          handlerLog('%s#%s invalid by default responder', adapterPath, actionName)
+          const response = await defaultResponder.invalid(ctx, validationError, input)
+          await ctx.respond(response)
         }
       }
     })().catch((err) => next(err))
