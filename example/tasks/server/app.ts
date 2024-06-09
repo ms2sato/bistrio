@@ -117,7 +117,7 @@ export async function setup() {
       return 'status' in herr && typeof herr.status === 'number'
     }
 
-    const responseJson = (code: string, message: string) => {
+    const responseJson = (code: number, message: string) => {
       if (code >= 500) {
         console.error(err)
         res.status(code)
