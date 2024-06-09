@@ -121,7 +121,7 @@ export async function setup() {
       if (code >= 500) {
         console.error(err)
         res.status(code)
-        res.json({ err: '予期しないエラーです' })
+        res.json({ err: 'Unexpected Error' })
         return
       } else {
         res.status(code)
@@ -144,7 +144,7 @@ export async function setup() {
     }
 
     console.error(err)
-    responseJson(500, '予期しないエラーです')
+    responseJson(500, 'Unexpected Error')
   } as express.ErrorRequestHandler)
 
   // catch 404 and forward to error handler
