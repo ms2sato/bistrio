@@ -1,3 +1,4 @@
+import { NextFunction } from 'express'
 import { ActionContext, FilledResponder } from './action-context.js'
 import { JsonFormatter, StandardJsonFormatter, ValidationError } from './shared/index.js'
 
@@ -50,7 +51,12 @@ export class StandardJsonResponder<Opt = unknown, Out = unknown, Src = unknown>
  * Throw error or Response object to respond.
  * @returns Response object
  */
-export type RespondFatalHandler = (ctx: ActionContext, err: Error) => Promise<Response>
+export type RespondFatalHandler = <Opt>(
+  ctx: ActionContext,
+  err: Error,
+  options?: Opt,
+  next?: NextFunction,
+) => false | undefined | Response | Promise<Response | undefined>
 
 export class SmartResponder<Opt = unknown, Out = unknown, Src = unknown> implements FilledResponder<Opt, Out, Src> {
   constructor(
@@ -78,12 +84,12 @@ export class SmartResponder<Opt = unknown, Out = unknown, Src = unknown> impleme
     return await this.jsonResonder.invalid(ctx, validationError, source)
   }
 
-  async fatal(ctx: ActionContext, err: Error) {
+  async fatal(ctx: ActionContext, err: Error, option?: Opt, next?: NextFunction) {
     console.error('fatal', err)
     if (ctx.willRespondJson()) {
-      return await this.jsonResonder.fatal(ctx, err)
+      return await this.jsonResonder.fatal(ctx, err, option)
     }
 
-    return await this.fatalHandler(ctx, err)
+    return await this.fatalHandler(ctx, err, option, next)
   }
 }

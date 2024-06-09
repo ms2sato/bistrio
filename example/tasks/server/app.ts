@@ -18,6 +18,7 @@ import { routes } from '@universal/routes/all'
 import { serverRouterConfig } from './config'
 import { config } from '../config'
 import { init as initPassport } from './lib/passport-util'
+import { HttpResponseError } from 'bistrio'
 
 if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = 'development'
@@ -116,15 +117,34 @@ export async function setup() {
       return 'status' in herr && typeof herr.status === 'number'
     }
 
-    console.error(err)
+    const responseJson = (code: number, message: string) => {
+      if (code >= 500) {
+        console.error(err)
+        res.status(code)
+        res.json({ err: 'Unexpected Error' })
+        return
+      } else {
+        res.status(code)
+        res.json({ err: message })
+      }
+    }
+
+    console.error('handle error', err)
+
+    if (err instanceof HttpResponseError) {
+      responseJson(err.code, err.message)
+      return
+    }
 
     // TODO: handling RecordNotFound of prisma
 
-    // render the error page
-    res.status(isHttpError(err) ? err.status : 500)
+    if (isHttpError(err)) {
+      responseJson(err.status, err.message)
+      return
+    }
 
-    // TODO: render any error info accoding to the Content-Type
-    res.json({ err })
+    console.error(err)
+    responseJson(500, 'Unexpected Error')
   } as express.ErrorRequestHandler)
 
   // catch 404 and forward to error handler

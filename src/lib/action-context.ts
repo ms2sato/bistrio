@@ -1,4 +1,4 @@
-import express from 'express'
+import express, { NextFunction } from 'express'
 import { ZodType } from 'zod'
 import { RouteObject } from 'react-router-dom'
 import {
@@ -57,7 +57,12 @@ export type Responder<Opt = unknown, Out = unknown, Src = unknown> = {
     option?: Opt,
   ) => Response | false | undefined | Promise<Response | false | undefined>
   invalid?: (ctx: ActionContext, err: ValidationError, source: Src, option?: Opt) => Response | Promise<Response>
-  fatal?: (ctx: ActionContext, err: Error, option?: Opt) => Response | Promise<Response>
+  fatal?: (
+    ctx: ActionContext,
+    err: Error,
+    option?: Opt,
+    next?: NextFunction,
+  ) => Response | false | undefined | Promise<Response | false | undefined>
 }
 
 export type FilledResponder<Opt = unknown, Out = unknown, Src = unknown> = Required<Responder<Opt, Out, Src>>
