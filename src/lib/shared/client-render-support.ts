@@ -66,7 +66,7 @@ export class ClientRenderSupport<RS extends NamedResources> implements RenderSup
   }
 
   getLocalizer(): Localizer {
-    return this.localeSelector.select(navigator.language)
+    return this.localeSelector.select(document.documentElement.lang || navigator.language)
   }
 
   resourceOf(name: string): Resource {

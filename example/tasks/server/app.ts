@@ -10,7 +10,15 @@ import { tmpdir } from 'os'
 import Redis from 'ioredis'
 import RedisStore from 'connect-redis'
 
-import { defaultHotMiddlewareClientPath, initConfig, localeMiddleware, useExpressRouter, useHMR } from 'bistrio'
+import {
+  choiceDefaultLanguage,
+  choiceLanguageByAcceptLanguage,
+  defaultHotMiddlewareClientPath,
+  initConfig,
+  localeMiddleware,
+  useExpressRouter,
+  useHMR,
+} from 'bistrio'
 import { middlewares } from './middlewares'
 import { localeMap } from '@universal/locales/index'
 import { constructView } from './customizers/construct-view'
@@ -78,6 +86,7 @@ export async function setup() {
     localeMiddleware({
       defaultLanguage: 'en',
       localeMap: localeMap,
+      choiceLanguage: app.get('env') === 'test' ? choiceDefaultLanguage : choiceLanguageByAcceptLanguage,
     }),
   )
 
