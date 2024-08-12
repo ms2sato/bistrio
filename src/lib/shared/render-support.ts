@@ -78,7 +78,6 @@ type SuspendedAppendLastArgToResourceMethodOptions<F> = F extends (...args: infe
   : never
 
 type OmitOptArgument<R> = {
-   
   [A in keyof R]: RemoveLastArgIsA<R[A], ActionOptions>
 }
 

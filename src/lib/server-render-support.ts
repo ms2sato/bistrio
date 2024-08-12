@@ -44,7 +44,7 @@ export class ServerRenderSupport<RS extends NamedResources = NamedResources> imp
 
   resources(): StubResources<RS> {
     const ret = this.ctx.resources()
-     
+
     return ret as StubResources<RS>
   }
 

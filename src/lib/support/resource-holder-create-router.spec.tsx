@@ -41,7 +41,6 @@ test('standard', async () => {
   })
   await router.build()
 
-   
   expect(await holder.test_resource.build()).toStrictEqual({ msg: 'ret build' })
   spy.mockRestore()
 })
@@ -68,7 +67,6 @@ test('with actionOption', async () => {
   })
   await router.build()
 
-   
   expect(await holder.test_resource.hasOption({ test: 123 })).toStrictEqual({
     msg: 'ret hasOption',
     opt: { test: 123 },

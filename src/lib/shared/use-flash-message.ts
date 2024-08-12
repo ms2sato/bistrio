@@ -41,7 +41,6 @@ export function useNavigateFlashMessage<T extends string = DefaultFlashMessageTy
   const [navigateOptions, setNavigateOptions] = useState<Record<string, unknown>>()
 
   useEffect(() => {
-     
     const newNavigateOptions = rs.suspense.read(navigateOptionsKey) as Record<string, unknown> | undefined
     if (!newNavigateOptions?.flashMessage) {
       setNavigateOptions(newNavigateOptions)

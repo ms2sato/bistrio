@@ -232,7 +232,6 @@ export class MockExpressResponse extends Writable {
   _write(chunk: any, encoding: string, callback: (error?: Error | null) => void) {
     const bencoding: BufferEncoding = isBufferEncoding(encoding) ? encoding : 'utf8'
 
-     
     const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk as string, bencoding)
     this._data = Buffer.concat([this._data, buffer])
     callback()

@@ -54,6 +54,5 @@ function normalizeAssets(assets: unknown): string[] {
     return Object.values(assets) as string[]
   }
 
-   
   return (Array.isArray(assets) ? assets : [assets]) as string[]
 }
