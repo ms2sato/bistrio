@@ -54,6 +54,6 @@ function normalizeAssets(assets: unknown): string[] {
     return Object.values(assets) as string[]
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+   
   return (Array.isArray(assets) ? assets : [assets]) as string[]
 }

@@ -24,7 +24,7 @@ export function createHttpServer<
 
   function onError(error: ServerError) {
     if (error.syscall !== 'listen') {
-      throw error
+      throw new Error(JSON.stringify(error))
     }
 
     // handle specific listen errors with friendly messages
@@ -38,7 +38,7 @@ export function createHttpServer<
         process.exit(1)
         break
       default:
-        throw error
+        throw new Error(JSON.stringify(error))
     }
   }
 

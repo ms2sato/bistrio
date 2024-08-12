@@ -10,5 +10,6 @@
     "../bin/**/*.ts",
     "../__tests__/**/*.ts",
     "./**/*.ts",
+    "**/eslint.config.mjs",
   ]
 }

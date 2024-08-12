@@ -6,6 +6,8 @@ declare global {
     interface Request {
       localizer?: Localizer
     }
+
+    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
     interface Response extends ExtendedServerResponse {}
   }
 }

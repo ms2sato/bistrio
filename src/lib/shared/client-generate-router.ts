@@ -329,7 +329,7 @@ export class ClientGenretateRouter<RS extends NamedResources> implements Router 
                   hasFile = true
                 } else if (Array.isArray(value) && value.length && value.every((v) => v instanceof File)) {
                   for (let i = 0; i < value.length; ++i) {
-                    const v = value[i] as File
+                    const v = value[i]
                     formData.append(`${key}[${i}]`, v, v.name)
                   }
                   hasFile = true

@@ -46,7 +46,7 @@ export const fakeRequest = (router: ServerRouterImpl, req: VirtualRequest): Prom
 
     // @see https://stackoverflow.com/questions/33090091/is-it-possible-to-call-express-router-directly-from-code-with-a-fake-request
     expressRouter.handle(req, res, (...args: unknown[]) => {
-      reject(args[0])
+      reject(args[0] instanceof Error ? args[0] : new Error(String(args[0])))
     })
   })
 
@@ -232,7 +232,7 @@ export class MockExpressResponse extends Writable {
   _write(chunk: any, encoding: string, callback: (error?: Error | null) => void) {
     const bencoding: BufferEncoding = isBufferEncoding(encoding) ? encoding : 'utf8'
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+     
     const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk as string, bencoding)
     this._data = Buffer.concat([this._data, buffer])
     callback()

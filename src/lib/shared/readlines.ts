@@ -20,7 +20,6 @@ export const readLines = async <R>(
   let readerDone: boolean
   let lineCount = 0
   do {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     ;({ value: chunk, done: readerDone } = await reader.read())
     if (chunk?.length) {
       lineCount += chunk.length
