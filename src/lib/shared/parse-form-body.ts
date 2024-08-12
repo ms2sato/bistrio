@@ -20,9 +20,7 @@ export type TraverseArrangerCreator = {
 
 export function nullTraverseArranger(): TraverseArranger {
   return {
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
     next(): NextRet | void {},
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
     nextItem() {},
     arrangeIndexedArrayItemOnLast() {
       return nullArrangeResult

@@ -44,7 +44,7 @@ export class ServerRenderSupport<RS extends NamedResources = NamedResources> imp
 
   resources(): StubResources<RS> {
     const ret = this.ctx.resources()
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+
     return ret as StubResources<RS>
   }
 

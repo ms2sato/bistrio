@@ -33,7 +33,9 @@ export function readable<T>(promise: Promise<T>): SuspendedReader<T> {
   return {
     read: () => {
       if (_result !== undefined) return _result
+      // eslint-disable-next-line @typescript-eslint/only-throw-error
       if (_error !== undefined) throw _error
+      // eslint-disable-next-line @typescript-eslint/only-throw-error
       throw suspender
     },
     get result() {
@@ -76,7 +78,6 @@ type SuspendedAppendLastArgToResourceMethodOptions<F> = F extends (...args: infe
   : never
 
 type OmitOptArgument<R> = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [A in keyof R]: RemoveLastArgIsA<R[A], ActionOptions>
 }
 

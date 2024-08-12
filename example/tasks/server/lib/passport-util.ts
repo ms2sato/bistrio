@@ -49,12 +49,12 @@ export const init = (app: Express) => {
 export const authenticate = (ctx: ActionContext, next?: NextFunction) => {
   return new Promise<{ user?: User | false; info?: IVerifyOptions }>((resolve, reject) => {
     if (!next) {
-      next = (err) => reject(err)
+      next = (err) => reject(err instanceof Error ? err : new Error(String(err)))
     }
 
     const handler: AuthenticateCallback = (err, user, info) => {
       if (err) {
-        reject(err)
+        reject(err instanceof Error ? err : new Error(String(err)))
         return
       }
 
@@ -65,13 +65,13 @@ export const authenticate = (ctx: ActionContext, next?: NextFunction) => {
 
       ctx.req.session.regenerate(function (err) {
         if (err) {
-          reject(err)
+          reject(err instanceof Error ? err : new Error(String(err)))
           return
         }
 
         ctx.req.login(user, function (err) {
           if (err) {
-            reject(err)
+            reject(err instanceof Error ? err : new Error(String(err)))
             return
           }
           resolve({ user: user as User, info: info as IVerifyOptions })

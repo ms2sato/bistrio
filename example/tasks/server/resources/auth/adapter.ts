@@ -23,7 +23,7 @@ export default defineAdapter<Adapter>(() => ({
       await new Promise<void>((resolve, reject) => {
         ctx.req.logout((err) => {
           if (err) {
-            reject(err)
+            reject(err instanceof Error ? err : new Error(String(err)))
           } else {
             resolve()
           }

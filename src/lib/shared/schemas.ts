@@ -20,11 +20,11 @@ type ZodToTsOptions = {
   resolveNativeEnums?: boolean
   nativeEnums?: 'identifier' | 'resolve' | 'union'
 }
-declare const resolveOptions: (raw?: ZodToTsOptions) => {
+type ResolveObject = (raw?: ZodToTsOptions) => {
   resolveNativeEnums?: boolean | undefined
   nativeEnums: 'identifier' | 'resolve' | 'union'
 }
-type ResolvedZodToTsOptions = ReturnType<typeof resolveOptions>
+type ResolvedZodToTsOptions = ReturnType<ResolveObject>
 type GetTypeFunction = (
   typescript: typeof ts,
   identifier: string,

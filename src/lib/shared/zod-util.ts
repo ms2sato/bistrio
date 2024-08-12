@@ -181,6 +181,6 @@ export const isBlank = (schema: ZodType): boolean => {
   if (!('shape' in schema)) {
     return false
   }
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+
   return schema.shape ? Object.keys(schema.shape).length === 0 : false
 }

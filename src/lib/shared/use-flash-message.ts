@@ -41,7 +41,6 @@ export function useNavigateFlashMessage<T extends string = DefaultFlashMessageTy
   const [navigateOptions, setNavigateOptions] = useState<Record<string, unknown>>()
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     const newNavigateOptions = rs.suspense.read(navigateOptionsKey) as Record<string, unknown> | undefined
     if (!newNavigateOptions?.flashMessage) {
       setNavigateOptions(newNavigateOptions)

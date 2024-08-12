@@ -64,7 +64,7 @@ export function useSubmit<
 
       const result = await action(newParams as S, { el, custom: custom as O })
       setResult(result)
-      onSuccess && onSuccess(result, { el, custom: custom as O })
+      onSuccess?.(result, { el, custom: custom as O })
     })().catch((err) => {
       setResult(null)
       if (isValidationError(err)) {
@@ -136,7 +136,7 @@ export function useUIEvent<R, E = unknown>({ modifier, onSuccess, onError }: Use
       setStatus('fulfilled')
       setResult(ret)
 
-      onSuccess && onSuccess(ret, el)
+      onSuccess?.(ret, el)
     })().catch((err) => {
       setStatus('rejected')
       setResult(undefined)
