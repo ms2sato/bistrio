@@ -1,51 +1,12 @@
 import { ActionOptions, NamedResources, Resource } from '../../client.js'
 import { Localizer } from './locale.js'
+import { readable, SuspendedReadable } from './suspense.js'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type SuspendedResourceMethod = (input?: any, ...args: any[]) => any
 export type SuspendedResource = Record<string, SuspendedResourceMethod>
 export type SuspendedNamedResources = {
   [name: string]: SuspendedResource
-}
-
-export type SuspendedReader<T> = {
-  read(): T
-  readonly error?: unknown
-  readonly result?: T
-  readonly suspender: Promise<unknown>
-}
-
-// @see https://blog.logrocket.com/react-suspense-data-fetching/#data-fetching-approaches
-export function readable<T>(promise: Promise<T>): SuspendedReader<T> {
-  let _result: T | undefined
-  let _error: unknown
-  const suspender: Promise<void> = promise.then(
-    (ret) => {
-      if (ret === undefined) {
-        throw new Error('readable: promise resolved with undefined')
-      }
-      _result = ret
-    },
-    (err: unknown) => {
-      _error = err
-    },
-  )
-  return {
-    read: () => {
-      if (_result !== undefined) return _result
-      // eslint-disable-next-line @typescript-eslint/only-throw-error
-      if (_error !== undefined) throw _error
-      // eslint-disable-next-line @typescript-eslint/only-throw-error
-      throw suspender
-    },
-    get result() {
-      return _result
-    },
-    get error() {
-      return _error
-    },
-    suspender,
-  }
 }
 
 export type ParamsDictionary = { [key: string]: string | undefined }
@@ -103,7 +64,7 @@ export type RenderSupport<RS extends NamedResources> = {
 
 export type PageNode = React.FC
 
-export type ReaderMap = { [key: string | symbol]: SuspendedReader<unknown> }
+export type ReaderMap = { [key: string | symbol]: SuspendedReadable<unknown> }
 
 export type SuspensePurgeOptions =
   | boolean
@@ -145,13 +106,13 @@ export function isSuspensePurgeOptions(option: unknown): option is SuspensePurge
 export class SuspenseImpl implements Suspendable {
   readonly readers: ReaderMap = {}
   suspend<T>(asyncProcess: () => Promise<T>, key: string | symbol): T {
-    let reader: SuspendedReader<unknown> | undefined = this.readers[key]
+    let reader: SuspendedReadable<unknown> | undefined = this.readers[key]
     if (!reader) {
       reader = readable(asyncProcess())
       this.readers[key] = reader
     }
 
-    return (reader as SuspendedReader<T>).read()
+    return (reader as SuspendedReadable<T>).read()
   }
 
   put(key: string | symbol, val: unknown) {
