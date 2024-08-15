@@ -35,15 +35,15 @@ function Header() {
     <header>
       {pending ? (
         '...'
-      ) : user === null ? (
-        <Link to={__auth__login.path()}>Login</Link>
-      ) : (
+      ) : user ? (
         <>
           <a id="logout" href="#" onClick={handleLogout}>
             Logout
           </a>
           {user.username}
         </>
+      ) : (
+        <Link to={__auth__login.path()}>Login</Link>
       )}
     </header>
   )
