@@ -13,6 +13,7 @@
     "declaration": false,
     "esModuleInterop": true,
     "resolveJsonModule": true,
+    "skipLibCheck": true,
     "jsx": "react-jsx"
   },
   "include": ["src", "jest.config.cjs"],

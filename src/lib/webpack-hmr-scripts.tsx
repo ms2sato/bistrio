@@ -30,7 +30,7 @@ export function DevScripts({ ctx, hydrate, type = 'module', script }: ScriptProp
           {entries.map((entry) =>
             normalizeAssets(assetsByChunkName[entry])
               .filter((filePath) => filePath.endsWith('.css'))
-              .map((filePath) => outputFileSystem.readFileSync!(join(outputPath, filePath)))
+              .map((filePath) => outputFileSystem.readFileSync(join(outputPath, filePath)))
               .join('\n'),
           )}
         </style>
