@@ -74,7 +74,7 @@ describe('senario /tasks', () => {
     await expect(page.content()).resolves.toMatch('TestDescription')
 
     await page.$eval('input[name=title]', (el) => ((el as HTMLInputElement).value = 'll')) // for overwrite all text
-    await page.$eval('textarea[name=description]', (el) => ((el as HTMLTextAreaElement).value = '')) // for overwrite all text
+    await page.$eval('textarea[name=description]', (el) => ((el as HTMLInputElement).value = '')) // for overwrite all text
 
     await Promise.all([
       page.click('input[type="submit"]'), // Update(validation error) CSR
@@ -84,7 +84,7 @@ describe('senario /tasks', () => {
     await expect(page.content()).resolves.toMatch('title: String must contain at least 3 character(s)')
 
     await page.$eval('input[name=title]', (el) => ((el as HTMLInputElement).value = 'NewTitle')) // for overwrite all text
-    await page.$eval('textarea[name=description]', (el) => ((el as HTMLTextAreaElement).value = 'NewDescription')) // for overwrite all text
+    await page.$eval('textarea[name=description]', (el) => ((el as HTMLInputElement).value = 'NewDescription')) // for overwrite all text
 
     // Update CSR + Ajax
     await Promise.all([req.clearAndWaitForResponses(1, { resourceType: 'ajax' }), page.click('input[type="submit"]')])
