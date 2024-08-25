@@ -53,7 +53,8 @@
     },
     "dev:server": {
       "patterns": [
-        "server"
+        "server",
+        "universal"
       ],
       "quiet": true,
       "inherit": true,
