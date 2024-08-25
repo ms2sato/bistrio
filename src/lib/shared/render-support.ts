@@ -26,8 +26,8 @@ type RemoveLastArgIsA<F, A> = F extends (...args: infer Args) => infer R
   ? Args extends { length: 0 } // Argsが長さ0の場合
     ? F // 長さ0の場合はそのままの関数型を返す
     : Args extends [...infer Rest, A?] // Argsが長さ0でない場合
-    ? (...args: Rest) => R // 最後の引数を除去した関数型を返す
-    : F // 上記の条件に当てはまらない場合はそのままの関数型を返す
+      ? (...args: Rest) => R // 最後の引数を除去した関数型を返す
+      : F // 上記の条件に当てはまらない場合はそのままの関数型を返す
   : never
 
 type AppendLastArgToResourceMethodOptions<F> = F extends (...args: infer Args) => infer R
